@@ -44,6 +44,7 @@ export interface SearchOptions {
   startAt?: number;
   maxResults?: number;
   fields?: string[];
+  nextPageToken?: string; // For Cloud pagination
 }
 
 export abstract class JiraClient {
@@ -79,6 +80,7 @@ export abstract class JiraClient {
     };
 
     logger.apiRequest(method, endpoint, body ? { body } : undefined);
+    logger.debug(`Request URL: ${url}`);
 
     // Create abort controller for timeout
     const controller = new AbortController();
@@ -95,15 +97,27 @@ export abstract class JiraClient {
       clearTimeout(timeoutId);
 
       const duration = timer();
-      const data = await response.json();
+
+      // Get response text first, then try to parse as JSON
+      const responseText = await response.text();
+      let data: unknown;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        // Response is not JSON
+        data = { rawResponse: responseText };
+      }
 
       if (!response.ok) {
+        const errorMessage = typeof data === 'object' && data !== null
+          ? (data as Record<string, unknown>).errorMessages
+            ? ((data as Record<string, unknown>).errorMessages as string[]).join(', ')
+            : (data as Record<string, unknown>).rawResponse as string || 'API request failed'
+          : 'API request failed';
+
         logger.apiError(method, endpoint, { status: response.status, data });
-        throw new JiraApiError(
-          data.errorMessages?.join(', ') || 'API request failed',
-          response.status,
-          data
-        );
+        throw new JiraApiError(errorMessage, response.status, data);
       }
 
       logger.apiResponse(method, endpoint, response.status, duration, {
@@ -140,21 +154,38 @@ export abstract class JiraClient {
 
   /**
    * Search issues with JQL
+   * Note: JIRA Cloud now uses /search/jql endpoint with nextPageToken pagination
    */
   async searchIssues(options: SearchOptions): Promise<JiraSearchResponse> {
-    const { jql, startAt = 0, maxResults = 100, fields = DEFAULT_FIELDS } = options;
+    const { jql, startAt = 0, maxResults = 100, fields = DEFAULT_FIELDS, nextPageToken } = options;
 
     // Include Epic Link field for Server instances
     const allFields = this.epicLinkFieldId
       ? [...fields, this.epicLinkFieldId]
       : fields;
 
-    return this.request<JiraSearchResponse>('POST', '/search', {
-      jql,
-      startAt,
-      maxResults,
-      fields: allFields
-    });
+    if (this.config.instanceType === 'cloud') {
+      // New Cloud API format
+      const body: Record<string, unknown> = {
+        jql,
+        maxResults,
+        fields: allFields
+      };
+
+      if (nextPageToken) {
+        body.nextPageToken = nextPageToken;
+      }
+
+      return this.request<JiraSearchResponse>('POST', '/search/jql', body);
+    } else {
+      // Server API (old format with startAt)
+      return this.request<JiraSearchResponse>('POST', '/search', {
+        jql,
+        startAt,
+        maxResults,
+        fields: allFields
+      });
+    }
   }
 
   /**
@@ -162,26 +193,47 @@ export abstract class JiraClient {
    */
   async fetchAllIssues(jql: string, fields?: string[]): Promise<JiraIssue[]> {
     const allIssues: JiraIssue[] = [];
-    let startAt = 0;
     const maxResults = 100;
-    let total = 0;
 
     logger.info(`Fetching all issues for JQL: ${jql}`);
 
-    do {
-      const response = await this.searchIssues({
-        jql,
-        startAt,
-        maxResults,
-        fields
-      });
+    if (this.config.instanceType === 'cloud') {
+      // Cloud: Use nextPageToken pagination
+      let nextPageToken: string | undefined;
 
-      allIssues.push(...response.issues);
-      total = response.total;
-      startAt += response.issues.length;
+      do {
+        const response = await this.searchIssues({
+          jql,
+          maxResults,
+          fields,
+          nextPageToken
+        });
 
-      logger.debug(`Fetched ${allIssues.length}/${total} issues`);
-    } while (allIssues.length < total);
+        allIssues.push(...response.issues);
+        nextPageToken = response.nextPageToken;
+
+        logger.debug(`Fetched ${allIssues.length} issues so far...`);
+      } while (nextPageToken);
+    } else {
+      // Server: Use startAt pagination
+      let startAt = 0;
+      let total = 0;
+
+      do {
+        const response = await this.searchIssues({
+          jql,
+          startAt,
+          maxResults,
+          fields
+        });
+
+        allIssues.push(...response.issues);
+        total = response.total;
+        startAt += response.issues.length;
+
+        logger.debug(`Fetched ${allIssues.length}/${total} issues`);
+      } while (allIssues.length < total);
+    }
 
     logger.info(`Fetched ${allIssues.length} issues total`);
     return allIssues;

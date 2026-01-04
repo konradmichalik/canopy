@@ -38,18 +38,18 @@
     tabindex={hasChildren ? 0 : -1}
   >
     <!-- Expand/Collapse Toggle -->
-    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+    <div class="w-6 h-6 flex items-center justify-center flex-shrink-0">
       {#if hasChildren}
         <button
-          onclick={handleToggle}
-          class="p-0.5 rounded hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+          onclick={(e) => { e.stopPropagation(); handleToggle(); }}
+          class="p-1 rounded hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
           aria-expanded={node.isExpanded}
           aria-label={node.isExpanded ? 'Collapse' : 'Expand'}
         >
           {#if node.isExpanded}
-            <ChevronDown class="w-4 h-4" />
+            <ChevronDown class="w-5 h-5" />
           {:else}
-            <ChevronRight class="w-4 h-4" />
+            <ChevronRight class="w-5 h-5" />
           {/if}
         </button>
       {/if}

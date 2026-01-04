@@ -47,12 +47,18 @@ export function buildHierarchy(
     const node = nodeMap.get(issue.key)!;
     const parentKey = findParentKey(issue, issueMap, epicLinkFieldId);
 
+    // Debug: Log subtask parent relationships
+    if (issue.fields.issuetype.subtask) {
+      logger.debug(`Subtask ${issue.key} - parent field: ${issue.fields.parent?.key || 'none'}, found parent: ${parentKey || 'none'}`);
+    }
+
     if (parentKey && nodeMap.has(parentKey)) {
       // Has a parent in our result set
       const parentNode = nodeMap.get(parentKey)!;
       node.parentKey = parentKey;
       node.depth = parentNode.depth + 1;
       parentNode.children.push(node);
+      logger.debug(`${issue.key} -> parent ${parentKey} (children: ${parentNode.children.length})`);
     } else if (parentKey) {
       // Parent exists but not in our result set
       orphanCount++;

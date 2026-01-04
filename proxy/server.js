@@ -2,7 +2,7 @@
  * CORS Proxy Server for JIRA API
  *
  * Usage:
- *   1. Install dependencies: npm install express http-proxy-middleware cors
+ *   1. Install dependencies: npm install express cors node-fetch@2
  *   2. Set environment variable: export JIRA_BASE_URL=https://your-domain.atlassian.net
  *   3. Run: node server.js
  *   4. Configure app to use http://localhost:3001/jira as proxy URL
@@ -10,7 +10,6 @@
 
 import express from 'express';
 import cors from 'cors';
-import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,130 +21,102 @@ if (!JIRA_BASE_URL) {
   process.exit(1);
 }
 
-// Enable CORS with explicit headers
+// Parse JSON body
+app.use(express.json({ limit: '10mb' }));
+
+// Enable CORS
 app.use(cors({
   origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'Accept',
-    'X-Atlassian-Token',
-    'X-Requested-With'
-  ]
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Atlassian-Token']
 }));
 
-// Health check endpoint
+// Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', target: JIRA_BASE_URL });
 });
 
-// Info page for direct browser access to /jira root
+// Info page for browser access
 app.get('/jira', (req, res, next) => {
-  // If it's an API request (has Accept: application/json), proxy it
-  const acceptHeader = req.headers.accept || '';
-  if (acceptHeader.includes('application/json')) {
+  if (req.headers.accept?.includes('application/json')) {
     return next();
   }
-
-  // Otherwise show info page
   res.send(`
     <!DOCTYPE html>
     <html>
-    <head>
-      <title>JIRA CORS Proxy</title>
-      <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-        h1 { color: #0052CC; }
-        code { background: #f4f5f7; padding: 2px 6px; border-radius: 3px; }
-        .status { color: #00875A; }
-      </style>
-    </head>
-    <body>
-      <h1>JIRA CORS Proxy</h1>
-      <p class="status">✓ Proxy is running</p>
+    <head><title>JIRA CORS Proxy</title></head>
+    <body style="font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
+      <h1 style="color: #0052CC;">JIRA CORS Proxy</h1>
+      <p style="color: #00875A;">✓ Proxy is running</p>
       <p><strong>Target:</strong> <code>${JIRA_BASE_URL}</code></p>
       <hr>
-      <p>This proxy is designed for API requests from the JIRA Tree app, not for direct browser access.</p>
-      <p><strong>Usage in JIRA Tree:</strong></p>
-      <ol>
-        <li>Open JIRA Tree app</li>
-        <li>In connection settings, set Proxy URL to: <code>http://localhost:${PORT}/jira</code></li>
-        <li>Enter your JIRA credentials</li>
-      </ol>
-      <p><strong>Test API:</strong> <a href="/jira/rest/api/3/myself">/jira/rest/api/3/myself</a> (requires auth)</p>
+      <p>Configure JIRA Tree to use: <code>http://localhost:${PORT}/jira</code></p>
     </body>
     </html>
   `);
 });
 
-// Proxy middleware
-const jiraProxy = createProxyMiddleware({
-  target: JIRA_BASE_URL,
-  changeOrigin: true,
-  followRedirects: false, // Don't follow redirects - let client handle them
-  pathRewrite: {
-    '^/jira': '' // Remove /jira prefix
-  },
-  onProxyReq: (proxyReq, req) => {
-    // Forward authorization header
-    if (req.headers.authorization) {
-      proxyReq.setHeader('Authorization', req.headers.authorization);
+// Proxy all /jira/* requests
+app.all('/jira/*', async (req, res) => {
+  const path = req.path.replace('/jira', '');
+  const targetUrl = `${JIRA_BASE_URL}${path}`;
+
+  console.log(`\n[Proxy] ${req.method} ${path}`);
+  console.log(`[Proxy] → ${targetUrl}`);
+
+  // Build headers for JIRA request
+  const headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-Atlassian-Token': 'no-check'
+  };
+
+  // Forward Authorization header
+  if (req.headers.authorization) {
+    headers['Authorization'] = req.headers.authorization;
+    console.log('[Proxy] Auth: Basic ***');
+  } else {
+    console.log('[Proxy] WARNING: No Authorization header!');
+  }
+
+  try {
+    const fetchOptions = {
+      method: req.method,
+      headers
+    };
+
+    // Add body for POST/PUT requests
+    if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
+      fetchOptions.body = JSON.stringify(req.body);
+      console.log(`[Proxy] Body: ${fetchOptions.body.substring(0, 100)}...`);
     }
 
-    // Always set Atlassian token header to bypass XSRF check
-    // This is required for JIRA Cloud API requests
-    proxyReq.setHeader('X-Atlassian-Token', 'no-check');
+    const response = await fetch(targetUrl, fetchOptions);
+    const responseText = await response.text();
 
-    // Ensure content-type is set for POST/PUT requests
-    if (req.headers['content-type']) {
-      proxyReq.setHeader('Content-Type', req.headers['content-type']);
+    console.log(`[Proxy] Response: ${response.status} ${response.statusText}`);
+
+    if (!response.ok) {
+      console.log(`[Proxy] Error: ${responseText.substring(0, 200)}`);
     }
 
-    // Log request
-    console.log(`[Proxy] ${req.method} ${req.path} -> ${JIRA_BASE_URL}${req.path.replace('/jira', '')}`);
-    console.log(`[Proxy] Headers: Auth=${!!req.headers.authorization}, Content-Type=${req.headers['content-type'] || 'none'}`);
-  },
-  onProxyRes: (proxyRes, req, res) => {
-    // Log response status
-    console.log(`[Proxy] Response: ${proxyRes.statusCode} ${proxyRes.statusMessage || ''}`);
-
-    // Log error responses for debugging
-    if (proxyRes.statusCode >= 400) {
-      let body = '';
-      proxyRes.on('data', (chunk) => { body += chunk; });
-      proxyRes.on('end', () => {
-        console.log(`[Proxy] Error body: ${body.substring(0, 500)}`);
-      });
-    }
-
-    // Rewrite redirect Location headers to go through proxy
-    if (proxyRes.headers.location) {
-      const location = proxyRes.headers.location;
-      // If redirect points to JIRA, rewrite to go through proxy
-      if (location.startsWith(JIRA_BASE_URL)) {
-        const newLocation = location.replace(JIRA_BASE_URL, `http://localhost:${PORT}/jira`);
-        proxyRes.headers.location = newLocation;
-        console.log(`[Proxy] Rewrote redirect: ${location} -> ${newLocation}`);
-      } else if (location.startsWith('/')) {
-        // Relative redirect - prefix with proxy path
-        const newLocation = `/jira${location}`;
-        proxyRes.headers.location = newLocation;
-        console.log(`[Proxy] Rewrote relative redirect: ${location} -> ${newLocation}`);
+    // Forward response headers
+    res.status(response.status);
+    response.headers.forEach((value, key) => {
+      // Skip headers that cause issues
+      if (!['content-encoding', 'transfer-encoding', 'connection'].includes(key.toLowerCase())) {
+        res.setHeader(key, value);
       }
-    }
-  },
-  onError: (err, req, res) => {
-    console.error('[Proxy] Error:', err.message);
-    res.status(500).json({ error: 'Proxy error', message: err.message });
+    });
+
+    res.send(responseText);
+  } catch (error) {
+    console.error('[Proxy] Fetch error:', error.message);
+    res.status(500).json({ error: 'Proxy error', message: error.message });
   }
 });
 
-// Apply proxy to /jira path
-app.use('/jira', jiraProxy);
-
-// Start server
 app.listen(PORT, () => {
   console.log(`
 ╔══════════════════════════════════════════════════════════════╗

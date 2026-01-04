@@ -181,6 +181,7 @@ export interface JiraSearchResponse {
   total: number;
   issues: JiraIssue[];
   warningMessages?: string[];
+  nextPageToken?: string; // Cloud pagination (new API)
 }
 
 export interface JiraFieldsResponse {

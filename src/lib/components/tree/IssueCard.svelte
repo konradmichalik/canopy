@@ -36,22 +36,22 @@
   );
 </script>
 
-<div class="flex items-center gap-3 min-w-0 flex-1 py-1">
+<div class="flex items-center gap-4 min-w-0 flex-1 py-2.5">
   <!-- Issue Type Icon -->
-  <IssueTypeIcon issueType={issue.fields.issuetype} size={16} />
+  <IssueTypeIcon issueType={issue.fields.issuetype} size={20} />
 
   <!-- Issue Key (link) -->
   <button
     onclick={openIssue}
-    class="text-sm font-medium text-jira-blue hover:underline flex items-center gap-1 flex-shrink-0"
+    class="text-base font-medium text-jira-blue hover:underline flex items-center gap-1.5 flex-shrink-0"
     title="Open in JIRA"
   >
     {issue.key}
-    <ExternalLink class="w-3 h-3 opacity-50" />
+    <ExternalLink class="w-3.5 h-3.5 opacity-50" />
   </button>
 
   <!-- Summary -->
-  <span class="text-sm text-[var(--color-text-primary)] truncate min-w-0 flex-1">
+  <span class="text-base text-[var(--color-text-primary)] truncate min-w-0 flex-1">
     {issue.fields.summary}
   </span>
 
@@ -74,5 +74,5 @@
   <StatusBadge status={issue.fields.status} />
 
   <!-- Assignee Avatar -->
-  <Avatar user={issue.fields.assignee} size="sm" />
+  <Avatar user={issue.fields.assignee} size="md" />
 </div>
