@@ -1,30 +1,31 @@
 # JIRA Tree Viewer
 
-Eine Web-Anwendung zur hierarchischen Darstellung von JIRA-Tickets in einer Baumstruktur (Epic -> Story -> Task).
+A web application for displaying JIRA tickets in a hierarchical tree structure (Epic → Story → Task).
 
 ## Features
 
-- **Hierarchische Baumansicht**: Tickets mit korrekten Parent-Child-Beziehungen anzeigen
-- **Mehrere JQL-Abfragen**: Speichern und Verwalten mehrerer JQL-Abfragen
-- **Schnellfilter**: "Assigned to me" und "Unresolved" Filter
-- **Dark Mode**: Unterstützung für helles und dunkles Theme
-- **JIRA Cloud & Server**: Unterstützung für JIRA Cloud und Server/Data Center
-- **Local Storage**: Verbindungseinstellungen und Abfragen werden im Browser gespeichert
+- **Hierarchical Tree View**: Display tickets with correct parent-child relationships
+- **Multiple JQL Queries**: Save and manage multiple JQL queries with titles
+- **Quick Filters**: "Assigned to me" and "Unresolved" filters
+- **Dark Mode**: Support for light and dark themes
+- **JIRA Cloud & Server**: Support for both JIRA Cloud and Server/Data Center
+- **Local Storage**: Connection settings and queries are stored in the browser
+- **Import/Export**: Export and import configuration as JSON for use on different devices
 
-## Erste Schritte
+## Getting Started
 
-### Voraussetzungen
+### Prerequisites
 
 - Node.js 18+
-- npm oder yarn
+- npm or yarn
 
 ### Installation
 
 ```bash
-# Abhängigkeiten installieren
+# Install dependencies
 npm install
 
-# Entwicklungsserver starten
+# Start development server
 npm run dev
 ```
 
@@ -37,9 +38,9 @@ npm run preview
 
 ## CORS Proxy
 
-Aufgrund von Browser-CORS-Einschränkungen kann es erforderlich sein, einen Proxy-Server zu betreiben.
+Due to browser CORS restrictions, you may need to run a proxy server.
 
-### Enthaltenen Proxy verwenden
+### Using the Included Proxy
 
 ```bash
 cd proxy
@@ -48,55 +49,61 @@ export JIRA_BASE_URL=https://your-domain.atlassian.net
 npm start
 ```
 
-Konfigurieren Sie dann die App, um `http://localhost:3001/jira` als Proxy-URL zu verwenden.
+Then configure the app to use `http://localhost:3001/jira` as the Proxy URL.
 
-## Konfiguration
+### Connection Setup
+
+1. Enter your JIRA URL in the **JIRA URL** field (e.g., `https://your-domain.atlassian.net`)
+2. Expand **Advanced: CORS Proxy** and enter `http://localhost:3001/jira`
+3. Enter your credentials
+
+## Configuration
 
 ### JIRA Cloud
 
-1. Gehen Sie zu https://id.atlassian.com/manage-profile/security/api-tokens
-2. Erstellen Sie ein API-Token
-3. Geben Sie Ihre JIRA Cloud URL ein (z.B. `https://your-domain.atlassian.net`)
-4. Geben Sie Ihre E-Mail und das API-Token ein
+1. Go to https://id.atlassian.com/manage-profile/security/api-tokens
+2. Create an API token
+3. Enter your JIRA Cloud URL (e.g., `https://your-domain.atlassian.net`)
+4. Enter your email and API token
 
 ### JIRA Server/Data Center
 
-1. Erstellen Sie ein Personal Access Token in den JIRA-Einstellungen
-2. Geben Sie Ihre JIRA Server URL ein
-3. Geben Sie Ihren Benutzernamen und PAT ein (oder verwenden Sie Basic Auth)
+1. Create a Personal Access Token in JIRA settings
+2. Enter your JIRA Server URL
+3. Enter your username and PAT (or use Basic Auth)
 
 ## Tech Stack
 
-- **Svelte 5** mit TypeScript
-- **Tailwind CSS** für Styling
-- **Vite** als Build-Tool
-- **Lucide** für Icons
+- **Svelte 5** with TypeScript
+- **Tailwind CSS** for styling
+- **Vite** as build tool
+- **Lucide** for icons
 
-## Projektstruktur
+## Project Structure
 
 ```
 src/
 ├── lib/
-│   ├── api/          # JIRA API Clients
-│   ├── components/   # Svelte Komponenten
-│   ├── stores/       # State Management
-│   ├── types/        # TypeScript Typen
-│   └── utils/        # Hilfsfunktionen
-├── App.svelte        # Root-Komponente
-└── main.ts           # Einstiegspunkt
+│   ├── api/          # JIRA API clients
+│   ├── components/   # Svelte components
+│   ├── stores/       # State management
+│   ├── types/        # TypeScript types
+│   └── utils/        # Utility functions
+├── App.svelte        # Root component
+└── main.ts           # Entry point
 
-proxy/                # Optionaler CORS-Proxy
+proxy/                # Optional CORS proxy
 └── server.js
 ```
 
 ## Screenshots
 
 ### Dashboard
-Übersicht und Verwaltung der gespeicherten JQL-Abfragen.
+Overview and management of saved JQL queries.
 
-### Baumansicht
-Hierarchische Darstellung der JIRA-Tickets mit auf-/zuklappbaren Knoten.
+### Tree View
+Hierarchical display of JIRA tickets with collapsible nodes.
 
-## Lizenz
+## License
 
 MIT

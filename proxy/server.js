@@ -22,8 +22,19 @@ if (!JIRA_BASE_URL) {
   process.exit(1);
 }
 
-// Enable CORS for all origins
-app.use(cors());
+// Enable CORS with explicit headers
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'Accept',
+    'X-Atlassian-Token',
+    'X-Requested-With'
+  ]
+}));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -83,17 +94,31 @@ const jiraProxy = createProxyMiddleware({
       proxyReq.setHeader('Authorization', req.headers.authorization);
     }
 
-    // Forward Atlassian token header (bypasses XSRF check)
-    if (req.headers['x-atlassian-token']) {
-      proxyReq.setHeader('X-Atlassian-Token', req.headers['x-atlassian-token']);
+    // Always set Atlassian token header to bypass XSRF check
+    // This is required for JIRA Cloud API requests
+    proxyReq.setHeader('X-Atlassian-Token', 'no-check');
+
+    // Ensure content-type is set for POST/PUT requests
+    if (req.headers['content-type']) {
+      proxyReq.setHeader('Content-Type', req.headers['content-type']);
     }
 
-    // Log request (optional)
+    // Log request
     console.log(`[Proxy] ${req.method} ${req.path} -> ${JIRA_BASE_URL}${req.path.replace('/jira', '')}`);
+    console.log(`[Proxy] Headers: Auth=${!!req.headers.authorization}, Content-Type=${req.headers['content-type'] || 'none'}`);
   },
   onProxyRes: (proxyRes, req, res) => {
     // Log response status
-    console.log(`[Proxy] Response: ${proxyRes.statusCode}`);
+    console.log(`[Proxy] Response: ${proxyRes.statusCode} ${proxyRes.statusMessage || ''}`);
+
+    // Log error responses for debugging
+    if (proxyRes.statusCode >= 400) {
+      let body = '';
+      proxyRes.on('data', (chunk) => { body += chunk; });
+      proxyRes.on('end', () => {
+        console.log(`[Proxy] Error body: ${body.substring(0, 500)}`);
+      });
+    }
 
     // Rewrite redirect Location headers to go through proxy
     if (proxyRes.headers.location) {
