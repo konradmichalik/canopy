@@ -1,0 +1,159 @@
+/**
+ * Issues Store
+ * Manages loaded issues and tree structure
+ */
+
+import type { JiraIssue, TreeNode } from '../types';
+import { getClient, getEpicLinkFieldId } from './connection.svelte';
+import {
+  buildHierarchy,
+  toggleNode as toggleNodeInTree,
+  expandAll as expandAllNodes,
+  collapseAll as collapseAllNodes,
+  getExpandedKeys,
+  getTreeStats
+} from '../utils/hierarchy-builder';
+import { applyQuickFilters } from '../utils/jql-helpers';
+import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { logger } from '../utils/logger';
+
+// State container object
+export const issuesState = $state({
+  rawIssues: [] as JiraIssue[],
+  treeNodes: [] as TreeNode[],
+  isLoading: false,
+  error: null as string | null,
+  currentJql: '',
+  assignedToMe: false,
+  unresolvedOnly: false
+});
+
+/**
+ * Load issues for a JQL query
+ */
+export async function loadIssues(jql: string): Promise<boolean> {
+  const client = getClient();
+
+  if (!client) {
+    issuesState.error = 'Not connected to JIRA';
+    return false;
+  }
+
+  issuesState.isLoading = true;
+  issuesState.error = null;
+  issuesState.currentJql = jql;
+
+  try {
+    // Apply quick filters if active
+    const effectiveJql = applyQuickFilters(jql, {
+      assignedToMe: issuesState.assignedToMe,
+      unresolvedOnly: issuesState.unresolvedOnly
+    });
+
+    logger.info('Loading issues', { jql: effectiveJql });
+
+    issuesState.rawIssues = await client.fetchAllIssues(effectiveJql);
+
+    // Build hierarchy
+    const savedExpandedKeys = getStorageItem<string[]>(STORAGE_KEYS.EXPANDED_NODES);
+    const expandedKeys = savedExpandedKeys ? new Set(savedExpandedKeys) : new Set<string>();
+
+    issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
+      epicLinkFieldId: getEpicLinkFieldId() || undefined,
+      expandedKeys
+    });
+
+    const stats = getTreeStats(issuesState.treeNodes);
+    logger.info('Issues loaded', stats);
+
+    issuesState.isLoading = false;
+    return true;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to load issues';
+    issuesState.error = message;
+    issuesState.isLoading = false;
+    logger.error('Failed to load issues', err);
+    return false;
+  }
+}
+
+/**
+ * Refresh current issues
+ */
+export async function refreshIssues(): Promise<boolean> {
+  if (!issuesState.currentJql) {
+    return false;
+  }
+  return loadIssues(issuesState.currentJql);
+}
+
+/**
+ * Toggle node expansion
+ */
+export function toggleNode(key: string): void {
+  issuesState.treeNodes = toggleNodeInTree(issuesState.treeNodes, key);
+  persistExpandedKeys();
+}
+
+/**
+ * Expand all nodes
+ */
+export function expandAll(): void {
+  issuesState.treeNodes = expandAllNodes(issuesState.treeNodes);
+  persistExpandedKeys();
+}
+
+/**
+ * Collapse all nodes
+ */
+export function collapseAll(): void {
+  issuesState.treeNodes = collapseAllNodes(issuesState.treeNodes);
+  persistExpandedKeys();
+}
+
+/**
+ * Set "Assigned to me" filter
+ */
+export function setAssignedToMe(value: boolean): void {
+  issuesState.assignedToMe = value;
+  if (issuesState.currentJql) {
+    loadIssues(issuesState.currentJql);
+  }
+}
+
+/**
+ * Set "Unresolved only" filter
+ */
+export function setUnresolvedOnly(value: boolean): void {
+  issuesState.unresolvedOnly = value;
+  if (issuesState.currentJql) {
+    loadIssues(issuesState.currentJql);
+  }
+}
+
+/**
+ * Clear all data
+ */
+export function clearIssues(): void {
+  issuesState.rawIssues = [];
+  issuesState.treeNodes = [];
+  issuesState.currentJql = '';
+  issuesState.error = null;
+}
+
+/**
+ * Get issue URL
+ */
+export function getIssueUrl(issueKey: string): string | null {
+  const client = getClient();
+  return client?.getIssueUrl(issueKey) || null;
+}
+
+/**
+ * Persist expanded keys to storage
+ */
+function persistExpandedKeys(): void {
+  const keys = getExpandedKeys(issuesState.treeNodes);
+  setStorageItem(STORAGE_KEYS.EXPANDED_NODES, Array.from(keys));
+}
+
