@@ -9,6 +9,7 @@
     addQuery,
     updateQuery,
     deleteQuery,
+    reorderQueries,
     updateQueryDisplayFields,
     updateQueryActiveFilters,
     updateQuerySearchText
@@ -36,6 +37,10 @@
   let showQueryForm = $state(false);
   let editingQuery = $state<SavedQuery | null>(null);
   let initialized = false;
+
+  // Drag & Drop state
+  let draggedIndex = $state<number | null>(null);
+  let dragOverIndex = $state<number | null>(null);
 
   // Initialize on mount (run only once)
   $effect(() => {
@@ -104,6 +109,29 @@
     showQueryForm = false;
     editingQuery = null;
   }
+
+  // Drag & Drop handlers
+  function handleDragStart(index: number): void {
+    draggedIndex = index;
+  }
+
+  function handleDragOver(e: DragEvent, index: number): void {
+    e.preventDefault();
+    dragOverIndex = index;
+  }
+
+  function handleDrop(index: number): void {
+    if (draggedIndex !== null && draggedIndex !== index) {
+      reorderQueries(draggedIndex, index);
+    }
+    draggedIndex = null;
+    dragOverIndex = null;
+  }
+
+  function handleDragEnd(): void {
+    draggedIndex = null;
+    dragOverIndex = null;
+  }
 </script>
 
 <aside
@@ -133,13 +161,20 @@
         </button>
       </div>
     {:else}
-      {#each jqlState.queries as query (query.id)}
+      {#each jqlState.queries as query, index (query.id)}
         <QueryListItem
           {query}
+          {index}
           isActive={routerState.activeQueryId === query.id}
+          isDragging={draggedIndex === index}
+          isDragOver={dragOverIndex === index && draggedIndex !== index}
           onSelect={handleSelectQuery}
           onEdit={handleEditQuery}
           onDelete={handleDeleteQuery}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
         />
       {/each}
     {/if}
