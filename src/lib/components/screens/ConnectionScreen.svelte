@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Download, Upload } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import ConnectionForm from '../connection/ConnectionForm.svelte';
   import ThemeToggle from '../common/ThemeToggle.svelte';
   import Logo from '../common/Logo.svelte';
@@ -86,14 +86,14 @@
           class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
           title="Import Configuration"
         >
-          <Upload class="w-5 h-5" />
+          <AtlaskitIcon name="upload" size={20} />
         </button>
         <button
           onclick={handleExport}
           class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
           title="Export Configuration"
         >
-          <Download class="w-5 h-5" />
+          <AtlaskitIcon name="download" size={20} />
         </button>
 
         <ThemeToggle />

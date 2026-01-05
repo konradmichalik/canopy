@@ -1,16 +1,15 @@
 <script lang="ts">
-  import { ChevronDown, Check } from 'lucide-svelte';
+  import AtlaskitIcon, { type AtlaskitIconName } from '../common/AtlaskitIcon.svelte';
   import type { ExtendedQuickFilter } from '../../stores/filters.svelte';
 
   interface Props {
     label: string;
     filters: ExtendedQuickFilter[];
     onToggle: (id: string) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getIcon: (iconName: string | undefined) => any;
+    getIconName: (iconName: string | undefined) => AtlaskitIconName;
   }
 
-  let { label, filters, onToggle, getIcon }: Props = $props();
+  let { label, filters, onToggle, getIconName }: Props = $props();
 
   let isOpen = $state(false);
   let dropdownRef: HTMLDivElement | null = $state(null);
@@ -57,7 +56,7 @@
         {activeCount}
       </span>
     {/if}
-    <ChevronDown class="w-3 h-3 transition-transform {isOpen ? 'rotate-180' : ''}" />
+    <AtlaskitIcon name="chevron-down" size={12} class="transition-transform {isOpen ? 'rotate-180' : ''}" />
   </button>
 
   {#if isOpen}
@@ -66,14 +65,13 @@
     >
       <div class="py-1">
         {#each filters as filter (filter.id)}
-          {@const IconComponent = getIcon(filter.icon)}
           <button
             onclick={() => handleOptionClick(filter.id)}
             class="w-full flex items-center gap-2 px-3 py-2 text-xs text-left hover:bg-surface-hovered transition-colors"
           >
             <span class="w-4 h-4 flex items-center justify-center">
               {#if filter.isActive}
-                <Check class="w-3.5 h-3.5 text-text-brand" />
+                <AtlaskitIcon name="check-mark" size={14} color="var(--color-text-brand)" />
               {/if}
             </span>
             {#if filter.avatarUrl}
@@ -89,7 +87,7 @@
                 style="background-color: {filter.color}"
               ></span>
             {:else}
-              <IconComponent class="w-3.5 h-3.5 text-text-subtle" />
+              <AtlaskitIcon name={getIconName(filter.icon)} size={14} color="var(--color-text-subtle)" />
             {/if}
             <span class={filter.isActive ? 'text-text-brand font-medium' : 'text-text'}
               >{filter.label}</span

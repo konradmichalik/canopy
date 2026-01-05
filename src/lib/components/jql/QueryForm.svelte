@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { X, Save } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { SavedQuery, QueryColor } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { validateJql } from '../../utils/jql-helpers';
@@ -66,7 +66,7 @@
         {isEdit ? 'Edit Query' : 'New Query'}
       </h2>
       <button onclick={onCancel} class="p-1 rounded hover:bg-surface-hovered text-text-subtle">
-        <X class="w-5 h-5" />
+        <AtlaskitIcon name="cross" size={20} />
       </button>
     </div>
 
@@ -136,7 +136,7 @@
           type="submit"
           class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-text-inverse bg-brand hover:bg-brand-hovered rounded-lg transition-colors"
         >
-          <Save class="w-4 h-4" />
+          <AtlaskitIcon name="save" size={16} />
           {isEdit ? 'Save Changes' : 'Create Query'}
         </button>
       </div>

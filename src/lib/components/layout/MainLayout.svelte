@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PanelLeft, LogOut, FolderSearch } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Sidebar from './Sidebar.svelte';
   import SidebarResizer from './SidebarResizer.svelte';
   import TreeView from '../tree/TreeView.svelte';
@@ -44,7 +44,7 @@
               class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
               title="Open sidebar"
             >
-              <PanelLeft class="w-5 h-5" />
+              <AtlaskitIcon name="panel-left" size={20} />
             </button>
             <div class="h-6 w-px bg-border"></div>
           {/if}
@@ -73,7 +73,7 @@
                 class="p-2 rounded-lg hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
                 title="Disconnect"
               >
-                <LogOut class="w-4 h-4" />
+                <AtlaskitIcon name="log-out" size={16} />
               </button>
             </div>
           {/if}
@@ -92,7 +92,7 @@
             <div
               class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-hovered flex items-center justify-center"
             >
-              <FolderSearch class="w-8 h-8 text-text-subtle" />
+              <AtlaskitIcon name="folder-open" size={32} color="var(--color-text-subtle)" />
             </div>
             <h2 class="text-xl font-semibold text-text mb-2">No Query Selected</h2>
             <p class="text-text-subtle">

@@ -1,19 +1,5 @@
 <script lang="ts">
-  import {
-    User,
-    Circle,
-    Zap,
-    CircleDot,
-    Loader2,
-    CheckCircle,
-    BookOpen,
-    CheckSquare,
-    Bug,
-    AlertTriangle,
-    Puzzle,
-    Package,
-    X
-  } from 'lucide-svelte';
+  import AtlaskitIcon, { type AtlaskitIconName } from '../common/AtlaskitIcon.svelte';
   import {
     filtersState,
     toggleFilter,
@@ -24,35 +10,35 @@
   import { isFieldEnabled } from '../../stores/fieldConfig.svelte';
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
 
-  // Icon mapping
-  function getIcon(iconName: string | undefined) {
+  // Icon name mapping (Lucide names → Atlaskit names)
+  function getIconName(iconName: string | undefined): AtlaskitIconName {
     switch (iconName) {
       case 'user':
-        return User;
+        return 'person';
       case 'circle':
-        return Circle;
+        return 'circle';
       case 'zap':
-        return Zap;
+        return 'epic';
       case 'circle-dot':
-        return CircleDot;
+        return 'circle-filled';
       case 'loader':
-        return Loader2;
+        return 'refresh';
       case 'check-circle':
-        return CheckCircle;
+        return 'check-circle';
       case 'book-open':
-        return BookOpen;
+        return 'story';
       case 'check-square':
-        return CheckSquare;
+        return 'task';
       case 'bug':
-        return Bug;
+        return 'bug';
       case 'alert-triangle':
-        return AlertTriangle;
+        return 'warning';
       case 'puzzle':
-        return Puzzle;
+        return 'component';
       case 'package':
-        return Package;
+        return 'release';
       default:
-        return Circle;
+        return 'circle';
     }
   }
 
@@ -71,7 +57,6 @@
   <div class="flex flex-wrap items-center gap-2">
     <!-- Toggle buttons for static filters (general and sprint) -->
     {#each filtersState.filters as filter (filter.id)}
-      {@const IconComponent = getIcon(filter.icon)}
       <button
         onclick={() => toggleFilter(filter.id)}
         class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
@@ -80,7 +65,7 @@
           : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
         title={filter.jqlCondition}
       >
-        <IconComponent class="w-3 h-3" />
+        <AtlaskitIcon name={getIconName(filter.icon)} size={12} />
         {filter.label}
       </button>
     {/each}
@@ -91,7 +76,7 @@
         label="Status"
         filters={filtersState.dynamicStatusFilters}
         onToggle={toggleDynamicFilter}
-        {getIcon}
+        {getIconName}
       />
     {/if}
 
@@ -101,7 +86,7 @@
         label="Type"
         filters={filtersState.dynamicTypeFilters}
         onToggle={toggleDynamicFilter}
-        {getIcon}
+        {getIconName}
       />
     {/if}
 
@@ -111,7 +96,7 @@
         label="Assignee"
         filters={filtersState.dynamicAssigneeFilters}
         onToggle={toggleDynamicFilter}
-        {getIcon}
+        {getIconName}
       />
     {/if}
 
@@ -121,7 +106,7 @@
         label="Priority"
         filters={filtersState.dynamicPriorityFilters}
         onToggle={toggleDynamicFilter}
-        {getIcon}
+        {getIconName}
       />
     {/if}
 
@@ -131,7 +116,7 @@
         label="Resolution"
         filters={filtersState.dynamicResolutionFilters}
         onToggle={toggleDynamicFilter}
-        {getIcon}
+        {getIconName}
       />
     {/if}
 
@@ -141,7 +126,7 @@
         label="Component"
         filters={filtersState.dynamicComponentFilters}
         onToggle={toggleDynamicFilter}
-        {getIcon}
+        {getIconName}
       />
     {/if}
 
@@ -151,7 +136,7 @@
         label="Release"
         filters={filtersState.dynamicFixVersionFilters}
         onToggle={toggleDynamicFilter}
-        {getIcon}
+        {getIconName}
       />
     {/if}
 
@@ -162,7 +147,7 @@
         class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered transition-colors"
         title="Reset all filters"
       >
-        <X class="w-3 h-3" />
+        <AtlaskitIcon name="cross" size={12} />
         Reset
       </button>
     {/if}

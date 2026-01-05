@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Play, Pencil, Trash2 } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { SavedQuery } from '../../types';
   import { truncateJql } from '../../utils/jql-helpers';
 
@@ -40,14 +40,14 @@
         class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
         title="Edit query"
       >
-        <Pencil class="w-4 h-4" />
+        <AtlaskitIcon name="edit" size={16} />
       </button>
       <button
         onclick={handleDelete}
         class="p-1.5 rounded hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
         title="Delete query"
       >
-        <Trash2 class="w-4 h-4" />
+        <AtlaskitIcon name="delete" size={16} />
       </button>
     </div>
   </div>
@@ -67,7 +67,7 @@
       }}
       class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-text-brand hover:bg-brand-subtlest rounded transition-colors"
     >
-      <Play class="w-4 h-4" />
+      <AtlaskitIcon name="video-play" size={16} />
       Open
     </button>
   </div>

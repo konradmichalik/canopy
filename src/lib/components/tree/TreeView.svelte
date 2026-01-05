@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChevronDown, ChevronUp, RefreshCw, Loader2, AlertCircle, SearchX } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import TreeNode from './TreeNode.svelte';
   import IssueCardSkeleton from './IssueCardSkeleton.svelte';
   import QuickFilters from '../filters/QuickFilters.svelte';
@@ -43,7 +43,7 @@
           class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           title="Expand all"
         >
-          <ChevronDown class="w-4 h-4" />
+          <AtlaskitIcon name="chevron-down" size={16} />
         </button>
 
         <button
@@ -52,7 +52,7 @@
           class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           title="Collapse all"
         >
-          <ChevronUp class="w-4 h-4" />
+          <AtlaskitIcon name="chevron-up" size={16} />
         </button>
 
         <button
@@ -61,11 +61,7 @@
           class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           title="Refresh"
         >
-          {#if isRefreshing || issuesState.isLoading}
-            <Loader2 class="w-4 h-4 animate-spin" />
-          {:else}
-            <RefreshCw class="w-4 h-4" />
-          {/if}
+          <AtlaskitIcon name="refresh" size={16} class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''} />
         </button>
       </div>
     </div>
@@ -87,7 +83,7 @@
     {:else if issuesState.error}
       <div class="flex items-center justify-center h-full">
         <div class="flex flex-col items-center gap-3 text-center max-w-md">
-          <AlertCircle class="w-8 h-8 text-text-danger" />
+          <AtlaskitIcon name="warning" size={32} color="var(--color-text-danger)" />
           <p class="text-text-danger">{issuesState.error}</p>
           <button
             onclick={handleRefresh}
@@ -103,7 +99,7 @@
           <div
             class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-hovered flex items-center justify-center"
           >
-            <SearchX class="w-8 h-8 text-text-subtlest" />
+            <AtlaskitIcon name="search" size={32} color="var(--color-text-subtlest)" />
           </div>
           <p class="text-lg mb-2">No issues found <span class="opacity-70">:(</span></p>
           <p class="text-sm">Try adjusting your JQL query or filters</p>

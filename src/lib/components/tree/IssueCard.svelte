@@ -1,14 +1,5 @@
 <script lang="ts">
-  import {
-    ExternalLink,
-    Calendar,
-    CalendarClock,
-    MessageSquare,
-    Tag,
-    Puzzle,
-    CheckCircle2,
-    Package
-  } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { JiraIssue } from '../../types';
   import StatusBadge from '../common/StatusBadge.svelte';
   import IssueTypeIcon from '../common/IssueTypeIcon.svelte';
@@ -102,7 +93,7 @@
     title="Open in JIRA"
   >
     {issue.key}
-    <ExternalLink class="w-3.5 h-3.5 opacity-50" />
+    <AtlaskitIcon name="link-external" size={14} class="opacity-50" />
   </button>
 
   <!-- Summary -->
@@ -127,7 +118,7 @@
   {#if showCreated && issue.fields.created}
     <Tooltip text={`Created: ${formatDateTime(issue.fields.created)}`}>
       <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0">
-        <Calendar class="w-3.5 h-3.5" />
+        <AtlaskitIcon name="calendar" size={14} />
         <span>{formatDate(issue.fields.created)}</span>
       </div>
     </Tooltip>
@@ -137,7 +128,7 @@
   {#if showUpdated && issue.fields.updated}
     <Tooltip text={`Updated: ${formatDateTime(issue.fields.updated)}`}>
       <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0">
-        <CalendarClock class="w-3.5 h-3.5" />
+        <AtlaskitIcon name="clock" size={14} />
         <span>{formatDate(issue.fields.updated)}</span>
       </div>
     </Tooltip>
@@ -147,7 +138,7 @@
   {#if showComments && commentCount > 0}
     <Tooltip text={`${commentCount} Comment${commentCount !== 1 ? 's' : ''}`}>
       <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0">
-        <MessageSquare class="w-3.5 h-3.5" />
+        <AtlaskitIcon name="comment" size={14} />
         <span>{commentCount}</span>
       </div>
     </Tooltip>
@@ -157,7 +148,7 @@
   {#if showLabels && issue.fields.labels && issue.fields.labels.length > 0}
     <Tooltip text={`Labels: ${issue.fields.labels.join(', ')}`}>
       <div class="flex items-center gap-1 flex-shrink-0">
-        <Tag class="w-3.5 h-3.5 text-text-subtle" />
+        <AtlaskitIcon name="tag" size={14} color="var(--color-text-subtle)" />
         <span class="text-xs text-text-subtle">{issue.fields.labels.length}</span>
       </div>
     </Tooltip>
@@ -167,7 +158,7 @@
   {#if showComponents && issue.fields.components && issue.fields.components.length > 0}
     <Tooltip text={`Components: ${issue.fields.components.map((c) => c.name).join(', ')}`}>
       <div class="flex items-center gap-1 flex-shrink-0">
-        <Puzzle class="w-3.5 h-3.5 text-text-subtle" />
+        <AtlaskitIcon name="component" size={14} color="var(--color-text-subtle)" />
         <span class="text-xs text-text-subtle">{issue.fields.components.length}</span>
       </div>
     </Tooltip>
@@ -177,7 +168,7 @@
   {#if showResolution && issue.fields.resolution}
     <Tooltip text={`Resolution: ${issue.fields.resolution.name}`}>
       <div class="flex items-center gap-1 flex-shrink-0">
-        <CheckCircle2 class="w-3.5 h-3.5 text-success" />
+        <AtlaskitIcon name="check-circle" size={14} color="var(--color-success)" />
         <span class="text-xs text-success">{issue.fields.resolution.name}</span>
       </div>
     </Tooltip>
@@ -187,7 +178,7 @@
   {#if showFixVersions && fixVersions.length > 0}
     <Tooltip text={`Fix Version: ${fixVersions.map((v) => v.name).join(', ')}`}>
       <div class="flex items-center gap-1 flex-shrink-0">
-        <Package class="w-3.5 h-3.5 text-text-subtle" />
+        <AtlaskitIcon name="release" size={14} color="var(--color-text-subtle)" />
         <span class="text-xs text-text-subtle max-w-[80px] truncate">{fixVersions[0].name}</span>
         {#if fixVersions.length > 1}
           <span class="text-xs text-text-subtlest">+{fixVersions.length - 1}</span>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Loader2, Link, TestTube2 } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { JiraInstanceType, ConnectionFormData } from '../../types';
   import { connect, connectionState } from '../../stores/connection.svelte';
   import { detectInstanceType } from '../../api';
@@ -129,7 +129,9 @@
   <div>
     <label for="baseUrl" class="block text-sm font-medium text-text mb-2"> JIRA URL </label>
     <div class="relative">
-      <Link class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-subtle">
+        <AtlaskitIcon name="link" size={16} />
+      </span>
       <input
         id="baseUrl"
         type="url"
@@ -301,10 +303,10 @@
     class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand text-text-inverse rounded-lg font-medium hover:bg-brand-hovered focus:outline-none focus:ring-2 focus:ring-border-focused focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
   >
     {#if isSubmitting}
-      <Loader2 class="w-4 h-4 animate-spin" />
+      <AtlaskitIcon name="refresh" size={16} class="animate-spin" />
       Connecting...
     {:else}
-      <TestTube2 class="w-4 h-4" />
+      <AtlaskitIcon name="flask" size={16} />
       Connect
     {/if}
   </button>

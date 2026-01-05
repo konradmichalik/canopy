@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Sun, Moon } from 'lucide-svelte';
+  import AtlaskitIcon from './AtlaskitIcon.svelte';
   import { themeState, toggleTheme } from '../../stores/theme.svelte';
 </script>
 
@@ -10,8 +10,8 @@
   aria-label="Toggle theme"
 >
   {#if themeState.resolvedTheme === 'dark'}
-    <Sun class="w-5 h-5 text-text-subtle" />
+    <AtlaskitIcon name="sun" size={20} color="var(--color-text-subtle)" />
   {:else}
-    <Moon class="w-5 h-5 text-text-subtle" />
+    <AtlaskitIcon name="moon" size={20} color="var(--color-text-subtle)" />
   {/if}
 </button>

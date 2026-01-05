@@ -62,16 +62,15 @@ export function getRouterState(): RouterState {
 
 /**
  * Initialize router (restore state from localStorage)
+ * Note: We intentionally do NOT restore the last query ID on startup.
+ * The user should explicitly select a query from the sidebar.
  */
 export function initializeRouter(): void {
-  const lastQueryId = getStorageItem<string>(STORAGE_KEYS.LAST_QUERY_ID);
   const sidebarOpen = getStorageItem<boolean>(STORAGE_KEYS.SIDEBAR_OPEN);
   const sidebarWidth = getStorageItem<number>(STORAGE_KEYS.SIDEBAR_WIDTH);
 
-  if (lastQueryId) {
-    routerState.activeQueryId = lastQueryId;
-    logger.store('router', 'Restored last query ID', { queryId: lastQueryId });
-  }
+  // Reset active query - app starts with no query selected
+  routerState.activeQueryId = null;
 
   if (sidebarOpen !== null) {
     routerState.sidebarOpen = sidebarOpen;
@@ -85,6 +84,8 @@ export function initializeRouter(): void {
     );
     logger.store('router', 'Restored sidebar width', { width: routerState.sidebarWidth });
   }
+
+  logger.store('router', 'Initialized router (no query selected)');
 }
 
 // Export constants for use in components

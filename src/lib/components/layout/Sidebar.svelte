@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, Download, Upload, PanelLeftClose } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { SavedQuery, QueryColor } from '../../types';
   import QueryListItem from '../jql/QueryListItem.svelte';
   import QueryForm from '../jql/QueryForm.svelte';
@@ -169,21 +169,21 @@
         class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle"
         title="Import Configuration"
       >
-        <Upload class="w-4 h-4" />
+        <AtlaskitIcon name="upload" size={16} />
       </button>
       <button
         onclick={handleExport}
         class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle"
         title="Export Configuration"
       >
-        <Download class="w-4 h-4" />
+        <AtlaskitIcon name="download" size={16} />
       </button>
       <button
         onclick={onClose}
         class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle"
         title="Close sidebar"
       >
-        <PanelLeftClose class="w-4 h-4" />
+        <AtlaskitIcon name="sidebar-collapse" size={16} />
       </button>
     </div>
   </div>
@@ -196,7 +196,7 @@
       class="flex items-center gap-1 px-2 py-1 text-xs font-medium text-text-brand hover:bg-brand-subtlest rounded transition-colors"
       title="New Query"
     >
-      <Plus class="w-3.5 h-3.5" />
+      <AtlaskitIcon name="add" size={14} />
       New
     </button>
   </div>

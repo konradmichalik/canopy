@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChevronDown, Check, Columns3 } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import { fieldConfigState, toggleField, type DisplayFieldId } from '../../stores/fieldConfig.svelte';
 
   let isOpen = $state(false);
@@ -40,14 +40,14 @@
       : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
     title="Configure visible fields"
   >
-    <Columns3 class="w-4 h-4" />
+    <AtlaskitIcon name="layout-three-columns" size={16} />
     <span class="hidden sm:inline">Fields</span>
     <span
       class="inline-flex items-center justify-center min-w-[1rem] h-4 px-1 text-[10px] font-bold rounded bg-surface-sunken text-text-subtle"
     >
       {enabledCount}
     </span>
-    <ChevronDown class="w-3 h-3 transition-transform {isOpen ? 'rotate-180' : ''}" />
+    <AtlaskitIcon name="chevron-down" size={12} class="transition-transform {isOpen ? 'rotate-180' : ''}" />
   </button>
 
   {#if isOpen}
@@ -65,7 +65,7 @@
           >
             <span class="w-4 h-4 flex items-center justify-center flex-shrink-0">
               {#if field.isEnabled}
-                <Check class="w-3.5 h-3.5 text-text-brand" />
+                <AtlaskitIcon name="check-mark" size={14} color="var(--color-text-brand)" />
               {/if}
             </span>
             <span class={field.isEnabled ? 'text-text-brand font-medium' : 'text-text'}>

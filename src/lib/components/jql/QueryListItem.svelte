@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Pencil, Trash2 } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { SavedQuery } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
 
@@ -67,7 +67,7 @@
       class="p-1 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
       title="Edit query"
     >
-      <Pencil class="w-3.5 h-3.5" />
+      <AtlaskitIcon name="edit" size={14} />
     </button>
     <button
       type="button"
@@ -75,7 +75,7 @@
       class="p-1 rounded hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
       title="Delete query"
     >
-      <Trash2 class="w-3.5 h-3.5" />
+      <AtlaskitIcon name="delete" size={14} />
     </button>
   </div>
 </div>

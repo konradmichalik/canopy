@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChevronRight, ChevronDown } from 'lucide-svelte';
+  import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { TreeNode as TreeNodeType } from '../../types';
   import IssueCard from './IssueCard.svelte';
   import { toggleNode } from '../../stores/issues.svelte';
@@ -50,9 +50,9 @@
           aria-label={node.isExpanded ? 'Collapse' : 'Expand'}
         >
           {#if node.isExpanded}
-            <ChevronDown class="w-5 h-5" />
+            <AtlaskitIcon name="chevron-down" size={20} />
           {:else}
-            <ChevronRight class="w-5 h-5" />
+            <AtlaskitIcon name="chevron-right" size={20} />
           {/if}
         </button>
       {/if}
