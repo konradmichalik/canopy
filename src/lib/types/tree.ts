@@ -81,16 +81,36 @@ export interface QuickFilter {
   isActive: boolean;
 }
 
-export const DEFAULT_QUICK_FILTERS: Omit<QuickFilter, 'isActive'>[] = [
+export type FilterCategory = 'general' | 'status' | 'type' | 'sprint';
+
+export interface QuickFilterDefinition extends Omit<QuickFilter, 'isActive'> {
+  category: FilterCategory;
+  icon?: string;
+}
+
+// Only static/general filters - status/type filters are generated dynamically from loaded issues
+export const DEFAULT_QUICK_FILTERS: QuickFilterDefinition[] = [
+  // General filters
   {
     id: 'assigned-to-me',
     label: 'Assigned to me',
-    jqlCondition: 'assignee = currentUser()'
+    jqlCondition: 'assignee = currentUser()',
+    category: 'general',
+    icon: 'user'
   },
   {
     id: 'unresolved',
     label: 'Unresolved',
-    jqlCondition: 'resolution = EMPTY'
+    jqlCondition: 'resolution = EMPTY',
+    category: 'general',
+    icon: 'circle'
+  },
+  {
+    id: 'current-sprint',
+    label: 'Current Sprint',
+    jqlCondition: 'sprint in openSprints()',
+    category: 'sprint',
+    icon: 'zap'
   }
 ];
 

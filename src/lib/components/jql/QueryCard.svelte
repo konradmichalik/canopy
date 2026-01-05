@@ -44,7 +44,7 @@
       </button>
       <button
         onclick={handleDelete}
-        class="p-1.5 rounded hover:bg-danger/10 text-text-subtle hover:text-text-danger"
+        class="p-1.5 rounded hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
         title="Delete query"
       >
         <Trash2 class="w-4 h-4" />
@@ -65,7 +65,7 @@
         e.stopPropagation();
         onOpen(query);
       }}
-      class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-text-brand hover:bg-brand/10 rounded transition-colors"
+      class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-text-brand hover:bg-brand-subtlest rounded transition-colors"
     >
       <Play class="w-4 h-4" />
       Open

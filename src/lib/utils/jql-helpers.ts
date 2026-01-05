@@ -26,21 +26,45 @@ export function wrapIfNeeded(jql: string): string {
 }
 
 /**
+ * Extract ORDER BY clause from JQL
+ */
+function extractOrderBy(jql: string): { query: string; orderBy: string | null } {
+  const upperJql = jql.toUpperCase();
+  const orderByIndex = upperJql.lastIndexOf('ORDER BY');
+
+  if (orderByIndex === -1) {
+    return { query: jql.trim(), orderBy: null };
+  }
+
+  return {
+    query: jql.substring(0, orderByIndex).trim(),
+    orderBy: jql.substring(orderByIndex).trim()
+  };
+}
+
+/**
  * Append a condition to a JQL query with AND
+ * Handles ORDER BY correctly by inserting conditions before it
  */
 export function appendCondition(baseJql: string, condition: string): string {
-  const trimmedBase = baseJql.trim();
   const trimmedCondition = condition.trim();
 
-  if (!trimmedBase) {
+  if (!baseJql.trim()) {
     return trimmedCondition;
   }
 
   if (!trimmedCondition) {
-    return trimmedBase;
+    return baseJql.trim();
   }
 
-  return `${wrapIfNeeded(trimmedBase)} AND ${trimmedCondition}`;
+  // Extract ORDER BY if present
+  const { query, orderBy } = extractOrderBy(baseJql);
+
+  // Build new query with condition
+  const newQuery = `${wrapIfNeeded(query)} AND ${trimmedCondition}`;
+
+  // Re-append ORDER BY if it existed
+  return orderBy ? `${newQuery} ${orderBy}` : newQuery;
 }
 
 /**
@@ -55,19 +79,9 @@ export function appendConditions(baseJql: string, conditions: string[]): string 
  */
 export function applyQuickFilters(
   baseJql: string,
-  filters: { assignedToMe?: boolean; unresolvedOnly?: boolean }
+  filterConditions: string[]
 ): string {
-  const conditions: string[] = [];
-
-  if (filters.assignedToMe) {
-    conditions.push('assignee = currentUser()');
-  }
-
-  if (filters.unresolvedOnly) {
-    conditions.push('resolution = EMPTY');
-  }
-
-  return appendConditions(baseJql, conditions);
+  return appendConditions(baseJql, filterConditions);
 }
 
 /**

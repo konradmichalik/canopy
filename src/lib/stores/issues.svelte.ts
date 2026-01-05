@@ -16,6 +16,7 @@ import {
 import { applyQuickFilters } from '../utils/jql-helpers';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
+import { getActiveFilterConditions, setFiltersChangeCallback, updateDynamicFilters } from './filters.svelte';
 
 // State container object
 export const issuesState = $state({
@@ -24,8 +25,15 @@ export const issuesState = $state({
   isLoading: false,
   error: null as string | null,
   currentJql: '',
-  assignedToMe: false,
-  unresolvedOnly: false
+  isInitialLoad: true
+});
+
+// Set up filter change callback
+setFiltersChangeCallback(() => {
+  if (issuesState.currentJql && !issuesState.isLoading) {
+    issuesState.isInitialLoad = false;
+    loadIssues(issuesState.currentJql);
+  }
 });
 
 /**
@@ -39,20 +47,28 @@ export async function loadIssues(jql: string): Promise<boolean> {
     return false;
   }
 
+  // If the JQL changed, this is a new initial load
+  if (issuesState.currentJql !== jql) {
+    issuesState.isInitialLoad = true;
+  }
+
   issuesState.isLoading = true;
   issuesState.error = null;
   issuesState.currentJql = jql;
 
   try {
     // Apply quick filters if active
-    const effectiveJql = applyQuickFilters(jql, {
-      assignedToMe: issuesState.assignedToMe,
-      unresolvedOnly: issuesState.unresolvedOnly
-    });
+    const filterConditions = getActiveFilterConditions();
+    const effectiveJql = applyQuickFilters(jql, filterConditions);
 
-    logger.info('Loading issues', { jql: effectiveJql });
+    logger.info('Loading issues', { jql: effectiveJql, filters: filterConditions });
 
     issuesState.rawIssues = await client.fetchAllIssues(effectiveJql);
+
+    // Update dynamic filters only on initial load (before any quick filters are applied)
+    if (issuesState.isInitialLoad) {
+      updateDynamicFilters(issuesState.rawIssues);
+    }
 
     // Build hierarchy
     const savedExpandedKeys = getStorageItem<string[]>(STORAGE_KEYS.EXPANDED_NODES);
@@ -112,21 +128,11 @@ export function collapseAll(): void {
 }
 
 /**
- * Set "Assigned to me" filter
+ * Reload issues with current filters
+ * Called when filters change
  */
-export function setAssignedToMe(value: boolean): void {
-  issuesState.assignedToMe = value;
-  if (issuesState.currentJql) {
-    loadIssues(issuesState.currentJql);
-  }
-}
-
-/**
- * Set "Unresolved only" filter
- */
-export function setUnresolvedOnly(value: boolean): void {
-  issuesState.unresolvedOnly = value;
-  if (issuesState.currentJql) {
+export function reloadWithFilters(): void {
+  if (issuesState.currentJql && !issuesState.isLoading) {
     loadIssues(issuesState.currentJql);
   }
 }

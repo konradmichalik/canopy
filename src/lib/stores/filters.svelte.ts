@@ -3,13 +3,44 @@
  * Manages quick filter state
  */
 
-import type { QuickFilter } from '../types';
-import { DEFAULT_QUICK_FILTERS } from '../types/tree';
+import type { JiraIssue, QuickFilter } from '../types';
+import { DEFAULT_QUICK_FILTERS, type FilterCategory, type QuickFilterDefinition } from '../types/tree';
 import { logger } from '../utils/logger';
+
+// Callback for when filters change - set by issues store
+let onFiltersChange: (() => void) | null = null;
+
+export function setFiltersChangeCallback(callback: () => void): void {
+  onFiltersChange = callback;
+}
+
+function notifyFiltersChange(): void {
+  if (onFiltersChange) {
+    onFiltersChange();
+  }
+}
+
+// Extended filter type with category
+export interface ExtendedQuickFilter extends QuickFilter {
+  category: FilterCategory;
+  icon?: string;
+}
+
+// Icon mapping for issue types
+const TYPE_ICONS: Record<string, string> = {
+  'Epic': 'zap',
+  'Story': 'book-open',
+  'Task': 'check-square',
+  'Bug': 'bug',
+  'Sub-task': 'check-square',
+  'Subtask': 'check-square'
+};
 
 // State container object
 export const filtersState = $state({
-  filters: DEFAULT_QUICK_FILTERS.map((f) => ({ ...f, isActive: false })) as QuickFilter[]
+  filters: DEFAULT_QUICK_FILTERS.map((f) => ({ ...f, isActive: false })) as ExtendedQuickFilter[],
+  dynamicStatusFilters: [] as ExtendedQuickFilter[],
+  dynamicTypeFilters: [] as ExtendedQuickFilter[]
 });
 
 /**
@@ -20,10 +51,14 @@ export function getFilters(): QuickFilter[] {
 }
 
 /**
- * Get active filters
+ * Get active filters (including dynamic)
  */
 export function getActiveFilters(): QuickFilter[] {
-  return filtersState.filters.filter((f) => f.isActive);
+  return [
+    ...filtersState.filters.filter((f) => f.isActive),
+    ...filtersState.dynamicStatusFilters.filter((f) => f.isActive),
+    ...filtersState.dynamicTypeFilters.filter((f) => f.isActive)
+  ];
 }
 
 /**
@@ -34,6 +69,7 @@ export function toggleFilter(id: string): void {
     f.id === id ? { ...f, isActive: !f.isActive } : f
   );
   logger.store('filters', 'Toggle filter', { id, isActive: filtersState.filters.find((f) => f.id === id)?.isActive });
+  notifyFiltersChange();
 }
 
 /**
@@ -69,8 +105,124 @@ export function isUnresolvedActive(): boolean {
 
 /**
  * Get JQL conditions from active filters
+ * All filters are combined with AND
  */
 export function getActiveFilterConditions(): string[] {
   return getActiveFilters().map((f) => f.jqlCondition);
+}
+
+/**
+ * Get all filters including dynamic ones
+ */
+export function getAllFilters(): ExtendedQuickFilter[] {
+  return [
+    ...filtersState.filters,
+    ...filtersState.dynamicStatusFilters,
+    ...filtersState.dynamicTypeFilters
+  ];
+}
+
+/**
+ * Update dynamic filters based on loaded issues
+ */
+export function updateDynamicFilters(issues: JiraIssue[]): void {
+  // Extract unique statuses
+  const statusMap = new Map<string, { name: string; categoryKey: string }>();
+  const typeMap = new Map<string, string>();
+
+  for (const issue of issues) {
+    const status = issue.fields.status;
+    if (status && !statusMap.has(status.name)) {
+      statusMap.set(status.name, {
+        name: status.name,
+        categoryKey: status.statusCategory?.key || 'undefined'
+      });
+    }
+
+    const issueType = issue.fields.issuetype;
+    if (issueType && !typeMap.has(issueType.name)) {
+      typeMap.set(issueType.name, issueType.name);
+    }
+  }
+
+  // Preserve active state of existing filters
+  const activeStatusIds = new Set(
+    filtersState.dynamicStatusFilters.filter(f => f.isActive).map(f => f.id)
+  );
+  const activeTypeIds = new Set(
+    filtersState.dynamicTypeFilters.filter(f => f.isActive).map(f => f.id)
+  );
+
+  // Create status filters
+  filtersState.dynamicStatusFilters = Array.from(statusMap.entries()).map(([name, data]) => ({
+    id: `status-${name.toLowerCase().replace(/\s+/g, '-')}`,
+    label: name,
+    jqlCondition: `status = "${name}"`,
+    category: 'status' as FilterCategory,
+    icon: getStatusIcon(data.categoryKey),
+    isActive: activeStatusIds.has(`status-${name.toLowerCase().replace(/\s+/g, '-')}`)
+  }));
+
+  // Create type filters
+  filtersState.dynamicTypeFilters = Array.from(typeMap.keys()).map((name) => ({
+    id: `type-${name.toLowerCase().replace(/\s+/g, '-')}`,
+    label: name,
+    jqlCondition: `issuetype = "${name}"`,
+    category: 'type' as FilterCategory,
+    icon: TYPE_ICONS[name] || 'circle',
+    isActive: activeTypeIds.has(`type-${name.toLowerCase().replace(/\s+/g, '-')}`)
+  }));
+
+  logger.store('filters', 'Updated dynamic filters', {
+    statuses: filtersState.dynamicStatusFilters.length,
+    types: filtersState.dynamicTypeFilters.length
+  });
+}
+
+/**
+ * Get icon for status based on category
+ */
+function getStatusIcon(categoryKey: string): string {
+  switch (categoryKey) {
+    case 'new':
+    case 'undefined':
+      return 'circle-dot';
+    case 'indeterminate':
+      return 'loader';
+    case 'done':
+      return 'check-circle';
+    default:
+      return 'circle';
+  }
+}
+
+/**
+ * Toggle a dynamic filter by ID
+ */
+export function toggleDynamicFilter(id: string): void {
+  // Check if it's a status filter
+  const statusIndex = filtersState.dynamicStatusFilters.findIndex(f => f.id === id);
+  if (statusIndex !== -1) {
+    filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map(f =>
+      f.id === id ? { ...f, isActive: !f.isActive } : f
+    );
+    logger.store('filters', 'Toggle dynamic status filter', { id });
+    notifyFiltersChange();
+    return;
+  }
+
+  // Check if it's a type filter
+  const typeIndex = filtersState.dynamicTypeFilters.findIndex(f => f.id === id);
+  if (typeIndex !== -1) {
+    filtersState.dynamicTypeFilters = filtersState.dynamicTypeFilters.map(f =>
+      f.id === id ? { ...f, isActive: !f.isActive } : f
+    );
+    logger.store('filters', 'Toggle dynamic type filter', { id });
+    notifyFiltersChange();
+    return;
+  }
+
+  // Otherwise, toggle regular filter
+  toggleFilter(id);
 }
 

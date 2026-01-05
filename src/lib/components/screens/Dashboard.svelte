@@ -178,7 +178,7 @@
             </span>
             <button
               onclick={handleDisconnect}
-              class="p-2 rounded-lg hover:bg-danger/10 text-text-subtle hover:text-text-danger"
+              class="p-2 rounded-lg hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
               title="Disconnect"
             >
               <LogOut class="w-4 h-4" />

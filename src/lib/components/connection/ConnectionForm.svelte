@@ -297,7 +297,7 @@
 
   <!-- Error Message -->
   {#if formError}
-    <div class="p-3 bg-danger/10 border border-danger/30 rounded-lg">
+    <div class="p-3 bg-danger-subtlest border border-border-danger rounded-lg">
       <p class="text-sm text-text-danger">{formError}</p>
     </div>
   {/if}

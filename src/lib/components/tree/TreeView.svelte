@@ -24,46 +24,54 @@
 
 <div class="tree-view flex flex-col h-full">
   <!-- Toolbar -->
-  <div class="flex items-center justify-between gap-4 p-3 border-b border-border bg-surface-raised">
-    <QuickFilters />
-
-    <div class="flex items-center gap-2">
-      {#if !isEmpty}
-        <span class="text-xs text-text-subtle">
-          {stats.totalIssues} issues
-        </span>
-      {/if}
-
-      <button
-        onclick={expandAll}
-        disabled={isEmpty || issuesState.isLoading}
-        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
-        title="Expand all"
-      >
-        <ChevronDown class="w-4 h-4" />
-      </button>
-
-      <button
-        onclick={collapseAll}
-        disabled={isEmpty || issuesState.isLoading}
-        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
-        title="Collapse all"
-      >
-        <ChevronUp class="w-4 h-4" />
-      </button>
-
-      <button
-        onclick={handleRefresh}
-        disabled={issuesState.isLoading || isRefreshing}
-        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
-        title="Refresh"
-      >
-        {#if isRefreshing || issuesState.isLoading}
-          <Loader2 class="w-4 h-4 animate-spin" />
-        {:else}
-          <RefreshCw class="w-4 h-4" />
+  <div class="border-b border-border bg-surface-raised">
+    <!-- Actions row -->
+    <div class="flex items-center justify-between gap-4 px-3 py-2">
+      <div class="flex items-center gap-2">
+        {#if !isEmpty}
+          <span class="text-sm font-medium text-text">
+            {stats.totalIssues} Issues
+          </span>
         {/if}
-      </button>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <button
+          onclick={expandAll}
+          disabled={isEmpty || issuesState.isLoading}
+          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
+          title="Expand all"
+        >
+          <ChevronDown class="w-4 h-4" />
+        </button>
+
+        <button
+          onclick={collapseAll}
+          disabled={isEmpty || issuesState.isLoading}
+          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
+          title="Collapse all"
+        >
+          <ChevronUp class="w-4 h-4" />
+        </button>
+
+        <button
+          onclick={handleRefresh}
+          disabled={issuesState.isLoading || isRefreshing}
+          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
+          title="Refresh"
+        >
+          {#if isRefreshing || issuesState.isLoading}
+            <Loader2 class="w-4 h-4 animate-spin" />
+          {:else}
+            <RefreshCw class="w-4 h-4" />
+          {/if}
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters row -->
+    <div class="px-3 py-2 border-t border-border">
+      <QuickFilters />
     </div>
   </div>
 
@@ -83,7 +91,7 @@
           <p class="text-text-danger">{issuesState.error}</p>
           <button
             onclick={handleRefresh}
-            class="px-4 py-2 text-sm font-medium text-text-brand hover:bg-brand/10 rounded-lg"
+            class="px-4 py-2 text-sm font-medium text-text-brand hover:bg-brand-subtlest rounded-lg"
           >
             Try again
           </button>

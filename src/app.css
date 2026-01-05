@@ -170,11 +170,13 @@ html[data-color-mode="dark"] {
   --color-border-bold: var(--ds-border-bold);
   --color-border-focused: var(--ds-border-focused);
   --color-border-brand: var(--ds-border-brand);
+  --color-border-danger: var(--ds-border-danger);
 
   /* Brand/Primary colors */
   --color-brand: var(--ds-background-brand-bold);
   --color-brand-hovered: var(--ds-background-brand-bold-hovered);
   --color-brand-pressed: var(--ds-background-brand-bold-pressed);
+  --color-brand-subtlest: var(--ds-background-selected);
 
   /* Semantic colors */
   --color-success: var(--ds-background-success-bold);
@@ -182,6 +184,7 @@ html[data-color-mode="dark"] {
   --color-warning: var(--ds-background-warning-bold);
   --color-danger: var(--ds-background-danger-bold);
   --color-danger-hovered: var(--ds-background-danger-bold-hovered);
+  --color-danger-subtlest: var(--ds-background-danger);
   --color-discovery: var(--ds-background-discovery-bold);
   --color-information: var(--ds-background-information-bold);
   --color-neutral: var(--ds-background-neutral);
