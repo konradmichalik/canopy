@@ -24,6 +24,7 @@ function notifyFiltersChange(): void {
 export interface ExtendedQuickFilter extends QuickFilter {
   category: FilterCategory;
   icon?: string;
+  color?: string; // Color from JIRA API (e.g., statusCategory.colorName)
 }
 
 // Icon mapping for issue types
@@ -122,26 +123,42 @@ export function getAllFilters(): ExtendedQuickFilter[] {
   ];
 }
 
+// JIRA status category color mapping
+const STATUS_CATEGORY_COLORS: Record<string, string> = {
+  'blue-gray': '#42526E',
+  'yellow': '#FF991F',
+  'green': '#00875A',
+  'medium-gray': '#6B778C',
+  // Additional fallback mappings for status category keys
+  'new': '#42526E',
+  'indeterminate': '#0052CC',
+  'done': '#00875A'
+};
+
 /**
  * Update dynamic filters based on loaded issues
  */
 export function updateDynamicFilters(issues: JiraIssue[]): void {
-  // Extract unique statuses
-  const statusMap = new Map<string, { name: string; categoryKey: string }>();
-  const typeMap = new Map<string, string>();
+  // Extract unique statuses with color info
+  const statusMap = new Map<string, { name: string; categoryKey: string; colorName: string }>();
+  const typeMap = new Map<string, { name: string; iconUrl?: string }>();
 
   for (const issue of issues) {
     const status = issue.fields.status;
     if (status && !statusMap.has(status.name)) {
       statusMap.set(status.name, {
         name: status.name,
-        categoryKey: status.statusCategory?.key || 'undefined'
+        categoryKey: status.statusCategory?.key || 'undefined',
+        colorName: status.statusCategory?.colorName || 'medium-gray'
       });
     }
 
     const issueType = issue.fields.issuetype;
     if (issueType && !typeMap.has(issueType.name)) {
-      typeMap.set(issueType.name, issueType.name);
+      typeMap.set(issueType.name, {
+        name: issueType.name,
+        iconUrl: issueType.iconUrl
+      });
     }
   }
 
@@ -153,18 +170,19 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     filtersState.dynamicTypeFilters.filter(f => f.isActive).map(f => f.id)
   );
 
-  // Create status filters
+  // Create status filters with colors
   filtersState.dynamicStatusFilters = Array.from(statusMap.entries()).map(([name, data]) => ({
     id: `status-${name.toLowerCase().replace(/\s+/g, '-')}`,
     label: name,
     jqlCondition: `status = "${name}"`,
     category: 'status' as FilterCategory,
     icon: getStatusIcon(data.categoryKey),
+    color: STATUS_CATEGORY_COLORS[data.colorName] || STATUS_CATEGORY_COLORS[data.categoryKey] || '#6B778C',
     isActive: activeStatusIds.has(`status-${name.toLowerCase().replace(/\s+/g, '-')}`)
   }));
 
   // Create type filters
-  filtersState.dynamicTypeFilters = Array.from(typeMap.keys()).map((name) => ({
+  filtersState.dynamicTypeFilters = Array.from(typeMap.entries()).map(([name, data]) => ({
     id: `type-${name.toLowerCase().replace(/\s+/g, '-')}`,
     label: name,
     jqlCondition: `issuetype = "${name}"`,
@@ -174,7 +192,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
   }));
 
   logger.store('filters', 'Updated dynamic filters', {
-    statuses: filtersState.dynamicStatusFilters.length,
+    statuses: filtersState.dynamicStatusFilters.map(s => ({ name: s.label, color: s.color })),
     types: filtersState.dynamicTypeFilters.length
   });
 }
