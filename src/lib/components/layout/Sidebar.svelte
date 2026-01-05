@@ -12,7 +12,8 @@
     reorderQueries,
     updateQueryDisplayFields,
     updateQueryActiveFilters,
-    updateQuerySearchText
+    updateQuerySearchText,
+    updateQuerySortConfig
   } from '../../stores/jql.svelte';
   import { routerState, setActiveQuery } from '../../stores/router.svelte';
   import { loadIssues, clearIssues } from '../../stores/issues.svelte';
@@ -26,6 +27,11 @@
     setActiveFiltersChangeCallback,
     setSearchTextChangeCallback
   } from '../../stores/filters.svelte';
+  import {
+    loadSortConfig,
+    setSortConfigChangeCallback
+  } from '../../stores/sortConfig.svelte';
+  import type { SortConfig } from '../../types/tree';
 
   interface Props {
     width: number;
@@ -68,6 +74,13 @@
         updateQuerySearchText(routerState.activeQueryId, searchText);
       }
     });
+
+    // Set callback for sort config changes
+    setSortConfigChangeCallback((sortConfig: SortConfig) => {
+      if (routerState.activeQueryId) {
+        updateQuerySortConfig(routerState.activeQueryId, sortConfig);
+      }
+    });
   });
 
   function handleNewQuery(): void {
@@ -102,6 +115,7 @@
     setActiveQuery(query.id);
     loadFieldConfig(query.id, query.displayFields);
     loadActiveFilters(query.activeFilterIds, query.searchText);
+    loadSortConfig(query.id, query.sortConfig);
     await loadIssues(query.jql);
   }
 
@@ -135,29 +149,40 @@
 </script>
 
 <aside
-  class="h-full bg-surface-sunken border-r border-border-bold flex flex-col shadow-sm"
+  class="h-full bg-surface-sunken flex flex-col"
   style="width: {width}px;"
 >
   <!-- Query List Header -->
-  <div class="flex items-center justify-between px-4 py-3 border-b border-border bg-surface-raised">
-    <span class="text-sm font-semibold text-text-subtle uppercase tracking-wide">Queries</span>
+  <div class="flex items-center justify-between px-4 py-4 border-b border-border bg-gradient-to-b from-surface-raised to-surface">
+    <div class="flex items-center gap-2">
+      <div class="w-1 h-5 rounded-full bg-brand"></div>
+      <span class="text-sm font-semibold text-text tracking-wide">Queries</span>
+    </div>
     <button
       onclick={handleNewQuery}
-      class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-text-brand hover:bg-brand-subtlest rounded-lg transition-colors"
+      class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-brand text-text-inverse hover:bg-brand-hovered rounded-md transition-all duration-200 shadow-sm hover:shadow"
       title="New Query"
     >
       <AtlaskitIcon name="add" size={16} />
-      New
+      <span>New</span>
     </button>
   </div>
 
   <!-- Query List -->
-  <div class="flex-1 overflow-y-auto p-2 space-y-1">
+  <div class="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
     {#if jqlState.queries.length === 0}
-      <div class="text-center py-8">
-        <p class="text-sm text-text-subtle mb-2">No saved queries</p>
-        <button onclick={handleNewQuery} class="text-sm text-text-brand hover:underline">
-          Create your first query
+      <div class="text-center py-12 px-4">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-subtlest flex items-center justify-center">
+          <AtlaskitIcon name="search" size={28} color="var(--ds-text-brand)" />
+        </div>
+        <p class="text-base font-medium text-text mb-1">No saved queries</p>
+        <p class="text-sm text-text-subtlest mb-4">Create your first query to get started</p>
+        <button
+          onclick={handleNewQuery}
+          class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-text-brand hover:bg-brand-subtlest rounded-md transition-colors"
+        >
+          <AtlaskitIcon name="add" size={16} />
+          Create query
         </button>
       </div>
     {:else}

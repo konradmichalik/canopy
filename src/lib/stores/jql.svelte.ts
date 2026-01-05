@@ -3,7 +3,7 @@
  * Manages saved queries with Svelte 5 Runes
  */
 
-import type { SavedQuery, QueryColor } from '../types';
+import type { SavedQuery, QueryColor, SortConfig } from '../types';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { generateQueryId } from '../types/tree';
 import { logger } from '../utils/logger';
@@ -68,7 +68,7 @@ export function addQuery(title: string, jql: string, color?: QueryColor): SavedQ
  */
 export function updateQuery(
   id: string,
-  updates: Partial<Pick<SavedQuery, 'title' | 'jql' | 'color' | 'displayFields' | 'activeFilterIds' | 'searchText'>>
+  updates: Partial<Pick<SavedQuery, 'title' | 'jql' | 'color' | 'displayFields' | 'activeFilterIds' | 'searchText' | 'sortConfig'>>
 ): boolean {
   const index = jqlState.queries.findIndex((q) => q.id === id);
 
@@ -113,6 +113,13 @@ export function updateQueryActiveFilters(id: string, activeFilterIds: string[]):
  */
 export function updateQuerySearchText(id: string, searchText: string): boolean {
   return updateQuery(id, { searchText: searchText || undefined });
+}
+
+/**
+ * Update sort configuration for a query
+ */
+export function updateQuerySortConfig(id: string, sortConfig: SortConfig): boolean {
+  return updateQuery(id, { sortConfig });
 }
 
 /**

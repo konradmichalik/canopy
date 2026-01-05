@@ -23,6 +23,7 @@ import {
   filterIssuesBySearchText,
   filterIssuesByRecency
 } from './filters.svelte';
+import { getSortConfig, setSortConfigChangeCallback } from './sortConfig.svelte';
 
 // State container object
 export const issuesState = $state({
@@ -47,6 +48,13 @@ setFiltersChangeCallback(() => {
       issuesState.isInitialLoad = false;
       loadIssues(issuesState.currentJql);
     }
+  }
+});
+
+// Set up sort config change callback (rebuilds tree without refetching)
+setSortConfigChangeCallback(() => {
+  if (issuesState.rawIssues.length > 0 && !issuesState.isLoading) {
+    rebuildTree();
   }
 });
 
@@ -95,7 +103,8 @@ export async function loadIssues(jql: string): Promise<boolean> {
 
     issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
       epicLinkFieldId: getEpicLinkFieldId() || undefined,
-      expandedKeys
+      expandedKeys,
+      sortConfig: getSortConfig()
     });
 
     const stats = getTreeStats(issuesState.treeNodes);
@@ -164,6 +173,32 @@ export function reloadWithFilters(): void {
   if (issuesState.currentJql && !issuesState.isLoading) {
     loadIssues(issuesState.currentJql);
   }
+}
+
+/**
+ * Rebuild tree with current sort config (without refetching from API)
+ */
+export function rebuildTree(): void {
+  if (issuesState.rawIssues.length === 0) return;
+
+  const savedExpandedKeys = getStorageItem<string[]>(STORAGE_KEYS.EXPANDED_NODES);
+  const expandedKeys = savedExpandedKeys ? new Set(savedExpandedKeys) : new Set<string>();
+
+  issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
+    epicLinkFieldId: getEpicLinkFieldId() || undefined,
+    expandedKeys,
+    sortConfig: getSortConfig()
+  });
+
+  logger.info('Tree rebuilt with updated sort config');
+}
+
+/**
+ * Check if current JQL has an ORDER BY clause
+ */
+export function hasJqlOrderBy(): boolean {
+  if (!issuesState.currentJql) return false;
+  return /\bORDER\s+BY\b/i.test(issuesState.currentJql);
 }
 
 /**

@@ -79,44 +79,52 @@
 <div
   role="button"
   tabindex="0"
-  class="group w-full text-left px-1 py-2 transition-colors flex items-center justify-between gap-1 cursor-pointer
+  class="group w-full text-left px-2 py-2.5 rounded-lg transition-all duration-200 flex items-center justify-between gap-2 cursor-pointer relative
     {isActive
-    ? 'bg-brand-subtlest border-l-2 border-brand text-text'
-    : 'hover:bg-surface-hovered text-text-subtle hover:text-text'}
-    {isDragging ? 'opacity-50' : ''}
-    {isDragOver ? 'border-t-2 border-brand' : ''}"
+    ? 'bg-brand-subtlest shadow-sm ring-1 ring-brand/20 text-text'
+    : 'hover:bg-surface-hovered text-text-subtle hover:text-text hover:shadow-sm'}
+    {isDragging ? 'opacity-50 scale-95' : ''}
+    {isDragOver ? 'ring-2 ring-brand ring-offset-1' : ''}"
   onclick={handleClick}
   onkeydown={handleKeydown}
   ondragover={handleDragOver}
   ondrop={handleDrop}
 >
-  <div class="flex items-center gap-1 min-w-0">
+  <!-- Active indicator -->
+  {#if isActive}
+    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-brand"></div>
+  {/if}
+
+  <div class="flex items-center min-w-0 pl-1">
+    <!-- Farbpunkt - immer 20px breit für konsistente Ausrichtung -->
+    <div class="w-5 flex-shrink-0 flex items-center justify-center">
+      <span class="w-2.5 h-2.5 rounded-full {colorClass || 'bg-text-disabled/30'}"></span>
+    </div>
+    <!-- Text -->
+    <span class="truncate text-sm font-medium">{query.title}</span>
+  </div>
+
+  <!-- Aktionen - immer sichtbar bei hover -->
+  <div
+    class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0"
+  >
     <div
       draggable="true"
       ondragstart={handleDragStart}
       ondragend={onDragEnd}
-      class="p-1 cursor-grab active:cursor-grabbing text-text-disabled opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+      class="p-1.5 cursor-grab active:cursor-grabbing text-text-disabled hover:text-text-subtle rounded-md hover:bg-neutral transition-colors"
       title="Drag to reorder"
       role="button"
       tabindex="-1"
       onclick={(e: MouseEvent) => e.stopPropagation()}
       onkeydown={(e: KeyboardEvent) => e.stopPropagation()}
     >
-      <AtlaskitIcon name="drag-handle" size={12} />
+      <AtlaskitIcon name="drag-handle" size={14} />
     </div>
-    {#if colorClass}
-      <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 {colorClass}"></span>
-    {/if}
-    <span class="truncate text-sm font-medium">{query.title}</span>
-  </div>
-
-  <div
-    class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 pr-2"
-  >
     <button
       type="button"
       onclick={handleEdit}
-      class="p-1 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
+      class="p-1.5 rounded-md hover:bg-neutral text-text-subtle hover:text-text transition-colors"
       title="Edit query"
     >
       <AtlaskitIcon name="edit" size={14} />
@@ -124,7 +132,7 @@
     <button
       type="button"
       onclick={handleDelete}
-      class="p-1 rounded hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
+      class="p-1.5 rounded-md hover:bg-danger-subtlest text-text-subtle hover:text-text-danger transition-colors"
       title="Delete query"
     >
       <AtlaskitIcon name="delete" size={14} />

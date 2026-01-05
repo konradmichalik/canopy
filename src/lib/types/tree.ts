@@ -93,7 +93,38 @@ export interface SavedQuery {
   displayFields?: string[];
   activeFilterIds?: string[];
   searchText?: string;
+  sortConfig?: SortConfig;
 }
+
+// ============================================
+// Sort Configuration
+// ============================================
+
+export type SortField = 'key' | 'priority' | 'created' | 'updated' | 'status';
+export type SortDirection = 'asc' | 'desc';
+
+export interface SortConfig {
+  field: SortField;
+  direction: SortDirection;
+}
+
+export interface SortFieldDefinition {
+  id: SortField;
+  label: string;
+}
+
+export const SORT_FIELDS: SortFieldDefinition[] = [
+  { id: 'key', label: 'Key' },
+  { id: 'priority', label: 'Priority' },
+  { id: 'created', label: 'Created' },
+  { id: 'updated', label: 'Updated' },
+  { id: 'status', label: 'Status' }
+];
+
+export const DEFAULT_SORT_CONFIG: SortConfig = {
+  field: 'key',
+  direction: 'asc'
+};
 
 // ============================================
 // Quick Filters
@@ -219,15 +250,94 @@ export function getHierarchyLevel(issueTypeName: string): HierarchyLevel {
   return HIERARCHY_MAPPING[issueTypeName] || 'unknown';
 }
 
-export function compareByHierarchy(a: TreeNode, b: TreeNode): number {
+/**
+ * Priority order mapping (lower number = higher priority)
+ */
+const PRIORITY_ORDER: Record<string, number> = {
+  Blocker: 0,
+  Critical: 1,
+  Highest: 1,
+  High: 2,
+  Medium: 3,
+  Normal: 3,
+  Low: 4,
+  Lowest: 5,
+  Minor: 5,
+  Trivial: 6
+};
+
+/**
+ * Get priority sort value (lower = higher priority)
+ */
+function getPriorityOrder(priorityName: string | undefined | null): number {
+  if (!priorityName) return 999; // No priority = lowest
+  return PRIORITY_ORDER[priorityName] ?? 50; // Unknown priorities in middle
+}
+
+/**
+ * Compare two tree nodes by hierarchy level and secondary sort field
+ */
+export function compareByHierarchy(a: TreeNode, b: TreeNode, sortConfig?: SortConfig): number {
+  // Primary sort: hierarchy level
   const levelA = getHierarchyLevel(a.issue.fields.issuetype.name);
   const levelB = getHierarchyLevel(b.issue.fields.issuetype.name);
 
   const orderDiff = HIERARCHY_ORDER[levelA] - HIERARCHY_ORDER[levelB];
   if (orderDiff !== 0) return orderDiff;
 
-  // Same level: sort by key
-  return a.issue.key.localeCompare(b.issue.key, undefined, { numeric: true });
+  // Secondary sort: user-selected field (default: key asc)
+  const field = sortConfig?.field ?? 'key';
+  const direction = sortConfig?.direction ?? 'asc';
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  let comparison = 0;
+
+  switch (field) {
+    case 'key':
+      comparison = a.issue.key.localeCompare(b.issue.key, undefined, { numeric: true });
+      break;
+
+    case 'priority': {
+      const prioA = getPriorityOrder(a.issue.fields.priority?.name);
+      const prioB = getPriorityOrder(b.issue.fields.priority?.name);
+      comparison = prioA - prioB;
+      // Fallback to key if priorities are equal
+      if (comparison === 0) {
+        comparison = a.issue.key.localeCompare(b.issue.key, undefined, { numeric: true });
+      }
+      break;
+    }
+
+    case 'created': {
+      const createdA = new Date(a.issue.fields.created).getTime();
+      const createdB = new Date(b.issue.fields.created).getTime();
+      comparison = createdA - createdB;
+      break;
+    }
+
+    case 'updated': {
+      const updatedA = new Date(a.issue.fields.updated).getTime();
+      const updatedB = new Date(b.issue.fields.updated).getTime();
+      comparison = updatedA - updatedB;
+      break;
+    }
+
+    case 'status': {
+      const statusA = a.issue.fields.status.name;
+      const statusB = b.issue.fields.status.name;
+      comparison = statusA.localeCompare(statusB);
+      // Fallback to key if statuses are equal
+      if (comparison === 0) {
+        comparison = a.issue.key.localeCompare(b.issue.key, undefined, { numeric: true });
+      }
+      break;
+    }
+
+    default:
+      comparison = a.issue.key.localeCompare(b.issue.key, undefined, { numeric: true });
+  }
+
+  return comparison * multiplier;
 }
 
 export function generateQueryId(): string {

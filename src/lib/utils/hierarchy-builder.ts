@@ -4,19 +4,21 @@
  */
 
 import type { JiraIssue, TreeNode } from '../types';
+import type { SortConfig } from '../types/tree';
 import { getHierarchyLevel, compareByHierarchy, HIERARCHY_ORDER } from '../types/tree';
 import { logger } from './logger';
 
 interface BuildOptions {
   epicLinkFieldId?: string;
   expandedKeys?: Set<string>;
+  sortConfig?: SortConfig;
 }
 
 /**
  * Build a tree structure from a flat list of JIRA issues
  */
 export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}): TreeNode[] {
-  const { epicLinkFieldId, expandedKeys = new Set() } = options;
+  const { epicLinkFieldId, expandedKeys = new Set(), sortConfig } = options;
   const timer = logger.time('buildHierarchy');
 
   // Create a map for quick lookup
@@ -70,7 +72,7 @@ export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}):
   });
 
   // Sort children recursively
-  sortChildrenRecursively(rootNodes);
+  sortChildrenRecursively(rootNodes, sortConfig);
 
   // Update depths recursively (in case we missed any)
   updateDepths(rootNodes, 0);
@@ -129,13 +131,13 @@ function findParentKey(
 }
 
 /**
- * Sort children recursively by hierarchy level and key
+ * Sort children recursively by hierarchy level and configured secondary field
  */
-function sortChildrenRecursively(nodes: TreeNode[]): void {
-  nodes.sort(compareByHierarchy);
+function sortChildrenRecursively(nodes: TreeNode[], sortConfig?: SortConfig): void {
+  nodes.sort((a, b) => compareByHierarchy(a, b, sortConfig));
   nodes.forEach((node) => {
     if (node.children.length > 0) {
-      sortChildrenRecursively(node.children);
+      sortChildrenRecursively(node.children, sortConfig);
     }
   });
 }

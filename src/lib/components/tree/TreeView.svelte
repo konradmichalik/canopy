@@ -4,6 +4,7 @@
   import IssueCardSkeleton from './IssueCardSkeleton.svelte';
   import QuickFilters from '../filters/QuickFilters.svelte';
   import FieldSelector from './FieldSelector.svelte';
+  import SortDropdown from './SortDropdown.svelte';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
   import { getActiveFilterConditions } from '../../stores/filters.svelte';
@@ -46,6 +47,7 @@
 
       <div class="flex items-center gap-1">
         <FieldSelector />
+        <SortDropdown />
 
         <div class="w-px h-4 bg-border mx-1"></div>
 
