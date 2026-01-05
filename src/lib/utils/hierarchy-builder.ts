@@ -15,10 +15,7 @@ interface BuildOptions {
 /**
  * Build a tree structure from a flat list of JIRA issues
  */
-export function buildHierarchy(
-  issues: JiraIssue[],
-  options: BuildOptions = {}
-): TreeNode[] {
+export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}): TreeNode[] {
   const { epicLinkFieldId, expandedKeys = new Set() } = options;
   const timer = logger.time('buildHierarchy');
 
@@ -49,7 +46,9 @@ export function buildHierarchy(
 
     // Debug: Log subtask parent relationships
     if (issue.fields.issuetype.subtask) {
-      logger.debug(`Subtask ${issue.key} - parent field: ${issue.fields.parent?.key || 'none'}, found parent: ${parentKey || 'none'}`);
+      logger.debug(
+        `Subtask ${issue.key} - parent field: ${issue.fields.parent?.key || 'none'}, found parent: ${parentKey || 'none'}`
+      );
     }
 
     if (parentKey && nodeMap.has(parentKey)) {
@@ -118,10 +117,7 @@ function findParentKey(
           return link.inwardIssue.key;
         }
       }
-      if (
-        link.type.outward?.toLowerCase().includes('parent') &&
-        link.outwardIssue
-      ) {
+      if (link.type.outward?.toLowerCase().includes('parent') && link.outwardIssue) {
         if (issueMap.has(link.outwardIssue.key)) {
           return link.outwardIssue.key;
         }

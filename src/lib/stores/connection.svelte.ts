@@ -3,12 +3,7 @@
  * Manages JIRA connection state with Svelte 5 Runes
  */
 
-import type {
-  JiraConnectionConfig,
-  JiraUser,
-  ConnectionState,
-  StoredConnection
-} from '../types';
+import type { JiraConnectionConfig, JiraUser, ConnectionState, StoredConnection } from '../types';
 import { createJiraClient, type JiraClient } from '../api';
 import { getStorageItem, setStorageItem, removeStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';

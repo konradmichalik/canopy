@@ -2,12 +2,7 @@
   import { ChevronDown, ChevronUp, RefreshCw, Loader2, AlertCircle } from 'lucide-svelte';
   import TreeNode from './TreeNode.svelte';
   import QuickFilters from '../filters/QuickFilters.svelte';
-  import {
-    issuesState,
-    expandAll,
-    collapseAll,
-    refreshIssues
-  } from '../../stores/issues.svelte';
+  import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
 
   let isRefreshing = $state(false);

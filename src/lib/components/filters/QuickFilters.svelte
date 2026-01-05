@@ -10,22 +10,37 @@
     CheckSquare,
     Bug
   } from 'lucide-svelte';
-  import { filtersState, toggleFilter, toggleDynamicFilter, getActiveFilters } from '../../stores/filters.svelte';
+  import {
+    filtersState,
+    toggleFilter,
+    toggleDynamicFilter,
+    getActiveFilters
+  } from '../../stores/filters.svelte';
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
 
   // Icon mapping
   function getIcon(iconName: string | undefined) {
     switch (iconName) {
-      case 'user': return User;
-      case 'circle': return Circle;
-      case 'zap': return Zap;
-      case 'circle-dot': return CircleDot;
-      case 'loader': return Loader2;
-      case 'check-circle': return CheckCircle;
-      case 'book-open': return BookOpen;
-      case 'check-square': return CheckSquare;
-      case 'bug': return Bug;
-      default: return Circle;
+      case 'user':
+        return User;
+      case 'circle':
+        return Circle;
+      case 'zap':
+        return Zap;
+      case 'circle-dot':
+        return CircleDot;
+      case 'loader':
+        return Loader2;
+      case 'check-circle':
+        return CheckCircle;
+      case 'book-open':
+        return BookOpen;
+      case 'check-square':
+        return CheckSquare;
+      case 'bug':
+        return Bug;
+      default:
+        return Circle;
     }
   }
 
@@ -43,8 +58,8 @@
         onclick={() => toggleFilter(filter.id)}
         class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
           {filter.isActive
-            ? 'bg-brand-subtlest border-border-brand text-text-brand font-medium'
-            : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
+          ? 'bg-brand-subtlest border-border-brand text-text-brand font-medium'
+          : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
         title={filter.jqlCondition}
       >
         <IconComponent class="w-3 h-3" />

@@ -11,7 +11,9 @@
     navigateToDashboard();
   }
 
-  const query = $derived(routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : null);
+  const query = $derived(
+    routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : null
+  );
   const title = $derived(query?.title || 'Query Results');
 </script>
 

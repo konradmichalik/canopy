@@ -36,7 +36,10 @@ export function initializeTheme(): void {
   updateResolvedTheme();
   applyTheme();
 
-  logger.store('theme', 'Initialized', { theme: themeState.theme, resolvedTheme: themeState.resolvedTheme });
+  logger.store('theme', 'Initialized', {
+    theme: themeState.theme,
+    resolvedTheme: themeState.resolvedTheme
+  });
 }
 
 /**
@@ -86,7 +89,10 @@ export function setTheme(newTheme: Theme): void {
   updateResolvedTheme();
   applyTheme();
   setStorageItem(STORAGE_KEYS.THEME, themeState.theme);
-  logger.store('theme', 'Theme changed', { theme: themeState.theme, resolvedTheme: themeState.resolvedTheme });
+  logger.store('theme', 'Theme changed', {
+    theme: themeState.theme,
+    resolvedTheme: themeState.resolvedTheme
+  });
 }
 
 /**
@@ -126,4 +132,3 @@ export function cleanupTheme(): void {
     mediaQuery.removeEventListener('change', handleSystemChange);
   }
 }
-

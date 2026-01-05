@@ -64,18 +64,14 @@ export abstract class JiraClient {
   protected abstract get apiPath(): string;
   protected abstract getAuthHeader(): string;
 
-  protected async request<T>(
-    method: string,
-    endpoint: string,
-    body?: unknown
-  ): Promise<T> {
+  protected async request<T>(method: string, endpoint: string, body?: unknown): Promise<T> {
     const url = `${this.baseUrl}${this.apiPath}${endpoint}`;
     const timer = logger.time(`${method} ${endpoint}`);
 
     const headers: HeadersInit = {
-      'Authorization': this.getAuthHeader(),
+      Authorization: this.getAuthHeader(),
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'X-Atlassian-Token': 'no-check' // Bypass XSRF check for API requests
     };
 
@@ -110,11 +106,12 @@ export abstract class JiraClient {
       }
 
       if (!response.ok) {
-        const errorMessage = typeof data === 'object' && data !== null
-          ? (data as Record<string, unknown>).errorMessages
-            ? ((data as Record<string, unknown>).errorMessages as string[]).join(', ')
-            : (data as Record<string, unknown>).rawResponse as string || 'API request failed'
-          : 'API request failed';
+        const errorMessage =
+          typeof data === 'object' && data !== null
+            ? (data as Record<string, unknown>).errorMessages
+              ? ((data as Record<string, unknown>).errorMessages as string[]).join(', ')
+              : ((data as Record<string, unknown>).rawResponse as string) || 'API request failed'
+            : 'API request failed';
 
         logger.apiError(method, endpoint, { status: response.status, data });
         throw new JiraApiError(errorMessage, response.status, data);
@@ -139,11 +136,7 @@ export abstract class JiraClient {
       }
 
       logger.apiError(method, endpoint, error);
-      throw new JiraApiError(
-        error instanceof Error ? error.message : 'Network error',
-        0,
-        error
-      );
+      throw new JiraApiError(error instanceof Error ? error.message : 'Network error', 0, error);
     }
   }
 
@@ -160,9 +153,7 @@ export abstract class JiraClient {
     const { jql, startAt = 0, maxResults = 100, fields = DEFAULT_FIELDS, nextPageToken } = options;
 
     // Include Epic Link field for Server instances
-    const allFields = this.epicLinkFieldId
-      ? [...fields, this.epicLinkFieldId]
-      : fields;
+    const allFields = this.epicLinkFieldId ? [...fields, this.epicLinkFieldId] : fields;
 
     if (this.config.instanceType === 'cloud') {
       // New Cloud API format
@@ -254,8 +245,7 @@ export abstract class JiraClient {
       const fields = await this.getFields();
       const epicLinkField = fields.find(
         (f) =>
-          f.name === 'Epic Link' ||
-          f.schema?.custom === 'com.pyxis.greenhopper.jira:gh-epic-link'
+          f.name === 'Epic Link' || f.schema?.custom === 'com.pyxis.greenhopper.jira:gh-epic-link'
       );
       return epicLinkField?.id || null;
     } catch {

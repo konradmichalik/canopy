@@ -65,7 +65,10 @@ export function addQuery(title: string, jql: string): SavedQuery {
 /**
  * Update an existing query
  */
-export function updateQuery(id: string, updates: Partial<Pick<SavedQuery, 'title' | 'jql'>>): boolean {
+export function updateQuery(
+  id: string,
+  updates: Partial<Pick<SavedQuery, 'title' | 'jql'>>
+): boolean {
   const index = jqlState.queries.findIndex((q) => q.id === id);
 
   if (index === -1) {
@@ -79,7 +82,11 @@ export function updateQuery(id: string, updates: Partial<Pick<SavedQuery, 'title
     updatedAt: new Date().toISOString()
   };
 
-  jqlState.queries = [...jqlState.queries.slice(0, index), updated, ...jqlState.queries.slice(index + 1)];
+  jqlState.queries = [
+    ...jqlState.queries.slice(0, index),
+    updated,
+    ...jqlState.queries.slice(index + 1)
+  ];
   persistQueries();
   logger.store('jql', 'Updated query', { id, updates });
 
@@ -174,4 +181,3 @@ export function exportQueries(): string {
 function persistQueries(): void {
   setStorageItem(STORAGE_KEYS.QUERIES, jqlState.queries);
 }
-

@@ -41,7 +41,10 @@
     <div class="w-6 h-6 flex items-center justify-center flex-shrink-0">
       {#if hasChildren}
         <button
-          onclick={(e) => { e.stopPropagation(); handleToggle(); }}
+          onclick={(e) => {
+            e.stopPropagation();
+            handleToggle();
+          }}
           class="p-1 rounded hover:bg-surface-sunken text-text-subtle"
           aria-expanded={node.isExpanded}
           aria-label={node.isExpanded ? 'Collapse' : 'Expand'}

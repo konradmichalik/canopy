@@ -45,16 +45,16 @@ export const HIERARCHY_ORDER: Record<HierarchyLevel, number> = {
 
 // Map issue type names to hierarchy levels
 export const HIERARCHY_MAPPING: Record<string, HierarchyLevel> = {
-  'Epic': 'epic',
-  'Story': 'story',
-  'Task': 'task',
-  'Bug': 'task',
+  Epic: 'epic',
+  Story: 'story',
+  Task: 'task',
+  Bug: 'task',
   'Sub-task': 'subtask',
-  'Subtask': 'subtask',
+  Subtask: 'subtask',
   'Technical Task': 'task',
-  'Improvement': 'task',
+  Improvement: 'task',
   'New Feature': 'story',
-  'Feature': 'story'
+  Feature: 'story'
 };
 
 // ============================================

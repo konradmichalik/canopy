@@ -202,7 +202,9 @@ export function validateImportedConfig(data: unknown): { valid: boolean; errors:
   if (typeof config.version !== 'number') {
     errors.push('Missing or invalid version field');
   } else if (config.version > EXPORT_VERSION) {
-    errors.push(`Config version ${config.version} is newer than supported version ${EXPORT_VERSION}`);
+    errors.push(
+      `Config version ${config.version} is newer than supported version ${EXPORT_VERSION}`
+    );
   }
 
   // Check queries
@@ -250,7 +252,11 @@ export function validateImportedConfig(data: unknown): { valid: boolean; errors:
  */
 export function importConfig(
   config: ExportedConfig,
-  options: { overwriteConnection?: boolean; overwriteQueries?: boolean; mergeQueries?: boolean } = {}
+  options: {
+    overwriteConnection?: boolean;
+    overwriteQueries?: boolean;
+    mergeQueries?: boolean;
+  } = {}
 ): { success: boolean; imported: { connection: boolean; queriesCount: number } } {
   const { overwriteConnection = true, overwriteQueries = false, mergeQueries = true } = options;
 

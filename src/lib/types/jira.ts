@@ -244,10 +244,7 @@ export function isEpic(issue: JiraIssue): boolean {
 }
 
 export function isSubtask(issue: JiraIssue): boolean {
-  return (
-    issue.fields.issuetype.subtask ||
-    issue.fields.issuetype.hierarchyLevel === -1
-  );
+  return issue.fields.issuetype.subtask || issue.fields.issuetype.hierarchyLevel === -1;
 }
 
 // ============================================

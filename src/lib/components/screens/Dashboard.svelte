@@ -137,9 +137,7 @@
   <!-- Header -->
   <header class="border-b border-border bg-surface-raised">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <h1 class="text-xl font-bold text-text">
-        JIRA Tree
-      </h1>
+      <h1 class="text-xl font-bold text-text">JIRA Tree</h1>
 
       <div class="flex items-center gap-3">
         <!-- Import/Export Buttons -->
@@ -195,12 +193,8 @@
       <!-- Connection Form -->
       <div class="max-w-md mx-auto">
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold text-text mb-2">
-            Connect to JIRA
-          </h2>
-          <p class="text-text-subtle">
-            Enter your JIRA credentials to get started
-          </p>
+          <h2 class="text-2xl font-bold text-text mb-2">Connect to JIRA</h2>
+          <p class="text-text-subtle">Enter your JIRA credentials to get started</p>
         </div>
 
         <div class="bg-surface-raised border border-border rounded-xl p-6">
@@ -210,9 +204,7 @@
     {:else}
       <!-- Queries Dashboard -->
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-text">
-          Saved Queries
-        </h2>
+        <h2 class="text-lg font-semibold text-text">Saved Queries</h2>
         <button
           onclick={handleNewQuery}
           class="flex items-center gap-2 px-4 py-2 bg-brand text-text-inverse rounded-lg font-medium hover:bg-brand-hovered transition-colors"
@@ -224,13 +216,8 @@
 
       {#if jqlState.queries.length === 0}
         <div class="text-center py-12">
-          <p class="text-text-subtle mb-4">
-            No saved queries yet
-          </p>
-          <button
-            onclick={handleNewQuery}
-            class="text-text-brand hover:underline"
-          >
+          <p class="text-text-subtle mb-4">No saved queries yet</p>
+          <button onclick={handleNewQuery} class="text-text-brand hover:underline">
             Create your first query
           </button>
         </div>
@@ -251,11 +238,7 @@
 
   <!-- Query Form Modal -->
   {#if showQueryForm}
-    <QueryForm
-      query={editingQuery}
-      onSave={handleSaveQuery}
-      onCancel={handleCancelForm}
-    />
+    <QueryForm query={editingQuery} onSave={handleSaveQuery} onCancel={handleCancelForm} />
   {/if}
 
   <!-- Hidden File Input for Import -->
@@ -272,16 +255,26 @@
     <div
       class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-up
         {importMessage.type === 'success'
-          ? 'bg-success text-text-inverse'
-          : 'bg-danger text-text-inverse'}"
+        ? 'bg-success text-text-inverse'
+        : 'bg-danger text-text-inverse'}"
     >
       {#if importMessage.type === 'success'}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          />
         </svg>
       {:else}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       {/if}
       <span>{importMessage.text}</span>

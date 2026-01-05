@@ -80,7 +80,8 @@
         authMethod: formData.authMethod,
         username: formData.authMethod === 'basic' ? formData.username : undefined,
         password: formData.authMethod === 'basic' ? formData.password : undefined,
-        personalAccessToken: formData.authMethod === 'pat' ? formData.personalAccessToken : undefined
+        personalAccessToken:
+          formData.authMethod === 'pat' ? formData.personalAccessToken : undefined
       },
       proxyUrl: formData.proxyUrl || undefined
     };
@@ -98,9 +99,7 @@
 <form onsubmit={handleSubmit} class="space-y-6">
   <!-- Instance Type -->
   <div>
-    <label class="block text-sm font-medium text-text mb-2">
-      JIRA Instance Type
-    </label>
+    <label class="block text-sm font-medium text-text mb-2"> JIRA Instance Type </label>
     <div class="flex gap-4">
       <label class="flex items-center gap-2 cursor-pointer">
         <input
@@ -128,9 +127,7 @@
 
   <!-- Base URL -->
   <div>
-    <label for="baseUrl" class="block text-sm font-medium text-text mb-2">
-      JIRA URL
-    </label>
+    <label for="baseUrl" class="block text-sm font-medium text-text mb-2"> JIRA URL </label>
     <div class="relative">
       <Link class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
       <input
@@ -138,7 +135,9 @@
         type="url"
         bind:value={formData.baseUrl}
         oninput={handleUrlChange}
-        placeholder={isCloud ? 'https://your-domain.atlassian.net' : 'https://jira.your-company.com'}
+        placeholder={isCloud
+          ? 'https://your-domain.atlassian.net'
+          : 'https://jira.your-company.com'}
         required
         autocomplete="url"
         class="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent
@@ -147,7 +146,8 @@
     </div>
     {#if isLocalhostInBaseUrl}
       <p class="mt-1 text-xs text-text-warning">
-        This looks like a proxy URL. Enter your actual JIRA URL here (e.g. https://your-domain.atlassian.net) and put the proxy URL in "Advanced: CORS Proxy" below.
+        This looks like a proxy URL. Enter your actual JIRA URL here (e.g.
+        https://your-domain.atlassian.net) and put the proxy URL in "Advanced: CORS Proxy" below.
       </p>
     {/if}
   </div>
@@ -155,9 +155,7 @@
   <!-- Cloud Credentials -->
   {#if isCloud}
     <div>
-      <label for="email" class="block text-sm font-medium text-text mb-2">
-        Email
-      </label>
+      <label for="email" class="block text-sm font-medium text-text mb-2"> Email </label>
       <input
         id="email"
         type="email"
@@ -194,9 +192,7 @@
   {:else}
     <!-- Server Credentials -->
     <div>
-      <label class="block text-sm font-medium text-text mb-2">
-        Authentication Method
-      </label>
+      <label class="block text-sm font-medium text-text mb-2"> Authentication Method </label>
       <div class="flex gap-4">
         <label class="flex items-center gap-2 cursor-pointer">
           <input
@@ -223,9 +219,7 @@
 
     {#if isBasicAuth}
       <div>
-        <label for="username" class="block text-sm font-medium text-text mb-2">
-          Username
-        </label>
+        <label for="username" class="block text-sm font-medium text-text mb-2"> Username </label>
         <input
           id="username"
           type="text"
@@ -238,9 +232,7 @@
       </div>
 
       <div>
-        <label for="password" class="block text-sm font-medium text-text mb-2">
-          Password
-        </label>
+        <label for="password" class="block text-sm font-medium text-text mb-2"> Password </label>
         <input
           id="password"
           type="password"

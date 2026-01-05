@@ -59,10 +59,7 @@
       <h2 class="text-lg font-semibold text-text">
         {isEdit ? 'Edit Query' : 'New Query'}
       </h2>
-      <button
-        onclick={onCancel}
-        class="p-1 rounded hover:bg-surface-hovered text-text-subtle"
-      >
+      <button onclick={onCancel} class="p-1 rounded hover:bg-surface-hovered text-text-subtle">
         <X class="w-5 h-5" />
       </button>
     </div>
@@ -70,9 +67,7 @@
     <!-- Form -->
     <form onsubmit={handleSubmit} class="p-4 space-y-4">
       <div>
-        <label for="queryTitle" class="block text-sm font-medium text-text mb-1">
-          Title
-        </label>
+        <label for="queryTitle" class="block text-sm font-medium text-text mb-1"> Title </label>
         <input
           id="queryTitle"
           type="text"
@@ -83,9 +78,7 @@
       </div>
 
       <div>
-        <label for="queryJql" class="block text-sm font-medium text-text mb-1">
-          JQL Query
-        </label>
+        <label for="queryJql" class="block text-sm font-medium text-text mb-1"> JQL Query </label>
         <textarea
           id="queryJql"
           bind:value={jql}

@@ -21,16 +21,13 @@
   }
 
   const hasProgress = $derived(
-    issue.fields.aggregateprogress &&
-    issue.fields.aggregateprogress.total > 0
+    issue.fields.aggregateprogress && issue.fields.aggregateprogress.total > 0
   );
 
   const progressPercent = $derived(
     hasProgress
       ? Math.round(
-          (issue.fields.aggregateprogress!.progress /
-            issue.fields.aggregateprogress!.total) *
-            100
+          (issue.fields.aggregateprogress!.progress / issue.fields.aggregateprogress!.total) * 100
         )
       : 0
   );
@@ -59,10 +56,7 @@
   {#if hasProgress}
     <div class="flex items-center gap-2 flex-shrink-0">
       <div class="w-16 h-1.5 bg-surface-sunken rounded-full overflow-hidden">
-        <div
-          class="h-full bg-success transition-all"
-          style="width: {progressPercent}%"
-        ></div>
+        <div class="h-full bg-success transition-all" style="width: {progressPercent}%"></div>
       </div>
       <span class="text-xs text-text-subtle w-8 text-right">
         {progressPercent}%

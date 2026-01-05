@@ -16,7 +16,11 @@ import {
 import { applyQuickFilters } from '../utils/jql-helpers';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
-import { getActiveFilterConditions, setFiltersChangeCallback, updateDynamicFilters } from './filters.svelte';
+import {
+  getActiveFilterConditions,
+  setFiltersChangeCallback,
+  updateDynamicFilters
+} from './filters.svelte';
 
 // State container object
 export const issuesState = $state({
@@ -162,4 +166,3 @@ function persistExpandedKeys(): void {
   const keys = getExpandedKeys(issuesState.treeNodes);
   setStorageItem(STORAGE_KEYS.EXPANDED_NODES, Array.from(keys));
 }
-

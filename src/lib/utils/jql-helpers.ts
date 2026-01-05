@@ -77,10 +77,7 @@ export function appendConditions(baseJql: string, conditions: string[]): string 
 /**
  * Apply quick filters to a JQL query
  */
-export function applyQuickFilters(
-  baseJql: string,
-  filterConditions: string[]
-): string {
+export function applyQuickFilters(baseJql: string, filterConditions: string[]): string {
   return appendConditions(baseJql, filterConditions);
 }
 
@@ -110,9 +107,7 @@ export function extractProjectKeys(jql: string): string[] {
     const projectList = match[1] || match[2];
     if (projectList) {
       // Split by comma and clean up
-      const projects = projectList.split(',').map((p) =>
-        p.trim().replace(/["']/g, '')
-      );
+      const projects = projectList.split(',').map((p) => p.trim().replace(/["']/g, ''));
       keys.push(...projects);
     }
   }

@@ -4,7 +4,11 @@
  */
 
 import type { JiraIssue, QuickFilter } from '../types';
-import { DEFAULT_QUICK_FILTERS, type FilterCategory, type QuickFilterDefinition } from '../types/tree';
+import {
+  DEFAULT_QUICK_FILTERS,
+  type FilterCategory,
+  type QuickFilterDefinition
+} from '../types/tree';
 import { logger } from '../utils/logger';
 
 // Callback for when filters change - set by issues store
@@ -29,12 +33,12 @@ export interface ExtendedQuickFilter extends QuickFilter {
 
 // Icon mapping for issue types
 const TYPE_ICONS: Record<string, string> = {
-  'Epic': 'zap',
-  'Story': 'book-open',
-  'Task': 'check-square',
-  'Bug': 'bug',
+  Epic: 'zap',
+  Story: 'book-open',
+  Task: 'check-square',
+  Bug: 'bug',
   'Sub-task': 'check-square',
-  'Subtask': 'check-square'
+  Subtask: 'check-square'
 };
 
 // State container object
@@ -69,7 +73,10 @@ export function toggleFilter(id: string): void {
   filtersState.filters = filtersState.filters.map((f) =>
     f.id === id ? { ...f, isActive: !f.isActive } : f
   );
-  logger.store('filters', 'Toggle filter', { id, isActive: filtersState.filters.find((f) => f.id === id)?.isActive });
+  logger.store('filters', 'Toggle filter', {
+    id,
+    isActive: filtersState.filters.find((f) => f.id === id)?.isActive
+  });
   notifyFiltersChange();
 }
 
@@ -77,9 +84,7 @@ export function toggleFilter(id: string): void {
  * Set filter state
  */
 export function setFilter(id: string, isActive: boolean): void {
-  filtersState.filters = filtersState.filters.map((f) =>
-    f.id === id ? { ...f, isActive } : f
-  );
+  filtersState.filters = filtersState.filters.map((f) => (f.id === id ? { ...f, isActive } : f));
 }
 
 /**
@@ -126,13 +131,13 @@ export function getAllFilters(): ExtendedQuickFilter[] {
 // JIRA status category color mapping
 const STATUS_CATEGORY_COLORS: Record<string, string> = {
   'blue-gray': '#42526E',
-  'yellow': '#FF991F',
-  'green': '#00875A',
+  yellow: '#FF991F',
+  green: '#00875A',
   'medium-gray': '#6B778C',
   // Additional fallback mappings for status category keys
-  'new': '#42526E',
-  'indeterminate': '#0052CC',
-  'done': '#00875A'
+  new: '#42526E',
+  indeterminate: '#0052CC',
+  done: '#00875A'
 };
 
 /**
@@ -164,10 +169,10 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
 
   // Preserve active state of existing filters
   const activeStatusIds = new Set(
-    filtersState.dynamicStatusFilters.filter(f => f.isActive).map(f => f.id)
+    filtersState.dynamicStatusFilters.filter((f) => f.isActive).map((f) => f.id)
   );
   const activeTypeIds = new Set(
-    filtersState.dynamicTypeFilters.filter(f => f.isActive).map(f => f.id)
+    filtersState.dynamicTypeFilters.filter((f) => f.isActive).map((f) => f.id)
   );
 
   // Create status filters with colors
@@ -177,7 +182,10 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     jqlCondition: `status = "${name}"`,
     category: 'status' as FilterCategory,
     icon: getStatusIcon(data.categoryKey),
-    color: STATUS_CATEGORY_COLORS[data.colorName] || STATUS_CATEGORY_COLORS[data.categoryKey] || '#6B778C',
+    color:
+      STATUS_CATEGORY_COLORS[data.colorName] ||
+      STATUS_CATEGORY_COLORS[data.categoryKey] ||
+      '#6B778C',
     isActive: activeStatusIds.has(`status-${name.toLowerCase().replace(/\s+/g, '-')}`)
   }));
 
@@ -192,7 +200,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
   }));
 
   logger.store('filters', 'Updated dynamic filters', {
-    statuses: filtersState.dynamicStatusFilters.map(s => ({ name: s.label, color: s.color })),
+    statuses: filtersState.dynamicStatusFilters.map((s) => ({ name: s.label, color: s.color })),
     types: filtersState.dynamicTypeFilters.length
   });
 }
@@ -219,9 +227,9 @@ function getStatusIcon(categoryKey: string): string {
  */
 export function toggleDynamicFilter(id: string): void {
   // Check if it's a status filter
-  const statusIndex = filtersState.dynamicStatusFilters.findIndex(f => f.id === id);
+  const statusIndex = filtersState.dynamicStatusFilters.findIndex((f) => f.id === id);
   if (statusIndex !== -1) {
-    filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map(f =>
+    filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map((f) =>
       f.id === id ? { ...f, isActive: !f.isActive } : f
     );
     logger.store('filters', 'Toggle dynamic status filter', { id });
@@ -230,9 +238,9 @@ export function toggleDynamicFilter(id: string): void {
   }
 
   // Check if it's a type filter
-  const typeIndex = filtersState.dynamicTypeFilters.findIndex(f => f.id === id);
+  const typeIndex = filtersState.dynamicTypeFilters.findIndex((f) => f.id === id);
   if (typeIndex !== -1) {
-    filtersState.dynamicTypeFilters = filtersState.dynamicTypeFilters.map(f =>
+    filtersState.dynamicTypeFilters = filtersState.dynamicTypeFilters.map((f) =>
       f.id === id ? { ...f, isActive: !f.isActive } : f
     );
     logger.store('filters', 'Toggle dynamic type filter', { id });
@@ -243,4 +251,3 @@ export function toggleDynamicFilter(id: string): void {
   // Otherwise, toggle regular filter
   toggleFilter(id);
 }
-

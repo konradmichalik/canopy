@@ -15,7 +15,7 @@
   let isOpen = $state(false);
   let dropdownRef: HTMLDivElement | null = $state(null);
 
-  const activeCount = $derived(filters.filter(f => f.isActive).length);
+  const activeCount = $derived(filters.filter((f) => f.isActive).length);
 
   function handleClickOutside(event: MouseEvent): void {
     if (dropdownRef && !dropdownRef.contains(event.target as Node)) {
@@ -46,12 +46,14 @@
     onclick={toggleDropdown}
     class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
       {activeCount > 0
-        ? 'bg-brand-subtlest border-border-brand text-text-brand font-medium'
-        : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
+      ? 'bg-brand-subtlest border-border-brand text-text-brand font-medium'
+      : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
   >
     <span>{label}</span>
     {#if activeCount > 0}
-      <span class="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold rounded-full bg-brand text-text-inverse">
+      <span
+        class="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold rounded-full bg-brand text-text-inverse"
+      >
         {activeCount}
       </span>
     {/if}
@@ -59,7 +61,9 @@
   </button>
 
   {#if isOpen}
-    <div class="absolute top-full left-0 mt-1 min-w-[160px] bg-surface-overlay border border-border rounded-lg shadow-lg z-50">
+    <div
+      class="absolute top-full left-0 mt-1 min-w-[160px] bg-surface-overlay border border-border rounded-lg shadow-lg z-50"
+    >
       <div class="py-1">
         {#each filters as filter (filter.id)}
           {@const IconComponent = getIcon(filter.icon)}
@@ -80,7 +84,9 @@
             {:else}
               <IconComponent class="w-3.5 h-3.5 text-text-subtle" />
             {/if}
-            <span class="{filter.isActive ? 'text-text-brand font-medium' : 'text-text'}">{filter.label}</span>
+            <span class={filter.isActive ? 'text-text-brand font-medium' : 'text-text'}
+              >{filter.label}</span
+            >
           </button>
         {/each}
       </div>

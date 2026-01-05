@@ -35,7 +35,9 @@
 
 {#if user}
   <div
-    class="inline-flex items-center justify-center rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden flex-shrink-0 {sizeClasses[size]}"
+    class="inline-flex items-center justify-center rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden flex-shrink-0 {sizeClasses[
+      size
+    ]}"
     title={user.displayName}
   >
     {#if avatarUrl}
@@ -60,7 +62,9 @@
   </div>
 {:else}
   <div
-    class="inline-flex items-center justify-center rounded-full bg-[var(--color-bg-tertiary)] flex-shrink-0 {sizeClasses[size]}"
+    class="inline-flex items-center justify-center rounded-full bg-[var(--color-bg-tertiary)] flex-shrink-0 {sizeClasses[
+      size
+    ]}"
     title="Unassigned"
   >
     <span class="text-[var(--color-text-secondary)]">-</span>
