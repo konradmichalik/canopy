@@ -14,5 +14,5 @@
   <div class="w-6 h-6 flex-shrink-0"></div>
 
   <!-- Content bar (h-8 matches avatar height) -->
-  <div class="flex-1 h-8 rounded bg-surface-sunken min-w-0"></div>
+  <div class="flex-1 h-8 rounded bg-neutral min-w-0"></div>
 </div>

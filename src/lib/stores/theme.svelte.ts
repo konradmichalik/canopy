@@ -3,9 +3,11 @@
  * Manages dark/light mode with Svelte 5 Runes
  */
 
-import type { Theme } from '../types';
+import type { Theme as ThemeType } from '../types';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
+
+export type Theme = ThemeType;
 
 // State container object (mutable properties, not reassignable)
 export const themeState = $state({

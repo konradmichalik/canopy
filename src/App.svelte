@@ -6,12 +6,14 @@
   import { initializeRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
   import { initializeFieldConfig } from './lib/stores/fieldConfig.svelte';
+  import { initializeDisplayDensity } from './lib/stores/displayDensity.svelte';
   import { onMount } from 'svelte';
 
   onMount(() => {
     initializeTheme();
     initializeRouter();
     initializeFieldConfig();
+    initializeDisplayDensity();
 
     return () => {
       cleanupTheme();

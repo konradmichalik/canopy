@@ -3,23 +3,18 @@
   import Sidebar from './Sidebar.svelte';
   import SidebarResizer from './SidebarResizer.svelte';
   import TreeView from '../tree/TreeView.svelte';
-  import ThemeToggle from '../common/ThemeToggle.svelte';
+  import SettingsDropdown from '../common/SettingsDropdown.svelte';
   import Avatar from '../common/Avatar.svelte';
+  import Logo from '../common/Logo.svelte';
   import { routerState, toggleSidebar, setSidebarWidth } from '../../stores/router.svelte';
-  import { connectionState, disconnect } from '../../stores/connection.svelte';
+  import { connectionState } from '../../stores/connection.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
   import { QUERY_COLORS } from '../../types/tree';
-
-  function handleDisconnect(): void {
-    if (confirm('Disconnect from JIRA?')) {
-      disconnect();
-    }
-  }
 
   const activeQuery = $derived(
     routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : null
   );
-  const title = $derived(activeQuery?.title || 'JIRA Hierarchy Viewer');
+  const queryTitle = $derived(activeQuery?.title || null);
   const colorClass = $derived(
     activeQuery?.color ? QUERY_COLORS.find((c) => c.id === activeQuery.color)?.bg : null
   );
@@ -35,54 +30,53 @@
   <!-- Main Content -->
   <div class="flex-1 flex flex-col min-w-0">
     <!-- Header -->
-    <header class="border-b border-border bg-surface-raised flex-shrink-0">
-      <div class="px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          {#if !routerState.sidebarOpen}
-            <button
-              onclick={toggleSidebar}
-              class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
-              title="Open sidebar"
-            >
-              <AtlaskitIcon name="panel-left" size={20} />
-            </button>
-            <div class="h-6 w-px bg-border"></div>
-          {/if}
-
-          <div class="flex items-center gap-2 min-w-0">
-            {#if colorClass}
-              <span class="w-3 h-3 rounded-full flex-shrink-0 {colorClass}"></span>
-            {/if}
-            <h1 class="text-lg font-semibold text-text truncate">
-              {title}
-            </h1>
-          </div>
+    <header class="border-b border-border-bold bg-surface-raised flex-shrink-0 shadow-sm">
+      <div class="px-4 py-3 flex items-center">
+        <!-- Left: Toggle + Logo + App Name -->
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <button
+            onclick={toggleSidebar}
+            class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle transition-colors"
+            title={routerState.sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          >
+            <AtlaskitIcon name={routerState.sidebarOpen ? 'sidebar-collapse' : 'panel-left'} size={20} />
+          </button>
+          <div class="h-6 w-px bg-border"></div>
+          <Logo size="sm" showText={true} />
         </div>
 
-        <div class="flex items-center gap-3">
-          <ThemeToggle />
+        <!-- Center: Query Name -->
+        <div class="flex-1 flex items-center justify-center min-w-0 px-4">
+          {#if queryTitle}
+            <div class="flex items-center gap-2 max-w-md">
+              {#if colorClass}
+                <span class="w-3 h-3 rounded-full flex-shrink-0 {colorClass}"></span>
+              {/if}
+              <span class="text-base font-medium text-text truncate">
+                {queryTitle}
+              </span>
+            </div>
+          {/if}
+        </div>
 
+        <!-- Right: User + Settings -->
+        <div class="flex items-center gap-2 flex-shrink-0">
           {#if connectionState.currentUser}
             <div class="flex items-center gap-2">
               <Avatar user={connectionState.currentUser} size="md" />
               <span class="text-sm text-text-subtle hidden sm:block">
                 {connectionState.currentUser.displayName}
               </span>
-              <button
-                onclick={handleDisconnect}
-                class="p-2 rounded-lg hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
-                title="Disconnect"
-              >
-                <AtlaskitIcon name="log-out" size={16} />
-              </button>
             </div>
+            <div class="h-6 w-px bg-border mx-1"></div>
           {/if}
+          <SettingsDropdown />
         </div>
       </div>
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col overflow-hidden">
+    <main class="flex-1 flex flex-col overflow-hidden bg-surface-sunken">
       {#if routerState.activeQueryId}
         <TreeView />
       {:else}

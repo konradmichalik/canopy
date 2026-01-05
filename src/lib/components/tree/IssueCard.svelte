@@ -7,6 +7,7 @@
   import Tooltip from '../common/Tooltip.svelte';
   import { getIssueUrl } from '../../stores/issues.svelte';
   import { isFieldEnabled } from '../../stores/fieldConfig.svelte';
+  import { displayDensityState } from '../../stores/displayDensity.svelte';
 
   interface Props {
     issue: JiraIssue;
@@ -80,24 +81,31 @@
   const fixVersions = $derived(
     ((issue.fields as Record<string, unknown>).fixVersions as { name: string }[] | undefined) || []
   );
+
+  // Display density
+  const isCompact = $derived(displayDensityState.density === 'compact');
 </script>
 
-<div class="flex items-center gap-4 min-w-0 flex-1 py-2.5">
+<div
+  class="flex items-center min-w-0 flex-1 {isCompact ? 'gap-3 py-1' : 'gap-4 py-2.5'}"
+>
   <!-- Issue Type Icon -->
-  <IssueTypeIcon issueType={issue.fields.issuetype} size={20} />
+  <IssueTypeIcon issueType={issue.fields.issuetype} size={isCompact ? 16 : 20} />
 
   <!-- Issue Key (link) -->
   <button
     onclick={openIssue}
-    class="text-base font-medium text-text-brand hover:underline flex items-center gap-1.5 flex-shrink-0"
+    class="font-medium text-text-brand hover:underline flex items-center gap-1 flex-shrink-0 {isCompact
+      ? 'text-sm'
+      : 'text-base gap-1.5'}"
     title="Open in JIRA"
   >
     {issue.key}
-    <AtlaskitIcon name="link-external" size={14} class="opacity-50" />
+    <AtlaskitIcon name="link-external" size={isCompact ? 12 : 14} class="opacity-50" />
   </button>
 
   <!-- Summary -->
-  <span class="text-base text-text truncate min-w-0 flex-1">
+  <span class="text-text truncate min-w-0 flex-1 {isCompact ? 'text-sm' : 'text-base'}">
     {issue.fields.summary}
   </span>
 
@@ -216,6 +224,6 @@
 
   <!-- Assignee Avatar -->
   {#if showAssignee}
-    <Avatar user={issue.fields.assignee} size="md" />
+    <Avatar user={issue.fields.assignee} size={isCompact ? 'sm' : 'md'} />
   {/if}
 </div>
