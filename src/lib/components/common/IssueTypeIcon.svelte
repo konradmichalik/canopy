@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Zap, BookOpen, CheckSquare, Bug, ListTodo, FileText } from 'lucide-svelte';
   import type { JiraIssueType } from '../../types';
+  import Tooltip from './Tooltip.svelte';
 
   interface Props {
     issueType: JiraIssueType;
@@ -36,22 +37,20 @@
   const typeName = $derived(issueType.name.toLowerCase());
 </script>
 
-<span
-  class="inline-flex items-center justify-center flex-shrink-0"
-  style="color: {typeInfo.color}"
-  title={issueType.name}
->
-  {#if typeName === 'epic'}
-    <Zap {size} />
-  {:else if typeName === 'story' || typeName === 'feature' || typeName === 'new feature'}
-    <BookOpen {size} />
-  {:else if typeName === 'bug'}
-    <Bug {size} />
-  {:else if typeName === 'task' || typeName === 'technical task'}
-    <CheckSquare {size} />
-  {:else if typeName.includes('sub-task') || typeName === 'subtask'}
-    <ListTodo {size} />
-  {:else}
-    <FileText {size} />
-  {/if}
-</span>
+<Tooltip text={issueType.name}>
+  <span class="inline-flex items-center justify-center flex-shrink-0" style="color: {typeInfo.color}">
+    {#if typeName === 'epic'}
+      <Zap {size} />
+    {:else if typeName === 'story' || typeName === 'feature' || typeName === 'new feature'}
+      <BookOpen {size} />
+    {:else if typeName === 'bug'}
+      <Bug {size} />
+    {:else if typeName === 'task' || typeName === 'technical task'}
+      <CheckSquare {size} />
+    {:else if typeName.includes('sub-task') || typeName === 'subtask'}
+      <ListTodo {size} />
+    {:else}
+      <FileText {size} />
+    {/if}
+  </span>
+</Tooltip>

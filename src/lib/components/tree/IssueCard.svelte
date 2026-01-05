@@ -4,6 +4,7 @@
   import StatusBadge from '../common/StatusBadge.svelte';
   import IssueTypeIcon from '../common/IssueTypeIcon.svelte';
   import Avatar from '../common/Avatar.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import { getIssueUrl } from '../../stores/issues.svelte';
 
   interface Props {
@@ -54,14 +55,22 @@
 
   <!-- Progress Bar (if available) -->
   {#if hasProgress}
-    <div class="flex items-center gap-2 flex-shrink-0">
-      <div class="w-16 h-1.5 bg-surface-sunken rounded-full overflow-hidden">
-        <div class="h-full bg-success transition-all" style="width: {progressPercent}%"></div>
+    {@const progress = issue.fields.aggregateprogress!.progress}
+    {@const total = issue.fields.aggregateprogress!.total}
+    {@const remaining = total - progress}
+    {@const progressHours = Math.round(progress / 3600)}
+    {@const totalHours = Math.round(total / 3600)}
+    {@const remainingHours = Math.round(remaining / 3600)}
+    <Tooltip text={`Progress: ${progressPercent}%\nLogged: ${progressHours}h / ${totalHours}h\nRemaining: ${remainingHours}h`}>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <div class="w-16 h-1.5 bg-surface-sunken rounded-full overflow-hidden">
+          <div class="h-full bg-success transition-all" style="width: {progressPercent}%"></div>
+        </div>
+        <span class="text-xs text-text-subtle w-8 text-right">
+          {progressPercent}%
+        </span>
       </div>
-      <span class="text-xs text-text-subtle w-8 text-right">
-        {progressPercent}%
-      </span>
-    </div>
+    </Tooltip>
   {/if}
 
   <!-- Status Badge -->

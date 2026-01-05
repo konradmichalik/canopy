@@ -99,6 +99,13 @@ export const DEFAULT_QUICK_FILTERS: QuickFilterDefinition[] = [
     icon: 'user'
   },
   {
+    id: 'unassigned',
+    label: 'Unassigned',
+    jqlCondition: 'assignee IS EMPTY',
+    category: 'general',
+    icon: 'user-x'
+  },
+  {
     id: 'unresolved',
     label: 'Unresolved',
     jqlCondition: 'resolution = EMPTY',

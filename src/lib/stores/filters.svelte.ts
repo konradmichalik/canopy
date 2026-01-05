@@ -111,10 +111,42 @@ export function isUnresolvedActive(): boolean {
 
 /**
  * Get JQL conditions from active filters
- * All filters are combined with AND
+ * Filters within the same category (status, type) are combined with OR
+ * Different categories are combined with AND
  */
 export function getActiveFilterConditions(): string[] {
-  return getActiveFilters().map((f) => f.jqlCondition);
+  const activeFilters = getActiveFilters() as ExtendedQuickFilter[];
+  const conditions: string[] = [];
+
+  // Group filters by category
+  const statusFilters = activeFilters.filter((f) => f.category === 'status');
+  const typeFilters = activeFilters.filter((f) => f.category === 'type');
+  const otherFilters = activeFilters.filter(
+    (f) => f.category !== 'status' && f.category !== 'type'
+  );
+
+  // Build OR-combined conditions for status filters
+  if (statusFilters.length === 1) {
+    conditions.push(statusFilters[0].jqlCondition);
+  } else if (statusFilters.length > 1) {
+    const statusNames = statusFilters.map((f) => `"${f.label}"`).join(', ');
+    conditions.push(`status IN (${statusNames})`);
+  }
+
+  // Build OR-combined conditions for type filters
+  if (typeFilters.length === 1) {
+    conditions.push(typeFilters[0].jqlCondition);
+  } else if (typeFilters.length > 1) {
+    const typeNames = typeFilters.map((f) => `"${f.label}"`).join(', ');
+    conditions.push(`issuetype IN (${typeNames})`);
+  }
+
+  // Add other filters (general category) as individual AND conditions
+  for (const filter of otherFilters) {
+    conditions.push(filter.jqlCondition);
+  }
+
+  return conditions;
 }
 
 /**
