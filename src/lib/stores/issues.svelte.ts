@@ -33,11 +33,19 @@ export const issuesState = $state({
   isInitialLoad: true
 });
 
+// Track if a reload is pending (triggered while loading)
+let pendingReload = false;
+
 // Set up filter change callback
 setFiltersChangeCallback(() => {
-  if (issuesState.currentJql && !issuesState.isLoading) {
-    issuesState.isInitialLoad = false;
-    loadIssues(issuesState.currentJql);
+  if (issuesState.currentJql) {
+    if (issuesState.isLoading) {
+      // Schedule reload after current load completes
+      pendingReload = true;
+    } else {
+      issuesState.isInitialLoad = false;
+      loadIssues(issuesState.currentJql);
+    }
   }
 });
 
@@ -91,11 +99,21 @@ export async function loadIssues(jql: string): Promise<boolean> {
     logger.info('Issues loaded', stats);
 
     issuesState.isLoading = false;
+
+    // Check if a reload was requested while loading (e.g., filters were activated)
+    if (pendingReload) {
+      pendingReload = false;
+      issuesState.isInitialLoad = false;
+      // Use setTimeout to avoid potential recursion issues
+      setTimeout(() => loadIssues(issuesState.currentJql), 0);
+    }
+
     return true;
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to load issues';
     issuesState.error = message;
     issuesState.isLoading = false;
+    pendingReload = false; // Clear pending reload on error
     logger.error('Failed to load issues', err);
     return false;
   }

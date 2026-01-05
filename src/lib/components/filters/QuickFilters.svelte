@@ -13,8 +13,17 @@
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
 
   // Icon name mapping (Lucide names → Atlaskit names)
+  // Also supports direct Atlaskit names
   function getIconName(iconName: string | undefined): AtlaskitIconName {
     switch (iconName) {
+      // Direct Atlaskit icon names (used by type filters)
+      case 'epic':
+      case 'story':
+      case 'task':
+      case 'bug':
+      case 'subtasks':
+        return iconName;
+      // Lucide to Atlaskit mappings (legacy support)
       case 'user':
         return 'person';
       case 'circle':
@@ -31,8 +40,6 @@
         return 'story';
       case 'check-square':
         return 'task';
-      case 'bug':
-        return 'bug';
       case 'alert-triangle':
         return 'warning';
       case 'puzzle':

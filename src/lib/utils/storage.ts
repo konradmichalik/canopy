@@ -18,7 +18,8 @@ export const STORAGE_KEYS = {
   SIDEBAR_OPEN: 'sidebar-open',
   SIDEBAR_WIDTH: 'sidebar-width',
   DISPLAY_FIELDS: 'display-fields',
-  DISPLAY_DENSITY: 'display-density'
+  DISPLAY_DENSITY: 'display-density',
+  DEBUG_MODE: 'debug-mode'
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

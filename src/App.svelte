@@ -8,6 +8,7 @@
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
   import { initializeFieldConfig } from './lib/stores/fieldConfig.svelte';
   import { initializeDisplayDensity } from './lib/stores/displayDensity.svelte';
+  import { initializeDebugMode } from './lib/stores/debugMode.svelte';
   import { initializeQueries } from './lib/stores/jql.svelte';
   import { onMount } from 'svelte';
 
@@ -23,6 +24,7 @@
         initializeRouter();
         initializeFieldConfig();
         initializeDisplayDensity();
+        initializeDebugMode();
         initializeQueries();
 
         // Try to restore connection from storage

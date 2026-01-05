@@ -9,6 +9,7 @@
     setDisplayDensity,
     type DisplayDensity
   } from '../../stores/displayDensity.svelte';
+  import { debugModeState, setDebugMode } from '../../stores/debugMode.svelte';
 
   let isOpen = $state(false);
   let fileInput: HTMLInputElement;
@@ -186,6 +187,32 @@
             Compact
           </button>
         </div>
+      </div>
+
+      <div class="h-px bg-border my-1"></div>
+
+      <!-- Debug Mode Toggle -->
+      <div class="px-3 py-2">
+        <button
+          onclick={() => setDebugMode(!debugModeState.enabled)}
+          class="w-full flex items-center justify-between text-sm text-text hover:bg-surface-hovered rounded px-2 py-1.5 -mx-2 transition-colors"
+        >
+          <span class="flex items-center gap-2">
+            <AtlaskitIcon name="flask" size={16} />
+            Debug Mode
+          </span>
+          <span
+            class="w-8 h-5 rounded-full transition-colors relative {debugModeState.enabled
+              ? 'bg-brand'
+              : 'bg-neutral-bold'}"
+          >
+            <span
+              class="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform {debugModeState.enabled
+                ? 'translate-x-3.5'
+                : 'translate-x-0.5'}"
+            ></span>
+          </span>
+        </button>
       </div>
 
       <div class="h-px bg-border my-1"></div>

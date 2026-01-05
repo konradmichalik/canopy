@@ -151,12 +151,20 @@ function applyPendingActiveFilters(): void {
     isActive: activeIds.has(f.id)
   }));
 
+  const hasActiveFilters = activeIds.size > 0;
+
   logger.debug('Dynamic filters restored from pending', {
-    pendingFilterIds: filtersState.pendingActiveFilterIds
+    pendingFilterIds: filtersState.pendingActiveFilterIds,
+    hasActiveFilters
   });
 
   // Clear pending
   filtersState.pendingActiveFilterIds = null;
+
+  // Trigger reload with filters if any were activated
+  if (hasActiveFilters) {
+    notifyFiltersChange();
+  }
 }
 
 // Extended filter type with category
@@ -165,17 +173,9 @@ export interface ExtendedQuickFilter extends QuickFilter {
   icon?: string;
   color?: string; // Color from JIRA API (e.g., statusCategory.colorName)
   avatarUrl?: string; // Avatar URL for assignee filters
+  iconUrl?: string; // Icon URL from JIRA API (for issue types, priorities)
 }
 
-// Icon mapping for issue types
-const TYPE_ICONS: Record<string, string> = {
-  Epic: 'zap',
-  Story: 'book-open',
-  Task: 'check-square',
-  Bug: 'bug',
-  'Sub-task': 'check-square',
-  Subtask: 'check-square'
-};
 
 // State container object
 export const filtersState = $state({
@@ -392,12 +392,16 @@ export function getActiveFilterConditions(): string[] {
     conditions.push(`status IN (${statusNames})`);
   }
 
-  // Build OR-combined conditions for type filters
+  // Build OR-combined conditions for type filters (using IDs)
   if (typeFilters.length === 1) {
     conditions.push(typeFilters[0].jqlCondition);
   } else if (typeFilters.length > 1) {
-    const typeNames = typeFilters.map((f) => `"${f.label}"`).join(', ');
-    conditions.push(`issuetype IN (${typeNames})`);
+    // Extract IDs from jqlConditions (format: "issuetype = 12345")
+    const typeIds = typeFilters
+      .map((f) => f.jqlCondition.split('=')[1]?.trim())
+      .filter(Boolean)
+      .join(', ');
+    conditions.push(`issuetype IN (${typeIds})`);
   }
 
   // Build OR-combined conditions for assignee filters
@@ -417,12 +421,16 @@ export function getActiveFilterConditions(): string[] {
     conditions.push(`priority IN (${priorityNames})`);
   }
 
-  // Build OR-combined conditions for resolution filters
+  // Build OR-combined conditions for resolution filters (using IDs)
   if (resolutionFilters.length === 1) {
     conditions.push(resolutionFilters[0].jqlCondition);
   } else if (resolutionFilters.length > 1) {
-    const resolutionNames = resolutionFilters.map((f) => `"${f.label}"`).join(', ');
-    conditions.push(`resolution IN (${resolutionNames})`);
+    // Extract IDs from jqlConditions (format: "resolution = 12345")
+    const resolutionIds = resolutionFilters
+      .map((f) => f.jqlCondition.split('=')[1]?.trim())
+      .filter(Boolean)
+      .join(', ');
+    conditions.push(`resolution IN (${resolutionIds})`);
   }
 
   // Build OR-combined conditions for component filters
@@ -545,7 +553,7 @@ function getAvatarColor(identifier: string): string {
 export function updateDynamicFilters(issues: JiraIssue[]): void {
   // Extract unique values
   const statusMap = new Map<string, { name: string; categoryKey: string; colorName: string }>();
-  const typeMap = new Map<string, { name: string; iconUrl?: string }>();
+  const typeMap = new Map<string, { id: string; name: string; iconUrl?: string }>();
   const assigneeMap = new Map<
     string,
     {
@@ -558,7 +566,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     }
   >();
   const priorityMap = new Map<string, { name: string; iconUrl?: string }>();
-  const resolutionMap = new Map<string, { name: string }>();
+  const resolutionMap = new Map<string, { id: string; name: string }>();
   const componentMap = new Map<string, { name: string }>();
   const fixVersionMap = new Map<string, { name: string }>();
 
@@ -575,6 +583,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     const issueType = issue.fields.issuetype;
     if (issueType && !typeMap.has(issueType.name)) {
       typeMap.set(issueType.name, {
+        id: issueType.id,
         name: issueType.name,
         iconUrl: issueType.iconUrl
       });
@@ -609,6 +618,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     const resolution = issue.fields.resolution;
     if (resolution && !resolutionMap.has(resolution.name)) {
       resolutionMap.set(resolution.name, {
+        id: resolution.id,
         name: resolution.name
       });
     }
@@ -677,13 +687,14 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     isActive: activeStatusIds.has(`status-${name.toLowerCase().replace(/\s+/g, '-')}`)
   }));
 
-  // Create type filters
+  // Create type filters using iconUrl from JIRA API
+  // Use issue type ID in JQL for reliability (name can vary across instances)
   filtersState.dynamicTypeFilters = Array.from(typeMap.entries()).map(([name, data]) => ({
     id: `type-${name.toLowerCase().replace(/\s+/g, '-')}`,
     label: name,
-    jqlCondition: `issuetype = "${name}"`,
+    jqlCondition: `issuetype = ${data.id}`,
     category: 'type' as FilterCategory,
-    icon: TYPE_ICONS[name] || 'circle',
+    iconUrl: data.iconUrl,
     isActive: activeTypeIds.has(`type-${name.toLowerCase().replace(/\s+/g, '-')}`)
   }));
 
@@ -708,7 +719,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     };
   });
 
-  // Create priority filters sorted by name
+  // Create priority filters sorted by name, using iconUrl from JIRA API
   const sortedPriorities = Array.from(priorityMap.entries()).sort((a, b) =>
     a[0].localeCompare(b[0])
   );
@@ -717,18 +728,19 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     label: name,
     jqlCondition: `priority = "${name}"`,
     category: 'priority' as FilterCategory,
-    icon: 'alert-triangle',
+    iconUrl: data.iconUrl,
     isActive: activePriorityIds.has(`priority-${name.toLowerCase().replace(/\s+/g, '-')}`)
   }));
 
   // Create resolution filters sorted by name
+  // Use resolution ID in JQL for reliability (name can vary across instances)
   const sortedResolutions = Array.from(resolutionMap.entries()).sort((a, b) =>
     a[0].localeCompare(b[0])
   );
-  filtersState.dynamicResolutionFilters = sortedResolutions.map(([name]) => ({
+  filtersState.dynamicResolutionFilters = sortedResolutions.map(([name, data]) => ({
     id: `resolution-${name.toLowerCase().replace(/\s+/g, '-')}`,
     label: name,
-    jqlCondition: `resolution = "${name}"`,
+    jqlCondition: `resolution = ${data.id}`,
     category: 'resolution' as FilterCategory,
     icon: 'check-circle',
     color: '#00875A',

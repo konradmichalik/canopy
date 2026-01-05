@@ -81,6 +81,14 @@
                 class="w-5 h-5 rounded-full flex-shrink-0 {filter.color ? 'ring-1' : ''}"
                 style={filter.color ? `--tw-ring-color: ${filter.color}` : ''}
               />
+            {:else if filter.iconUrl}
+              <img
+                src={filter.iconUrl}
+                alt=""
+                class="w-4 h-4 flex-shrink-0"
+              />
+            {:else if filter.icon && filter.color}
+              <AtlaskitIcon name={getIconName(filter.icon)} size={14} color={filter.color} />
             {:else if filter.color}
               <span
                 class="w-3 h-3 rounded-full flex-shrink-0"

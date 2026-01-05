@@ -6,8 +6,12 @@
   import FieldSelector from './FieldSelector.svelte';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
+  import { getActiveFilterConditions } from '../../stores/filters.svelte';
+  import { applyQuickFilters } from '../../utils/jql-helpers';
+  import { debugModeState } from '../../stores/debugMode.svelte';
 
   let isRefreshing = $state(false);
+  let showJqlDebug = $state(false);
 
   async function handleRefresh(): Promise<void> {
     isRefreshing = true;
@@ -17,6 +21,14 @@
 
   const stats = $derived(getTreeStats(issuesState.treeNodes));
   const isEmpty = $derived(issuesState.treeNodes.length === 0 && !issuesState.isLoading);
+
+  // Debug: Compute effective JQL with filters
+  const filterConditions = $derived(getActiveFilterConditions());
+  const effectiveJql = $derived(
+    issuesState.currentJql
+      ? applyQuickFilters(issuesState.currentJql, filterConditions)
+      : ''
+  );
 </script>
 
 <div class="tree-view flex flex-col h-full">
@@ -70,6 +82,54 @@
     <div class="px-3 py-2 border-t border-border">
       <QuickFilters />
     </div>
+
+    <!-- JQL Debug (only visible when debug mode is enabled) -->
+    {#if debugModeState.enabled}
+      <div class="px-3 py-1.5 border-t border-border bg-surface-sunken">
+        <button
+          onclick={() => (showJqlDebug = !showJqlDebug)}
+          class="flex items-center gap-1.5 text-xs text-text-subtlest hover:text-text-subtle transition-colors"
+        >
+          <AtlaskitIcon
+            name="chevron-right"
+            size={12}
+            class="transition-transform {showJqlDebug ? 'rotate-90' : ''}"
+          />
+          <span>JQL Debug</span>
+          {#if filterConditions.length > 0}
+            <span class="text-text-brand">({filterConditions.length} filter{filterConditions.length > 1 ? 's' : ''})</span>
+          {/if}
+        </button>
+        {#if showJqlDebug}
+          <div class="mt-2 space-y-2 text-xs">
+            <div>
+              <span class="text-text-subtlest">Base JQL:</span>
+              <code class="block mt-1 p-2 bg-surface rounded border border-border text-text-subtle break-all font-mono">
+                {issuesState.currentJql || '(none)'}
+              </code>
+            </div>
+            {#if filterConditions.length > 0}
+              <div>
+                <span class="text-text-subtlest">Filter conditions:</span>
+                <ul class="mt-1 space-y-1">
+                  {#each filterConditions as condition}
+                    <li class="p-1.5 bg-brand-subtlest rounded border border-brand-subtle text-text-brand font-mono">
+                      {condition}
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+            <div>
+              <span class="text-text-subtlest">Effective JQL:</span>
+              <code class="block mt-1 p-2 bg-surface rounded border border-border text-text break-all font-mono font-medium">
+                {effectiveJql || '(none)'}
+              </code>
+            </div>
+          </div>
+        {/if}
+      </div>
+    {/if}
   </div>
 
   <!-- Tree Content -->
