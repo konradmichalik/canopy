@@ -31,7 +31,8 @@ export const DEFAULT_FIELDS = [
   'progress',
   'aggregateprogress',
   'labels',
-  'components'
+  'components',
+  'comment'
 ];
 
 export interface JiraClientOptions {

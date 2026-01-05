@@ -167,7 +167,7 @@
     <Tooltip text={`Components: ${issue.fields.components.map((c) => c.name).join(', ')}`}>
       <div class="flex items-center gap-1 flex-shrink-0">
         <AtlaskitIcon name="component" size={14} color="var(--color-text-subtle)" />
-        <span class="text-xs text-text-subtle">{issue.fields.components.length}</span>
+        <span class="text-xs text-text-subtle">{issue.fields.components.map((c) => c.name).join(', ')}</span>
       </div>
     </Tooltip>
   {/if}

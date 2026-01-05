@@ -39,7 +39,11 @@
             class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle transition-colors"
             title={routerState.sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
           >
-            <AtlaskitIcon name={routerState.sidebarOpen ? 'sidebar-collapse' : 'panel-left'} size={20} />
+            <AtlaskitIcon
+              name="panel-left"
+              size={20}
+              class="transition-transform duration-200 {routerState.sidebarOpen ? '' : '-scale-x-100'}"
+            />
           </button>
           <div class="h-6 w-px bg-border"></div>
           <Logo size="sm" showText={true} />
