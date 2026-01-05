@@ -3,6 +3,7 @@
   import TreeNode from './TreeNode.svelte';
   import IssueCardSkeleton from './IssueCardSkeleton.svelte';
   import QuickFilters from '../filters/QuickFilters.svelte';
+  import FieldSelector from './FieldSelector.svelte';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
 
@@ -32,6 +33,10 @@
       </div>
 
       <div class="flex items-center gap-1">
+        <FieldSelector />
+
+        <div class="w-px h-4 bg-border mx-1"></div>
+
         <button
           onclick={expandAll}
           disabled={isEmpty || issuesState.isLoading}

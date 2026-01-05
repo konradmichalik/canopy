@@ -68,7 +68,7 @@ export function addQuery(title: string, jql: string, color?: QueryColor): SavedQ
  */
 export function updateQuery(
   id: string,
-  updates: Partial<Pick<SavedQuery, 'title' | 'jql' | 'color'>>
+  updates: Partial<Pick<SavedQuery, 'title' | 'jql' | 'color' | 'displayFields' | 'activeFilterIds'>>
 ): boolean {
   const index = jqlState.queries.findIndex((q) => q.id === id);
 
@@ -92,6 +92,20 @@ export function updateQuery(
   logger.store('jql', 'Updated query', { id, updates });
 
   return true;
+}
+
+/**
+ * Update display fields for a query
+ */
+export function updateQueryDisplayFields(id: string, displayFields: string[]): boolean {
+  return updateQuery(id, { displayFields });
+}
+
+/**
+ * Update active filter IDs for a query
+ */
+export function updateQueryActiveFilters(id: string, activeFilterIds: string[]): boolean {
+  return updateQuery(id, { activeFilterIds });
 }
 
 /**

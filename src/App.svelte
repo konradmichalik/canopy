@@ -5,11 +5,13 @@
   import { connectionState } from './lib/stores/connection.svelte';
   import { initializeRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
+  import { initializeFieldConfig } from './lib/stores/fieldConfig.svelte';
   import { onMount } from 'svelte';
 
   onMount(() => {
     initializeTheme();
     initializeRouter();
+    initializeFieldConfig();
 
     return () => {
       cleanupTheme();

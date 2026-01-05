@@ -90,6 +90,8 @@ export interface SavedQuery {
   createdAt: string;
   updatedAt: string;
   isDefault?: boolean;
+  displayFields?: string[];
+  activeFilterIds?: string[];
 }
 
 // ============================================
@@ -103,7 +105,16 @@ export interface QuickFilter {
   isActive: boolean;
 }
 
-export type FilterCategory = 'general' | 'status' | 'type' | 'sprint' | 'assignee';
+export type FilterCategory =
+  | 'general'
+  | 'status'
+  | 'type'
+  | 'sprint'
+  | 'assignee'
+  | 'priority'
+  | 'resolution'
+  | 'component'
+  | 'fixVersion';
 
 export interface QuickFilterDefinition extends Omit<QuickFilter, 'isActive'> {
   category: FilterCategory;
@@ -196,6 +207,7 @@ export interface ExportedConfig {
   exportedAt: string;
   connection: ExportedConnection | null;
   queries: SavedQuery[];
+  displayFields?: string[];
 }
 
 export interface ExportedConnection {

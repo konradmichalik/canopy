@@ -118,7 +118,7 @@ export abstract class JiraClient {
       }
 
       logger.apiResponse(method, endpoint, response.status, duration, {
-        dataKeys: Object.keys(data)
+        dataKeys: typeof data === 'object' && data !== null ? Object.keys(data) : []
       });
 
       return data as T;

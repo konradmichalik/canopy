@@ -16,7 +16,8 @@ export const STORAGE_KEYS = {
   EXPANDED_NODES: 'expanded-nodes',
   LAST_QUERY_ID: 'last-query-id',
   SIDEBAR_OPEN: 'sidebar-open',
-  SIDEBAR_WIDTH: 'sidebar-width'
+  SIDEBAR_WIDTH: 'sidebar-width',
+  DISPLAY_FIELDS: 'display-fields'
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
@@ -139,6 +140,7 @@ const EXPORT_VERSION = 1;
 
 /**
  * Export current configuration as JSON
+ * Note: displayFields are stored per query, not globally
  */
 export function exportConfig(): ExportedConfig {
   const connection = getStorageItem<StoredConnection>(STORAGE_KEYS.CONNECTION);
@@ -251,6 +253,7 @@ export function validateImportedConfig(data: unknown): { valid: boolean; errors:
 
 /**
  * Import configuration from JSON
+ * Note: displayFields are stored per query, not globally
  */
 export function importConfig(
   config: ExportedConfig,
@@ -259,7 +262,10 @@ export function importConfig(
     overwriteQueries?: boolean;
     mergeQueries?: boolean;
   } = {}
-): { success: boolean; imported: { connection: boolean; queriesCount: number } } {
+): {
+  success: boolean;
+  imported: { connection: boolean; queriesCount: number };
+} {
   const { overwriteConnection = true, overwriteQueries = false, mergeQueries = true } = options;
 
   let connectionImported = false;
@@ -278,7 +284,7 @@ export function importConfig(
     logger.info('🔗 Connection imported', { baseUrl: config.connection.baseUrl });
   }
 
-  // Import queries
+  // Import queries (including their displayFields)
   if (config.queries && config.queries.length > 0) {
     const existingQueries = getStorageItem<SavedQuery[]>(STORAGE_KEYS.QUERIES) || [];
 

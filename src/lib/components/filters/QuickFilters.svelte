@@ -8,14 +8,20 @@
     CheckCircle,
     BookOpen,
     CheckSquare,
-    Bug
+    Bug,
+    AlertTriangle,
+    Puzzle,
+    Package,
+    X
   } from 'lucide-svelte';
   import {
     filtersState,
     toggleFilter,
     toggleDynamicFilter,
-    getActiveFilters
+    getActiveFilters,
+    resetFilters
   } from '../../stores/filters.svelte';
+  import { isFieldEnabled } from '../../stores/fieldConfig.svelte';
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
 
   // Icon mapping
@@ -39,10 +45,22 @@
         return CheckSquare;
       case 'bug':
         return Bug;
+      case 'alert-triangle':
+        return AlertTriangle;
+      case 'puzzle':
+        return Puzzle;
+      case 'package':
+        return Package;
       default:
         return Circle;
     }
   }
+
+  // Field visibility
+  const showPriorityFilters = $derived(isFieldEnabled('priority'));
+  const showResolutionFilters = $derived(isFieldEnabled('resolution'));
+  const showComponentFilters = $derived(isFieldEnabled('components'));
+  const showFixVersionFilters = $derived(isFieldEnabled('fixVersions'));
 
   // Active filter count
   const activeCount = $derived(getActiveFilters().length);
@@ -95,6 +113,58 @@
         onToggle={toggleDynamicFilter}
         {getIcon}
       />
+    {/if}
+
+    <!-- Dropdown for dynamic priority filters (only if priority field is enabled) -->
+    {#if showPriorityFilters && filtersState.dynamicPriorityFilters.length > 0}
+      <MultiSelectDropdown
+        label="Priority"
+        filters={filtersState.dynamicPriorityFilters}
+        onToggle={toggleDynamicFilter}
+        {getIcon}
+      />
+    {/if}
+
+    <!-- Dropdown for dynamic resolution filters (only if resolution field is enabled) -->
+    {#if showResolutionFilters && filtersState.dynamicResolutionFilters.length > 0}
+      <MultiSelectDropdown
+        label="Resolution"
+        filters={filtersState.dynamicResolutionFilters}
+        onToggle={toggleDynamicFilter}
+        {getIcon}
+      />
+    {/if}
+
+    <!-- Dropdown for dynamic component filters (only if components field is enabled) -->
+    {#if showComponentFilters && filtersState.dynamicComponentFilters.length > 0}
+      <MultiSelectDropdown
+        label="Component"
+        filters={filtersState.dynamicComponentFilters}
+        onToggle={toggleDynamicFilter}
+        {getIcon}
+      />
+    {/if}
+
+    <!-- Dropdown for dynamic fix version filters (only if fixVersions field is enabled) -->
+    {#if showFixVersionFilters && filtersState.dynamicFixVersionFilters.length > 0}
+      <MultiSelectDropdown
+        label="Release"
+        filters={filtersState.dynamicFixVersionFilters}
+        onToggle={toggleDynamicFilter}
+        {getIcon}
+      />
+    {/if}
+
+    <!-- Reset button -->
+    {#if activeCount > 0}
+      <button
+        onclick={resetFilters}
+        class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered transition-colors"
+        title="Reset all filters"
+      >
+        <X class="w-3 h-3" />
+        Reset
+      </button>
     {/if}
   </div>
 

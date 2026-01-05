@@ -1,13 +1,13 @@
 <script lang="ts">
   import { ChevronDown, Check } from 'lucide-svelte';
   import type { ExtendedQuickFilter } from '../../stores/filters.svelte';
-  import type { Component } from 'svelte';
 
   interface Props {
     label: string;
     filters: ExtendedQuickFilter[];
     onToggle: (id: string) => void;
-    getIcon: (iconName: string | undefined) => Component;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getIcon: (iconName: string | undefined) => any;
   }
 
   let { label, filters, onToggle, getIcon }: Props = $props();

@@ -9,12 +9,23 @@
     initializeQueries,
     addQuery,
     updateQuery,
-    deleteQuery
+    deleteQuery,
+    updateQueryDisplayFields,
+    updateQueryActiveFilters
   } from '../../stores/jql.svelte';
   import { routerState, setActiveQuery } from '../../stores/router.svelte';
   import { loadIssues, clearIssues } from '../../stores/issues.svelte';
   import { downloadConfig, readConfigFile, importConfig } from '../../utils/storage';
   import { initializeConnection } from '../../stores/connection.svelte';
+  import {
+    loadFieldConfig,
+    setFieldConfigChangeCallback,
+    type DisplayFieldId
+  } from '../../stores/fieldConfig.svelte';
+  import {
+    loadActiveFilters,
+    setActiveFiltersChangeCallback
+  } from '../../stores/filters.svelte';
 
   interface Props {
     width: number;
@@ -34,6 +45,20 @@
     if (initialized) return;
     initialized = true;
     initializeQueries();
+
+    // Set callback for field config changes
+    setFieldConfigChangeCallback((enabledFields: DisplayFieldId[]) => {
+      if (routerState.activeQueryId) {
+        updateQueryDisplayFields(routerState.activeQueryId, enabledFields);
+      }
+    });
+
+    // Set callback for filter changes
+    setActiveFiltersChangeCallback((activeFilterIds: string[]) => {
+      if (routerState.activeQueryId) {
+        updateQueryActiveFilters(routerState.activeQueryId, activeFilterIds);
+      }
+    });
   });
 
   function handleExport(): void {
@@ -119,6 +144,8 @@
 
   async function handleSelectQuery(query: SavedQuery): Promise<void> {
     setActiveQuery(query.id);
+    loadFieldConfig(query.id, query.displayFields);
+    loadActiveFilters(query.activeFilterIds);
     await loadIssues(query.jql);
   }
 
