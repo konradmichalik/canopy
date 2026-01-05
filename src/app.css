@@ -190,6 +190,10 @@ html[data-color-mode='dark'] {
   --color-neutral: var(--ds-background-neutral);
   --color-neutral-hovered: var(--ds-background-neutral-hovered);
 
+  /* Progress bar track (more visible than neutral) */
+  --color-progress-track: var(--ds-background-neutral-pressed);
+  --color-brand-bold: var(--ds-background-brand-bold);
+
   /* Input/Form colors */
   --color-input: var(--ds-background-input);
   --color-input-hovered: var(--ds-background-input-hovered);

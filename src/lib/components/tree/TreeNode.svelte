@@ -59,7 +59,7 @@
     </div>
 
     <!-- Issue Card -->
-    <IssueCard issue={node.issue} />
+    <IssueCard {node} />
   </div>
 
   <!-- Children -->
