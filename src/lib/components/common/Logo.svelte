@@ -27,27 +27,26 @@
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
-    <!-- Tree structure lines -->
+    <!-- Vertical connector line -->
     <path
-      d="M16 6 L16 12 M16 12 L8 18 M16 12 L24 18 M8 18 L8 24 M24 18 L24 24 M8 24 L4 28 M8 24 L12 28 M24 24 L20 28 M24 24 L28 28"
+      d="M8 7 L8 26 M8 10 L12 10 M8 18 L12 18 M8 26 L12 26"
       stroke="currentColor"
-      stroke-width="1.5"
+      stroke-width="2"
       stroke-linecap="round"
       class="text-text-subtle"
     />
 
-    <!-- Root node - Blue -->
-    <circle cx="16" cy="5" r="3.5" fill="#2563eb" />
+    <!-- Root node - subtle blue -->
+    <rect x="4" y="2" width="12" height="6" rx="1.5" fill="#3b82f6" />
 
-    <!-- Level 2 nodes - Green and Purple -->
-    <circle cx="8" cy="18" r="3" fill="#16a34a" />
-    <circle cx="24" cy="18" r="3" fill="#9333ea" />
+    <!-- Child node 1 - subtle green -->
+    <rect x="14" y="7" width="14" height="6" rx="1.5" fill="#22c55e" />
 
-    <!-- Level 3 nodes - Orange, Yellow, Red, Teal -->
-    <circle cx="4" cy="28" r="2.5" fill="#ea580c" />
-    <circle cx="12" cy="28" r="2.5" fill="#eab308" />
-    <circle cx="20" cy="28" r="2.5" fill="#dc2626" />
-    <circle cx="28" cy="28" r="2.5" fill="#0d9488" />
+    <!-- Child node 2 - subtle purple -->
+    <rect x="14" y="15" width="14" height="6" rx="1.5" fill="#a855f7" />
+
+    <!-- Child node 3 - subtle orange -->
+    <rect x="14" y="23" width="14" height="6" rx="1.5" fill="#f97316" />
   </svg>
 
   {#if showText}

@@ -29,6 +29,7 @@ export interface ExtendedQuickFilter extends QuickFilter {
   category: FilterCategory;
   icon?: string;
   color?: string; // Color from JIRA API (e.g., statusCategory.colorName)
+  avatarUrl?: string; // Avatar URL for assignee filters
 }
 
 // Icon mapping for issue types
@@ -45,7 +46,8 @@ const TYPE_ICONS: Record<string, string> = {
 export const filtersState = $state({
   filters: DEFAULT_QUICK_FILTERS.map((f) => ({ ...f, isActive: false })) as ExtendedQuickFilter[],
   dynamicStatusFilters: [] as ExtendedQuickFilter[],
-  dynamicTypeFilters: [] as ExtendedQuickFilter[]
+  dynamicTypeFilters: [] as ExtendedQuickFilter[],
+  dynamicAssigneeFilters: [] as ExtendedQuickFilter[]
 });
 
 /**
@@ -62,7 +64,8 @@ export function getActiveFilters(): QuickFilter[] {
   return [
     ...filtersState.filters.filter((f) => f.isActive),
     ...filtersState.dynamicStatusFilters.filter((f) => f.isActive),
-    ...filtersState.dynamicTypeFilters.filter((f) => f.isActive)
+    ...filtersState.dynamicTypeFilters.filter((f) => f.isActive),
+    ...filtersState.dynamicAssigneeFilters.filter((f) => f.isActive)
   ];
 }
 
@@ -88,10 +91,22 @@ export function setFilter(id: string, isActive: boolean): void {
 }
 
 /**
- * Clear all filters
+ * Clear all filters (including dynamic ones)
  */
 export function clearFilters(): void {
   filtersState.filters = filtersState.filters.map((f) => ({ ...f, isActive: false }));
+  filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map((f) => ({
+    ...f,
+    isActive: false
+  }));
+  filtersState.dynamicTypeFilters = filtersState.dynamicTypeFilters.map((f) => ({
+    ...f,
+    isActive: false
+  }));
+  filtersState.dynamicAssigneeFilters = filtersState.dynamicAssigneeFilters.map((f) => ({
+    ...f,
+    isActive: false
+  }));
   logger.store('filters', 'Cleared all filters');
 }
 
@@ -111,7 +126,7 @@ export function isUnresolvedActive(): boolean {
 
 /**
  * Get JQL conditions from active filters
- * Filters within the same category (status, type) are combined with OR
+ * Filters within the same category (status, type, assignee) are combined with OR
  * Different categories are combined with AND
  */
 export function getActiveFilterConditions(): string[] {
@@ -121,8 +136,9 @@ export function getActiveFilterConditions(): string[] {
   // Group filters by category
   const statusFilters = activeFilters.filter((f) => f.category === 'status');
   const typeFilters = activeFilters.filter((f) => f.category === 'type');
+  const assigneeFilters = activeFilters.filter((f) => f.category === 'assignee');
   const otherFilters = activeFilters.filter(
-    (f) => f.category !== 'status' && f.category !== 'type'
+    (f) => f.category !== 'status' && f.category !== 'type' && f.category !== 'assignee'
   );
 
   // Build OR-combined conditions for status filters
@@ -141,6 +157,15 @@ export function getActiveFilterConditions(): string[] {
     conditions.push(`issuetype IN (${typeNames})`);
   }
 
+  // Build OR-combined conditions for assignee filters
+  if (assigneeFilters.length === 1) {
+    conditions.push(assigneeFilters[0].jqlCondition);
+  } else if (assigneeFilters.length > 1) {
+    // Combine assignee conditions with OR
+    const assigneeConditions = assigneeFilters.map((f) => f.jqlCondition).join(' OR ');
+    conditions.push(`(${assigneeConditions})`);
+  }
+
   // Add other filters (general category) as individual AND conditions
   for (const filter of otherFilters) {
     conditions.push(filter.jqlCondition);
@@ -156,7 +181,8 @@ export function getAllFilters(): ExtendedQuickFilter[] {
   return [
     ...filtersState.filters,
     ...filtersState.dynamicStatusFilters,
-    ...filtersState.dynamicTypeFilters
+    ...filtersState.dynamicTypeFilters,
+    ...filtersState.dynamicAssigneeFilters
   ];
 }
 
@@ -172,6 +198,35 @@ const STATUS_CATEGORY_COLORS: Record<string, string> = {
   done: '#00875A'
 };
 
+// Avatar color palette (same as Avatar.svelte)
+const AVATAR_COLORS = [
+  '#0052CC', // Blue
+  '#00875A', // Green
+  '#FF5630', // Red
+  '#6554C0', // Purple
+  '#FF991F', // Orange
+  '#00B8D9', // Cyan
+  '#36B37E', // Teal
+  '#E91E63', // Pink
+  '#8777D9', // Violet
+  '#FFAB00' // Yellow
+];
+
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+function getAvatarColor(identifier: string): string {
+  const hash = hashString(identifier);
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
 /**
  * Update dynamic filters based on loaded issues
  */
@@ -179,6 +234,17 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
   // Extract unique statuses with color info
   const statusMap = new Map<string, { name: string; categoryKey: string; colorName: string }>();
   const typeMap = new Map<string, { name: string; iconUrl?: string }>();
+  const assigneeMap = new Map<
+    string,
+    {
+      id: string;
+      displayName: string;
+      avatarUrl?: string;
+      accountId?: string;
+      emailAddress?: string;
+      name?: string;
+    }
+  >();
 
   for (const issue of issues) {
     const status = issue.fields.status;
@@ -197,6 +263,23 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
         iconUrl: issueType.iconUrl
       });
     }
+
+    // Extract assignee
+    const assignee = issue.fields.assignee;
+    if (assignee) {
+      // Use accountId (Cloud) or name (Server) as unique key
+      const uniqueKey = assignee.accountId || assignee.name || assignee.key || '';
+      if (uniqueKey && !assigneeMap.has(uniqueKey)) {
+        assigneeMap.set(uniqueKey, {
+          id: uniqueKey,
+          displayName: assignee.displayName,
+          avatarUrl: assignee.avatarUrls?.['24x24'],
+          accountId: assignee.accountId,
+          emailAddress: assignee.emailAddress,
+          name: assignee.name
+        });
+      }
+    }
   }
 
   // Preserve active state of existing filters
@@ -205,6 +288,9 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
   );
   const activeTypeIds = new Set(
     filtersState.dynamicTypeFilters.filter((f) => f.isActive).map((f) => f.id)
+  );
+  const activeAssigneeIds = new Set(
+    filtersState.dynamicAssigneeFilters.filter((f) => f.isActive).map((f) => f.id)
   );
 
   // Create status filters with colors
@@ -231,9 +317,33 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     isActive: activeTypeIds.has(`type-${name.toLowerCase().replace(/\s+/g, '-')}`)
   }));
 
+  // Create assignee filters sorted by display name
+  const sortedAssignees = Array.from(assigneeMap.entries()).sort((a, b) =>
+    a[1].displayName.localeCompare(b[1].displayName)
+  );
+
+  filtersState.dynamicAssigneeFilters = sortedAssignees.map(([key, data]) => {
+    const filterId = `assignee-${key.replace(/[^a-zA-Z0-9]/g, '-')}`;
+    // Use accountId for Cloud, name for Server in JQL
+    const jqlValue = data.accountId ? `"${data.accountId}"` : `"${data.name}"`;
+    // Use same color logic as Avatar component (accountId || emailAddress || displayName)
+    const colorIdentifier = data.accountId || data.emailAddress || data.displayName;
+    return {
+      id: filterId,
+      label: data.displayName,
+      jqlCondition: `assignee = ${jqlValue}`,
+      category: 'assignee' as FilterCategory,
+      icon: 'user',
+      avatarUrl: data.avatarUrl,
+      color: getAvatarColor(colorIdentifier),
+      isActive: activeAssigneeIds.has(filterId)
+    };
+  });
+
   logger.store('filters', 'Updated dynamic filters', {
     statuses: filtersState.dynamicStatusFilters.map((s) => ({ name: s.label, color: s.color })),
-    types: filtersState.dynamicTypeFilters.length
+    types: filtersState.dynamicTypeFilters.length,
+    assignees: filtersState.dynamicAssigneeFilters.length
   });
 }
 
@@ -276,6 +386,17 @@ export function toggleDynamicFilter(id: string): void {
       f.id === id ? { ...f, isActive: !f.isActive } : f
     );
     logger.store('filters', 'Toggle dynamic type filter', { id });
+    notifyFiltersChange();
+    return;
+  }
+
+  // Check if it's an assignee filter
+  const assigneeIndex = filtersState.dynamicAssigneeFilters.findIndex((f) => f.id === id);
+  if (assigneeIndex !== -1) {
+    filtersState.dynamicAssigneeFilters = filtersState.dynamicAssigneeFilters.map((f) =>
+      f.id === id ? { ...f, isActive: !f.isActive } : f
+    );
+    logger.store('filters', 'Toggle dynamic assignee filter', { id });
     notifyFiltersChange();
     return;
   }

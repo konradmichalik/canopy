@@ -76,7 +76,14 @@
                 <Check class="w-3.5 h-3.5 text-text-brand" />
               {/if}
             </span>
-            {#if filter.color}
+            {#if filter.avatarUrl}
+              <img
+                src={filter.avatarUrl}
+                alt=""
+                class="w-5 h-5 rounded-full flex-shrink-0 {filter.color ? 'ring-1' : ''}"
+                style={filter.color ? `--tw-ring-color: ${filter.color}` : ''}
+              />
+            {:else if filter.color}
               <span
                 class="w-3 h-3 rounded-full flex-shrink-0"
                 style="background-color: {filter.color}"

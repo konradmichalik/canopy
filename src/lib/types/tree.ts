@@ -103,7 +103,7 @@ export interface QuickFilter {
   isActive: boolean;
 }
 
-export type FilterCategory = 'general' | 'status' | 'type' | 'sprint';
+export type FilterCategory = 'general' | 'status' | 'type' | 'sprint' | 'assignee';
 
 export interface QuickFilterDefinition extends Omit<QuickFilter, 'isActive'> {
   category: FilterCategory;

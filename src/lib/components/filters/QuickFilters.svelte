@@ -86,6 +86,16 @@
         {getIcon}
       />
     {/if}
+
+    <!-- Dropdown for dynamic assignee filters -->
+    {#if filtersState.dynamicAssigneeFilters.length > 0}
+      <MultiSelectDropdown
+        label="Assignee"
+        filters={filtersState.dynamicAssigneeFilters}
+        onToggle={toggleDynamicFilter}
+        {getIcon}
+      />
+    {/if}
   </div>
 
   <!-- Active filters summary -->
