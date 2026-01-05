@@ -79,7 +79,10 @@ export function initializeRouter(): void {
   }
 
   if (sidebarWidth !== null) {
-    routerState.sidebarWidth = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, sidebarWidth));
+    routerState.sidebarWidth = Math.max(
+      MIN_SIDEBAR_WIDTH,
+      Math.min(MAX_SIDEBAR_WIDTH, sidebarWidth)
+    );
     logger.store('router', 'Restored sidebar width', { width: routerState.sidebarWidth });
   }
 }

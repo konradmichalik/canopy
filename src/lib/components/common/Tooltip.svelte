@@ -46,10 +46,7 @@
   {@render children()}
 
   {#if visible && text}
-    <div
-      class="absolute z-50 {positionClasses[position]} pointer-events-none"
-      role="tooltip"
-    >
+    <div class="absolute z-50 {positionClasses[position]} pointer-events-none" role="tooltip">
       <div
         class="tooltip-content relative text-xs font-medium px-2.5 py-1.5 rounded shadow-lg whitespace-pre-line max-w-xs"
       >

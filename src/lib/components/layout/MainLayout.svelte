@@ -5,11 +5,7 @@
   import TreeView from '../tree/TreeView.svelte';
   import ThemeToggle from '../common/ThemeToggle.svelte';
   import Avatar from '../common/Avatar.svelte';
-  import {
-    routerState,
-    toggleSidebar,
-    setSidebarWidth
-  } from '../../stores/router.svelte';
+  import { routerState, toggleSidebar, setSidebarWidth } from '../../stores/router.svelte';
   import { connectionState, disconnect } from '../../stores/connection.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
   import { QUERY_COLORS } from '../../types/tree';

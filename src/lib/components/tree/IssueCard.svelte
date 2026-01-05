@@ -61,7 +61,9 @@
     {@const progressHours = Math.round(progress / 3600)}
     {@const totalHours = Math.round(total / 3600)}
     {@const remainingHours = Math.round(remaining / 3600)}
-    <Tooltip text={`Progress: ${progressPercent}%\nLogged: ${progressHours}h / ${totalHours}h\nRemaining: ${remainingHours}h`}>
+    <Tooltip
+      text={`Progress: ${progressPercent}%\nLogged: ${progressHours}h / ${totalHours}h\nRemaining: ${remainingHours}h`}
+    >
       <div class="flex items-center gap-2 flex-shrink-0">
         <div class="w-16 h-1.5 bg-surface-sunken rounded-full overflow-hidden">
           <div class="h-full bg-success transition-all" style="width: {progressPercent}%"></div>

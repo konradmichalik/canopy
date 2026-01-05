@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { ChevronDown, ChevronUp, RefreshCw, Loader2, AlertCircle } from 'lucide-svelte';
+  import { ChevronDown, ChevronUp, RefreshCw, Loader2, AlertCircle, SearchX } from 'lucide-svelte';
   import TreeNode from './TreeNode.svelte';
+  import IssueCardSkeleton from './IssueCardSkeleton.svelte';
   import QuickFilters from '../filters/QuickFilters.svelte';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
@@ -72,12 +73,11 @@
 
   <!-- Tree Content -->
   <div class="flex-1 overflow-auto p-2">
-    {#if issuesState.isLoading && issuesState.treeNodes.length === 0}
-      <div class="flex items-center justify-center h-full">
-        <div class="flex flex-col items-center gap-3 text-text-subtle">
-          <Loader2 class="w-8 h-8 animate-spin" />
-          <p>Loading issues...</p>
-        </div>
+    {#if issuesState.isLoading}
+      <div class="tree-container">
+        {#each Array(8) as _, i}
+          <IssueCardSkeleton depth={i < 2 ? 0 : i < 5 ? 1 : 2} />
+        {/each}
       </div>
     {:else if issuesState.error}
       <div class="flex items-center justify-center h-full">
@@ -95,7 +95,12 @@
     {:else if isEmpty}
       <div class="flex items-center justify-center h-full">
         <div class="text-center text-text-subtle">
-          <p class="mb-2">No issues found</p>
+          <div
+            class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-hovered flex items-center justify-center"
+          >
+            <SearchX class="w-8 h-8 text-text-subtlest" />
+          </div>
+          <p class="text-lg mb-2">No issues found <span class="opacity-70">:(</span></p>
           <p class="text-sm">Try adjusting your JQL query or filters</p>
         </div>
       </div>

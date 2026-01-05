@@ -32,14 +32,14 @@
     '#36B37E', // Teal
     '#E91E63', // Pink
     '#8777D9', // Violet
-    '#FFAB00'  // Yellow
+    '#FFAB00' // Yellow
   ];
 
   function hashString(str: string): number {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash;
     }
     return Math.abs(hash);

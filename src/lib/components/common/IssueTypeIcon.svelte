@@ -38,7 +38,10 @@
 </script>
 
 <Tooltip text={issueType.name}>
-  <span class="inline-flex items-center justify-center flex-shrink-0" style="color: {typeInfo.color}">
+  <span
+    class="inline-flex items-center justify-center flex-shrink-0"
+    style="color: {typeInfo.color}"
+  >
     {#if typeName === 'epic'}
       <Zap {size} />
     {:else if typeName === 'story' || typeName === 'feature' || typeName === 'new feature'}
