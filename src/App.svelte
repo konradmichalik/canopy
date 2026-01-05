@@ -1,8 +1,9 @@
 <script lang="ts">
   import './app.css';
-  import Dashboard from './lib/components/screens/Dashboard.svelte';
-  import TreeScreen from './lib/components/screens/TreeScreen.svelte';
-  import { routerState, initializeRouter } from './lib/stores/router.svelte';
+  import ConnectionScreen from './lib/components/screens/ConnectionScreen.svelte';
+  import MainLayout from './lib/components/layout/MainLayout.svelte';
+  import { connectionState } from './lib/stores/connection.svelte';
+  import { initializeRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
   import { onMount } from 'svelte';
 
@@ -16,8 +17,8 @@
   });
 </script>
 
-{#if routerState.currentScreen === 'dashboard'}
-  <Dashboard />
-{:else if routerState.currentScreen === 'tree'}
-  <TreeScreen />
+{#if connectionState.isConnected}
+  <MainLayout />
+{:else}
+  <ConnectionScreen />
 {/if}

@@ -1,20 +1,22 @@
 /**
  * LocalStorage Wrapper with Type Safety
- * All keys are prefixed with 'jira-tree:' for namespacing
+ * All keys are prefixed with 'jira-hierarchy:' for namespacing
  */
 
 import { logger } from './logger';
 import type { ExportedConfig, SavedQuery } from '../types';
 import type { StoredConnection } from '../types/connection';
 
-const STORAGE_PREFIX = 'jira-tree:';
+const STORAGE_PREFIX = 'jira-hierarchy:';
 
 export const STORAGE_KEYS = {
   CONNECTION: 'connection',
   QUERIES: 'queries',
   THEME: 'theme',
   EXPANDED_NODES: 'expanded-nodes',
-  LAST_QUERY_ID: 'last-query-id'
+  LAST_QUERY_ID: 'last-query-id',
+  SIDEBAR_OPEN: 'sidebar-open',
+  SIDEBAR_WIDTH: 'sidebar-width'
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
@@ -72,7 +74,7 @@ export function removeStorageItem(key: StorageKey): boolean {
 }
 
 /**
- * Clear all jira-tree storage items
+ * Clear all jira-hierarchy storage items
  */
 export function clearStorage(): boolean {
   try {
@@ -173,7 +175,7 @@ export function downloadConfig(): void {
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
 
-  const filename = `jira-tree-config-${new Date().toISOString().split('T')[0]}.json`;
+  const filename = `jira-hierarchy-config-${new Date().toISOString().split('T')[0]}.json`;
 
   const a = document.createElement('a');
   a.href = url;

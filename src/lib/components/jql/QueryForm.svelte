@@ -1,11 +1,12 @@
 <script lang="ts">
   import { X, Save } from 'lucide-svelte';
-  import type { SavedQuery } from '../../types';
+  import type { SavedQuery, QueryColor } from '../../types';
+  import { QUERY_COLORS } from '../../types/tree';
   import { validateJql } from '../../utils/jql-helpers';
 
   interface Props {
     query?: SavedQuery | null;
-    onSave: (title: string, jql: string) => void;
+    onSave: (title: string, jql: string, color?: QueryColor) => void;
     onCancel: () => void;
   }
 
@@ -13,6 +14,7 @@
 
   let title = $state(query?.title || '');
   let jql = $state(query?.jql || '');
+  let color = $state<QueryColor | undefined>(query?.color);
   let error = $state<string | null>(null);
 
   function handleSubmit(e: Event): void {
@@ -33,7 +35,11 @@
       return;
     }
 
-    onSave(trimmedTitle, trimmedJql);
+    onSave(trimmedTitle, trimmedJql, color);
+  }
+
+  function selectColor(c: QueryColor): void {
+    color = color === c ? undefined : c;
   }
 
   const isEdit = $derived(!!query);
@@ -89,6 +95,26 @@
         <p class="mt-1 text-xs text-text-subtle">
           Enter a valid JQL query. The app will automatically build the hierarchy from the results.
         </p>
+      </div>
+
+      <!-- Color Selection -->
+      <div>
+        <label class="block text-sm font-medium text-text mb-2"> Color (optional) </label>
+        <div class="flex flex-wrap gap-2">
+          {#each QUERY_COLORS as c (c.id)}
+            <button
+              type="button"
+              onclick={() => selectColor(c.id)}
+              class="w-8 h-8 rounded-full {c.bg} transition-all
+                {color === c.id
+                ? 'ring-2 ring-offset-2 ring-offset-surface ring-text scale-110'
+                : 'hover:scale-110 opacity-70 hover:opacity-100'}"
+              title={c.label}
+              aria-label={c.label}
+              aria-pressed={color === c.id}
+            ></button>
+          {/each}
+        </div>
       </div>
 
       {#if error}

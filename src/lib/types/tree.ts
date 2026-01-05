@@ -61,10 +61,32 @@ export const HIERARCHY_MAPPING: Record<string, HierarchyLevel> = {
 // Saved Queries
 // ============================================
 
+export type QueryColor =
+  | 'gray'
+  | 'blue'
+  | 'green'
+  | 'yellow'
+  | 'orange'
+  | 'red'
+  | 'purple'
+  | 'teal';
+
+export const QUERY_COLORS: { id: QueryColor; label: string; bg: string; border: string }[] = [
+  { id: 'gray', label: 'Gray', bg: 'bg-neutral-500', border: 'border-neutral-500' },
+  { id: 'blue', label: 'Blue', bg: 'bg-blue-500', border: 'border-blue-500' },
+  { id: 'green', label: 'Green', bg: 'bg-green-500', border: 'border-green-500' },
+  { id: 'yellow', label: 'Yellow', bg: 'bg-yellow-500', border: 'border-yellow-500' },
+  { id: 'orange', label: 'Orange', bg: 'bg-orange-500', border: 'border-orange-500' },
+  { id: 'red', label: 'Red', bg: 'bg-red-500', border: 'border-red-500' },
+  { id: 'purple', label: 'Purple', bg: 'bg-purple-500', border: 'border-purple-500' },
+  { id: 'teal', label: 'Teal', bg: 'bg-teal-500', border: 'border-teal-500' }
+];
+
 export interface SavedQuery {
   id: string;
   title: string;
   jql: string;
+  color?: QueryColor;
   createdAt: string;
   updatedAt: string;
   isDefault?: boolean;
@@ -125,11 +147,10 @@ export const DEFAULT_QUICK_FILTERS: QuickFilterDefinition[] = [
 // Router Types
 // ============================================
 
-export type Screen = 'dashboard' | 'tree';
-
 export interface RouterState {
-  currentScreen: Screen;
   activeQueryId: string | null;
+  sidebarOpen: boolean;
+  sidebarWidth: number;
 }
 
 // ============================================

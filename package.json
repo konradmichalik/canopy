@@ -1,8 +1,8 @@
 {
-  "name": "jira-tree",
+  "name": "jira-hierarchy-viewer",
   "private": true,
   "version": "1.0.0",
-  "description": "Hierarchical JIRA ticket viewer with tree structure display",
+  "description": "JIRA Hierarchy Viewer - Visualize JIRA tickets in a hierarchical tree structure",
   "type": "module",
   "scripts": {
     "dev": "vite",

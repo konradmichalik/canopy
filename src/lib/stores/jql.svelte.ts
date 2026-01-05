@@ -3,7 +3,7 @@
  * Manages saved queries with Svelte 5 Runes
  */
 
-import type { SavedQuery } from '../types';
+import type { SavedQuery, QueryColor } from '../types';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { generateQueryId } from '../types/tree';
 import { logger } from '../utils/logger';
@@ -45,19 +45,20 @@ export function getQueryById(id: string): SavedQuery | undefined {
 /**
  * Add a new query
  */
-export function addQuery(title: string, jql: string): SavedQuery {
+export function addQuery(title: string, jql: string, color?: QueryColor): SavedQuery {
   const now = new Date().toISOString();
   const newQuery: SavedQuery = {
     id: generateQueryId(),
     title: title.trim(),
     jql: jql.trim(),
+    color,
     createdAt: now,
     updatedAt: now
   };
 
   jqlState.queries = [...jqlState.queries, newQuery];
   persistQueries();
-  logger.store('jql', 'Added query', { id: newQuery.id, title: newQuery.title });
+  logger.store('jql', 'Added query', { id: newQuery.id, title: newQuery.title, color });
 
   return newQuery;
 }
@@ -67,7 +68,7 @@ export function addQuery(title: string, jql: string): SavedQuery {
  */
 export function updateQuery(
   id: string,
-  updates: Partial<Pick<SavedQuery, 'title' | 'jql'>>
+  updates: Partial<Pick<SavedQuery, 'title' | 'jql' | 'color'>>
 ): boolean {
   const index = jqlState.queries.findIndex((q) => q.id === id);
 
