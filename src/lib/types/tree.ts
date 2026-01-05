@@ -92,6 +92,7 @@ export interface SavedQuery {
   isDefault?: boolean;
   displayFields?: string[];
   activeFilterIds?: string[];
+  searchText?: string;
 }
 
 // ============================================

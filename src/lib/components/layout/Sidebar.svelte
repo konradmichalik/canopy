@@ -11,7 +11,8 @@
     updateQuery,
     deleteQuery,
     updateQueryDisplayFields,
-    updateQueryActiveFilters
+    updateQueryActiveFilters,
+    updateQuerySearchText
   } from '../../stores/jql.svelte';
   import { routerState, setActiveQuery } from '../../stores/router.svelte';
   import { loadIssues, clearIssues } from '../../stores/issues.svelte';
@@ -24,7 +25,8 @@
   } from '../../stores/fieldConfig.svelte';
   import {
     loadActiveFilters,
-    setActiveFiltersChangeCallback
+    setActiveFiltersChangeCallback,
+    setSearchTextChangeCallback
   } from '../../stores/filters.svelte';
 
   interface Props {
@@ -57,6 +59,13 @@
     setActiveFiltersChangeCallback((activeFilterIds: string[]) => {
       if (routerState.activeQueryId) {
         updateQueryActiveFilters(routerState.activeQueryId, activeFilterIds);
+      }
+    });
+
+    // Set callback for search text changes
+    setSearchTextChangeCallback((searchText: string) => {
+      if (routerState.activeQueryId) {
+        updateQuerySearchText(routerState.activeQueryId, searchText);
       }
     });
   });
@@ -145,7 +154,7 @@
   async function handleSelectQuery(query: SavedQuery): Promise<void> {
     setActiveQuery(query.id);
     loadFieldConfig(query.id, query.displayFields);
-    loadActiveFilters(query.activeFilterIds);
+    loadActiveFilters(query.activeFilterIds, query.searchText);
     await loadIssues(query.jql);
   }
 

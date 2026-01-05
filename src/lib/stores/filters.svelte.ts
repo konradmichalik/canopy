@@ -17,12 +17,19 @@ let onFiltersChange: (() => void) | null = null;
 // Callback to persist active filter changes to query
 let onActiveFiltersChange: ((activeFilterIds: string[]) => void) | null = null;
 
+// Callback to persist search text changes to query
+let onSearchTextChange: ((searchText: string) => void) | null = null;
+
 export function setFiltersChangeCallback(callback: () => void): void {
   onFiltersChange = callback;
 }
 
 export function setActiveFiltersChangeCallback(callback: (activeFilterIds: string[]) => void): void {
   onActiveFiltersChange = callback;
+}
+
+export function setSearchTextChangeCallback(callback: (searchText: string) => void): void {
+  onSearchTextChange = callback;
 }
 
 function notifyFiltersChange(): void {
@@ -32,6 +39,10 @@ function notifyFiltersChange(): void {
   // Also notify about active filter IDs for persistence
   if (onActiveFiltersChange) {
     onActiveFiltersChange(getActiveFilterIds());
+  }
+  // Also notify about search text for persistence
+  if (onSearchTextChange) {
+    onSearchTextChange(filtersState.searchText);
   }
 }
 
@@ -47,7 +58,7 @@ export function getActiveFilterIds(): string[] {
  * Called when switching queries to restore filter state
  * Sets up pending filter IDs that will be applied after dynamic filters are generated
  */
-export function loadActiveFilters(activeFilterIds?: string[]): void {
+export function loadActiveFilters(activeFilterIds?: string[], searchText?: string): void {
   // Clear all filters first
   filtersState.filters = filtersState.filters.map((f) => ({ ...f, isActive: false }));
   filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map((f) => ({
@@ -78,6 +89,7 @@ export function loadActiveFilters(activeFilterIds?: string[]): void {
     ...f,
     isActive: false
   }));
+  filtersState.searchText = searchText || '';
 
   // If no active filters to restore, clear pending and we're done
   if (!activeFilterIds || activeFilterIds.length === 0) {
@@ -176,7 +188,9 @@ export const filtersState = $state({
   dynamicComponentFilters: [] as ExtendedQuickFilter[],
   dynamicFixVersionFilters: [] as ExtendedQuickFilter[],
   // Temporarily stores filter IDs to restore after dynamic filters are generated
-  pendingActiveFilterIds: null as string[] | null
+  pendingActiveFilterIds: null as string[] | null,
+  // Text search for summary and key
+  searchText: '' as string
 });
 
 /**
@@ -224,6 +238,36 @@ export function setFilter(id: string, isActive: boolean): void {
 }
 
 /**
+ * Set search text for filtering by summary and key
+ */
+export function setSearchText(text: string): void {
+  const trimmedText = text.trim();
+  if (filtersState.searchText !== trimmedText) {
+    filtersState.searchText = trimmedText;
+    logger.store('filters', 'Set search text', { text: trimmedText });
+    notifyFiltersChange();
+  }
+}
+
+/**
+ * Get current search text
+ */
+export function getSearchText(): string {
+  return filtersState.searchText;
+}
+
+/**
+ * Clear search text
+ */
+export function clearSearchText(): void {
+  if (filtersState.searchText !== '') {
+    filtersState.searchText = '';
+    logger.store('filters', 'Cleared search text');
+    notifyFiltersChange();
+  }
+}
+
+/**
  * Clear all filters (including dynamic ones) and persist the change
  */
 export function resetFilters(): void {
@@ -256,6 +300,7 @@ export function resetFilters(): void {
     ...f,
     isActive: false
   }));
+  filtersState.searchText = '';
   logger.store('filters', 'Reset all filters');
   notifyFiltersChange();
 }
@@ -293,6 +338,7 @@ export function clearFilters(): void {
     ...f,
     isActive: false
   }));
+  filtersState.searchText = '';
   logger.store('filters', 'Cleared all filters');
 }
 
@@ -400,7 +446,40 @@ export function getActiveFilterConditions(): string[] {
     conditions.push(filter.jqlCondition);
   }
 
+  // Note: Text search is handled locally (not via JQL) to support partial key matching
+  // See filterIssuesBySearchText() for local filtering
+
   return conditions;
+}
+
+/**
+ * Filter issues by search text (local filtering)
+ * Searches in both summary (title) and key with partial matching
+ */
+export function filterIssuesBySearchText(issues: JiraIssue[]): JiraIssue[] {
+  const searchText = filtersState.searchText.toLowerCase().trim();
+
+  if (!searchText) {
+    return issues;
+  }
+
+  return issues.filter((issue) => {
+    // Check if key contains the search text (case-insensitive)
+    // This allows "127" to match "NE-127" or "PROJECT-1270"
+    const keyMatch = issue.key.toLowerCase().includes(searchText);
+
+    // Check if summary contains the search text (case-insensitive)
+    const summaryMatch = issue.fields.summary?.toLowerCase().includes(searchText);
+
+    return keyMatch || summaryMatch;
+  });
+}
+
+/**
+ * Check if there is an active search text filter
+ */
+export function hasSearchTextFilter(): boolean {
+  return filtersState.searchText.trim().length > 0;
 }
 
 /**

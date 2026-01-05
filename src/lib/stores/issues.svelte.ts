@@ -19,7 +19,8 @@ import { logger } from '../utils/logger';
 import {
   getActiveFilterConditions,
   setFiltersChangeCallback,
-  updateDynamicFilters
+  updateDynamicFilters,
+  filterIssuesBySearchText
 } from './filters.svelte';
 
 // State container object
@@ -67,12 +68,15 @@ export async function loadIssues(jql: string): Promise<boolean> {
 
     logger.info('Loading issues', { jql: effectiveJql, filters: filterConditions });
 
-    issuesState.rawIssues = await client.fetchAllIssues(effectiveJql);
+    const fetchedIssues = await client.fetchAllIssues(effectiveJql);
 
     // Update dynamic filters only on initial load (before any quick filters are applied)
     if (issuesState.isInitialLoad) {
-      updateDynamicFilters(issuesState.rawIssues);
+      updateDynamicFilters(fetchedIssues);
     }
+
+    // Apply local text search filter (for partial key matching support)
+    issuesState.rawIssues = filterIssuesBySearchText(fetchedIssues);
 
     // Build hierarchy
     const savedExpandedKeys = getStorageItem<string[]>(STORAGE_KEYS.EXPANDED_NODES);

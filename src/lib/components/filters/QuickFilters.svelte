@@ -5,7 +5,9 @@
     toggleFilter,
     toggleDynamicFilter,
     getActiveFilters,
-    resetFilters
+    resetFilters,
+    setSearchText,
+    clearSearchText
   } from '../../stores/filters.svelte';
   import { isFieldEnabled } from '../../stores/fieldConfig.svelte';
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
@@ -48,13 +50,85 @@
   const showComponentFilters = $derived(isFieldEnabled('components'));
   const showFixVersionFilters = $derived(isFieldEnabled('fixVersions'));
 
-  // Active filter count
-  const activeCount = $derived(getActiveFilters().length);
+  // Active filter count (including search text as a filter)
+  const activeCount = $derived(
+    getActiveFilters().length + (filtersState.searchText ? 1 : 0)
+  );
+
+  // Debounce timer for search input
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let localSearchText = $state(filtersState.searchText);
+
+  // Sync local search text with store when store changes externally (e.g., reset)
+  $effect(() => {
+    localSearchText = filtersState.searchText;
+  });
+
+  function handleSearchInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    localSearchText = target.value;
+
+    // Clear existing timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    // Set new timer for debounced search
+    debounceTimer = setTimeout(() => {
+      setSearchText(localSearchText);
+    }, 300);
+  }
+
+  function handleSearchKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      // Immediate search on Enter
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      setSearchText(localSearchText);
+    } else if (event.key === 'Escape') {
+      // Clear search on Escape
+      localSearchText = '';
+      clearSearchText();
+    }
+  }
+
+  function handleClearSearch() {
+    localSearchText = '';
+    clearSearchText();
+  }
 </script>
 
 <div class="flex flex-col gap-3">
   <!-- Filter groups -->
   <div class="flex flex-wrap items-center gap-2">
+    <!-- Search input -->
+    <div class="relative">
+      <div class="absolute inset-y-0 left-2 flex items-center pointer-events-none">
+        <AtlaskitIcon name="search" size={14} class="text-text-subtlest" />
+      </div>
+      <input
+        type="text"
+        placeholder="Search title or key..."
+        value={localSearchText}
+        oninput={handleSearchInput}
+        onkeydown={handleSearchKeydown}
+        class="w-44 pl-7 pr-7 py-1 text-xs rounded-md border border-border bg-surface-sunken
+          text-text placeholder:text-text-subtlest
+          focus:outline-none focus:ring-1 focus:ring-border-brand focus:border-border-brand
+          hover:border-border-bold transition-colors"
+      />
+      {#if localSearchText}
+        <button
+          onclick={handleClearSearch}
+          class="absolute inset-y-0 right-1.5 flex items-center text-text-subtlest hover:text-text-subtle"
+          title="Clear search (Esc)"
+        >
+          <AtlaskitIcon name="cross" size={12} />
+        </button>
+      {/if}
+    </div>
+
     <!-- Toggle buttons for static filters (general and sprint) -->
     {#each filtersState.filters as filter (filter.id)}
       <button
