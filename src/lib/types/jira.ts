@@ -170,6 +170,21 @@ export interface JiraComponent {
   description?: string;
 }
 
+export interface JiraComment {
+  id: string;
+  author: JiraUser;
+  body: string | AdfDocument;
+  created: string;
+  updated: string;
+}
+
+export interface JiraCommentField {
+  comments: JiraComment[];
+  maxResults: number;
+  total: number;
+  startAt: number;
+}
+
 // ============================================
 // API Response Types
 // ============================================

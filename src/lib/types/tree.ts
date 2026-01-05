@@ -115,7 +115,42 @@ export type FilterCategory =
   | 'priority'
   | 'resolution'
   | 'component'
-  | 'fixVersion';
+  | 'fixVersion'
+  | 'recency';
+
+// ============================================
+// Recency Filter Options
+// ============================================
+
+export type RecencyFilterOption = 'recently-created' | 'recently-updated' | 'recently-commented' | null;
+
+export interface RecencyFilterDefinition {
+  id: RecencyFilterOption;
+  label: string;
+  jqlCondition: string;
+  icon: string;
+}
+
+export const RECENCY_FILTER_OPTIONS: RecencyFilterDefinition[] = [
+  {
+    id: 'recently-created',
+    label: 'Recently created',
+    jqlCondition: 'created >= -7d',
+    icon: 'add'
+  },
+  {
+    id: 'recently-updated',
+    label: 'Recently updated',
+    jqlCondition: 'updated >= -7d',
+    icon: 'edit'
+  },
+  {
+    id: 'recently-commented',
+    label: 'Recently commented',
+    jqlCondition: '', // Uses local filtering based on actual comment dates
+    icon: 'comment'
+  }
+];
 
 export interface QuickFilterDefinition extends Omit<QuickFilter, 'isActive'> {
   category: FilterCategory;

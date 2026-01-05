@@ -7,10 +7,12 @@
     getActiveFilters,
     resetFilters,
     setSearchText,
-    clearSearchText
+    clearSearchText,
+    setRecencyFilter
   } from '../../stores/filters.svelte';
   import { isFieldEnabled } from '../../stores/fieldConfig.svelte';
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
+  import RecencyDropdown from './RecencyDropdown.svelte';
 
   // Icon name mapping (Lucide names → Atlaskit names)
   // Also supports direct Atlaskit names
@@ -57,9 +59,11 @@
   const showComponentFilters = $derived(isFieldEnabled('components'));
   const showFixVersionFilters = $derived(isFieldEnabled('fixVersions'));
 
-  // Active filter count (including search text as a filter)
+  // Active filter count (including search text and recency filter)
   const activeCount = $derived(
-    getActiveFilters().length + (filtersState.searchText ? 1 : 0)
+    getActiveFilters().length +
+    (filtersState.searchText ? 1 : 0) +
+    (filtersState.recencyFilter ? 1 : 0)
   );
 
   // Debounce timer for search input
@@ -135,6 +139,12 @@
         </button>
       {/if}
     </div>
+
+    <!-- Recency filter dropdown -->
+    <RecencyDropdown
+      selectedOption={filtersState.recencyFilter}
+      onSelect={setRecencyFilter}
+    />
 
     <!-- Toggle buttons for static filters (general and sprint) -->
     {#each filtersState.filters as filter (filter.id)}

@@ -3,11 +3,13 @@
  * Manages quick filter state
  */
 
-import type { JiraIssue, QuickFilter } from '../types';
+import type { JiraIssue, JiraCommentField, QuickFilter } from '../types';
 import {
   DEFAULT_QUICK_FILTERS,
+  RECENCY_FILTER_OPTIONS,
   type FilterCategory,
-  type QuickFilterDefinition
+  type QuickFilterDefinition,
+  type RecencyFilterOption
 } from '../types/tree';
 import { logger } from '../utils/logger';
 
@@ -50,7 +52,12 @@ function notifyFiltersChange(): void {
  * Get all active filter IDs for persistence
  */
 export function getActiveFilterIds(): string[] {
-  return getActiveFilters().map((f) => f.id);
+  const filterIds = getActiveFilters().map((f) => f.id);
+  // Include recency filter in persisted IDs
+  if (filtersState.recencyFilter) {
+    filterIds.push(`recency-${filtersState.recencyFilter}`);
+  }
+  return filterIds;
 }
 
 /**
@@ -90,6 +97,7 @@ export function loadActiveFilters(activeFilterIds?: string[], searchText?: strin
     isActive: false
   }));
   filtersState.searchText = searchText || '';
+  filtersState.recencyFilter = null;
 
   // If no active filters to restore, clear pending and we're done
   if (!activeFilterIds || activeFilterIds.length === 0) {
@@ -98,17 +106,29 @@ export function loadActiveFilters(activeFilterIds?: string[], searchText?: strin
     return;
   }
 
+  // Extract and apply recency filter if present
+  const recencyFilterId = activeFilterIds.find((id) => id.startsWith('recency-'));
+  if (recencyFilterId) {
+    const recencyOption = recencyFilterId.replace('recency-', '') as RecencyFilterOption;
+    if (RECENCY_FILTER_OPTIONS.some((o) => o.id === recencyOption)) {
+      filtersState.recencyFilter = recencyOption;
+    }
+  }
+
+  // Filter out recency filter IDs from the list for other processing
+  const otherFilterIds = activeFilterIds.filter((id) => !id.startsWith('recency-'));
+
   // Store pending filter IDs for restoration after dynamic filters are generated
-  filtersState.pendingActiveFilterIds = activeFilterIds;
+  filtersState.pendingActiveFilterIds = otherFilterIds.length > 0 ? otherFilterIds : null;
 
   // Apply to static filters immediately
-  const activeIds = new Set(activeFilterIds);
+  const activeIds = new Set(otherFilterIds);
   filtersState.filters = filtersState.filters.map((f) => ({
     ...f,
     isActive: activeIds.has(f.id)
   }));
 
-  logger.debug('Static filters loaded, dynamic filters pending', { activeFilterIds });
+  logger.debug('Static filters loaded, dynamic filters pending', { activeFilterIds, recencyFilter: filtersState.recencyFilter });
 }
 
 /**
@@ -190,7 +210,9 @@ export const filtersState = $state({
   // Temporarily stores filter IDs to restore after dynamic filters are generated
   pendingActiveFilterIds: null as string[] | null,
   // Text search for summary and key
-  searchText: '' as string
+  searchText: '' as string,
+  // Recency filter (single select: recently-created, recently-updated, recently-commented)
+  recencyFilter: null as RecencyFilterOption
 });
 
 /**
@@ -268,6 +290,35 @@ export function clearSearchText(): void {
 }
 
 /**
+ * Set recency filter (single select)
+ */
+export function setRecencyFilter(option: RecencyFilterOption): void {
+  if (filtersState.recencyFilter !== option) {
+    filtersState.recencyFilter = option;
+    logger.store('filters', 'Set recency filter', { option });
+    notifyFiltersChange();
+  }
+}
+
+/**
+ * Get current recency filter
+ */
+export function getRecencyFilter(): RecencyFilterOption {
+  return filtersState.recencyFilter;
+}
+
+/**
+ * Clear recency filter
+ */
+export function clearRecencyFilter(): void {
+  if (filtersState.recencyFilter !== null) {
+    filtersState.recencyFilter = null;
+    logger.store('filters', 'Cleared recency filter');
+    notifyFiltersChange();
+  }
+}
+
+/**
  * Clear all filters (including dynamic ones) and persist the change
  */
 export function resetFilters(): void {
@@ -301,6 +352,7 @@ export function resetFilters(): void {
     isActive: false
   }));
   filtersState.searchText = '';
+  filtersState.recencyFilter = null;
   logger.store('filters', 'Reset all filters');
   notifyFiltersChange();
 }
@@ -339,6 +391,7 @@ export function clearFilters(): void {
     isActive: false
   }));
   filtersState.searchText = '';
+  filtersState.recencyFilter = null;
   logger.store('filters', 'Cleared all filters');
 }
 
@@ -454,6 +507,14 @@ export function getActiveFilterConditions(): string[] {
     conditions.push(filter.jqlCondition);
   }
 
+  // Add recency filter condition if set (only for JQL-based filters, not local filtering)
+  if (filtersState.recencyFilter) {
+    const recencyOption = RECENCY_FILTER_OPTIONS.find((o) => o.id === filtersState.recencyFilter);
+    if (recencyOption && recencyOption.jqlCondition) {
+      conditions.push(recencyOption.jqlCondition);
+    }
+  }
+
   // Note: Text search is handled locally (not via JQL) to support partial key matching
   // See filterIssuesBySearchText() for local filtering
 
@@ -488,6 +549,43 @@ export function filterIssuesBySearchText(issues: JiraIssue[]): JiraIssue[] {
  */
 export function hasSearchTextFilter(): boolean {
   return filtersState.searchText.trim().length > 0;
+}
+
+/**
+ * Filter issues by recency (local filtering for 'recently-commented')
+ * For 'recently-created' and 'recently-updated', JQL handles the filtering
+ * For 'recently-commented', we filter locally based on actual comment dates
+ */
+export function filterIssuesByRecency(issues: JiraIssue[]): JiraIssue[] {
+  // Only apply local filtering for 'recently-commented'
+  if (filtersState.recencyFilter !== 'recently-commented') {
+    return issues;
+  }
+
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  return issues.filter((issue) => {
+    // Access the comment field from issue.fields
+    const commentField = (issue.fields as Record<string, unknown>).comment as JiraCommentField | undefined;
+
+    if (!commentField || !commentField.comments || commentField.comments.length === 0) {
+      return false;
+    }
+
+    // Check if any comment was created within the last 7 days
+    return commentField.comments.some((comment) => {
+      const commentDate = new Date(comment.created);
+      return commentDate >= sevenDaysAgo;
+    });
+  });
+}
+
+/**
+ * Check if recency filter requires local filtering
+ */
+export function requiresLocalRecencyFilter(): boolean {
+  return filtersState.recencyFilter === 'recently-commented';
 }
 
 /**

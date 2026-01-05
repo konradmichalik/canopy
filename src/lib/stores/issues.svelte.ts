@@ -20,7 +20,8 @@ import {
   getActiveFilterConditions,
   setFiltersChangeCallback,
   updateDynamicFilters,
-  filterIssuesBySearchText
+  filterIssuesBySearchText,
+  filterIssuesByRecency
 } from './filters.svelte';
 
 // State container object
@@ -83,8 +84,10 @@ export async function loadIssues(jql: string): Promise<boolean> {
       updateDynamicFilters(fetchedIssues);
     }
 
-    // Apply local text search filter (for partial key matching support)
-    issuesState.rawIssues = filterIssuesBySearchText(fetchedIssues);
+    // Apply local filters (text search and recency for 'recently-commented')
+    let filteredIssues = filterIssuesBySearchText(fetchedIssues);
+    filteredIssues = filterIssuesByRecency(filteredIssues);
+    issuesState.rawIssues = filteredIssues;
 
     // Build hierarchy
     const savedExpandedKeys = getStorageItem<string[]>(STORAGE_KEYS.EXPANDED_NODES);
