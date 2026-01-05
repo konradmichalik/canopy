@@ -153,11 +153,8 @@
   style="width: {width}px;"
 >
   <!-- Query List Header -->
-  <div class="flex items-center justify-between px-4 py-4 border-b border-border bg-gradient-to-b from-surface-raised to-surface">
-    <div class="flex items-center gap-2">
-      <div class="w-1 h-5 rounded-full bg-brand"></div>
-      <span class="text-sm font-semibold text-text tracking-wide">Queries</span>
-    </div>
+  <div class="h-14 flex items-center justify-between px-4 border-b border-border-bold bg-gradient-to-b from-surface-raised to-surface">
+    <span class="text-sm font-semibold text-text tracking-wide">Queries</span>
     <button
       onclick={handleNewQuery}
       class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-brand text-text-inverse hover:bg-brand-hovered rounded-md transition-all duration-200 shadow-sm hover:shadow"

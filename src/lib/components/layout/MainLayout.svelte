@@ -30,8 +30,8 @@
   <!-- Main Content -->
   <div class="flex-1 flex flex-col min-w-0">
     <!-- Header -->
-    <header class="border-b border-border-bold bg-surface-raised flex-shrink-0 shadow-sm">
-      <div class="px-4 py-3 flex items-center">
+    <header class="h-14 border-b border-border-bold bg-surface-raised flex-shrink-0 shadow-sm">
+      <div class="h-full px-4 flex items-center">
         <!-- Left: Toggle + Logo + App Name -->
         <div class="flex items-center gap-3 flex-shrink-0">
           <button
