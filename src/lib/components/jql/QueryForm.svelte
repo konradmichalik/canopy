@@ -49,19 +49,19 @@
 >
   <!-- Modal Content -->
   <div
-    class="bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-xl shadow-xl w-full max-w-lg"
+    class="bg-surface border border-border rounded-xl shadow-xl w-full max-w-lg"
     onclick={(e) => e.stopPropagation()}
     onkeydown={(e) => e.stopPropagation()}
     role="document"
   >
     <!-- Header -->
-    <div class="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
-      <h2 class="text-lg font-semibold text-[var(--color-text-primary)]">
+    <div class="flex items-center justify-between p-4 border-b border-border">
+      <h2 class="text-lg font-semibold text-text">
         {isEdit ? 'Edit Query' : 'New Query'}
       </h2>
       <button
         onclick={onCancel}
-        class="p-1 rounded hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+        class="p-1 rounded hover:bg-surface-hovered text-text-subtle"
       >
         <X class="w-5 h-5" />
       </button>
@@ -70,7 +70,7 @@
     <!-- Form -->
     <form onsubmit={handleSubmit} class="p-4 space-y-4">
       <div>
-        <label for="queryTitle" class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+        <label for="queryTitle" class="block text-sm font-medium text-text mb-1">
           Title
         </label>
         <input
@@ -78,12 +78,12 @@
           type="text"
           bind:value={title}
           placeholder="e.g., Sprint 42 Backlog"
-          class="w-full px-3 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-jira-blue focus:border-transparent"
+          class="w-full px-3 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
         />
       </div>
 
       <div>
-        <label for="queryJql" class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+        <label for="queryJql" class="block text-sm font-medium text-text mb-1">
           JQL Query
         </label>
         <textarea
@@ -91,16 +91,16 @@
           bind:value={jql}
           placeholder="project = MYPROJECT AND sprint in openSprints()"
           rows="4"
-          class="w-full px-3 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-jira-blue focus:border-transparent font-mono text-sm resize-none"
+          class="w-full px-3 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent font-mono text-sm resize-none"
         ></textarea>
-        <p class="mt-1 text-xs text-[var(--color-text-secondary)]">
+        <p class="mt-1 text-xs text-text-subtle">
           Enter a valid JQL query. The app will automatically build the hierarchy from the results.
         </p>
       </div>
 
       {#if error}
-        <div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p class="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div class="p-3 bg-danger/10 border border-danger/30 rounded-lg">
+          <p class="text-sm text-text-danger">{error}</p>
         </div>
       {/if}
 
@@ -109,13 +109,13 @@
         <button
           type="button"
           onclick={onCancel}
-          class="px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] rounded-lg transition-colors"
+          class="px-4 py-2 text-sm font-medium text-text hover:bg-surface-hovered rounded-lg transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
-          class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-jira-blue hover:bg-jira-blue/90 rounded-lg transition-colors"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-text-inverse bg-brand hover:bg-brand-hovered rounded-lg transition-colors"
         >
           <Save class="w-4 h-4" />
           {isEdit ? 'Save Changes' : 'Create Query'}

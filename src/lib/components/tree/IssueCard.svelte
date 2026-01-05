@@ -43,7 +43,7 @@
   <!-- Issue Key (link) -->
   <button
     onclick={openIssue}
-    class="text-base font-medium text-jira-blue hover:underline flex items-center gap-1.5 flex-shrink-0"
+    class="text-base font-medium text-text-brand hover:underline flex items-center gap-1.5 flex-shrink-0"
     title="Open in JIRA"
   >
     {issue.key}
@@ -51,20 +51,20 @@
   </button>
 
   <!-- Summary -->
-  <span class="text-base text-[var(--color-text-primary)] truncate min-w-0 flex-1">
+  <span class="text-base text-text truncate min-w-0 flex-1">
     {issue.fields.summary}
   </span>
 
   <!-- Progress Bar (if available) -->
   {#if hasProgress}
     <div class="flex items-center gap-2 flex-shrink-0">
-      <div class="w-16 h-1.5 bg-[var(--color-bg-tertiary)] rounded-full overflow-hidden">
+      <div class="w-16 h-1.5 bg-surface-sunken rounded-full overflow-hidden">
         <div
-          class="h-full bg-green-500 transition-all"
+          class="h-full bg-success transition-all"
           style="width: {progressPercent}%"
         ></div>
       </div>
-      <span class="text-xs text-[var(--color-text-secondary)] w-8 text-right">
+      <span class="text-xs text-text-subtle w-8 text-right">
         {progressPercent}%
       </span>
     </div>

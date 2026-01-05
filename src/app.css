@@ -1,42 +1,206 @@
 @import "tailwindcss";
 
-/* Custom theme variables */
+/* Atlassian Design Tokens - Light Theme */
+html[data-color-mode="light"] {
+  color-scheme: light;
+  --ds-text: #292A2E;
+  --ds-text-disabled: #080F214A;
+  --ds-text-inverse: #FFFFFF;
+  --ds-text-selected: #1868DB;
+  --ds-text-brand: #1868DB;
+  --ds-text-danger: #AE2E24;
+  --ds-text-warning: #9E4C00;
+  --ds-text-warning-inverse: #292A2E;
+  --ds-text-success: #4C6B1F;
+  --ds-text-discovery: #803FA5;
+  --ds-text-information: #1558BC;
+  --ds-text-subtlest: #6B6E76;
+  --ds-text-subtle: #505258;
+  --ds-link: #1868DB;
+  --ds-link-pressed: #1558BC;
+  --ds-border: #0B120E24;
+  --ds-border-disabled: #0515240F;
+  --ds-border-focused: #4688EC;
+  --ds-border-input: #8C8F97;
+  --ds-border-inverse: #FFFFFF;
+  --ds-border-selected: #1868DB;
+  --ds-border-brand: #1868DB;
+  --ds-border-danger: #E2483D;
+  --ds-border-warning: #E06C00;
+  --ds-border-success: #6A9A23;
+  --ds-border-bold: #7D818A;
+  --ds-background-disabled: #17171708;
+  --ds-background-input: #FFFFFF;
+  --ds-background-input-hovered: #F8F8F8;
+  --ds-background-input-pressed: #FFFFFF;
+  --ds-background-neutral: #0515240F;
+  --ds-background-neutral-hovered: #0B120E24;
+  --ds-background-neutral-pressed: #080F214A;
+  --ds-background-neutral-subtle: #00000000;
+  --ds-background-neutral-subtle-hovered: #0515240F;
+  --ds-background-neutral-subtle-pressed: #0B120E24;
+  --ds-background-neutral-bold: #292A2E;
+  --ds-background-neutral-bold-hovered: #3B3D42;
+  --ds-background-selected: #E9F2FE;
+  --ds-background-selected-hovered: #CFE1FD;
+  --ds-background-brand-bold: #1868DB;
+  --ds-background-brand-bold-hovered: #1558BC;
+  --ds-background-brand-bold-pressed: #144794;
+  --ds-background-danger: #FFECEB;
+  --ds-background-danger-hovered: #FFD5D2;
+  --ds-background-danger-bold: #C9372C;
+  --ds-background-danger-bold-hovered: #AE2E24;
+  --ds-background-warning: #FFF5DB;
+  --ds-background-warning-hovered: #FCE4A6;
+  --ds-background-warning-bold: #FBC828;
+  --ds-background-success: #EFFFD6;
+  --ds-background-success-hovered: #D3F1A7;
+  --ds-background-success-bold: #5B7F24;
+  --ds-background-success-bold-hovered: #4C6B1F;
+  --ds-background-discovery: #F8EEFE;
+  --ds-background-discovery-bold: #964AC0;
+  --ds-background-information: #E9F2FE;
+  --ds-background-information-hovered: #CFE1FD;
+  --ds-background-information-bold: #1868DB;
+  --ds-background-information-bold-hovered: #1558BC;
+  --ds-surface: #FFFFFF;
+  --ds-surface-hovered: #F0F1F2;
+  --ds-surface-pressed: #DDDEE1;
+  --ds-surface-overlay: #FFFFFF;
+  --ds-surface-raised: #FFFFFF;
+  --ds-surface-raised-hovered: #F0F1F2;
+  --ds-surface-sunken: #F8F8F8;
+  --ds-blanket: #050C1F75;
+}
+
+/* Atlassian Design Tokens - Dark Theme */
+html[data-color-mode="dark"] {
+  color-scheme: dark;
+  --ds-text: #DEE4EA;
+  --ds-text-disabled: #BDC5CD47;
+  --ds-text-inverse: #161A1D;
+  --ds-text-selected: #82B4FF;
+  --ds-text-brand: #82B4FF;
+  --ds-text-danger: #FF9C8F;
+  --ds-text-warning: #FBC828;
+  --ds-text-warning-inverse: #161A1D;
+  --ds-text-success: #D3F1A7;
+  --ds-text-discovery: #DEC8FC;
+  --ds-text-information: #82B4FF;
+  --ds-text-subtlest: #8C9BAB;
+  --ds-text-subtle: #9FADBC;
+  --ds-link: #82B4FF;
+  --ds-link-pressed: #4688EC;
+  --ds-border: #A6C5E229;
+  --ds-border-disabled: #8696A714;
+  --ds-border-focused: #4688EC;
+  --ds-border-input: #738496;
+  --ds-border-inverse: #161A1D;
+  --ds-border-selected: #82B4FF;
+  --ds-border-brand: #82B4FF;
+  --ds-border-danger: #F87168;
+  --ds-border-warning: #FBC828;
+  --ds-border-success: #B3DF72;
+  --ds-border-bold: #738496;
+  --ds-background-disabled: #8696A714;
+  --ds-background-input: #22272B;
+  --ds-background-input-hovered: #282E33;
+  --ds-background-input-pressed: #22272B;
+  --ds-background-neutral: #A1BDD914;
+  --ds-background-neutral-hovered: #A6C5E229;
+  --ds-background-neutral-pressed: #BDC5CD47;
+  --ds-background-neutral-subtle: #00000000;
+  --ds-background-neutral-subtle-hovered: #A1BDD914;
+  --ds-background-neutral-subtle-pressed: #A6C5E229;
+  --ds-background-neutral-bold: #9FADBC;
+  --ds-background-neutral-bold-hovered: #B8C4CF;
+  --ds-background-selected: #1C2B42;
+  --ds-background-selected-hovered: #123263;
+  --ds-background-brand-bold: #4688EC;
+  --ds-background-brand-bold-hovered: #357DE8;
+  --ds-background-brand-bold-pressed: #1868DB;
+  --ds-background-danger: #5D1F1A;
+  --ds-background-danger-hovered: #872821;
+  --ds-background-danger-bold: #F15B50;
+  --ds-background-danger-bold-hovered: #F87168;
+  --ds-background-warning: #3D2E00;
+  --ds-background-warning-hovered: #533F04;
+  --ds-background-warning-bold: #E2B203;
+  --ds-background-success: #37471F;
+  --ds-background-success-hovered: #3F5224;
+  --ds-background-success-bold: #94C748;
+  --ds-background-success-bold-hovered: #B3DF72;
+  --ds-background-discovery: #48245D;
+  --ds-background-discovery-bold: #C97CF4;
+  --ds-background-information: #1C2B42;
+  --ds-background-information-hovered: #123263;
+  --ds-background-information-bold: #4688EC;
+  --ds-background-information-bold-hovered: #357DE8;
+  --ds-surface: #1D2125;
+  --ds-surface-hovered: #282E33;
+  --ds-surface-pressed: #2C333A;
+  --ds-surface-overlay: #282E33;
+  --ds-surface-raised: #22272B;
+  --ds-surface-raised-hovered: #282E33;
+  --ds-surface-sunken: #161A1D;
+  --ds-blanket: #03040480;
+}
+
+/* Custom theme variables - mapping Atlassian tokens to Tailwind utilities */
 @theme {
-  /* JIRA-inspired colors */
-  --color-jira-blue: #0052CC;
-  --color-jira-blue-light: #4C9AFF;
+  /* Surface colors - for backgrounds */
+  --color-surface: var(--ds-surface);
+  --color-surface-raised: var(--ds-surface-raised);
+  --color-surface-sunken: var(--ds-surface-sunken);
+  --color-surface-overlay: var(--ds-surface-overlay);
+  --color-surface-hovered: var(--ds-surface-hovered);
+
+  /* Text colors */
+  --color-text: var(--ds-text);
+  --color-text-subtle: var(--ds-text-subtle);
+  --color-text-subtlest: var(--ds-text-subtlest);
+  --color-text-inverse: var(--ds-text-inverse);
+  --color-text-brand: var(--ds-text-brand);
+  --color-text-danger: var(--ds-text-danger);
+  --color-text-warning: var(--ds-text-warning);
+  --color-text-success: var(--ds-text-success);
+
+  /* Border colors */
+  --color-border: var(--ds-border);
+  --color-border-bold: var(--ds-border-bold);
+  --color-border-focused: var(--ds-border-focused);
+  --color-border-brand: var(--ds-border-brand);
+
+  /* Brand/Primary colors */
+  --color-brand: var(--ds-background-brand-bold);
+  --color-brand-hovered: var(--ds-background-brand-bold-hovered);
+  --color-brand-pressed: var(--ds-background-brand-bold-pressed);
+
+  /* Semantic colors */
+  --color-success: var(--ds-background-success-bold);
+  --color-success-hovered: var(--ds-background-success-bold-hovered);
+  --color-warning: var(--ds-background-warning-bold);
+  --color-danger: var(--ds-background-danger-bold);
+  --color-danger-hovered: var(--ds-background-danger-bold-hovered);
+  --color-discovery: var(--ds-background-discovery-bold);
+  --color-information: var(--ds-background-information-bold);
+  --color-neutral: var(--ds-background-neutral);
+  --color-neutral-hovered: var(--ds-background-neutral-hovered);
+
+  /* Input/Form colors */
+  --color-input: var(--ds-background-input);
+  --color-input-hovered: var(--ds-background-input-hovered);
+  --color-input-pressed: var(--ds-background-input-pressed);
+
+  /* JIRA Issue-Type colors (preserved) */
   --color-epic: #904EE2;
   --color-story: #63BA3C;
   --color-task: #4BADE8;
   --color-bug: #E5493A;
   --color-subtask: #4BADE8;
 
-  /* Status colors */
-  --color-status-todo: #DFE1E6;
-  --color-status-inprogress: #0052CC;
-  --color-status-done: #00875A;
-
-  /* Light mode */
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #F4F5F7;
-  --color-bg-tertiary: #EBECF0;
-  --color-text-primary: #172B4D;
-  --color-text-secondary: #5E6C84;
-  --color-border: #DFE1E6;
-
   /* Spacing */
   --spacing-tree-indent: 24px;
-}
-
-/* Dark mode overrides */
-.dark {
-  --color-bg-primary: #1D2125;
-  --color-bg-secondary: #22272B;
-  --color-bg-tertiary: #2C333A;
-  --color-text-primary: #B6C2CF;
-  --color-text-secondary: #8C9BAB;
-  --color-border: #3D4449;
-  --color-status-todo: #3D4449;
 }
 
 /* Base styles */
@@ -48,8 +212,8 @@ html {
 
 body {
   margin: 0;
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  background-color: var(--ds-surface);
+  color: var(--ds-text);
   transition: background-color 0.2s, color 0.2s;
 }
 
@@ -64,16 +228,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
+  background: var(--ds-surface-sunken);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: var(--ds-border-bold);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
+  background: var(--ds-text-subtlest);
 }
 
 /* Toast animation */
@@ -90,4 +254,10 @@ body {
 
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
+}
+
+/* Focus ring using Atlassian tokens */
+.focus-ring:focus {
+  outline: 2px solid var(--ds-border-focused);
+  outline-offset: 2px;
 }

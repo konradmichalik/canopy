@@ -98,7 +98,7 @@
 <form onsubmit={handleSubmit} class="space-y-6">
   <!-- Instance Type -->
   <div>
-    <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+    <label class="block text-sm font-medium text-text mb-2">
       JIRA Instance Type
     </label>
     <div class="flex gap-4">
@@ -108,10 +108,10 @@
           name="instanceType"
           value="cloud"
           bind:group={formData.instanceType}
-          class="text-jira-blue focus:ring-jira-blue"
+          class="text-brand focus:ring-border-focused"
         />
-        <span class="text-sm text-[var(--color-text-primary)]">Cloud</span>
-        <span class="text-xs text-[var(--color-text-secondary)]">(*.atlassian.net)</span>
+        <span class="text-sm text-text">Cloud</span>
+        <span class="text-xs text-text-subtle">(*.atlassian.net)</span>
       </label>
       <label class="flex items-center gap-2 cursor-pointer">
         <input
@@ -119,20 +119,20 @@
           name="instanceType"
           value="server"
           bind:group={formData.instanceType}
-          class="text-jira-blue focus:ring-jira-blue"
+          class="text-brand focus:ring-border-focused"
         />
-        <span class="text-sm text-[var(--color-text-primary)]">Server / Data Center</span>
+        <span class="text-sm text-text">Server / Data Center</span>
       </label>
     </div>
   </div>
 
   <!-- Base URL -->
   <div>
-    <label for="baseUrl" class="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+    <label for="baseUrl" class="block text-sm font-medium text-text mb-2">
       JIRA URL
     </label>
     <div class="relative">
-      <Link class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-secondary)]" />
+      <Link class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
       <input
         id="baseUrl"
         type="url"
@@ -141,13 +141,13 @@
         placeholder={isCloud ? 'https://your-domain.atlassian.net' : 'https://jira.your-company.com'}
         required
         autocomplete="url"
-        class="w-full pl-10 pr-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-jira-blue focus:border-transparent
-          {isLocalhostInBaseUrl ? 'border-amber-500 focus:ring-amber-500' : ''}"
+        class="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent
+          {isLocalhostInBaseUrl ? 'border-warning focus:ring-warning' : ''}"
       />
     </div>
     {#if isLocalhostInBaseUrl}
-      <p class="mt-1 text-xs text-amber-600 dark:text-amber-400">
-        ⚠️ This looks like a proxy URL. Enter your actual JIRA URL here (e.g. https://your-domain.atlassian.net) and put the proxy URL in "Advanced: CORS Proxy" below.
+      <p class="mt-1 text-xs text-text-warning">
+        This looks like a proxy URL. Enter your actual JIRA URL here (e.g. https://your-domain.atlassian.net) and put the proxy URL in "Advanced: CORS Proxy" below.
       </p>
     {/if}
   </div>
@@ -155,7 +155,7 @@
   <!-- Cloud Credentials -->
   {#if isCloud}
     <div>
-      <label for="email" class="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+      <label for="email" class="block text-sm font-medium text-text mb-2">
         Email
       </label>
       <input
@@ -165,18 +165,18 @@
         placeholder="your-email@company.com"
         required
         autocomplete="email"
-        class="w-full px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-jira-blue focus:border-transparent"
+        class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
       />
     </div>
 
     <div>
-      <label for="apiToken" class="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+      <label for="apiToken" class="block text-sm font-medium text-text mb-2">
         API Token
         <a
           href="https://id.atlassian.com/manage-profile/security/api-tokens"
           target="_blank"
           rel="noopener noreferrer"
-          class="ml-2 text-xs text-jira-blue hover:underline"
+          class="ml-2 text-xs text-text-brand hover:underline"
         >
           Create token
         </a>
@@ -188,13 +188,13 @@
         placeholder="Your API token"
         required
         autocomplete="current-password"
-        class="w-full px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-jira-blue focus:border-transparent"
+        class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
       />
     </div>
   {:else}
     <!-- Server Credentials -->
     <div>
-      <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+      <label class="block text-sm font-medium text-text mb-2">
         Authentication Method
       </label>
       <div class="flex gap-4">
@@ -204,9 +204,9 @@
             name="authMethod"
             value="pat"
             bind:group={formData.authMethod}
-            class="text-jira-blue focus:ring-jira-blue"
+            class="text-brand focus:ring-border-focused"
           />
-          <span class="text-sm text-[var(--color-text-primary)]">Personal Access Token</span>
+          <span class="text-sm text-text">Personal Access Token</span>
         </label>
         <label class="flex items-center gap-2 cursor-pointer">
           <input
@@ -214,16 +214,16 @@
             name="authMethod"
             value="basic"
             bind:group={formData.authMethod}
-            class="text-jira-blue focus:ring-jira-blue"
+            class="text-brand focus:ring-border-focused"
           />
-          <span class="text-sm text-[var(--color-text-primary)]">Basic Auth</span>
+          <span class="text-sm text-text">Basic Auth</span>
         </label>
       </div>
     </div>
 
     {#if isBasicAuth}
       <div>
-        <label for="username" class="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+        <label for="username" class="block text-sm font-medium text-text mb-2">
           Username
         </label>
         <input
@@ -233,12 +233,12 @@
           placeholder="Your JIRA username"
           required
           autocomplete="username"
-          class="w-full px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-jira-blue focus:border-transparent"
+          class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
         />
       </div>
 
       <div>
-        <label for="password" class="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+        <label for="password" class="block text-sm font-medium text-text mb-2">
           Password
         </label>
         <input
@@ -248,12 +248,12 @@
           placeholder="Your password"
           required
           autocomplete="current-password"
-          class="w-full px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-jira-blue focus:border-transparent"
+          class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
         />
       </div>
     {:else}
       <div>
-        <label for="pat" class="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+        <label for="pat" class="block text-sm font-medium text-text mb-2">
           Personal Access Token
         </label>
         <input
@@ -263,7 +263,7 @@
           placeholder="Your personal access token"
           required
           autocomplete="current-password"
-          class="w-full px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-jira-blue focus:border-transparent"
+          class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
         />
       </div>
     {/if}
@@ -274,7 +274,7 @@
     <button
       type="button"
       onclick={() => (showProxyInput = !showProxyInput)}
-      class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1"
+      class="text-sm text-text-subtle hover:text-text flex items-center gap-1"
     >
       <span class="text-xs">{showProxyInput ? '▼' : '▶'}</span>
       Advanced: CORS Proxy
@@ -286,9 +286,9 @@
           type="url"
           bind:value={formData.proxyUrl}
           placeholder="http://localhost:3001/jira (optional)"
-          class="w-full px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-jira-blue focus:border-transparent text-sm"
+          class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent text-sm"
         />
-        <p class="mt-1 text-xs text-[var(--color-text-secondary)]">
+        <p class="mt-1 text-xs text-text-subtle">
           If you're having CORS issues, run the included proxy server and enter its URL here.
         </p>
       </div>
@@ -297,8 +297,8 @@
 
   <!-- Error Message -->
   {#if formError}
-    <div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-      <p class="text-sm text-red-600 dark:text-red-400">{formError}</p>
+    <div class="p-3 bg-danger/10 border border-danger/30 rounded-lg">
+      <p class="text-sm text-text-danger">{formError}</p>
     </div>
   {/if}
 
@@ -306,7 +306,7 @@
   <button
     type="submit"
     disabled={isSubmitting}
-    class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-jira-blue text-white rounded-lg font-medium hover:bg-jira-blue/90 focus:outline-none focus:ring-2 focus:ring-jira-blue focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand text-text-inverse rounded-lg font-medium hover:bg-brand-hovered focus:outline-none focus:ring-2 focus:ring-border-focused focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
   >
     {#if isSubmitting}
       <Loader2 class="w-4 h-4 animate-spin" />

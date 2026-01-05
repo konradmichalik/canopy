@@ -24,6 +24,7 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
+    "@atlaskit/tokens": "^9.1.0",
     "lucide-svelte": "^0.562.0"
   }
 }

@@ -21,14 +21,14 @@
 </script>
 
 <div
-  class="group bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg p-4 hover:border-jira-blue transition-colors cursor-pointer"
+  class="group bg-surface-raised border border-border rounded-lg p-4 hover:border-border-brand transition-colors cursor-pointer"
   onclick={() => onOpen(query)}
   onkeydown={(e) => e.key === 'Enter' && onOpen(query)}
   role="button"
   tabindex="0"
 >
   <div class="flex items-start justify-between gap-2 mb-2">
-    <h3 class="font-medium text-[var(--color-text-primary)] truncate">
+    <h3 class="font-medium text-text truncate">
       {query.title}
     </h3>
     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -37,14 +37,14 @@
           e.stopPropagation();
           onEdit(query);
         }}
-        class="p-1.5 rounded hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
         title="Edit query"
       >
         <Pencil class="w-4 h-4" />
       </button>
       <button
         onclick={handleDelete}
-        class="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-[var(--color-text-secondary)] hover:text-red-600"
+        class="p-1.5 rounded hover:bg-danger/10 text-text-subtle hover:text-text-danger"
         title="Delete query"
       >
         <Trash2 class="w-4 h-4" />
@@ -52,12 +52,12 @@
     </div>
   </div>
 
-  <p class="text-sm text-[var(--color-text-secondary)] font-mono break-all">
+  <p class="text-sm text-text-subtle font-mono break-all">
     {truncateJql(query.jql, 80)}
   </p>
 
   <div class="mt-3 flex items-center justify-between">
-    <span class="text-xs text-[var(--color-text-secondary)]">
+    <span class="text-xs text-text-subtle">
       Updated {new Date(query.updatedAt).toLocaleDateString()}
     </span>
     <button
@@ -65,7 +65,7 @@
         e.stopPropagation();
         onOpen(query);
       }}
-      class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-jira-blue hover:bg-jira-blue/10 rounded transition-colors"
+      class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-text-brand hover:bg-brand/10 rounded transition-colors"
     >
       <Play class="w-4 h-4" />
       Open

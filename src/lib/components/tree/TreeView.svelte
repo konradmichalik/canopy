@@ -24,12 +24,12 @@
 
 <div class="tree-view flex flex-col h-full">
   <!-- Toolbar -->
-  <div class="flex items-center justify-between gap-4 p-3 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+  <div class="flex items-center justify-between gap-4 p-3 border-b border-border bg-surface-raised">
     <QuickFilters />
 
     <div class="flex items-center gap-2">
       {#if !isEmpty}
-        <span class="text-xs text-[var(--color-text-secondary)]">
+        <span class="text-xs text-text-subtle">
           {stats.totalIssues} issues
         </span>
       {/if}
@@ -37,7 +37,7 @@
       <button
         onclick={expandAll}
         disabled={isEmpty || issuesState.isLoading}
-        class="p-1.5 rounded hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] disabled:opacity-50"
+        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
         title="Expand all"
       >
         <ChevronDown class="w-4 h-4" />
@@ -46,7 +46,7 @@
       <button
         onclick={collapseAll}
         disabled={isEmpty || issuesState.isLoading}
-        class="p-1.5 rounded hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] disabled:opacity-50"
+        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
         title="Collapse all"
       >
         <ChevronUp class="w-4 h-4" />
@@ -55,7 +55,7 @@
       <button
         onclick={handleRefresh}
         disabled={issuesState.isLoading || isRefreshing}
-        class="p-1.5 rounded hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] disabled:opacity-50"
+        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
         title="Refresh"
       >
         {#if isRefreshing || issuesState.isLoading}
@@ -71,7 +71,7 @@
   <div class="flex-1 overflow-auto p-2">
     {#if issuesState.isLoading && issuesState.treeNodes.length === 0}
       <div class="flex items-center justify-center h-full">
-        <div class="flex flex-col items-center gap-3 text-[var(--color-text-secondary)]">
+        <div class="flex flex-col items-center gap-3 text-text-subtle">
           <Loader2 class="w-8 h-8 animate-spin" />
           <p>Loading issues...</p>
         </div>
@@ -79,11 +79,11 @@
     {:else if issuesState.error}
       <div class="flex items-center justify-center h-full">
         <div class="flex flex-col items-center gap-3 text-center max-w-md">
-          <AlertCircle class="w-8 h-8 text-red-500" />
-          <p class="text-red-600 dark:text-red-400">{issuesState.error}</p>
+          <AlertCircle class="w-8 h-8 text-text-danger" />
+          <p class="text-text-danger">{issuesState.error}</p>
           <button
             onclick={handleRefresh}
-            class="px-4 py-2 text-sm font-medium text-jira-blue hover:bg-jira-blue/10 rounded-lg"
+            class="px-4 py-2 text-sm font-medium text-text-brand hover:bg-brand/10 rounded-lg"
           >
             Try again
           </button>
@@ -91,7 +91,7 @@
       </div>
     {:else if isEmpty}
       <div class="flex items-center justify-center h-full">
-        <div class="text-center text-[var(--color-text-secondary)]">
+        <div class="text-center text-text-subtle">
           <p class="mb-2">No issues found</p>
           <p class="text-sm">Try adjusting your JQL query or filters</p>
         </div>

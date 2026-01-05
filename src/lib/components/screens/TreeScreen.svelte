@@ -15,22 +15,22 @@
   const title = $derived(query?.title || 'Query Results');
 </script>
 
-<div class="min-h-screen bg-[var(--color-bg-primary)] flex flex-col">
+<div class="min-h-screen bg-surface flex flex-col">
   <!-- Header -->
-  <header class="border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+  <header class="border-b border-border bg-surface-raised">
     <div class="px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <button
           onclick={handleBack}
-          class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] rounded-lg transition-colors"
+          class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-text-subtle hover:text-text hover:bg-surface-hovered rounded-lg transition-colors"
         >
           <ArrowLeft class="w-4 h-4" />
           Back
         </button>
 
-        <div class="h-6 w-px bg-[var(--color-border)]"></div>
+        <div class="h-6 w-px bg-border"></div>
 
-        <h1 class="text-lg font-semibold text-[var(--color-text-primary)]">
+        <h1 class="text-lg font-semibold text-text">
           {title}
         </h1>
       </div>

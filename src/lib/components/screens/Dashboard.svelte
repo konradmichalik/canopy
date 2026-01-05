@@ -133,11 +133,11 @@
   const isConnected = $derived(connectionState.isConnected);
 </script>
 
-<div class="min-h-screen bg-[var(--color-bg-primary)]">
+<div class="min-h-screen bg-surface">
   <!-- Header -->
-  <header class="border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+  <header class="border-b border-border bg-surface-raised">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <h1 class="text-xl font-bold text-[var(--color-text-primary)]">
+      <h1 class="text-xl font-bold text-text">
         JIRA Tree
       </h1>
 
@@ -145,14 +145,14 @@
         <!-- Import/Export Buttons -->
         <button
           onclick={handleImportClick}
-          class="p-2 rounded-lg hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+          class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
           title="Import Configuration"
         >
           <Upload class="w-5 h-5" />
         </button>
         <button
           onclick={handleExport}
-          class="p-2 rounded-lg hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+          class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
           title="Export Configuration"
         >
           <Download class="w-5 h-5" />
@@ -161,7 +161,7 @@
         {#if isConnected}
           <button
             onclick={() => (showSettings = !showSettings)}
-            class="p-2 rounded-lg hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+            class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
             title="Settings"
           >
             <Settings class="w-5 h-5" />
@@ -173,12 +173,12 @@
         {#if isConnected && connectionState.currentUser}
           <div class="flex items-center gap-2">
             <Avatar user={connectionState.currentUser} size="md" />
-            <span class="text-sm text-[var(--color-text-secondary)] hidden sm:block">
+            <span class="text-sm text-text-subtle hidden sm:block">
               {connectionState.currentUser.displayName}
             </span>
             <button
               onclick={handleDisconnect}
-              class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-[var(--color-text-secondary)] hover:text-red-600"
+              class="p-2 rounded-lg hover:bg-danger/10 text-text-subtle hover:text-text-danger"
               title="Disconnect"
             >
               <LogOut class="w-4 h-4" />
@@ -195,27 +195,27 @@
       <!-- Connection Form -->
       <div class="max-w-md mx-auto">
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
+          <h2 class="text-2xl font-bold text-text mb-2">
             Connect to JIRA
           </h2>
-          <p class="text-[var(--color-text-secondary)]">
+          <p class="text-text-subtle">
             Enter your JIRA credentials to get started
           </p>
         </div>
 
-        <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
+        <div class="bg-surface-raised border border-border rounded-xl p-6">
           <ConnectionForm />
         </div>
       </div>
     {:else}
       <!-- Queries Dashboard -->
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-[var(--color-text-primary)]">
+        <h2 class="text-lg font-semibold text-text">
           Saved Queries
         </h2>
         <button
           onclick={handleNewQuery}
-          class="flex items-center gap-2 px-4 py-2 bg-jira-blue text-white rounded-lg font-medium hover:bg-jira-blue/90 transition-colors"
+          class="flex items-center gap-2 px-4 py-2 bg-brand text-text-inverse rounded-lg font-medium hover:bg-brand-hovered transition-colors"
         >
           <Plus class="w-4 h-4" />
           New Query
@@ -224,12 +224,12 @@
 
       {#if jqlState.queries.length === 0}
         <div class="text-center py-12">
-          <p class="text-[var(--color-text-secondary)] mb-4">
+          <p class="text-text-subtle mb-4">
             No saved queries yet
           </p>
           <button
             onclick={handleNewQuery}
-            class="text-jira-blue hover:underline"
+            class="text-text-brand hover:underline"
           >
             Create your first query
           </button>
@@ -272,8 +272,8 @@
     <div
       class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-up
         {importMessage.type === 'success'
-          ? 'bg-green-600 text-white'
-          : 'bg-red-600 text-white'}"
+          ? 'bg-success text-text-inverse'
+          : 'bg-danger text-text-inverse'}"
     >
       {#if importMessage.type === 'success'}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -66,6 +66,10 @@ function updateResolvedTheme(): void {
  */
 function applyTheme(): void {
   if (typeof document !== 'undefined') {
+    // Atlassian Design Tokens: Set data-color-mode attribute
+    document.documentElement.setAttribute('data-color-mode', themeState.resolvedTheme);
+
+    // Keep .dark class for Tailwind dark mode utilities
     if (themeState.resolvedTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {

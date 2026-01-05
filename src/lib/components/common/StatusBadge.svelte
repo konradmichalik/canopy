@@ -7,16 +7,16 @@
 
   let { status }: Props = $props();
 
-  // Get color based on status category
+  // Get color based on status category using Atlassian semantic colors
   function getStatusColor(categoryKey: string): string {
     switch (categoryKey) {
       case 'done':
-        return 'bg-green-600 text-white';
+        return 'bg-success text-text-inverse';
       case 'indeterminate':
-        return 'bg-blue-600 text-white';
+        return 'bg-information text-text-inverse';
       case 'new':
       default:
-        return 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)]';
+        return 'bg-neutral text-text';
     }
   }
 

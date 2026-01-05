@@ -30,7 +30,7 @@
 <div class="tree-node">
   <!-- Node Row -->
   <div
-    class="flex items-center hover:bg-[var(--color-bg-secondary)] rounded px-2 group"
+    class="flex items-center hover:bg-surface-hovered rounded px-2 group"
     style="padding-left: {indent + 8}px"
     onclick={handleToggle}
     onkeydown={handleKeydown}
@@ -42,7 +42,7 @@
       {#if hasChildren}
         <button
           onclick={(e) => { e.stopPropagation(); handleToggle(); }}
-          class="p-1 rounded hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+          class="p-1 rounded hover:bg-surface-sunken text-text-subtle"
           aria-expanded={node.isExpanded}
           aria-label={node.isExpanded ? 'Collapse' : 'Expand'}
         >
