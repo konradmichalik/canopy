@@ -2,18 +2,40 @@
   import './app.css';
   import ConnectionScreen from './lib/components/screens/ConnectionScreen.svelte';
   import MainLayout from './lib/components/layout/MainLayout.svelte';
-  import { connectionState } from './lib/stores/connection.svelte';
+  import AppLoader from './lib/components/common/AppLoader.svelte';
+  import { connectionState, initializeConnection } from './lib/stores/connection.svelte';
   import { initializeRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
   import { initializeFieldConfig } from './lib/stores/fieldConfig.svelte';
   import { initializeDisplayDensity } from './lib/stores/displayDensity.svelte';
+  import { initializeQueries } from './lib/stores/jql.svelte';
   import { onMount } from 'svelte';
 
+  let isInitializing = $state(true);
+
   onMount(() => {
+    // Initialize theme first (sync, affects appearance immediately)
     initializeTheme();
-    initializeRouter();
-    initializeFieldConfig();
-    initializeDisplayDensity();
+
+    // Initialize all stores and connection
+    async function initialize() {
+      try {
+        initializeRouter();
+        initializeFieldConfig();
+        initializeDisplayDensity();
+        initializeQueries();
+
+        // Try to restore connection from storage
+        await initializeConnection();
+      } finally {
+        // Small delay to ensure smooth transition
+        setTimeout(() => {
+          isInitializing = false;
+        }, 300);
+      }
+    }
+
+    initialize();
 
     return () => {
       cleanupTheme();
@@ -21,8 +43,14 @@
   });
 </script>
 
-{#if connectionState.isConnected}
-  <MainLayout />
+{#if isInitializing}
+  <AppLoader />
+{:else if connectionState.isConnected}
+  <div class="animate-fade-in">
+    <MainLayout />
+  </div>
 {:else}
-  <ConnectionScreen />
+  <div class="animate-fade-in">
+    <ConnectionScreen />
+  </div>
 {/if}

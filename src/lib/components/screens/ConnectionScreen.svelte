@@ -9,15 +9,6 @@
 
   let fileInput: HTMLInputElement;
   let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
-  let initialized = false;
-
-  // Initialize on mount (run only once)
-  $effect(() => {
-    if (initialized) return;
-    initialized = true;
-    initializeConnection();
-    initializeQueries();
-  });
 
   function handleExport(): void {
     downloadConfig();
