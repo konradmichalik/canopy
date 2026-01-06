@@ -196,6 +196,7 @@ export interface QuickFilterDefinition extends Omit<QuickFilter, 'isActive'> {
 }
 
 // Only static/general filters - status/type filters are generated dynamically from loaded issues
+// Icons use Atlaskit icon names
 export const DEFAULT_QUICK_FILTERS: QuickFilterDefinition[] = [
   // General filters
   {
@@ -203,14 +204,14 @@ export const DEFAULT_QUICK_FILTERS: QuickFilterDefinition[] = [
     label: 'Assigned to me',
     jqlCondition: 'assignee = currentUser()',
     category: 'general',
-    icon: 'user'
+    icon: 'person'
   },
   {
     id: 'unassigned',
     label: 'Unassigned',
     jqlCondition: 'assignee IS EMPTY',
     category: 'general',
-    icon: 'user-x'
+    icon: 'person-offboard'
   },
   {
     id: 'unresolved',
@@ -224,7 +225,7 @@ export const DEFAULT_QUICK_FILTERS: QuickFilterDefinition[] = [
     label: 'Current Sprint',
     jqlCondition: 'sprint in openSprints()',
     category: 'sprint',
-    icon: 'zap'
+    icon: 'sprint'
   }
 ];
 
