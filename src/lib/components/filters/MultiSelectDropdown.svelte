@@ -79,14 +79,38 @@
               {/if}
             </span>
             {#if filter.avatarUrl}
-              <img
-                src={filter.avatarUrl}
-                alt=""
-                class="w-5 h-5 rounded-full flex-shrink-0 {filter.color ? 'ring-1' : ''}"
-                style={filter.color ? `--tw-ring-color: ${filter.color}` : ''}
-              />
+              <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                <img
+                  src={filter.avatarUrl}
+                  alt=""
+                  class="w-5 h-5 rounded-full {filter.color ? 'ring-1' : ''}"
+                  style={filter.color ? `--tw-ring-color: ${filter.color}` : ''}
+                  onerror={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <span class="hidden">
+                  <AtlaskitIcon name={getIconName(filter.icon)} size={16} color="var(--color-text-subtle)" />
+                </span>
+              </span>
             {:else if filter.iconUrl}
-              <img src={filter.iconUrl} alt="" class="w-4 h-4 flex-shrink-0" />
+              <span class="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                <img
+                  src={filter.iconUrl}
+                  alt=""
+                  class="w-4 h-4"
+                  onerror={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <span class="hidden">
+                  <AtlaskitIcon name={getIconName(filter.icon)} size={14} color="var(--color-text-subtle)" />
+                </span>
+              </span>
             {:else if filter.icon && filter.color}
               <AtlaskitIcon name={getIconName(filter.icon)} size={14} color={filter.color} />
             {:else if filter.color}

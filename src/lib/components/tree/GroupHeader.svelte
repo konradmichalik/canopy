@@ -148,7 +148,21 @@
     </span>
   {:else if isProject && projectMeta}
     {#if projectMeta.avatarUrl}
-      <img src={projectMeta.avatarUrl} alt="" class="w-5 h-5 rounded" />
+      <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+        <img
+          src={projectMeta.avatarUrl}
+          alt=""
+          class="w-5 h-5 rounded"
+          onerror={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            target.nextElementSibling?.classList.remove('hidden');
+          }}
+        />
+        <span class="hidden">
+          <AtlaskitIcon name="folder" size={18} class="text-brand" />
+        </span>
+      </div>
     {:else}
       <AtlaskitIcon name="folder" size={18} class="text-brand" />
     {/if}
