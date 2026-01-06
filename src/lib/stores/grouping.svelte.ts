@@ -4,7 +4,7 @@
  */
 
 import type { JiraIssue, JiraSprint, SprintState } from '../types/jira';
-import type { TreeNode } from '../types/tree';
+import type { TreeNode, SortConfig } from '../types/tree';
 import { extractSprints, SPRINT_STATE_ORDER } from '../types/jira';
 import { buildHierarchy } from '../utils/hierarchy-builder';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
@@ -88,17 +88,18 @@ export function setGroupBy(groupBy: GroupByOption): void {
 export function groupIssues(
   issues: JiraIssue[],
   groupBy: GroupByOption,
-  epicLinkFieldId?: string
+  epicLinkFieldId?: string,
+  sortConfig?: SortConfig
 ): IssueGroup[] {
   switch (groupBy) {
     case 'sprint':
-      return groupBySprint(issues, epicLinkFieldId);
+      return groupBySprint(issues, epicLinkFieldId, sortConfig);
     case 'assignee':
-      return groupByAssignee(issues, epicLinkFieldId);
+      return groupByAssignee(issues, epicLinkFieldId, sortConfig);
     case 'status':
-      return groupByStatus(issues, epicLinkFieldId);
+      return groupByStatus(issues, epicLinkFieldId, sortConfig);
     case 'project':
-      return groupByProject(issues, epicLinkFieldId);
+      return groupByProject(issues, epicLinkFieldId, sortConfig);
     default:
       return [];
   }
@@ -107,7 +108,7 @@ export function groupIssues(
 /**
  * Group issues by sprint
  */
-function groupBySprint(issues: JiraIssue[], epicLinkFieldId?: string): IssueGroup[] {
+function groupBySprint(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig?: SortConfig): IssueGroup[] {
   const sprintMap = new Map<string, { sprint: JiraSprint | null; issues: JiraIssue[] }>();
 
   // Group issues by sprint
@@ -144,7 +145,7 @@ function groupBySprint(issues: JiraIssue[], epicLinkFieldId?: string): IssueGrou
     const totalCount = groupIssues.length;
 
     // Build hierarchy within the group
-    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId });
+    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId, sortConfig });
 
     // Format dates
     let subtitle: string | undefined;
@@ -204,7 +205,7 @@ function groupBySprint(issues: JiraIssue[], epicLinkFieldId?: string): IssueGrou
 /**
  * Group issues by assignee
  */
-function groupByAssignee(issues: JiraIssue[], epicLinkFieldId?: string): IssueGroup[] {
+function groupByAssignee(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig?: SortConfig): IssueGroup[] {
   const assigneeMap = new Map<string, JiraIssue[]>();
 
   for (const issue of issues) {
@@ -223,7 +224,7 @@ function groupByAssignee(issues: JiraIssue[], epicLinkFieldId?: string): IssueGr
   for (const [id, groupIssues] of assigneeMap) {
     const firstIssue = groupIssues[0];
     const assignee = firstIssue.fields.assignee;
-    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId });
+    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId, sortConfig });
 
     groups.push({
       id: `assignee-${id}`,
@@ -253,7 +254,7 @@ function groupByAssignee(issues: JiraIssue[], epicLinkFieldId?: string): IssueGr
 /**
  * Group issues by status
  */
-function groupByStatus(issues: JiraIssue[], epicLinkFieldId?: string): IssueGroup[] {
+function groupByStatus(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig?: SortConfig): IssueGroup[] {
   const statusMap = new Map<string, JiraIssue[]>();
 
   for (const issue of issues) {
@@ -271,7 +272,7 @@ function groupByStatus(issues: JiraIssue[], epicLinkFieldId?: string): IssueGrou
   for (const [id, groupIssues] of statusMap) {
     const firstIssue = groupIssues[0];
     const status = firstIssue.fields.status;
-    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId });
+    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId, sortConfig });
 
     groups.push({
       id: `status-${id}`,
@@ -305,7 +306,7 @@ function groupByStatus(issues: JiraIssue[], epicLinkFieldId?: string): IssueGrou
 /**
  * Group issues by project
  */
-function groupByProject(issues: JiraIssue[], epicLinkFieldId?: string): IssueGroup[] {
+function groupByProject(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig?: SortConfig): IssueGroup[] {
   const projectMap = new Map<string, JiraIssue[]>();
 
   for (const issue of issues) {
@@ -323,7 +324,7 @@ function groupByProject(issues: JiraIssue[], epicLinkFieldId?: string): IssueGro
   for (const [key, groupIssues] of projectMap) {
     const firstIssue = groupIssues[0];
     const project = firstIssue.fields.project;
-    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId });
+    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId, sortConfig });
 
     groups.push({
       id: `project-${key}`,

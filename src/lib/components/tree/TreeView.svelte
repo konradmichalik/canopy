@@ -23,6 +23,7 @@
     clearFocus
   } from '../../stores/keyboardNavigation.svelte';
   import { groupingState, groupIssues, type IssueGroup } from '../../stores/grouping.svelte';
+  import { sortConfigState } from '../../stores/sortConfig.svelte';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
@@ -49,7 +50,7 @@
   const isGrouped = $derived(groupingState.groupBy !== 'none');
   const issueGroups = $derived<IssueGroup[]>(
     isGrouped
-      ? groupIssues(issuesState.rawIssues, groupingState.groupBy, getEpicLinkFieldId() ?? undefined)
+      ? groupIssues(issuesState.rawIssues, groupingState.groupBy, getEpicLinkFieldId() ?? undefined, sortConfigState.config)
       : []
   );
 
