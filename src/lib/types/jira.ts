@@ -284,3 +284,85 @@ export const ISSUE_TYPE_COLORS: Record<string, string> = {
   'Sub-task': '#4BADE8',
   Subtask: '#4BADE8'
 };
+
+// ============================================
+// Sprint Types
+// ============================================
+
+export interface JiraSprint {
+  id: number;
+  name: string;
+  state: 'active' | 'future' | 'closed';
+  startDate?: string;
+  endDate?: string;
+  completeDate?: string;
+  originBoardId?: number;
+  goal?: string;
+}
+
+export type SprintState = 'active' | 'future' | 'closed';
+
+export const SPRINT_STATE_ORDER: Record<SprintState, number> = {
+  active: 0,
+  future: 1,
+  closed: 2
+};
+
+/**
+ * Extract sprint data from an issue's custom fields
+ * Sprint data can be in various custom fields depending on JIRA configuration
+ */
+export function extractSprints(issue: JiraIssue): JiraSprint[] {
+  const fields = issue.fields as Record<string, unknown>;
+
+  // Look for sprint field (usually customfield_XXXXX)
+  for (const [key, value] of Object.entries(fields)) {
+    if (!key.startsWith('customfield_')) continue;
+    if (!Array.isArray(value)) continue;
+
+    // Check if it looks like sprint data
+    const firstItem = value[0];
+    if (
+      firstItem &&
+      typeof firstItem === 'object' &&
+      'id' in firstItem &&
+      'name' in firstItem &&
+      'state' in firstItem
+    ) {
+      return value as JiraSprint[];
+    }
+
+    // Handle string format (older JIRA versions)
+    if (typeof firstItem === 'string' && firstItem.includes('name=')) {
+      return value.map((s) => parseSprintString(s as string)).filter(Boolean) as JiraSprint[];
+    }
+  }
+
+  return [];
+}
+
+/**
+ * Parse sprint string format from older JIRA versions
+ * Format: "com.atlassian.greenhopper.service.sprint.Sprint@12345[id=123,name=Sprint 1,state=ACTIVE,...]"
+ */
+function parseSprintString(sprintStr: string): JiraSprint | null {
+  try {
+    const idMatch = sprintStr.match(/id=(\d+)/);
+    const nameMatch = sprintStr.match(/name=([^,\]]+)/);
+    const stateMatch = sprintStr.match(/state=(\w+)/);
+    const startDateMatch = sprintStr.match(/startDate=([^,\]]+)/);
+    const endDateMatch = sprintStr.match(/endDate=([^,\]]+)/);
+
+    if (!idMatch || !nameMatch || !stateMatch) return null;
+
+    return {
+      id: parseInt(idMatch[1], 10),
+      name: nameMatch[1],
+      state: stateMatch[1].toLowerCase() as SprintState,
+      startDate: startDateMatch?.[1] !== '<null>' ? startDateMatch?.[1] : undefined,
+      endDate: endDateMatch?.[1] !== '<null>' ? endDateMatch?.[1] : undefined
+    };
+  } catch {
+    return null;
+  }
+}

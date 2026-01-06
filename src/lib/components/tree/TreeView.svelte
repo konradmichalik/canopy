@@ -5,8 +5,11 @@
   import QuickFilters from '../filters/QuickFilters.svelte';
   import FieldSelector from './FieldSelector.svelte';
   import SortDropdown from './SortDropdown.svelte';
+  import GroupByDropdown from './GroupByDropdown.svelte';
+  import GroupHeader from './GroupHeader.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
+  import { getEpicLinkFieldId } from '../../stores/connection.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
   import { getActiveFilterConditions } from '../../stores/filters.svelte';
   import { applyQuickFilters } from '../../utils/jql-helpers';
@@ -16,10 +19,12 @@
     handleTreeKeydown,
     clearFocus
   } from '../../stores/keyboardNavigation.svelte';
+  import { groupingState, groupIssues, type IssueGroup } from '../../stores/grouping.svelte';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
   let treeContainerRef: HTMLDivElement | null = $state(null);
+  let expandedGroups = $state<Set<string>>(new Set());
 
   async function handleRefresh(): Promise<void> {
     isRefreshing = true;
@@ -29,6 +34,53 @@
 
   const stats = $derived(getTreeStats(issuesState.treeNodes));
   const isEmpty = $derived(issuesState.treeNodes.length === 0 && !issuesState.isLoading);
+
+  // Compute grouped issues when grouping is active
+  const isGrouped = $derived(groupingState.groupBy !== 'none');
+  const issueGroups = $derived<IssueGroup[]>(
+    isGrouped
+      ? groupIssues(issuesState.rawIssues, groupingState.groupBy, getEpicLinkFieldId() ?? undefined)
+      : []
+  );
+
+  // Initialize expanded groups (expand active sprints by default)
+  $effect(() => {
+    if (isGrouped && issueGroups.length > 0 && expandedGroups.size === 0) {
+      const initialExpanded = new Set<string>();
+      for (const group of issueGroups) {
+        // Auto-expand active sprints and first few groups
+        if (
+          group.metadata?.type === 'sprint' &&
+          (group.metadata as { state: string }).state === 'active'
+        ) {
+          initialExpanded.add(group.id);
+        }
+      }
+      // If no active sprints, expand first group
+      if (initialExpanded.size === 0 && issueGroups.length > 0) {
+        initialExpanded.add(issueGroups[0].id);
+      }
+      expandedGroups = initialExpanded;
+    }
+  });
+
+  function toggleGroup(groupId: string): void {
+    const newExpanded = new Set(expandedGroups);
+    if (newExpanded.has(groupId)) {
+      newExpanded.delete(groupId);
+    } else {
+      newExpanded.add(groupId);
+    }
+    expandedGroups = newExpanded;
+  }
+
+  function expandAllGroups(): void {
+    expandedGroups = new Set(issueGroups.map((g) => g.id));
+  }
+
+  function collapseAllGroups(): void {
+    expandedGroups = new Set();
+  }
 
   // Debug: Compute effective JQL with filters
   const filterConditions = $derived(getActiveFilterConditions());
@@ -80,13 +132,14 @@
       </div>
 
       <div class="flex items-center gap-1">
+        <GroupByDropdown />
         <FieldSelector />
         <SortDropdown />
 
         <div class="w-px h-4 bg-border mx-1"></div>
 
         <button
-          onclick={expandAll}
+          onclick={isGrouped ? expandAllGroups : expandAll}
           disabled={isEmpty || issuesState.isLoading}
           class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           title="Expand all"
@@ -95,7 +148,7 @@
         </button>
 
         <button
-          onclick={collapseAll}
+          onclick={isGrouped ? collapseAllGroups : collapseAll}
           disabled={isEmpty || issuesState.isLoading}
           class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           title="Collapse all"
@@ -247,7 +300,29 @@
           <p class="text-sm">Try adjusting your JQL query or filters</p>
         </div>
       </div>
+    {:else if isGrouped}
+      <!-- Grouped View -->
+      <div class="grouped-container space-y-3">
+        {#each issueGroups as group (group.id)}
+          <div class="group-section">
+            <GroupHeader
+              {group}
+              isExpanded={expandedGroups.has(group.id)}
+              onToggle={() => toggleGroup(group.id)}
+            />
+
+            {#if expandedGroups.has(group.id)}
+              <div class="tree-container mt-2 ml-2 pl-4 border-l-2 border-border">
+                {#each group.treeNodes as node (node.issue.key)}
+                  <TreeNode {node} />
+                {/each}
+              </div>
+            {/if}
+          </div>
+        {/each}
+      </div>
     {:else}
+      <!-- Default Hierarchy View -->
       <div class="tree-container">
         {#each issuesState.treeNodes as node (node.issue.key)}
           <TreeNode {node} />
