@@ -21,6 +21,7 @@ import { logger } from '../utils/logger';
  * Categories for dynamic filters (generated from loaded issues)
  */
 export type DynamicFilterCategory =
+  | 'project'
   | 'status'
   | 'type'
   | 'assignee'
@@ -33,6 +34,7 @@ export type DynamicFilterCategory =
  * All dynamic filter categories in order of display
  */
 export const DYNAMIC_FILTER_CATEGORIES: DynamicFilterCategory[] = [
+  'project',
   'status',
   'type',
   'assignee',
@@ -53,6 +55,7 @@ export interface DynamicFilterCategoryConfig {
 }
 
 export const DYNAMIC_FILTER_CONFIG: Record<DynamicFilterCategory, DynamicFilterCategoryConfig> = {
+  project: { label: 'Project', jqlField: 'project' },
   status: { label: 'Status', jqlField: 'status' },
   type: { label: 'Type', jqlField: 'issuetype', useIdInJql: true },
   assignee: { label: 'Assignee', jqlField: 'assignee', useOrJoin: true },
@@ -205,6 +208,7 @@ export type DynamicFiltersRecord = Record<DynamicFilterCategory, ExtendedQuickFi
  */
 function createEmptyDynamicFilters(): DynamicFiltersRecord {
   return {
+    project: [],
     status: [],
     type: [],
     assignee: [],
@@ -595,6 +599,7 @@ function getAvatarColor(identifier: string): string {
  */
 export function updateDynamicFilters(issues: JiraIssue[]): void {
   // Extract unique values
+  const projectMap = new Map<string, { key: string; name: string; avatarUrl?: string }>();
   const statusMap = new Map<string, { name: string; categoryKey: string; colorName: string }>();
   const typeMap = new Map<string, { id: string; name: string; iconUrl?: string }>();
   const assigneeMap = new Map<
@@ -614,6 +619,16 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
   const fixVersionMap = new Map<string, { name: string }>();
 
   for (const issue of issues) {
+    // Extract project
+    const project = issue.fields.project;
+    if (project && !projectMap.has(project.key)) {
+      projectMap.set(project.key, {
+        key: project.key,
+        name: project.name,
+        avatarUrl: project.avatarUrls?.['24x24']
+      });
+    }
+
     const status = issue.fields.status;
     if (status && !statusMap.has(status.name)) {
       statusMap.set(status.name, {
@@ -703,6 +718,23 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
   // Helper to generate filter ID
   const makeFilterId = (prefix: string, name: string) =>
     `${prefix}-${name.toLowerCase().replace(/\s+/g, '-')}`;
+
+  // Create project filters sorted alphabetically
+  const sortedProjects = Array.from(projectMap.entries()).sort((a, b) =>
+    a[1].name.localeCompare(b[1].name)
+  );
+  filtersState.dynamicFilters.project = sortedProjects.map(([key, data]) => {
+    const id = makeFilterId('project', key);
+    return {
+      id,
+      label: data.name,
+      jqlCondition: `project = "${key}"`,
+      category: 'project' as FilterCategory,
+      icon: 'folder',
+      avatarUrl: data.avatarUrl,
+      isActive: activeIds.has(id)
+    };
+  });
 
   // Create status filters with colors
   filtersState.dynamicFilters.status = Array.from(statusMap.entries()).map(([name, data]) => {
@@ -820,6 +852,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
   });
 
   logger.store('filters', 'Updated dynamic filters', {
+    projects: filtersState.dynamicFilters.project.length,
     statuses: filtersState.dynamicFilters.status.length,
     types: filtersState.dynamicFilters.type.length,
     assignees: filtersState.dynamicFilters.assignee.length,

@@ -141,6 +141,7 @@ export interface QuickFilter {
 
 export type FilterCategory =
   | 'general'
+  | 'project'
   | 'status'
   | 'type'
   | 'sprint'

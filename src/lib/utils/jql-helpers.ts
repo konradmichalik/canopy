@@ -386,12 +386,13 @@ function checkSyntaxErrors(jql: string): JqlValidationResult {
     };
   }
 
-  // Check for empty parentheses
-  if (trimmed.includes('()')) {
+  // Check for empty parentheses (but allow function calls like openSprints())
+  const emptyParensMatch = trimmed.match(/(?<!\w)\(\s*\)/);
+  if (emptyParensMatch) {
     return {
       isValid: false,
       error: 'Empty parentheses',
-      errorPosition: trimmed.indexOf('()')
+      errorPosition: emptyParensMatch.index ?? trimmed.indexOf('()')
     };
   }
 
@@ -493,12 +494,13 @@ export function validateJqlExtended(jql: string): JqlValidationResult {
   // More lenient syntax check for real-time
   // Only flag obvious errors, not incomplete queries
 
-  // Check for empty parentheses
-  if (trimmed.includes('()')) {
+  // Check for empty parentheses (but allow function calls like openSprints())
+  const emptyParensMatch = trimmed.match(/(?<!\w)\(\s*\)/);
+  if (emptyParensMatch) {
     return {
       isValid: false,
       error: 'Empty parentheses',
-      errorPosition: trimmed.indexOf('()')
+      errorPosition: emptyParensMatch.index ?? trimmed.indexOf('()')
     };
   }
 

@@ -13,7 +13,7 @@ import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 // Types
 // ============================================
 
-export type GroupByOption = 'none' | 'sprint' | 'assignee' | 'status';
+export type GroupByOption = 'none' | 'sprint' | 'assignee' | 'status' | 'project';
 
 export interface IssueGroup {
   id: string;
@@ -49,7 +49,13 @@ export interface StatusGroupMetadata {
   categoryColor: string;
 }
 
-export type GroupMetadata = SprintGroupMetadata | AssigneeGroupMetadata | StatusGroupMetadata;
+export interface ProjectGroupMetadata {
+  type: 'project';
+  projectKey: string;
+  avatarUrl?: string;
+}
+
+export type GroupMetadata = SprintGroupMetadata | AssigneeGroupMetadata | StatusGroupMetadata | ProjectGroupMetadata;
 
 // ============================================
 // State
@@ -89,6 +95,8 @@ export function groupIssues(
       return groupByAssignee(issues, epicLinkFieldId);
     case 'status':
       return groupByStatus(issues, epicLinkFieldId);
+    case 'project':
+      return groupByProject(issues, epicLinkFieldId);
     default:
       return [];
   }
@@ -290,6 +298,49 @@ function groupByStatus(issues: JiraIssue[], epicLinkFieldId?: string): IssueGrou
   return groups;
 }
 
+/**
+ * Group issues by project
+ */
+function groupByProject(issues: JiraIssue[], epicLinkFieldId?: string): IssueGroup[] {
+  const projectMap = new Map<string, JiraIssue[]>();
+
+  for (const issue of issues) {
+    const project = issue.fields.project;
+    const key = project.key;
+
+    if (!projectMap.has(key)) {
+      projectMap.set(key, []);
+    }
+    projectMap.get(key)!.push(issue);
+  }
+
+  const groups: IssueGroup[] = [];
+
+  for (const [key, groupIssues] of projectMap) {
+    const firstIssue = groupIssues[0];
+    const project = firstIssue.fields.project;
+    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId });
+
+    groups.push({
+      id: `project-${key}`,
+      label: project.name,
+      subtitle: key,
+      issues: groupIssues,
+      treeNodes,
+      metadata: {
+        type: 'project',
+        projectKey: key,
+        avatarUrl: project.avatarUrls?.['24x24']
+      } as ProjectGroupMetadata
+    });
+  }
+
+  // Sort alphabetically by project name
+  groups.sort((a, b) => a.label.localeCompare(b.label));
+
+  return groups;
+}
+
 // ============================================
 // Helpers
 // ============================================
@@ -309,5 +360,6 @@ export const GROUP_BY_OPTIONS: { id: GroupByOption; label: string; icon: string 
   { id: 'none', label: 'No Grouping', icon: 'list' },
   { id: 'sprint', label: 'Sprint', icon: 'sprint' },
   { id: 'assignee', label: 'Assignee', icon: 'user' },
-  { id: 'status', label: 'Status', icon: 'status' }
+  { id: 'status', label: 'Status', icon: 'status' },
+  { id: 'project', label: 'Project', icon: 'folder' }
 ];

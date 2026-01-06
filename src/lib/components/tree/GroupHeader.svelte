@@ -1,7 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
-  import type { IssueGroup, SprintGroupMetadata, AssigneeGroupMetadata, StatusGroupMetadata } from '../../stores/grouping.svelte';
+  import type { IssueGroup, SprintGroupMetadata, AssigneeGroupMetadata, StatusGroupMetadata, ProjectGroupMetadata } from '../../stores/grouping.svelte';
   import {
     calculateIssuesTimeProgress,
     calculateIssuesResolutionProgress,
@@ -20,10 +20,45 @@
   const isSprint = $derived(group.metadata?.type === 'sprint');
   const isAssignee = $derived(group.metadata?.type === 'assignee');
   const isStatus = $derived(group.metadata?.type === 'status');
+  const isProject = $derived(group.metadata?.type === 'project');
 
   const sprintMeta = $derived(isSprint ? (group.metadata as SprintGroupMetadata) : null);
   const assigneeMeta = $derived(isAssignee ? (group.metadata as AssigneeGroupMetadata) : null);
   const statusMeta = $derived(isStatus ? (group.metadata as StatusGroupMetadata) : null);
+  const projectMeta = $derived(isProject ? (group.metadata as ProjectGroupMetadata) : null);
+
+  // Avatar colors (same as Avatar.svelte)
+  const AVATAR_COLORS = [
+    '#0052CC', // Blue
+    '#00875A', // Green
+    '#FF5630', // Red
+    '#6554C0', // Purple
+    '#FF991F', // Orange
+    '#00B8D9', // Cyan
+    '#36B37E', // Teal
+    '#E91E63', // Pink
+    '#8777D9', // Violet
+    '#FFAB00' // Yellow
+  ];
+
+  function hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  }
+
+  function getAvatarColor(identifier: string): string {
+    const hash = hashString(identifier);
+    return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+  }
+
+  const assigneeBorderColor = $derived(
+    assigneeMeta?.accountId ? getAvatarColor(assigneeMeta.accountId) : '#6B778C'
+  );
 
   // Aggregated stats for all group types
   const timeProgress = $derived(calculateIssuesTimeProgress(group.issues));
@@ -97,9 +132,17 @@
     <AtlaskitIcon name="sprint" size={18} class="text-brand" />
   {:else if isAssignee && assigneeMeta}
     {#if assigneeMeta.avatarUrl}
-      <img src={assigneeMeta.avatarUrl} alt="" class="w-5 h-5 rounded-full" />
+      <div
+        class="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 box-content"
+        style="border: 2px solid {assigneeBorderColor}"
+      >
+        <img src={assigneeMeta.avatarUrl} alt="" class="w-full h-full object-cover" />
+      </div>
     {:else}
-      <div class="w-5 h-5 rounded-full bg-neutral flex items-center justify-center text-xs font-medium text-text-subtle">
+      <div
+        class="w-5 h-5 rounded-full bg-neutral flex items-center justify-center text-xs font-medium text-text-subtle flex-shrink-0 box-content"
+        style="border: 2px solid {assigneeBorderColor}"
+      >
         {getInitials(group.label || '?')}
       </div>
     {/if}
@@ -107,6 +150,12 @@
     <span class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded {getStatusColor(statusMeta.categoryKey)}">
       {group.label}
     </span>
+  {:else if isProject && projectMeta}
+    {#if projectMeta.avatarUrl}
+      <img src={projectMeta.avatarUrl} alt="" class="w-5 h-5 rounded" />
+    {:else}
+      <AtlaskitIcon name="folder" size={18} class="text-brand" />
+    {/if}
   {:else}
     <AtlaskitIcon name="layers" size={18} class="text-text-subtle" />
   {/if}
