@@ -14,7 +14,7 @@
 
   const selectedLabel = $derived(
     selectedOption
-      ? RECENCY_FILTER_OPTIONS.find((o) => o.id === selectedOption)?.label ?? 'Recency'
+      ? (RECENCY_FILTER_OPTIONS.find((o) => o.id === selectedOption)?.label ?? 'Recency')
       : 'Recency'
   );
 
@@ -73,7 +73,11 @@
   >
     <AtlaskitIcon name="clock" size={12} />
     <span>{selectedLabel}</span>
-    <AtlaskitIcon name="chevron-down" size={12} class="transition-transform {isOpen ? 'rotate-180' : ''}" />
+    <AtlaskitIcon
+      name="chevron-down"
+      size={12}
+      class="transition-transform {isOpen ? 'rotate-180' : ''}"
+    />
   </button>
 
   {#if isOpen}
@@ -91,8 +95,14 @@
                 <AtlaskitIcon name="check-mark" size={14} color="var(--color-text-brand)" />
               {/if}
             </span>
-            <AtlaskitIcon name={getIconName(option.icon)} size={14} color="var(--color-text-subtle)" />
-            <span class={option.id === selectedOption ? 'text-text-brand font-medium' : 'text-text'}>
+            <AtlaskitIcon
+              name={getIconName(option.icon)}
+              size={14}
+              color="var(--color-text-subtle)"
+            />
+            <span
+              class={option.id === selectedOption ? 'text-text-brand font-medium' : 'text-text'}
+            >
               {option.label}
             </span>
           </button>

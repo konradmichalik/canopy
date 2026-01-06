@@ -75,7 +75,9 @@ export function setFiltersChangeCallback(callback: () => void): void {
   onFiltersChange = callback;
 }
 
-export function setActiveFiltersChangeCallback(callback: (activeFilterIds: string[]) => void): void {
+export function setActiveFiltersChangeCallback(
+  callback: (activeFilterIds: string[]) => void
+): void {
   onActiveFiltersChange = callback;
 }
 
@@ -150,7 +152,10 @@ export function loadActiveFilters(activeFilterIds?: string[], searchText?: strin
     isActive: activeIds.has(f.id)
   }));
 
-  logger.debug('Static filters loaded, dynamic filters pending', { activeFilterIds, recencyFilter: filtersState.recencyFilter });
+  logger.debug('Static filters loaded, dynamic filters pending', {
+    activeFilterIds,
+    recencyFilter: filtersState.recencyFilter
+  });
 }
 
 /**
@@ -189,7 +194,6 @@ export interface ExtendedQuickFilter extends QuickFilter {
   avatarUrl?: string; // Avatar URL for assignee filters
   iconUrl?: string; // Icon URL from JIRA API (for issue types, priorities)
 }
-
 
 /**
  * Type for the dynamic filters record
@@ -231,9 +235,7 @@ export const filtersState = $state({
 /**
  * Map function over all dynamic filter categories
  */
-function mapAllDynamicFilters(
-  fn: (filter: ExtendedQuickFilter) => ExtendedQuickFilter
-): void {
+function mapAllDynamicFilters(fn: (filter: ExtendedQuickFilter) => ExtendedQuickFilter): void {
   for (const category of DYNAMIC_FILTER_CATEGORIES) {
     filtersState.dynamicFilters[category] = filtersState.dynamicFilters[category].map(fn);
   }
@@ -517,7 +519,9 @@ export function filterIssuesByRecency(issues: JiraIssue[]): JiraIssue[] {
 
   return issues.filter((issue) => {
     // Access the comment field from issue.fields
-    const commentField = (issue.fields as Record<string, unknown>).comment as JiraCommentField | undefined;
+    const commentField = (issue.fields as Record<string, unknown>).comment as
+      | JiraCommentField
+      | undefined;
 
     if (!commentField || !commentField.comments || commentField.comments.length === 0) {
       return false;
@@ -691,7 +695,9 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
 
   // Preserve active state of existing filters (collect all active IDs)
   const activeIds = new Set(
-    getAllDynamicFiltersFlat().filter((f) => f.isActive).map((f) => f.id)
+    getAllDynamicFiltersFlat()
+      .filter((f) => f.isActive)
+      .map((f) => f.id)
   );
 
   // Helper to generate filter ID

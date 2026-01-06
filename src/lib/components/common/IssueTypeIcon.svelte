@@ -15,13 +15,7 @@
 
 <Tooltip text={issueType.name}>
   {#if hasIconUrl}
-    <img
-      src={issueType.iconUrl}
-      alt={issueType.name}
-      width={size}
-      height={size}
-      class="shrink-0"
-    />
+    <img src={issueType.iconUrl} alt={issueType.name} width={size} height={size} class="shrink-0" />
   {:else}
     <!-- Fallback: generic icon -->
     <svg

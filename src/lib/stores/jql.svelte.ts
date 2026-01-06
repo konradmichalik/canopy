@@ -68,7 +68,12 @@ export function addQuery(title: string, jql: string, color?: QueryColor): SavedQ
  */
 export function updateQuery(
   id: string,
-  updates: Partial<Pick<SavedQuery, 'title' | 'jql' | 'color' | 'displayFields' | 'activeFilterIds' | 'searchText' | 'sortConfig'>>
+  updates: Partial<
+    Pick<
+      SavedQuery,
+      'title' | 'jql' | 'color' | 'displayFields' | 'activeFilterIds' | 'searchText' | 'sortConfig'
+    >
+  >
 ): boolean {
   const index = jqlState.queries.findIndex((q) => q.id === id);
 

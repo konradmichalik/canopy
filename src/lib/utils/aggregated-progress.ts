@@ -51,7 +51,9 @@ export function calculateAggregatedTimeProgress(node: TreeNode): AggregatedTimeP
  * Calculate aggregated resolution progress from a node's descendants
  * Counts done vs. total descendant issues (based on statusCategory.key === 'done')
  */
-export function calculateAggregatedResolutionProgress(node: TreeNode): AggregatedResolutionProgress {
+export function calculateAggregatedResolutionProgress(
+  node: TreeNode
+): AggregatedResolutionProgress {
   let done = 0;
   let total = 0;
 

@@ -45,8 +45,16 @@ export const DEFAULT_FIELD_IDS: DisplayFieldId[] = ['progress', 'status', 'assig
 
 const ALL_FIELDS: Omit<DisplayField, 'isEnabled'>[] = [
   { id: 'progress', label: 'Progress', labelDe: 'Fortschritt' },
-  { id: 'aggregatedTimeProgress', label: 'Time Progress (Sum)', labelDe: 'Summe Fortschritt (Zeit)' },
-  { id: 'aggregatedResolutionProgress', label: 'Resolution Progress (Sum)', labelDe: 'Summe Fortschritt (Lösung)' },
+  {
+    id: 'aggregatedTimeProgress',
+    label: 'Time Progress (Sum)',
+    labelDe: 'Summe Fortschritt (Zeit)'
+  },
+  {
+    id: 'aggregatedResolutionProgress',
+    label: 'Resolution Progress (Sum)',
+    labelDe: 'Summe Fortschritt (Lösung)'
+  },
   { id: 'status', label: 'Status', labelDe: 'Status' },
   { id: 'assignee', label: 'Assignee', labelDe: 'Bearbeiter' },
   { id: 'priority', label: 'Priority', labelDe: 'Priorität' },

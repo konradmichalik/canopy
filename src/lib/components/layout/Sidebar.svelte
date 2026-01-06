@@ -27,10 +27,7 @@
     setActiveFiltersChangeCallback,
     setSearchTextChangeCallback
   } from '../../stores/filters.svelte';
-  import {
-    loadSortConfig,
-    setSortConfigChangeCallback
-  } from '../../stores/sortConfig.svelte';
+  import { loadSortConfig, setSortConfigChangeCallback } from '../../stores/sortConfig.svelte';
   import type { SortConfig } from '../../types/tree';
 
   interface Props {
@@ -148,12 +145,11 @@
   }
 </script>
 
-<aside
-  class="h-full bg-surface-sunken flex flex-col"
-  style="width: {width}px;"
->
+<aside class="h-full bg-surface-sunken flex flex-col" style="width: {width}px;">
   <!-- Query List Header -->
-  <div class="h-14 flex items-center justify-between px-4 border-b border-border-bold bg-gradient-to-b from-surface-raised to-surface">
+  <div
+    class="h-14 flex items-center justify-between px-4 border-b border-border-bold bg-gradient-to-b from-surface-raised to-surface"
+  >
     <span class="text-sm font-semibold text-text tracking-wide">Queries</span>
     <button
       onclick={handleNewQuery}
@@ -169,7 +165,9 @@
   <div class="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
     {#if jqlState.queries.length === 0}
       <div class="text-center py-12 px-4">
-        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-subtlest flex items-center justify-center">
+        <div
+          class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-subtlest flex items-center justify-center"
+        >
           <AtlaskitIcon name="search" size={28} color="var(--ds-text-brand)" />
         </div>
         <p class="text-base font-medium text-text mb-1">No saved queries</p>

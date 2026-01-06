@@ -1,6 +1,10 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
-  import { fieldConfigState, toggleField, type DisplayFieldId } from '../../stores/fieldConfig.svelte';
+  import {
+    fieldConfigState,
+    toggleField,
+    type DisplayFieldId
+  } from '../../stores/fieldConfig.svelte';
 
   let isOpen = $state(false);
   let dropdownRef: HTMLDivElement | null = $state(null);
@@ -47,7 +51,11 @@
     >
       {enabledCount}
     </span>
-    <AtlaskitIcon name="chevron-down" size={12} class="transition-transform {isOpen ? 'rotate-180' : ''}" />
+    <AtlaskitIcon
+      name="chevron-down"
+      size={12}
+      class="transition-transform {isOpen ? 'rotate-180' : ''}"
+    />
   </button>
 
   {#if isOpen}

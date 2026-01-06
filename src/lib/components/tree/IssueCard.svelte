@@ -93,7 +93,7 @@
   // Get comment count from fields (if available)
   const commentCount = $derived(
     (issue.fields as Record<string, unknown>).comment
-      ? ((issue.fields as Record<string, unknown>).comment as { total?: number })?.total ?? 0
+      ? (((issue.fields as Record<string, unknown>).comment as { total?: number })?.total ?? 0)
       : 0
   );
 
@@ -106,9 +106,7 @@
   const isCompact = $derived(displayDensityState.density === 'compact');
 </script>
 
-<div
-  class="flex items-center min-w-0 flex-1 {isCompact ? 'gap-3 py-1' : 'gap-4 py-2.5'}"
->
+<div class="flex items-center min-w-0 flex-1 {isCompact ? 'gap-3 py-1' : 'gap-4 py-2.5'}">
   <!-- Issue Type Icon -->
   <IssueTypeIcon issueType={issue.fields.issuetype} size={isCompact ? 16 : 20} />
 
@@ -133,11 +131,7 @@
   {#if showPriority && issue.fields.priority}
     <Tooltip text={`Priority: ${issue.fields.priority.name}`}>
       <div class="flex items-center gap-1 flex-shrink-0">
-        <img
-          src={issue.fields.priority.iconUrl}
-          alt={issue.fields.priority.name}
-          class="w-4 h-4"
-        />
+        <img src={issue.fields.priority.iconUrl} alt={issue.fields.priority.name} class="w-4 h-4" />
       </div>
     </Tooltip>
   {/if}
@@ -187,7 +181,9 @@
     <Tooltip text={`Components: ${issue.fields.components.map((c) => c.name).join(', ')}`}>
       <div class="flex items-center gap-1 flex-shrink-0">
         <AtlaskitIcon name="component" size={14} color="var(--color-text-subtle)" />
-        <span class="text-xs text-text-subtle">{issue.fields.components.map((c) => c.name).join(', ')}</span>
+        <span class="text-xs text-text-subtle"
+          >{issue.fields.components.map((c) => c.name).join(', ')}</span
+        >
       </div>
     </Tooltip>
   {/if}
@@ -229,7 +225,10 @@
       <div class="flex items-center gap-2 flex-shrink-0">
         <AtlaskitIcon name="clock" size={12} color="var(--color-text-subtle)" />
         <div class="w-14 h-1.5 bg-progress-track rounded-full overflow-hidden">
-          <div class="h-full bg-success transition-all" style="width: {aggregatedTimeProgress.percent}%"></div>
+          <div
+            class="h-full bg-success transition-all"
+            style="width: {aggregatedTimeProgress.percent}%"
+          ></div>
         </div>
         <span class="text-xs text-text-subtle w-8 text-right">
           {aggregatedTimeProgress.percent}%
@@ -248,7 +247,10 @@
       <div class="flex items-center gap-2 flex-shrink-0">
         <AtlaskitIcon name="subtasks" size={12} color="var(--color-text-subtle)" />
         <div class="w-14 h-1.5 bg-progress-track rounded-full overflow-hidden">
-          <div class="h-full bg-brand-bold transition-all" style="width: {aggregatedResolutionProgress.percent}%"></div>
+          <div
+            class="h-full bg-brand-bold transition-all"
+            style="width: {aggregatedResolutionProgress.percent}%"
+          ></div>
         </div>
         <span class="text-xs text-text-subtle w-8 text-right">
           {done}/{total}

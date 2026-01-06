@@ -26,9 +26,7 @@
   // Debug: Compute effective JQL with filters
   const filterConditions = $derived(getActiveFilterConditions());
   const effectiveJql = $derived(
-    issuesState.currentJql
-      ? applyQuickFilters(issuesState.currentJql, filterConditions)
-      : ''
+    issuesState.currentJql ? applyQuickFilters(issuesState.currentJql, filterConditions) : ''
   );
 </script>
 
@@ -75,7 +73,11 @@
           class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           title="Refresh"
         >
-          <AtlaskitIcon name="refresh" size={16} class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''} />
+          <AtlaskitIcon
+            name="refresh"
+            size={16}
+            class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''}
+          />
         </button>
       </div>
     </div>
@@ -99,14 +101,18 @@
           />
           <span>JQL Debug</span>
           {#if filterConditions.length > 0}
-            <span class="text-text-brand">({filterConditions.length} filter{filterConditions.length > 1 ? 's' : ''})</span>
+            <span class="text-text-brand"
+              >({filterConditions.length} filter{filterConditions.length > 1 ? 's' : ''})</span
+            >
           {/if}
         </button>
         {#if showJqlDebug}
           <div class="mt-2 space-y-2 text-xs">
             <div>
               <span class="text-text-subtlest">Base JQL:</span>
-              <code class="block mt-1 p-2 bg-surface rounded border border-border text-text-subtle break-all font-mono">
+              <code
+                class="block mt-1 p-2 bg-surface rounded border border-border text-text-subtle break-all font-mono"
+              >
                 {issuesState.currentJql || '(none)'}
               </code>
             </div>
@@ -114,8 +120,10 @@
               <div>
                 <span class="text-text-subtlest">Filter conditions:</span>
                 <ul class="mt-1 space-y-1">
-                  {#each filterConditions as condition}
-                    <li class="p-1.5 bg-brand-subtlest rounded border border-brand-subtle text-text-brand font-mono">
+                  {#each filterConditions as condition (condition)}
+                    <li
+                      class="p-1.5 bg-brand-subtlest rounded border border-brand-subtle text-text-brand font-mono"
+                    >
                       {condition}
                     </li>
                   {/each}
@@ -124,7 +132,9 @@
             {/if}
             <div>
               <span class="text-text-subtlest">Effective JQL:</span>
-              <code class="block mt-1 p-2 bg-surface rounded border border-border text-text break-all font-mono font-medium">
+              <code
+                class="block mt-1 p-2 bg-surface rounded border border-border text-text break-all font-mono font-medium"
+              >
                 {effectiveJql || '(none)'}
               </code>
             </div>
@@ -138,7 +148,7 @@
   <div class="flex-1 overflow-auto p-2">
     {#if issuesState.isLoading}
       <div class="tree-container">
-        {#each Array(8) as _, i}
+        {#each Array(8) as _, i (i)}
           <IssueCardSkeleton depth={i < 2 ? 0 : i < 5 ? 1 : 2} />
         {/each}
       </div>

@@ -75,15 +75,16 @@
   // Active filter count (including search text and recency filter)
   const activeCount = $derived(
     getActiveFilters().length +
-    (filtersState.searchText ? 1 : 0) +
-    (filtersState.recencyFilter ? 1 : 0)
+      (filtersState.searchText ? 1 : 0) +
+      (filtersState.recencyFilter ? 1 : 0)
   );
 
   // Debounce timer for search input
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  // Local state for controlled input - syncs with store on external changes (e.g., reset)
+  // eslint-disable-next-line svelte/prefer-writable-derived -- intentional: bidirectional sync with debounce
   let localSearchText = $state(filtersState.searchText);
 
-  // Sync local search text with store when store changes externally (e.g., reset)
   $effect(() => {
     localSearchText = filtersState.searchText;
   });
@@ -154,10 +155,7 @@
     </div>
 
     <!-- Recency filter dropdown -->
-    <RecencyDropdown
-      selectedOption={filtersState.recencyFilter}
-      onSelect={setRecencyFilter}
-    />
+    <RecencyDropdown selectedOption={filtersState.recencyFilter} onSelect={setRecencyFilter} />
 
     <!-- Toggle buttons for static filters (general and sprint) -->
     {#each filtersState.filters as filter (filter.id)}

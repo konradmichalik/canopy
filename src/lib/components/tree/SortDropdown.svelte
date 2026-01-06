@@ -79,13 +79,16 @@
       onkeydown={(e) => e.key === 'Enter' && handleDirectionToggle(e as unknown as MouseEvent)}
       role="button"
       tabindex={isDisabled ? -1 : 0}
-      class="p-0.5 rounded hover:bg-surface-sunken {isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}"
-      title={isDisabled ? 'Sorting disabled' : isAscending ? 'Ascending (click to change)' : 'Descending (click to change)'}
+      class="p-0.5 rounded hover:bg-surface-sunken {isDisabled
+        ? 'cursor-not-allowed'
+        : 'cursor-pointer'}"
+      title={isDisabled
+        ? 'Sorting disabled'
+        : isAscending
+          ? 'Ascending (click to change)'
+          : 'Descending (click to change)'}
     >
-      <AtlaskitIcon
-        name={isAscending ? 'arrow-up' : 'arrow-down'}
-        size={12}
-      />
+      <AtlaskitIcon name={isAscending ? 'arrow-up' : 'arrow-down'} size={12} />
     </span>
     <AtlaskitIcon
       name="chevron-down"
@@ -113,7 +116,11 @@
                   <AtlaskitIcon name="check-mark" size={14} color="var(--color-text-brand)" />
                 {/if}
               </span>
-              <span class={field.id === sortConfigState.config.field ? 'text-text-brand font-medium' : 'text-text'}>
+              <span
+                class={field.id === sortConfigState.config.field
+                  ? 'text-text-brand font-medium'
+                  : 'text-text'}
+              >
                 {field.label}
               </span>
             </span>

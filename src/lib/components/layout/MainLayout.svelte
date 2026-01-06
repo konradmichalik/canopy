@@ -42,7 +42,9 @@
             <AtlaskitIcon
               name="panel-left"
               size={20}
-              class="transition-transform duration-200 {routerState.sidebarOpen ? '' : '-scale-x-100'}"
+              class="transition-transform duration-200 {routerState.sidebarOpen
+                ? ''
+                : '-scale-x-100'}"
             />
           </button>
           <div class="h-6 w-px bg-border"></div>

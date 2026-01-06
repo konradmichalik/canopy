@@ -56,7 +56,11 @@
         {activeCount}
       </span>
     {/if}
-    <AtlaskitIcon name="chevron-down" size={12} class="transition-transform {isOpen ? 'rotate-180' : ''}" />
+    <AtlaskitIcon
+      name="chevron-down"
+      size={12}
+      class="transition-transform {isOpen ? 'rotate-180' : ''}"
+    />
   </button>
 
   {#if isOpen}
@@ -82,11 +86,7 @@
                 style={filter.color ? `--tw-ring-color: ${filter.color}` : ''}
               />
             {:else if filter.iconUrl}
-              <img
-                src={filter.iconUrl}
-                alt=""
-                class="w-4 h-4 flex-shrink-0"
-              />
+              <img src={filter.iconUrl} alt="" class="w-4 h-4 flex-shrink-0" />
             {:else if filter.icon && filter.color}
               <AtlaskitIcon name={getIconName(filter.icon)} size={14} color={filter.color} />
             {:else if filter.color}
@@ -95,7 +95,11 @@
                 style="background-color: {filter.color}"
               ></span>
             {:else}
-              <AtlaskitIcon name={getIconName(filter.icon)} size={14} color="var(--color-text-subtle)" />
+              <AtlaskitIcon
+                name={getIconName(filter.icon)}
+                size={14}
+                color="var(--color-text-subtle)"
+              />
             {/if}
             <span class={filter.isActive ? 'text-text-brand font-medium' : 'text-text'}
               >{filter.label}</span

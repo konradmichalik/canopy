@@ -153,7 +153,11 @@ export type FilterCategory =
 // Recency Filter Options
 // ============================================
 
-export type RecencyFilterOption = 'recently-created' | 'recently-updated' | 'recently-commented' | null;
+export type RecencyFilterOption =
+  | 'recently-created'
+  | 'recently-updated'
+  | 'recently-commented'
+  | null;
 
 export interface RecencyFilterDefinition {
   id: RecencyFilterOption;
