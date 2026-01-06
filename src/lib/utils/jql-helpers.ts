@@ -96,6 +96,28 @@ export function ensureOrderBy(jql: string, orderBy = 'created DESC'): string {
 }
 
 /**
+ * Set or replace ORDER BY clause in JQL
+ * @param jql - The JQL query
+ * @param field - The field to sort by (e.g., 'key', 'priority', 'created')
+ * @param direction - 'asc' or 'desc'
+ * @returns JQL with the new ORDER BY clause
+ */
+export function setOrderBy(jql: string, field: string, direction: 'asc' | 'desc'): string {
+  const { query } = extractOrderBy(jql);
+  const jqlField = field === 'key' ? 'key' : field;
+  const orderByClause = `ORDER BY ${jqlField} ${direction.toUpperCase()}`;
+  return query ? `${query} ${orderByClause}` : orderByClause;
+}
+
+/**
+ * Check if JQL has a user-defined ORDER BY clause
+ * (to determine if we should allow UI sorting)
+ */
+export function hasOrderByClause(jql: string): boolean {
+  return jql.toUpperCase().includes('ORDER BY');
+}
+
+/**
  * Extract project keys from JQL (for display purposes)
  */
 export function extractProjectKeys(jql: string): string[] {

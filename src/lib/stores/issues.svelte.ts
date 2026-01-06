@@ -13,7 +13,7 @@ import {
   getExpandedKeys,
   getTreeStats
 } from '../utils/hierarchy-builder';
-import { applyQuickFilters } from '../utils/jql-helpers';
+import { applyQuickFilters, setOrderBy, hasOrderByClause } from '../utils/jql-helpers';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 import {
@@ -51,10 +51,14 @@ setFiltersChangeCallback(() => {
   }
 });
 
-// Set up sort config change callback (rebuilds tree without refetching)
+// Set up sort config change callback (reloads issues with new ORDER BY)
 setSortConfigChangeCallback(() => {
-  if (issuesState.rawIssues.length > 0 && !issuesState.isLoading) {
-    rebuildTree();
+  if (issuesState.currentJql && !issuesState.isLoading) {
+    // Only reload if the base JQL doesn't have its own ORDER BY
+    if (!hasOrderByClause(issuesState.currentJql)) {
+      issuesState.isInitialLoad = false;
+      loadIssues(issuesState.currentJql);
+    }
   }
 });
 
@@ -81,7 +85,13 @@ export async function loadIssues(jql: string): Promise<boolean> {
   try {
     // Apply quick filters if active
     const filterConditions = getActiveFilterConditions();
-    const effectiveJql = applyQuickFilters(jql, filterConditions);
+    let effectiveJql = applyQuickFilters(jql, filterConditions);
+
+    // Apply sort config via ORDER BY (only if base JQL doesn't have ORDER BY)
+    if (!hasOrderByClause(jql)) {
+      const sortConfig = getSortConfig();
+      effectiveJql = setOrderBy(effectiveJql, sortConfig.field, sortConfig.direction);
+    }
 
     logger.info('Loading issues', { jql: effectiveJql, filters: filterConditions });
 
