@@ -120,9 +120,9 @@
   {#if isSprint && sprintMeta}
     <div class="flex items-center gap-3">
       <!-- Progress bar -->
-      <div class="w-24 h-1.5 bg-neutral rounded-full overflow-hidden">
+      <div class="w-20 h-1.5 bg-progress-track rounded-full overflow-hidden">
         <div
-          class="h-full bg-success rounded-full transition-all"
+          class="h-full bg-brand-bold transition-all"
           style="width: {sprintMeta.progress.percentage}%"
         ></div>
       </div>
@@ -130,7 +130,6 @@
       <!-- Progress text -->
       <span class="text-xs text-text-subtle whitespace-nowrap">
         {sprintMeta.progress.done}/{sprintMeta.progress.total}
-        <span class="text-text-subtlest">({sprintMeta.progress.percentage}%)</span>
       </span>
     </div>
   {:else}

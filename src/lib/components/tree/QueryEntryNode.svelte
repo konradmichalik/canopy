@@ -85,7 +85,7 @@
         >
           <div class="flex items-center gap-2">
             <AtlaskitIcon name="clock" size={14} color="var(--color-text-subtle)" />
-            <div class="w-16 h-1.5 bg-neutral rounded-full overflow-hidden">
+            <div class="w-16 h-1.5 bg-progress-track rounded-full overflow-hidden">
               <div
                 class="h-full bg-success transition-all"
                 style="width: {timeProgress.percent}%"
@@ -104,8 +104,8 @@
         {@const total = resolutionProgress.total}
         <Tooltip text={`Done: ${done} / ${total} (${resolutionProgress.percent}%)`}>
           <div class="flex items-center gap-2">
-            <AtlaskitIcon name="check-circle" size={14} color="var(--color-text-subtle)" />
-            <div class="w-16 h-1.5 bg-neutral rounded-full overflow-hidden">
+            <AtlaskitIcon name="subtasks" size={14} color="var(--color-text-subtle)" />
+            <div class="w-16 h-1.5 bg-progress-track rounded-full overflow-hidden">
               <div
                 class="h-full bg-brand-bold transition-all"
                 style="width: {resolutionProgress.percent}%"
