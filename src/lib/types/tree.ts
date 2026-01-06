@@ -94,6 +94,8 @@ export interface SavedQuery {
   activeFilterIds?: string[];
   searchText?: string;
   sortConfig?: SortConfig;
+  /** Show a collapsible entry node wrapper with aggregated stats */
+  showEntryNode?: boolean;
 }
 
 // ============================================

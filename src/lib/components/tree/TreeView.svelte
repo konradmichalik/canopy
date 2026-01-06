@@ -7,9 +7,12 @@
   import SortDropdown from './SortDropdown.svelte';
   import GroupByDropdown from './GroupByDropdown.svelte';
   import GroupHeader from './GroupHeader.svelte';
+  import QueryEntryNode from './QueryEntryNode.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
   import { getEpicLinkFieldId } from '../../stores/connection.svelte';
+  import { routerState } from '../../stores/router.svelte';
+  import { getQueryById } from '../../stores/jql.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
   import { getActiveFilterConditions } from '../../stores/filters.svelte';
   import { applyQuickFilters } from '../../utils/jql-helpers';
@@ -25,6 +28,13 @@
   let showJqlDebug = $state(false);
   let treeContainerRef: HTMLDivElement | null = $state(null);
   let expandedGroups = $state<Set<string>>(new Set());
+  let entryNodeExpanded = $state(true);
+
+  // Get the current query
+  const currentQuery = $derived(
+    routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : undefined
+  );
+  const showEntryNode = $derived(currentQuery?.showEntryNode ?? false);
 
   async function handleRefresh(): Promise<void> {
     isRefreshing = true;
@@ -300,6 +310,45 @@
           <p class="text-sm">Try adjusting your JQL query or filters</p>
         </div>
       </div>
+    {:else if showEntryNode && currentQuery}
+      <!-- Query Entry Node Wrapper -->
+      <QueryEntryNode
+        query={currentQuery}
+        issues={issuesState.rawIssues}
+        treeNodes={issuesState.treeNodes}
+        isExpanded={entryNodeExpanded}
+        onToggle={() => (entryNodeExpanded = !entryNodeExpanded)}
+      >
+        {#if isGrouped}
+          <!-- Grouped View inside Entry Node -->
+          <div class="grouped-container space-y-3">
+            {#each issueGroups as group (group.id)}
+              <div class="group-section">
+                <GroupHeader
+                  {group}
+                  isExpanded={expandedGroups.has(group.id)}
+                  onToggle={() => toggleGroup(group.id)}
+                />
+
+                {#if expandedGroups.has(group.id)}
+                  <div class="tree-container mt-2 ml-2 pl-4 border-l-2 border-border">
+                    {#each group.treeNodes as node (node.issue.key)}
+                      <TreeNode {node} />
+                    {/each}
+                  </div>
+                {/if}
+              </div>
+            {/each}
+          </div>
+        {:else}
+          <!-- Default Hierarchy View inside Entry Node -->
+          <div class="tree-container">
+            {#each issuesState.treeNodes as node (node.issue.key)}
+              <TreeNode {node} />
+            {/each}
+          </div>
+        {/if}
+      </QueryEntryNode>
     {:else if isGrouped}
       <!-- Grouped View -->
       <div class="grouped-container space-y-3">

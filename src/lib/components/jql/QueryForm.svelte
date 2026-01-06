@@ -1,12 +1,13 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import type { SavedQuery, QueryColor } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { validateJql, validateJqlExtended } from '../../utils/jql-helpers';
 
   interface Props {
     query?: SavedQuery | null;
-    onSave: (title: string, jql: string, color?: QueryColor) => void;
+    onSave: (title: string, jql: string, color?: QueryColor, showEntryNode?: boolean) => void;
     onCancel: () => void;
   }
 
@@ -15,6 +16,7 @@
   let title = $state(query?.title || '');
   let jql = $state(query?.jql || '');
   let color = $state<QueryColor | undefined>(query?.color);
+  let showEntryNode = $state(query?.showEntryNode ?? false);
   let error = $state<string | null>(null);
 
   // Real-time JQL validation
@@ -39,7 +41,7 @@
       return;
     }
 
-    onSave(trimmedTitle, trimmedJql, color);
+    onSave(trimmedTitle, trimmedJql, color, showEntryNode);
   }
 
   function selectColor(c: QueryColor): void {
@@ -129,6 +131,24 @@
               aria-pressed={color === c.id}
             ></button>
           {/each}
+        </div>
+      </div>
+
+      <!-- Entry Node Option -->
+      <div class="flex items-center gap-3">
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            bind:checked={showEntryNode}
+            class="sr-only peer"
+          />
+          <div class="w-9 h-5 bg-neutral rounded-full peer peer-checked:bg-brand peer-focus:ring-2 peer-focus:ring-border-focused transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></div>
+        </label>
+        <div class="flex items-center gap-1.5">
+          <span class="text-sm text-text">Show summary header</span>
+          <Tooltip text="Wraps all issues in a collapsible header showing aggregated time and completion stats">
+            <AtlaskitIcon name="status-information" size={14} class="text-text-subtlest" />
+          </Tooltip>
         </div>
       </div>
 

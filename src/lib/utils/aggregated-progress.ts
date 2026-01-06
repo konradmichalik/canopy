@@ -3,7 +3,7 @@
  * Calculates time and resolution progress across tree nodes recursively
  */
 
-import type { TreeNode } from '../types';
+import type { TreeNode, JiraIssue } from '../types';
 
 // ============================================
 // Types
@@ -101,4 +101,54 @@ export function hasTimeTrackingData(node: TreeNode): boolean {
  */
 export function hasDescendants(node: TreeNode): boolean {
   return node.children.length > 0;
+}
+
+// ============================================
+// Flat Issue Array Aggregation
+// ============================================
+
+/**
+ * Calculate aggregated time progress from a flat array of issues
+ */
+export function calculateIssuesTimeProgress(issues: JiraIssue[]): AggregatedTimeProgress {
+  let logged = 0;
+  let total = 0;
+
+  for (const issue of issues) {
+    logged += issue.fields.progress?.progress ?? 0;
+    total += issue.fields.progress?.total ?? 0;
+  }
+
+  return {
+    logged,
+    total,
+    percent: total > 0 ? Math.round((logged / total) * 100) : 0
+  };
+}
+
+/**
+ * Calculate aggregated resolution progress from a flat array of issues
+ */
+export function calculateIssuesResolutionProgress(issues: JiraIssue[]): AggregatedResolutionProgress {
+  let done = 0;
+  const total = issues.length;
+
+  for (const issue of issues) {
+    if (issue.fields.status.statusCategory.key === 'done') {
+      done++;
+    }
+  }
+
+  return {
+    done,
+    total,
+    percent: total > 0 ? Math.round((done / total) * 100) : 0
+  };
+}
+
+/**
+ * Check if any issues have time tracking data
+ */
+export function issuesHaveTimeTrackingData(issues: JiraIssue[]): boolean {
+  return issues.some((issue) => (issue.fields.progress?.total ?? 0) > 0);
 }

@@ -90,11 +90,14 @@
     showQueryForm = true;
   }
 
-  function handleSaveQuery(title: string, jql: string, color?: QueryColor): void {
+  function handleSaveQuery(title: string, jql: string, color?: QueryColor, showEntryNode?: boolean): void {
     if (editingQuery) {
-      updateQuery(editingQuery.id, { title, jql, color });
+      updateQuery(editingQuery.id, { title, jql, color, showEntryNode });
     } else {
-      addQuery(title, jql, color);
+      const query = addQuery(title, jql, color);
+      if (query && showEntryNode) {
+        updateQuery(query.id, { showEntryNode });
+      }
     }
     showQueryForm = false;
     editingQuery = null;

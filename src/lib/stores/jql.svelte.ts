@@ -71,7 +71,14 @@ export function updateQuery(
   updates: Partial<
     Pick<
       SavedQuery,
-      'title' | 'jql' | 'color' | 'displayFields' | 'activeFilterIds' | 'searchText' | 'sortConfig'
+      | 'title'
+      | 'jql'
+      | 'color'
+      | 'displayFields'
+      | 'activeFilterIds'
+      | 'searchText'
+      | 'sortConfig'
+      | 'showEntryNode'
     >
   >
 ): boolean {
