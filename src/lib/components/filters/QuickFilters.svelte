@@ -8,9 +8,12 @@
     resetFilters,
     setSearchText,
     clearSearchText,
-    setRecencyFilter
+    setRecencyFilter,
+    DYNAMIC_FILTER_CATEGORIES,
+    DYNAMIC_FILTER_CONFIG,
+    type DynamicFilterCategory
   } from '../../stores/filters.svelte';
-  import { isFieldEnabled } from '../../stores/fieldConfig.svelte';
+  import { isFieldEnabled, type DisplayFieldId } from '../../stores/fieldConfig.svelte';
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
   import RecencyDropdown from './RecencyDropdown.svelte';
 
@@ -53,11 +56,21 @@
     }
   }
 
-  // Field visibility
-  const showPriorityFilters = $derived(isFieldEnabled('priority'));
-  const showResolutionFilters = $derived(isFieldEnabled('resolution'));
-  const showComponentFilters = $derived(isFieldEnabled('components'));
-  const showFixVersionFilters = $derived(isFieldEnabled('fixVersions'));
+  // Mapping from filter category to field config ID for visibility check
+  const CATEGORY_FIELD_MAP: Partial<Record<DynamicFilterCategory, DisplayFieldId>> = {
+    priority: 'priority',
+    resolution: 'resolution',
+    component: 'components',
+    fixVersion: 'fixVersions'
+  };
+
+  // Check if a filter category should be visible
+  function isCategoryVisible(category: DynamicFilterCategory): boolean {
+    const fieldId = CATEGORY_FIELD_MAP[category];
+    // If no field mapping, always show (status, type, assignee)
+    if (!fieldId) return true;
+    return isFieldEnabled(fieldId);
+  }
 
   // Active filter count (including search text and recency filter)
   const activeCount = $derived(
@@ -161,75 +174,19 @@
       </button>
     {/each}
 
-    <!-- Dropdown for dynamic status filters -->
-    {#if filtersState.dynamicStatusFilters.length > 0}
-      <MultiSelectDropdown
-        label="Status"
-        filters={filtersState.dynamicStatusFilters}
-        onToggle={toggleDynamicFilter}
-        {getIconName}
-      />
-    {/if}
-
-    <!-- Dropdown for dynamic type filters -->
-    {#if filtersState.dynamicTypeFilters.length > 0}
-      <MultiSelectDropdown
-        label="Type"
-        filters={filtersState.dynamicTypeFilters}
-        onToggle={toggleDynamicFilter}
-        {getIconName}
-      />
-    {/if}
-
-    <!-- Dropdown for dynamic assignee filters -->
-    {#if filtersState.dynamicAssigneeFilters.length > 0}
-      <MultiSelectDropdown
-        label="Assignee"
-        filters={filtersState.dynamicAssigneeFilters}
-        onToggle={toggleDynamicFilter}
-        {getIconName}
-      />
-    {/if}
-
-    <!-- Dropdown for dynamic priority filters (only if priority field is enabled) -->
-    {#if showPriorityFilters && filtersState.dynamicPriorityFilters.length > 0}
-      <MultiSelectDropdown
-        label="Priority"
-        filters={filtersState.dynamicPriorityFilters}
-        onToggle={toggleDynamicFilter}
-        {getIconName}
-      />
-    {/if}
-
-    <!-- Dropdown for dynamic resolution filters (only if resolution field is enabled) -->
-    {#if showResolutionFilters && filtersState.dynamicResolutionFilters.length > 0}
-      <MultiSelectDropdown
-        label="Resolution"
-        filters={filtersState.dynamicResolutionFilters}
-        onToggle={toggleDynamicFilter}
-        {getIconName}
-      />
-    {/if}
-
-    <!-- Dropdown for dynamic component filters (only if components field is enabled) -->
-    {#if showComponentFilters && filtersState.dynamicComponentFilters.length > 0}
-      <MultiSelectDropdown
-        label="Component"
-        filters={filtersState.dynamicComponentFilters}
-        onToggle={toggleDynamicFilter}
-        {getIconName}
-      />
-    {/if}
-
-    <!-- Dropdown for dynamic fix version filters (only if fixVersions field is enabled) -->
-    {#if showFixVersionFilters && filtersState.dynamicFixVersionFilters.length > 0}
-      <MultiSelectDropdown
-        label="Release"
-        filters={filtersState.dynamicFixVersionFilters}
-        onToggle={toggleDynamicFilter}
-        {getIconName}
-      />
-    {/if}
+    <!-- Dynamic filter dropdowns (generated from categories) -->
+    {#each DYNAMIC_FILTER_CATEGORIES as category (category)}
+      {@const filters = filtersState.dynamicFilters[category]}
+      {@const config = DYNAMIC_FILTER_CONFIG[category]}
+      {#if filters.length > 0 && isCategoryVisible(category)}
+        <MultiSelectDropdown
+          label={config.label}
+          {filters}
+          onToggle={toggleDynamicFilter}
+          {getIconName}
+        />
+      {/if}
+    {/each}
 
     <!-- Reset button -->
     {#if activeCount > 0}

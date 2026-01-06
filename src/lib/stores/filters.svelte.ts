@@ -13,6 +13,55 @@ import {
 } from '../types/tree';
 import { logger } from '../utils/logger';
 
+// ============================================
+// Dynamic Filter Categories
+// ============================================
+
+/**
+ * Categories for dynamic filters (generated from loaded issues)
+ */
+export type DynamicFilterCategory =
+  | 'status'
+  | 'type'
+  | 'assignee'
+  | 'priority'
+  | 'resolution'
+  | 'component'
+  | 'fixVersion';
+
+/**
+ * All dynamic filter categories in order of display
+ */
+export const DYNAMIC_FILTER_CATEGORIES: DynamicFilterCategory[] = [
+  'status',
+  'type',
+  'assignee',
+  'priority',
+  'resolution',
+  'component',
+  'fixVersion'
+];
+
+/**
+ * Configuration for each dynamic filter category
+ */
+export interface DynamicFilterCategoryConfig {
+  label: string;
+  jqlField: string;
+  useIdInJql?: boolean; // Whether to use ID instead of name in JQL (for type, resolution)
+  useOrJoin?: boolean; // Whether to use OR join for multiple values (for assignee)
+}
+
+export const DYNAMIC_FILTER_CONFIG: Record<DynamicFilterCategory, DynamicFilterCategoryConfig> = {
+  status: { label: 'Status', jqlField: 'status' },
+  type: { label: 'Type', jqlField: 'issuetype', useIdInJql: true },
+  assignee: { label: 'Assignee', jqlField: 'assignee', useOrJoin: true },
+  priority: { label: 'Priority', jqlField: 'priority' },
+  resolution: { label: 'Resolution', jqlField: 'resolution', useIdInJql: true },
+  component: { label: 'Component', jqlField: 'component' },
+  fixVersion: { label: 'Release', jqlField: 'fixVersion' }
+};
+
 // Callback for when filters change - set by issues store
 let onFiltersChange: (() => void) | null = null;
 
@@ -68,34 +117,7 @@ export function getActiveFilterIds(): string[] {
 export function loadActiveFilters(activeFilterIds?: string[], searchText?: string): void {
   // Clear all filters first
   filtersState.filters = filtersState.filters.map((f) => ({ ...f, isActive: false }));
-  filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicTypeFilters = filtersState.dynamicTypeFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicAssigneeFilters = filtersState.dynamicAssigneeFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicPriorityFilters = filtersState.dynamicPriorityFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicResolutionFilters = filtersState.dynamicResolutionFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicComponentFilters = filtersState.dynamicComponentFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicFixVersionFilters = filtersState.dynamicFixVersionFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
+  clearAllDynamicFilters();
   filtersState.searchText = searchText || '';
   filtersState.recencyFilter = null;
 
@@ -141,35 +163,7 @@ function applyPendingActiveFilters(): void {
   }
 
   const activeIds = new Set(filtersState.pendingActiveFilterIds);
-
-  filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map((f) => ({
-    ...f,
-    isActive: activeIds.has(f.id)
-  }));
-  filtersState.dynamicTypeFilters = filtersState.dynamicTypeFilters.map((f) => ({
-    ...f,
-    isActive: activeIds.has(f.id)
-  }));
-  filtersState.dynamicAssigneeFilters = filtersState.dynamicAssigneeFilters.map((f) => ({
-    ...f,
-    isActive: activeIds.has(f.id)
-  }));
-  filtersState.dynamicPriorityFilters = filtersState.dynamicPriorityFilters.map((f) => ({
-    ...f,
-    isActive: activeIds.has(f.id)
-  }));
-  filtersState.dynamicResolutionFilters = filtersState.dynamicResolutionFilters.map((f) => ({
-    ...f,
-    isActive: activeIds.has(f.id)
-  }));
-  filtersState.dynamicComponentFilters = filtersState.dynamicComponentFilters.map((f) => ({
-    ...f,
-    isActive: activeIds.has(f.id)
-  }));
-  filtersState.dynamicFixVersionFilters = filtersState.dynamicFixVersionFilters.map((f) => ({
-    ...f,
-    isActive: activeIds.has(f.id)
-  }));
+  setActiveStateByIds(activeIds);
 
   const hasActiveFilters = activeIds.size > 0;
 
@@ -197,16 +191,31 @@ export interface ExtendedQuickFilter extends QuickFilter {
 }
 
 
+/**
+ * Type for the dynamic filters record
+ */
+export type DynamicFiltersRecord = Record<DynamicFilterCategory, ExtendedQuickFilter[]>;
+
+/**
+ * Create empty dynamic filters record
+ */
+function createEmptyDynamicFilters(): DynamicFiltersRecord {
+  return {
+    status: [],
+    type: [],
+    assignee: [],
+    priority: [],
+    resolution: [],
+    component: [],
+    fixVersion: []
+  };
+}
+
 // State container object
 export const filtersState = $state({
   filters: DEFAULT_QUICK_FILTERS.map((f) => ({ ...f, isActive: false })) as ExtendedQuickFilter[],
-  dynamicStatusFilters: [] as ExtendedQuickFilter[],
-  dynamicTypeFilters: [] as ExtendedQuickFilter[],
-  dynamicAssigneeFilters: [] as ExtendedQuickFilter[],
-  dynamicPriorityFilters: [] as ExtendedQuickFilter[],
-  dynamicResolutionFilters: [] as ExtendedQuickFilter[],
-  dynamicComponentFilters: [] as ExtendedQuickFilter[],
-  dynamicFixVersionFilters: [] as ExtendedQuickFilter[],
+  // Dynamic filters organized by category
+  dynamicFilters: createEmptyDynamicFilters(),
   // Temporarily stores filter IDs to restore after dynamic filters are generated
   pendingActiveFilterIds: null as string[] | null,
   // Text search for summary and key
@@ -214,6 +223,49 @@ export const filtersState = $state({
   // Recency filter (single select: recently-created, recently-updated, recently-commented)
   recencyFilter: null as RecencyFilterOption
 });
+
+// ============================================
+// Generic Filter Helpers (DRY)
+// ============================================
+
+/**
+ * Map function over all dynamic filter categories
+ */
+function mapAllDynamicFilters(
+  fn: (filter: ExtendedQuickFilter) => ExtendedQuickFilter
+): void {
+  for (const category of DYNAMIC_FILTER_CATEGORIES) {
+    filtersState.dynamicFilters[category] = filtersState.dynamicFilters[category].map(fn);
+  }
+}
+
+/**
+ * Get all dynamic filters as a flat array
+ */
+function getAllDynamicFiltersFlat(): ExtendedQuickFilter[] {
+  return DYNAMIC_FILTER_CATEGORIES.flatMap((cat) => filtersState.dynamicFilters[cat]);
+}
+
+/**
+ * Set active state for all filters based on a set of active IDs
+ */
+function setActiveStateByIds(activeIds: Set<string>): void {
+  mapAllDynamicFilters((f) => ({ ...f, isActive: activeIds.has(f.id) }));
+}
+
+/**
+ * Clear all dynamic filters (set isActive to false)
+ */
+function clearAllDynamicFilters(): void {
+  mapAllDynamicFilters((f) => ({ ...f, isActive: false }));
+}
+
+/**
+ * Get dynamic filters for a specific category
+ */
+export function getDynamicFilters(category: DynamicFilterCategory): ExtendedQuickFilter[] {
+  return filtersState.dynamicFilters[category];
+}
 
 /**
  * Get all filters
@@ -226,16 +278,9 @@ export function getFilters(): QuickFilter[] {
  * Get active filters (including dynamic)
  */
 export function getActiveFilters(): QuickFilter[] {
-  return [
-    ...filtersState.filters.filter((f) => f.isActive),
-    ...filtersState.dynamicStatusFilters.filter((f) => f.isActive),
-    ...filtersState.dynamicTypeFilters.filter((f) => f.isActive),
-    ...filtersState.dynamicAssigneeFilters.filter((f) => f.isActive),
-    ...filtersState.dynamicPriorityFilters.filter((f) => f.isActive),
-    ...filtersState.dynamicResolutionFilters.filter((f) => f.isActive),
-    ...filtersState.dynamicComponentFilters.filter((f) => f.isActive),
-    ...filtersState.dynamicFixVersionFilters.filter((f) => f.isActive)
-  ];
+  const staticActive = filtersState.filters.filter((f) => f.isActive);
+  const dynamicActive = getAllDynamicFiltersFlat().filter((f) => f.isActive);
+  return [...staticActive, ...dynamicActive];
 }
 
 /**
@@ -323,34 +368,7 @@ export function clearRecencyFilter(): void {
  */
 export function resetFilters(): void {
   filtersState.filters = filtersState.filters.map((f) => ({ ...f, isActive: false }));
-  filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicTypeFilters = filtersState.dynamicTypeFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicAssigneeFilters = filtersState.dynamicAssigneeFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicPriorityFilters = filtersState.dynamicPriorityFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicResolutionFilters = filtersState.dynamicResolutionFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicComponentFilters = filtersState.dynamicComponentFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicFixVersionFilters = filtersState.dynamicFixVersionFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
+  clearAllDynamicFilters();
   filtersState.searchText = '';
   filtersState.recencyFilter = null;
   logger.store('filters', 'Reset all filters');
@@ -362,34 +380,7 @@ export function resetFilters(): void {
  */
 export function clearFilters(): void {
   filtersState.filters = filtersState.filters.map((f) => ({ ...f, isActive: false }));
-  filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicTypeFilters = filtersState.dynamicTypeFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicAssigneeFilters = filtersState.dynamicAssigneeFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicPriorityFilters = filtersState.dynamicPriorityFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicResolutionFilters = filtersState.dynamicResolutionFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicComponentFilters = filtersState.dynamicComponentFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
-  filtersState.dynamicFixVersionFilters = filtersState.dynamicFixVersionFilters.map((f) => ({
-    ...f,
-    isActive: false
-  }));
+  clearAllDynamicFilters();
   filtersState.searchText = '';
   filtersState.recencyFilter = null;
   logger.store('filters', 'Cleared all filters');
@@ -410,6 +401,38 @@ export function isUnresolvedActive(): boolean {
 }
 
 /**
+ * Build JQL condition for a category of filters
+ */
+function buildCategoryJqlCondition(
+  filters: ExtendedQuickFilter[],
+  category: DynamicFilterCategory
+): string | null {
+  if (filters.length === 0) return null;
+  if (filters.length === 1) return filters[0].jqlCondition;
+
+  const config = DYNAMIC_FILTER_CONFIG[category];
+
+  // Handle OR-join style (for assignee)
+  if (config.useOrJoin) {
+    const conditions = filters.map((f) => f.jqlCondition).join(' OR ');
+    return `(${conditions})`;
+  }
+
+  // Handle ID-based JQL (for type, resolution)
+  if (config.useIdInJql) {
+    const ids = filters
+      .map((f) => f.jqlCondition.split('=')[1]?.trim())
+      .filter(Boolean)
+      .join(', ');
+    return `${config.jqlField} IN (${ids})`;
+  }
+
+  // Default: use label names
+  const names = filters.map((f) => `"${f.label}"`).join(', ');
+  return `${config.jqlField} IN (${names})`;
+}
+
+/**
  * Get JQL conditions from active filters
  * Filters within the same category (status, type, assignee, etc.) are combined with OR
  * Different categories are combined with AND
@@ -418,91 +441,18 @@ export function getActiveFilterConditions(): string[] {
   const activeFilters = getActiveFilters() as ExtendedQuickFilter[];
   const conditions: string[] = [];
 
-  // Group filters by category
-  const statusFilters = activeFilters.filter((f) => f.category === 'status');
-  const typeFilters = activeFilters.filter((f) => f.category === 'type');
-  const assigneeFilters = activeFilters.filter((f) => f.category === 'assignee');
-  const priorityFilters = activeFilters.filter((f) => f.category === 'priority');
-  const resolutionFilters = activeFilters.filter((f) => f.category === 'resolution');
-  const componentFilters = activeFilters.filter((f) => f.category === 'component');
-  const fixVersionFilters = activeFilters.filter((f) => f.category === 'fixVersion');
-  const otherFilters = activeFilters.filter(
-    (f) =>
-      f.category !== 'status' &&
-      f.category !== 'type' &&
-      f.category !== 'assignee' &&
-      f.category !== 'priority' &&
-      f.category !== 'resolution' &&
-      f.category !== 'component' &&
-      f.category !== 'fixVersion'
-  );
-
-  // Build OR-combined conditions for status filters
-  if (statusFilters.length === 1) {
-    conditions.push(statusFilters[0].jqlCondition);
-  } else if (statusFilters.length > 1) {
-    const statusNames = statusFilters.map((f) => `"${f.label}"`).join(', ');
-    conditions.push(`status IN (${statusNames})`);
+  // Build conditions for each dynamic filter category
+  for (const category of DYNAMIC_FILTER_CATEGORIES) {
+    const categoryFilters = activeFilters.filter((f) => f.category === category);
+    const condition = buildCategoryJqlCondition(categoryFilters, category);
+    if (condition) {
+      conditions.push(condition);
+    }
   }
 
-  // Build OR-combined conditions for type filters (using IDs)
-  if (typeFilters.length === 1) {
-    conditions.push(typeFilters[0].jqlCondition);
-  } else if (typeFilters.length > 1) {
-    // Extract IDs from jqlConditions (format: "issuetype = 12345")
-    const typeIds = typeFilters
-      .map((f) => f.jqlCondition.split('=')[1]?.trim())
-      .filter(Boolean)
-      .join(', ');
-    conditions.push(`issuetype IN (${typeIds})`);
-  }
-
-  // Build OR-combined conditions for assignee filters
-  if (assigneeFilters.length === 1) {
-    conditions.push(assigneeFilters[0].jqlCondition);
-  } else if (assigneeFilters.length > 1) {
-    // Combine assignee conditions with OR
-    const assigneeConditions = assigneeFilters.map((f) => f.jqlCondition).join(' OR ');
-    conditions.push(`(${assigneeConditions})`);
-  }
-
-  // Build OR-combined conditions for priority filters
-  if (priorityFilters.length === 1) {
-    conditions.push(priorityFilters[0].jqlCondition);
-  } else if (priorityFilters.length > 1) {
-    const priorityNames = priorityFilters.map((f) => `"${f.label}"`).join(', ');
-    conditions.push(`priority IN (${priorityNames})`);
-  }
-
-  // Build OR-combined conditions for resolution filters (using IDs)
-  if (resolutionFilters.length === 1) {
-    conditions.push(resolutionFilters[0].jqlCondition);
-  } else if (resolutionFilters.length > 1) {
-    // Extract IDs from jqlConditions (format: "resolution = 12345")
-    const resolutionIds = resolutionFilters
-      .map((f) => f.jqlCondition.split('=')[1]?.trim())
-      .filter(Boolean)
-      .join(', ');
-    conditions.push(`resolution IN (${resolutionIds})`);
-  }
-
-  // Build OR-combined conditions for component filters
-  if (componentFilters.length === 1) {
-    conditions.push(componentFilters[0].jqlCondition);
-  } else if (componentFilters.length > 1) {
-    const componentNames = componentFilters.map((f) => `"${f.label}"`).join(', ');
-    conditions.push(`component IN (${componentNames})`);
-  }
-
-  // Build OR-combined conditions for fixVersion filters
-  if (fixVersionFilters.length === 1) {
-    conditions.push(fixVersionFilters[0].jqlCondition);
-  } else if (fixVersionFilters.length > 1) {
-    const versionNames = fixVersionFilters.map((f) => `"${f.label}"`).join(', ');
-    conditions.push(`fixVersion IN (${versionNames})`);
-  }
-
-  // Add other filters (general category) as individual AND conditions
+  // Add other filters (general, sprint category) as individual AND conditions
+  const dynamicCategories = new Set<string>(DYNAMIC_FILTER_CATEGORIES);
+  const otherFilters = activeFilters.filter((f) => !dynamicCategories.has(f.category));
   for (const filter of otherFilters) {
     conditions.push(filter.jqlCondition);
   }
@@ -592,16 +542,7 @@ export function requiresLocalRecencyFilter(): boolean {
  * Get all filters including dynamic ones
  */
 export function getAllFilters(): ExtendedQuickFilter[] {
-  return [
-    ...filtersState.filters,
-    ...filtersState.dynamicStatusFilters,
-    ...filtersState.dynamicTypeFilters,
-    ...filtersState.dynamicAssigneeFilters,
-    ...filtersState.dynamicPriorityFilters,
-    ...filtersState.dynamicResolutionFilters,
-    ...filtersState.dynamicComponentFilters,
-    ...filtersState.dynamicFixVersionFilters
-  ];
+  return [...filtersState.filters, ...getAllDynamicFiltersFlat()];
 }
 
 // JIRA status category color mapping
@@ -748,137 +689,138 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     }
   }
 
-  // Preserve active state of existing filters
-  const activeStatusIds = new Set(
-    filtersState.dynamicStatusFilters.filter((f) => f.isActive).map((f) => f.id)
+  // Preserve active state of existing filters (collect all active IDs)
+  const activeIds = new Set(
+    getAllDynamicFiltersFlat().filter((f) => f.isActive).map((f) => f.id)
   );
-  const activeTypeIds = new Set(
-    filtersState.dynamicTypeFilters.filter((f) => f.isActive).map((f) => f.id)
-  );
-  const activeAssigneeIds = new Set(
-    filtersState.dynamicAssigneeFilters.filter((f) => f.isActive).map((f) => f.id)
-  );
-  const activePriorityIds = new Set(
-    filtersState.dynamicPriorityFilters.filter((f) => f.isActive).map((f) => f.id)
-  );
-  const activeResolutionIds = new Set(
-    filtersState.dynamicResolutionFilters.filter((f) => f.isActive).map((f) => f.id)
-  );
-  const activeComponentIds = new Set(
-    filtersState.dynamicComponentFilters.filter((f) => f.isActive).map((f) => f.id)
-  );
-  const activeFixVersionIds = new Set(
-    filtersState.dynamicFixVersionFilters.filter((f) => f.isActive).map((f) => f.id)
-  );
+
+  // Helper to generate filter ID
+  const makeFilterId = (prefix: string, name: string) =>
+    `${prefix}-${name.toLowerCase().replace(/\s+/g, '-')}`;
 
   // Create status filters with colors
-  filtersState.dynamicStatusFilters = Array.from(statusMap.entries()).map(([name, data]) => ({
-    id: `status-${name.toLowerCase().replace(/\s+/g, '-')}`,
-    label: name,
-    jqlCondition: `status = "${name}"`,
-    category: 'status' as FilterCategory,
-    icon: getStatusIcon(data.categoryKey),
-    color:
-      STATUS_CATEGORY_COLORS[data.colorName] ||
-      STATUS_CATEGORY_COLORS[data.categoryKey] ||
-      '#6B778C',
-    isActive: activeStatusIds.has(`status-${name.toLowerCase().replace(/\s+/g, '-')}`)
-  }));
+  filtersState.dynamicFilters.status = Array.from(statusMap.entries()).map(([name, data]) => {
+    const id = makeFilterId('status', name);
+    return {
+      id,
+      label: name,
+      jqlCondition: `status = "${name}"`,
+      category: 'status' as FilterCategory,
+      icon: getStatusIcon(data.categoryKey),
+      color:
+        STATUS_CATEGORY_COLORS[data.colorName] ||
+        STATUS_CATEGORY_COLORS[data.categoryKey] ||
+        '#6B778C',
+      isActive: activeIds.has(id)
+    };
+  });
 
   // Create type filters using iconUrl from JIRA API
-  // Use issue type ID in JQL for reliability (name can vary across instances)
-  filtersState.dynamicTypeFilters = Array.from(typeMap.entries()).map(([name, data]) => ({
-    id: `type-${name.toLowerCase().replace(/\s+/g, '-')}`,
-    label: name,
-    jqlCondition: `issuetype = ${data.id}`,
-    category: 'type' as FilterCategory,
-    iconUrl: data.iconUrl,
-    isActive: activeTypeIds.has(`type-${name.toLowerCase().replace(/\s+/g, '-')}`)
-  }));
+  filtersState.dynamicFilters.type = Array.from(typeMap.entries()).map(([name, data]) => {
+    const id = makeFilterId('type', name);
+    return {
+      id,
+      label: name,
+      jqlCondition: `issuetype = ${data.id}`,
+      category: 'type' as FilterCategory,
+      iconUrl: data.iconUrl,
+      isActive: activeIds.has(id)
+    };
+  });
 
   // Create assignee filters sorted by display name
   const sortedAssignees = Array.from(assigneeMap.entries()).sort((a, b) =>
     a[1].displayName.localeCompare(b[1].displayName)
   );
-
-  filtersState.dynamicAssigneeFilters = sortedAssignees.map(([key, data]) => {
-    const filterId = `assignee-${key.replace(/[^a-zA-Z0-9]/g, '-')}`;
+  filtersState.dynamicFilters.assignee = sortedAssignees.map(([key, data]) => {
+    const id = `assignee-${key.replace(/[^a-zA-Z0-9]/g, '-')}`;
     const jqlValue = data.accountId ? `"${data.accountId}"` : `"${data.name}"`;
     const colorIdentifier = data.accountId || data.emailAddress || data.displayName;
     return {
-      id: filterId,
+      id,
       label: data.displayName,
       jqlCondition: `assignee = ${jqlValue}`,
       category: 'assignee' as FilterCategory,
       icon: 'user',
       avatarUrl: data.avatarUrl,
       color: getAvatarColor(colorIdentifier),
-      isActive: activeAssigneeIds.has(filterId)
+      isActive: activeIds.has(id)
     };
   });
 
-  // Create priority filters sorted by name, using iconUrl from JIRA API
+  // Create priority filters sorted by name
   const sortedPriorities = Array.from(priorityMap.entries()).sort((a, b) =>
     a[0].localeCompare(b[0])
   );
-  filtersState.dynamicPriorityFilters = sortedPriorities.map(([name, data]) => ({
-    id: `priority-${name.toLowerCase().replace(/\s+/g, '-')}`,
-    label: name,
-    jqlCondition: `priority = "${name}"`,
-    category: 'priority' as FilterCategory,
-    iconUrl: data.iconUrl,
-    isActive: activePriorityIds.has(`priority-${name.toLowerCase().replace(/\s+/g, '-')}`)
-  }));
+  filtersState.dynamicFilters.priority = sortedPriorities.map(([name, data]) => {
+    const id = makeFilterId('priority', name);
+    return {
+      id,
+      label: name,
+      jqlCondition: `priority = "${name}"`,
+      category: 'priority' as FilterCategory,
+      iconUrl: data.iconUrl,
+      isActive: activeIds.has(id)
+    };
+  });
 
   // Create resolution filters sorted by name
-  // Use resolution ID in JQL for reliability (name can vary across instances)
   const sortedResolutions = Array.from(resolutionMap.entries()).sort((a, b) =>
     a[0].localeCompare(b[0])
   );
-  filtersState.dynamicResolutionFilters = sortedResolutions.map(([name, data]) => ({
-    id: `resolution-${name.toLowerCase().replace(/\s+/g, '-')}`,
-    label: name,
-    jqlCondition: `resolution = ${data.id}`,
-    category: 'resolution' as FilterCategory,
-    icon: 'check-circle',
-    color: '#00875A',
-    isActive: activeResolutionIds.has(`resolution-${name.toLowerCase().replace(/\s+/g, '-')}`)
-  }));
+  filtersState.dynamicFilters.resolution = sortedResolutions.map(([name, data]) => {
+    const id = makeFilterId('resolution', name);
+    return {
+      id,
+      label: name,
+      jqlCondition: `resolution = ${data.id}`,
+      category: 'resolution' as FilterCategory,
+      icon: 'check-circle',
+      color: '#00875A',
+      isActive: activeIds.has(id)
+    };
+  });
 
   // Create component filters sorted by name
   const sortedComponents = Array.from(componentMap.entries()).sort((a, b) =>
     a[0].localeCompare(b[0])
   );
-  filtersState.dynamicComponentFilters = sortedComponents.map(([name]) => ({
-    id: `component-${name.toLowerCase().replace(/\s+/g, '-')}`,
-    label: name,
-    jqlCondition: `component = "${name}"`,
-    category: 'component' as FilterCategory,
-    icon: 'puzzle',
-    isActive: activeComponentIds.has(`component-${name.toLowerCase().replace(/\s+/g, '-')}`)
-  }));
+  filtersState.dynamicFilters.component = sortedComponents.map(([name]) => {
+    const id = makeFilterId('component', name);
+    return {
+      id,
+      label: name,
+      jqlCondition: `component = "${name}"`,
+      category: 'component' as FilterCategory,
+      icon: 'puzzle',
+      isActive: activeIds.has(id)
+    };
+  });
 
   // Create fix version filters sorted by name
   const sortedFixVersions = Array.from(fixVersionMap.entries()).sort((a, b) =>
     a[0].localeCompare(b[0])
   );
-  filtersState.dynamicFixVersionFilters = sortedFixVersions.map(([name]) => ({
-    id: `fixversion-${name.toLowerCase().replace(/\s+/g, '-')}`,
-    label: name,
-    jqlCondition: `fixVersion = "${name}"`,
-    category: 'fixVersion' as FilterCategory,
-    icon: 'package',
-    isActive: activeFixVersionIds.has(`fixversion-${name.toLowerCase().replace(/\s+/g, '-')}`)
-  }));
+  filtersState.dynamicFilters.fixVersion = sortedFixVersions.map(([name]) => {
+    const id = makeFilterId('fixversion', name);
+    return {
+      id,
+      label: name,
+      jqlCondition: `fixVersion = "${name}"`,
+      category: 'fixVersion' as FilterCategory,
+      icon: 'package',
+      isActive: activeIds.has(id)
+    };
+  });
 
   logger.store('filters', 'Updated dynamic filters', {
-    statuses: filtersState.dynamicStatusFilters.length,
-    types: filtersState.dynamicTypeFilters.length,
-    assignees: filtersState.dynamicAssigneeFilters.length,
-    priorities: filtersState.dynamicPriorityFilters.length,
-    resolutions: filtersState.dynamicResolutionFilters.length,
-    components: filtersState.dynamicComponentFilters.length,
-    fixVersions: filtersState.dynamicFixVersionFilters.length
+    statuses: filtersState.dynamicFilters.status.length,
+    types: filtersState.dynamicFilters.type.length,
+    assignees: filtersState.dynamicFilters.assignee.length,
+    priorities: filtersState.dynamicFilters.priority.length,
+    resolutions: filtersState.dynamicFilters.resolution.length,
+    components: filtersState.dynamicFilters.component.length,
+    fixVersions: filtersState.dynamicFilters.fixVersion.length
   });
 
   // Apply pending active filters if any
@@ -906,81 +848,19 @@ function getStatusIcon(categoryKey: string): string {
  * Toggle a dynamic filter by ID
  */
 export function toggleDynamicFilter(id: string): void {
-  // Check if it's a status filter
-  const statusIndex = filtersState.dynamicStatusFilters.findIndex((f) => f.id === id);
-  if (statusIndex !== -1) {
-    filtersState.dynamicStatusFilters = filtersState.dynamicStatusFilters.map((f) =>
-      f.id === id ? { ...f, isActive: !f.isActive } : f
-    );
-    logger.store('filters', 'Toggle dynamic status filter', { id });
-    notifyFiltersChange();
-    return;
-  }
+  // Search in all dynamic filter categories
+  for (const category of DYNAMIC_FILTER_CATEGORIES) {
+    const filters = filtersState.dynamicFilters[category];
+    const index = filters.findIndex((f) => f.id === id);
 
-  // Check if it's a type filter
-  const typeIndex = filtersState.dynamicTypeFilters.findIndex((f) => f.id === id);
-  if (typeIndex !== -1) {
-    filtersState.dynamicTypeFilters = filtersState.dynamicTypeFilters.map((f) =>
-      f.id === id ? { ...f, isActive: !f.isActive } : f
-    );
-    logger.store('filters', 'Toggle dynamic type filter', { id });
-    notifyFiltersChange();
-    return;
-  }
-
-  // Check if it's an assignee filter
-  const assigneeIndex = filtersState.dynamicAssigneeFilters.findIndex((f) => f.id === id);
-  if (assigneeIndex !== -1) {
-    filtersState.dynamicAssigneeFilters = filtersState.dynamicAssigneeFilters.map((f) =>
-      f.id === id ? { ...f, isActive: !f.isActive } : f
-    );
-    logger.store('filters', 'Toggle dynamic assignee filter', { id });
-    notifyFiltersChange();
-    return;
-  }
-
-  // Check if it's a priority filter
-  const priorityIndex = filtersState.dynamicPriorityFilters.findIndex((f) => f.id === id);
-  if (priorityIndex !== -1) {
-    filtersState.dynamicPriorityFilters = filtersState.dynamicPriorityFilters.map((f) =>
-      f.id === id ? { ...f, isActive: !f.isActive } : f
-    );
-    logger.store('filters', 'Toggle dynamic priority filter', { id });
-    notifyFiltersChange();
-    return;
-  }
-
-  // Check if it's a resolution filter
-  const resolutionIndex = filtersState.dynamicResolutionFilters.findIndex((f) => f.id === id);
-  if (resolutionIndex !== -1) {
-    filtersState.dynamicResolutionFilters = filtersState.dynamicResolutionFilters.map((f) =>
-      f.id === id ? { ...f, isActive: !f.isActive } : f
-    );
-    logger.store('filters', 'Toggle dynamic resolution filter', { id });
-    notifyFiltersChange();
-    return;
-  }
-
-  // Check if it's a component filter
-  const componentIndex = filtersState.dynamicComponentFilters.findIndex((f) => f.id === id);
-  if (componentIndex !== -1) {
-    filtersState.dynamicComponentFilters = filtersState.dynamicComponentFilters.map((f) =>
-      f.id === id ? { ...f, isActive: !f.isActive } : f
-    );
-    logger.store('filters', 'Toggle dynamic component filter', { id });
-    notifyFiltersChange();
-    return;
-  }
-
-  // Check if it's a fix version filter
-  const fixVersionIndex = filtersState.dynamicFixVersionFilters.findIndex((f) => f.id === id);
-  if (fixVersionIndex !== -1) {
-    filtersState.dynamicFixVersionFilters = filtersState.dynamicFixVersionFilters.map((f) =>
-      f.id === id ? { ...f, isActive: !f.isActive } : f
-    );
-    logger.store('filters', 'Toggle dynamic fix version filter', { id });
-    notifyFiltersChange();
-    return;
+    if (index !== -1) {
+      filtersState.dynamicFilters[category] = filters.map((f) =>
+        f.id === id ? { ...f, isActive: !f.isActive } : f
+      );
+      logger.store('filters', `Toggle dynamic ${category} filter`, { id });
+      notifyFiltersChange();
+      return;
+    }
   }
 
   // Otherwise, toggle regular filter
