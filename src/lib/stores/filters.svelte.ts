@@ -779,7 +779,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
       label: data.displayName,
       jqlCondition: `assignee = ${jqlValue}`,
       category: 'assignee' as FilterCategory,
-      icon: 'user',
+      icon: 'person',
       avatarUrl: data.avatarUrl,
       color: getAvatarColor(colorIdentifier),
       isActive: activeIds.has(id)
@@ -830,7 +830,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
       label: name,
       jqlCondition: `component = "${name}"`,
       category: 'component' as FilterCategory,
-      icon: 'puzzle',
+      icon: 'component',
       isActive: activeIds.has(id)
     };
   });
@@ -846,7 +846,7 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
       label: name,
       jqlCondition: `fixVersion = "${name}"`,
       category: 'fixVersion' as FilterCategory,
-      icon: 'package',
+      icon: 'release',
       isActive: activeIds.has(id)
     };
   });
@@ -867,15 +867,15 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
 }
 
 /**
- * Get icon for status based on category
+ * Get icon for status based on category (Atlaskit icon names)
  */
 function getStatusIcon(categoryKey: string): string {
   switch (categoryKey) {
     case 'new':
     case 'undefined':
-      return 'circle-dot';
+      return 'circle-filled';
     case 'indeterminate':
-      return 'loader';
+      return 'refresh';
     case 'done':
       return 'check-circle';
     default:

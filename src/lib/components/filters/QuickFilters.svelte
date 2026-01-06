@@ -17,43 +17,9 @@
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
   import RecencyDropdown from './RecencyDropdown.svelte';
 
-  // Icon name mapping (Lucide names → Atlaskit names)
-  // Also supports direct Atlaskit names
+  // Convert icon name to Atlaskit icon name (pass-through with fallback)
   function getIconName(iconName: string | undefined): AtlaskitIconName {
-    switch (iconName) {
-      // Direct Atlaskit icon names (used by type filters)
-      case 'epic':
-      case 'story':
-      case 'task':
-      case 'bug':
-      case 'subtasks':
-        return iconName;
-      // Lucide to Atlaskit mappings (legacy support)
-      case 'user':
-        return 'person';
-      case 'circle':
-        return 'circle';
-      case 'zap':
-        return 'epic';
-      case 'circle-dot':
-        return 'circle-filled';
-      case 'loader':
-        return 'refresh';
-      case 'check-circle':
-        return 'check-circle';
-      case 'book-open':
-        return 'story';
-      case 'check-square':
-        return 'task';
-      case 'alert-triangle':
-        return 'warning';
-      case 'puzzle':
-        return 'component';
-      case 'package':
-        return 'release';
-      default:
-        return 'circle';
-    }
+    return (iconName as AtlaskitIconName) || 'circle';
   }
 
   // Mapping from filter category to field config ID for visibility check
