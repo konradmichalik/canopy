@@ -29,6 +29,7 @@
   let treeContainerRef: HTMLDivElement | null = $state(null);
   let expandedGroups = $state<Set<string>>(new Set());
   let entryNodeExpanded = $state(true);
+  let hasInitializedGroups = $state(false);
 
   // Get the current query
   const currentQuery = $derived(
@@ -53,12 +54,20 @@
       : []
   );
 
+  // Reset initialization flag when grouping mode changes
+  $effect(() => {
+    // Track groupingState.groupBy to reset when it changes
+    const _groupBy = groupingState.groupBy;
+    hasInitializedGroups = false;
+  });
+
   // Initialize expanded groups (expand active sprints by default)
   $effect(() => {
-    if (isGrouped && issueGroups.length > 0 && expandedGroups.size === 0) {
+    if (isGrouped && issueGroups.length > 0 && !hasInitializedGroups) {
+      hasInitializedGroups = true;
       const initialExpanded = new Set<string>();
       for (const group of issueGroups) {
-        // Auto-expand active sprints and first few groups
+        // Auto-expand active sprints
         if (
           group.metadata?.type === 'sprint' &&
           (group.metadata as { state: string }).state === 'active'
