@@ -1,6 +1,13 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import type { IssueGroup, SprintGroupMetadata, AssigneeGroupMetadata, StatusGroupMetadata } from '../../stores/grouping.svelte';
+  import {
+    calculateIssuesTimeProgress,
+    calculateIssuesResolutionProgress,
+    issuesHaveTimeTrackingData,
+    formatHours
+  } from '../../utils/aggregated-progress';
 
   interface Props {
     group: IssueGroup;
@@ -17,6 +24,11 @@
   const sprintMeta = $derived(isSprint ? (group.metadata as SprintGroupMetadata) : null);
   const assigneeMeta = $derived(isAssignee ? (group.metadata as AssigneeGroupMetadata) : null);
   const statusMeta = $derived(isStatus ? (group.metadata as StatusGroupMetadata) : null);
+
+  // Aggregated stats for all group types
+  const timeProgress = $derived(calculateIssuesTimeProgress(group.issues));
+  const resolutionProgress = $derived(calculateIssuesResolutionProgress(group.issues));
+  const hasTimeData = $derived(issuesHaveTimeTrackingData(group.issues));
 
   // Get initials from name for fallback avatar
   function getInitials(name: string): string {
@@ -116,26 +128,57 @@
     {/if}
   </div>
 
-  <!-- Progress (for sprints) -->
-  {#if isSprint && sprintMeta}
-    <div class="flex items-center gap-3">
-      <!-- Progress bar -->
-      <div class="w-20 h-1.5 bg-progress-track rounded-full overflow-hidden">
-        <div
-          class="h-full bg-brand-bold transition-all"
-          style="width: {sprintMeta.progress.percentage}%"
-        ></div>
-      </div>
+  <!-- Stats -->
+  <div class="flex items-center gap-4">
+    <!-- Time Progress -->
+    {#if hasTimeData}
+      {@const logged = timeProgress.logged}
+      {@const total = timeProgress.total}
+      {@const remaining = total - logged}
+      {@const loggedHours = formatHours(logged)}
+      {@const totalHours = formatHours(total)}
+      {@const remainingHours = formatHours(remaining)}
+      <Tooltip
+        text={`Time: ${timeProgress.percent}%\nLogged: ${loggedHours} / ${totalHours}\nRemaining: ${remainingHours}`}
+      >
+        <div class="flex items-center gap-2">
+          <AtlaskitIcon name="clock" size={14} color="var(--color-text-subtle)" />
+          <div class="w-16 h-1.5 bg-progress-track rounded-full overflow-hidden">
+            <div
+              class="h-full bg-success transition-all"
+              style="width: {timeProgress.percent}%"
+            ></div>
+          </div>
+          <span class="text-xs text-text-subtle w-8 text-right">
+            {timeProgress.percent}%
+          </span>
+        </div>
+      </Tooltip>
+    {/if}
 
-      <!-- Progress text -->
-      <span class="text-xs text-text-subtle whitespace-nowrap">
-        {sprintMeta.progress.done}/{sprintMeta.progress.total}
-      </span>
-    </div>
-  {:else}
-    <!-- Issue count for other groups -->
+    <!-- Resolution Progress -->
+    {#if group.issues.length > 0}
+      {@const done = resolutionProgress.done}
+      {@const total = resolutionProgress.total}
+      <Tooltip text={`Done: ${done} / ${total} (${resolutionProgress.percent}%)`}>
+        <div class="flex items-center gap-2">
+          <AtlaskitIcon name="subtasks" size={14} color="var(--color-text-subtle)" />
+          <div class="w-16 h-1.5 bg-progress-track rounded-full overflow-hidden">
+            <div
+              class="h-full bg-brand-bold transition-all"
+              style="width: {resolutionProgress.percent}%"
+            ></div>
+          </div>
+          <span class="text-xs text-text-subtle whitespace-nowrap">
+            {done}/{total}
+          </span>
+        </div>
+      </Tooltip>
+    {/if}
+
+    <!-- Issue count -->
     <span class="text-xs text-text-subtle px-2 py-0.5 bg-neutral rounded-full">
-      {group.issues.length}
+      {group.issues.length} Issues
     </span>
-  {/if}
+  </div>
 </div>
