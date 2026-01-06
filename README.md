@@ -2,6 +2,8 @@
 
 A web application for displaying JIRA tickets in a hierarchical tree structure (Epic → Story → Task → Subtask).
 
+![jira-hierarchy-tree-demo.jpg](docs/images/jira-hierarchy-tree-demo.jpg)
+
 ## Features
 
 ### Core Features
