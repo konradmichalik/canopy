@@ -5,14 +5,21 @@
   import QuickFilters from '../filters/QuickFilters.svelte';
   import FieldSelector from './FieldSelector.svelte';
   import SortDropdown from './SortDropdown.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
   import { getActiveFilterConditions } from '../../stores/filters.svelte';
   import { applyQuickFilters } from '../../utils/jql-helpers';
   import { debugModeState } from '../../stores/debugMode.svelte';
+  import {
+    keyboardNavState,
+    handleTreeKeydown,
+    clearFocus
+  } from '../../stores/keyboardNavigation.svelte';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
+  let treeContainerRef: HTMLDivElement | null = $state(null);
 
   async function handleRefresh(): Promise<void> {
     isRefreshing = true;
@@ -28,6 +35,28 @@
   const effectiveJql = $derived(
     issuesState.currentJql ? applyQuickFilters(issuesState.currentJql, filterConditions) : ''
   );
+
+  // Handle keyboard navigation
+  function onKeyDown(event: KeyboardEvent): void {
+    handleTreeKeydown(event);
+  }
+
+  // Clear focus when clicking outside tree nodes
+  function onTreeClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    // Only clear if clicking the container itself, not a tree node
+    if (target === treeContainerRef || target.classList.contains('tree-container')) {
+      clearFocus();
+    }
+  }
+
+  // Focus the container when entering for keyboard nav
+  function onTreeFocus(): void {
+    // Auto-select first node if nothing selected
+    if (!keyboardNavState.focusedKey && issuesState.treeNodes.length > 0) {
+      // Don't auto-select, let user press arrow key first
+    }
+  }
 </script>
 
 <div class="tree-view flex flex-col h-full">
@@ -39,6 +68,13 @@
         {#if !isEmpty}
           <span class="text-sm font-medium text-text">
             {stats.totalIssues} Issues
+          </span>
+        {/if}
+        {#if keyboardNavState.isNavigating}
+          <span
+            class="text-xs text-text-subtlest bg-surface-sunken px-1.5 py-0.5 rounded font-mono"
+          >
+            {keyboardNavState.focusedKey}
           </span>
         {/if}
       </div>
@@ -79,6 +115,31 @@
             class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''}
           />
         </button>
+
+        <div class="w-px h-4 bg-border mx-1"></div>
+
+        <Tooltip
+          content="<div class='text-left space-y-1'>
+            <div class='font-semibold mb-2'>Keyboard Shortcuts</div>
+            <div><kbd class='kbd'>↑</kbd> <kbd class='kbd'>↓</kbd> Navigate</div>
+            <div><kbd class='kbd'>←</kbd> Collapse / Parent</div>
+            <div><kbd class='kbd'>→</kbd> Expand / Child</div>
+            <div><kbd class='kbd'>Space</kbd> Toggle expand</div>
+            <div><kbd class='kbd'>Enter</kbd> Open in JIRA</div>
+            <div><kbd class='kbd'>Home</kbd> <kbd class='kbd'>End</kbd> First / Last</div>
+            <div><kbd class='kbd'>Esc</kbd> Clear selection</div>
+            <div class='text-text-subtlest mt-2 text-xs'>Also: j/k/h/l (vim)</div>
+          </div>"
+          placement="bottom-end"
+          html
+        >
+          <button
+            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
+            disabled={isEmpty || issuesState.isLoading}
+          >
+            <AtlaskitIcon name="keyboard" size={16} />
+          </button>
+        </Tooltip>
       </div>
     </div>
 
@@ -145,7 +206,16 @@
   </div>
 
   <!-- Tree Content -->
-  <div class="flex-1 overflow-auto p-2">
+  <div
+    bind:this={treeContainerRef}
+    class="flex-1 overflow-auto p-2 outline-none"
+    tabindex="0"
+    role="tree"
+    aria-label="Issue hierarchy tree"
+    onkeydown={onKeyDown}
+    onclick={onTreeClick}
+    onfocus={onTreeFocus}
+  >
     {#if issuesState.isLoading}
       <div class="tree-container">
         {#each Array(8) as _, i (i)}

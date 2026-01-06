@@ -5,12 +5,18 @@
   import { onMount } from 'svelte';
 
   interface Props {
-    text: string;
+    text?: string;
+    content?: string;
+    html?: boolean;
     position?: 'top' | 'bottom' | 'left' | 'right';
+    placement?: Placement;
     children: Snippet;
   }
 
-  let { text, position = 'top', children }: Props = $props();
+  let { text, content, html = false, position = 'top', placement, children }: Props = $props();
+
+  // Support both text and content props (content takes precedence)
+  const tooltipContent = $derived(content ?? text ?? '');
 
   let containerRef: HTMLSpanElement | undefined = $state();
   let tippyInstance: Instance | undefined;
@@ -20,22 +26,27 @@
     top: 'top',
     bottom: 'bottom',
     left: 'left',
-    right: 'right'
+    right: 'right',
+    'bottom-end': 'bottom-end',
+    'bottom-start': 'bottom-start',
+    'top-end': 'top-end',
+    'top-start': 'top-start'
   };
 
   onMount(() => {
     if (containerRef) {
       tippyInstance = tippy(containerRef, {
-        content: text,
-        placement: placementMap[position],
+        content: tooltipContent,
+        placement: placement ?? placementMap[position],
         arrow: true,
         animation: 'fade',
         duration: [150, 100],
         delay: [200, 0],
-        allowHTML: false,
+        allowHTML: html,
         appendTo: () => document.body,
         theme: 'custom',
-        maxWidth: 300
+        maxWidth: 300,
+        interactive: html
       });
     }
 
@@ -47,7 +58,7 @@
   // Update tooltip content when text changes
   $effect(() => {
     if (tippyInstance) {
-      tippyInstance.setContent(text);
+      tippyInstance.setContent(tooltipContent);
     }
   });
 </script>
