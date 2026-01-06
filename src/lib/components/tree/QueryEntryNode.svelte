@@ -2,9 +2,6 @@
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import type { JiraIssue, TreeNode, SavedQuery } from '../../types';
-  import { QUERY_COLORS } from '../../types';
-
-  type QueryColorDef = (typeof QUERY_COLORS)[number];
   import {
     calculateIssuesTimeProgress,
     calculateIssuesResolutionProgress,
@@ -35,11 +32,6 @@
   const resolutionProgress = $derived(calculateIssuesResolutionProgress(issues));
   const hasTimeData = $derived(issuesHaveTimeTrackingData(issues));
 
-  // Query color
-  const queryColor = $derived<QueryColorDef | undefined>(
-    query.color ? QUERY_COLORS.find((c) => c.id === query.color) : undefined
-  );
-
   function handleToggle(): void {
     onToggle?.();
   }
@@ -55,7 +47,7 @@
 <div class="query-entry-node">
   <!-- Header -->
   <div
-    class="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken hover:bg-surface-hovered rounded-lg cursor-pointer select-none transition-colors border-l-4 {queryColor?.border ?? 'border-border'}"
+    class="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken hover:bg-surface-hovered rounded-lg cursor-pointer select-none transition-colors"
     onclick={handleToggle}
     onkeydown={handleKeydown}
     role="button"

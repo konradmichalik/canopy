@@ -48,16 +48,14 @@
   <button
     onclick={toggleDropdown}
     onkeydown={handleKeydown}
-    class="flex items-center gap-1.5 px-2 py-1.5 text-sm rounded hover:bg-surface-hovered text-text-subtle transition-colors"
+    class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered"
     title="Group by"
   >
     <AtlaskitIcon name="layers" size={16} />
-    <span class="hidden sm:inline">
-      {selectedOption.label}
-    </span>
+    <span class="hidden sm:inline">Group: {selectedOption.label}</span>
     <AtlaskitIcon
       name="chevron-down"
-      size={14}
+      size={12}
       class="transition-transform {isOpen ? 'rotate-180' : ''}"
     />
   </button>
