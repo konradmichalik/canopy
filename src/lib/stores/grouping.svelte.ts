@@ -41,6 +41,8 @@ export interface AssigneeGroupMetadata {
   type: 'assignee';
   avatarUrl?: string;
   accountId?: string;
+  emailAddress?: string;
+  displayName?: string;
 }
 
 export interface StatusGroupMetadata {
@@ -231,7 +233,9 @@ function groupByAssignee(issues: JiraIssue[], epicLinkFieldId?: string): IssueGr
       metadata: {
         type: 'assignee',
         avatarUrl: assignee?.avatarUrls?.['24x24'],
-        accountId: assignee?.accountId ?? assignee?.name
+        accountId: assignee?.accountId ?? assignee?.name,
+        emailAddress: assignee?.emailAddress,
+        displayName: assignee?.displayName
       } as AssigneeGroupMetadata
     });
   }

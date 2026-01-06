@@ -57,8 +57,11 @@
     return AVATAR_COLORS[hash % AVATAR_COLORS.length];
   }
 
+  // Use same identifier fallback as Avatar.svelte for consistent colors
   const assigneeBorderColor = $derived(
-    assigneeMeta?.accountId ? getAvatarColor(assigneeMeta.accountId) : '#6B778C'
+    assigneeMeta
+      ? getAvatarColor(assigneeMeta.accountId || assigneeMeta.emailAddress || assigneeMeta.displayName || '')
+      : '#6B778C'
   );
 
   // Aggregated stats for all group types
