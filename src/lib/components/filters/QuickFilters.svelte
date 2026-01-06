@@ -90,8 +90,8 @@
   }
 </script>
 
-<div class="flex flex-col gap-3">
-  <!-- Filter groups -->
+<div class="flex items-center justify-between gap-4">
+  <!-- Filter groups (left side) -->
   <div class="flex flex-wrap items-center gap-2">
     <!-- Search input -->
     <div class="relative">
@@ -151,9 +151,14 @@
         />
       {/if}
     {/each}
+  </div>
 
-    <!-- Reset button -->
-    {#if activeCount > 0}
+  <!-- Active filters summary + Reset (right side) -->
+  {#if activeCount > 0}
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <span class="text-xs text-text-subtle">
+        {activeCount} filter{activeCount > 1 ? 's' : ''} active
+      </span>
       <button
         onclick={resetFilters}
         class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered transition-colors"
@@ -162,13 +167,6 @@
         <AtlaskitIcon name="cross" size={12} />
         Reset
       </button>
-    {/if}
-  </div>
-
-  <!-- Active filters summary -->
-  {#if activeCount > 0}
-    <div class="text-xs text-text-subtle">
-      {activeCount} filter{activeCount > 1 ? 's' : ''} active
     </div>
   {/if}
 </div>
