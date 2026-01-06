@@ -17,7 +17,7 @@
   const isInteractive = $derived(!!onClick);
 </script>
 
-<div class="{containerSize} flex items-center justify-center flex-shrink-0">
+<div class="{containerSize} flex items-center justify-center flex-shrink-0 {isInteractive ? '' : 'pointer-events-none'}">
   {#if isInteractive}
     <button
       onclick={onClick}
@@ -30,7 +30,7 @@
     </button>
   {:else}
     <span
-      class="p-0.5 text-text-subtle transition-transform duration-150 pointer-events-none {isExpanded ? 'rotate-90' : ''}"
+      class="p-0.5 text-text-subtle transition-transform duration-150 {isExpanded ? 'rotate-90' : ''}"
       aria-hidden="true"
     >
       <AtlaskitIcon name="chevron-right" size={iconSize} />
