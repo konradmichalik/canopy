@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import AccordionChevron from '../common/AccordionChevron.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import type { JiraIssue, TreeNode, SavedQuery } from '../../types';
   import {
@@ -55,12 +56,7 @@
     aria-expanded={isExpanded}
   >
     <!-- Expand/Collapse icon -->
-    <button
-      class="p-0.5 rounded hover:bg-surface-hovered-hovered text-text-subtle transition-transform {isExpanded ? 'rotate-90' : ''}"
-      tabindex="-1"
-    >
-      <AtlaskitIcon name="chevron-right" size={16} />
-    </button>
+    <AccordionChevron {isExpanded} />
 
     <!-- Query icon -->
     <AtlaskitIcon name="search" size={18} class="text-brand" />

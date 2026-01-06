@@ -62,25 +62,35 @@
 
   {#if isOpen}
     <div
-      class="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-lg shadow-lg z-50 py-1"
+      class="absolute right-0 top-full mt-1 min-w-[160px] bg-surface-overlay border border-border rounded-lg shadow-lg z-50"
     >
-      <div class="px-3 py-1.5 text-xs font-medium text-text-subtlest uppercase tracking-wide">
-        Group by
+      <div class="px-3 py-2 border-b border-border">
+        <span class="text-xs font-medium text-text-subtle">Group By</span>
       </div>
-
-      {#each GROUP_BY_OPTIONS as option (option.id)}
-        <button
-          onclick={() => selectOption(option.id)}
-          class="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-surface-hovered transition-colors
-            {groupingState.groupBy === option.id ? 'text-brand bg-brand-subtlest' : 'text-text'}"
-        >
-          <AtlaskitIcon name={option.icon as AtlaskitIconName} size={16} />
-          <span class="flex-1">{option.label}</span>
-          {#if groupingState.groupBy === option.id}
-            <AtlaskitIcon name="check" size={16} class="text-brand" />
-          {/if}
-        </button>
-      {/each}
+      <div class="py-1">
+        {#each GROUP_BY_OPTIONS as option (option.id)}
+          <button
+            onclick={() => selectOption(option.id)}
+            class="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left hover:bg-surface-hovered transition-colors"
+          >
+            <span class="flex items-center gap-2">
+              <span class="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                {#if groupingState.groupBy === option.id}
+                  <AtlaskitIcon name="check-mark" size={14} color="var(--color-text-brand)" />
+                {/if}
+              </span>
+              <AtlaskitIcon name={option.icon as AtlaskitIconName} size={16} class="text-text-subtle" />
+              <span
+                class={groupingState.groupBy === option.id
+                  ? 'text-text-brand font-medium'
+                  : 'text-text'}
+              >
+                {option.label}
+              </span>
+            </span>
+          </button>
+        {/each}
+      </div>
     </div>
   {/if}
 </div>
