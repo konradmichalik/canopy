@@ -24,6 +24,9 @@ let client: JiraClient | null = null;
 // Epic Link field ID (for Server instances)
 let epicLinkFieldId: string | null = null;
 
+// Sprint field ID (custom field for sprints)
+let sprintFieldId: string | null = null;
+
 /**
  * Initialize connection from storage
  */
@@ -54,14 +57,23 @@ export async function connect(config: JiraConnectionConfig): Promise<boolean> {
       throw new Error(result.error || 'Connection failed');
     }
 
+    // Find the Sprint field (both Cloud and Server)
+    sprintFieldId = await client.findSprintFieldId();
+    if (sprintFieldId) {
+      logger.info(`Found Sprint field: ${sprintFieldId}`);
+    }
+
     // For Server instances, find the Epic Link field
     if (config.instanceType === 'server') {
       epicLinkFieldId = await client.findEpicLinkFieldId();
       if (epicLinkFieldId) {
         logger.info(`Found Epic Link field: ${epicLinkFieldId}`);
-        // Recreate client with Epic Link field
-        client = createJiraClient(config, epicLinkFieldId);
       }
+    }
+
+    // Recreate client with discovered custom fields
+    if (epicLinkFieldId || sprintFieldId) {
+      client = createJiraClient(config, epicLinkFieldId ?? undefined, sprintFieldId ?? undefined);
     }
 
     connectionState.config = config;
@@ -106,6 +118,7 @@ export function disconnect(): void {
   connectionState.lastConnected = null;
   client = null;
   epicLinkFieldId = null;
+  sprintFieldId = null;
   removeStorageItem(STORAGE_KEYS.CONNECTION);
   logger.connection('Disconnected');
 }
@@ -122,6 +135,13 @@ export function getClient(): JiraClient | null {
  */
 export function getEpicLinkFieldId(): string | null {
   return epicLinkFieldId;
+}
+
+/**
+ * Get Sprint field ID (custom field)
+ */
+export function getSprintFieldId(): string | null {
+  return sprintFieldId;
 }
 
 /**

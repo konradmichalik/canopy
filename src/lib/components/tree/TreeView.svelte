@@ -10,12 +10,11 @@
   import QueryEntryNode from './QueryEntryNode.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
-  import { getEpicLinkFieldId } from '../../stores/connection.svelte';
   import { routerState } from '../../stores/router.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
   import { getActiveFilterConditions } from '../../stores/filters.svelte';
-  import { applyQuickFilters } from '../../utils/jql-helpers';
+  import { applyQuickFilters, setOrderBy, hasOrderByClause } from '../../utils/jql-helpers';
   import { debugModeState } from '../../stores/debugMode.svelte';
   import {
     keyboardNavState,
@@ -50,7 +49,7 @@
   const isGrouped = $derived(groupingState.groupBy !== 'none');
   const issueGroups = $derived<IssueGroup[]>(
     isGrouped
-      ? groupIssues(issuesState.rawIssues, groupingState.groupBy, getEpicLinkFieldId() ?? undefined, sortConfigState.config)
+      ? groupIssues(issuesState.rawIssues, groupingState.groupBy, sortConfigState.config)
       : []
   );
 
@@ -93,11 +92,18 @@
     expandedGroups = new Set();
   }
 
-  // Debug: Compute effective JQL with filters
+  // Debug: Compute effective JQL with filters and sort
   const filterConditions = $derived(getActiveFilterConditions());
-  const effectiveJql = $derived(
-    issuesState.currentJql ? applyQuickFilters(issuesState.currentJql, filterConditions) : ''
-  );
+  const effectiveJql = $derived.by(() => {
+    if (!issuesState.currentJql) return '';
+    let jql = applyQuickFilters(issuesState.currentJql, filterConditions);
+    // Add ORDER BY if base JQL doesn't have one
+    if (!hasOrderByClause(issuesState.currentJql)) {
+      const { field, direction } = sortConfigState.config;
+      jql = setOrderBy(jql, field, direction);
+    }
+    return jql;
+  });
 
   // Handle keyboard navigation
   function onKeyDown(event: KeyboardEvent): void {

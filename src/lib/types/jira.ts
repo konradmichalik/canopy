@@ -309,19 +309,46 @@ export const SPRINT_STATE_ORDER: Record<SprintState, number> = {
 };
 
 /**
- * Extract sprint data from an issue's custom fields
- * Sprint data can be in various custom fields depending on JIRA configuration
+ * Extract sprint data from an issue's fields
+ * Sprint data can be in 'sprint' field (Cloud) or custom fields (Server)
  */
 export function extractSprints(issue: JiraIssue): JiraSprint[] {
   const fields = issue.fields as Record<string, unknown>;
 
-  // Look for sprint field (usually customfield_XXXXX)
+  // First, check for direct 'sprint' field (JIRA Cloud)
+  const sprintField = fields.sprint;
+  if (sprintField) {
+    const sprints = tryParseSprintData(sprintField);
+    if (sprints.length > 0) {
+      return sprints;
+    }
+  }
+
+  // Then look for sprint in custom fields (Server/Data Center)
   for (const [key, value] of Object.entries(fields)) {
     if (!key.startsWith('customfield_')) continue;
-    if (!Array.isArray(value)) continue;
+    if (!value) continue;
 
-    // Check if it looks like sprint data
+    const sprints = tryParseSprintData(value);
+    if (sprints.length > 0) {
+      return sprints;
+    }
+  }
+
+  return [];
+}
+
+/**
+ * Try to parse sprint data from various formats
+ */
+function tryParseSprintData(value: unknown): JiraSprint[] {
+  // Handle array format
+  if (Array.isArray(value)) {
+    if (value.length === 0) return [];
+
     const firstItem = value[0];
+
+    // Check if it looks like sprint objects
     if (
       firstItem &&
       typeof firstItem === 'object' &&
@@ -336,6 +363,17 @@ export function extractSprints(issue: JiraIssue): JiraSprint[] {
     if (typeof firstItem === 'string' && firstItem.includes('name=')) {
       return value.map((s) => parseSprintString(s as string)).filter(Boolean) as JiraSprint[];
     }
+  }
+
+  // Handle single sprint object (some JIRA configurations)
+  if (
+    value &&
+    typeof value === 'object' &&
+    'id' in value &&
+    'name' in value &&
+    'state' in value
+  ) {
+    return [value as JiraSprint];
   }
 
   return [];

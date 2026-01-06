@@ -4,16 +4,14 @@
  */
 
 import type { JiraIssue, JiraSprint, SprintState } from '../types/jira';
-import type { TreeNode, SortConfig } from '../types/tree';
+import type { TreeNode, SortConfig, GroupByOption } from '../types/tree';
 import { extractSprints, SPRINT_STATE_ORDER } from '../types/jira';
-import { buildHierarchy } from '../utils/hierarchy-builder';
+import { buildFlatList } from '../utils/hierarchy-builder';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { logger } from '../utils/logger';
 
-// ============================================
-// Types
-// ============================================
-
-export type GroupByOption = 'none' | 'sprint' | 'assignee' | 'status' | 'project';
+// Re-export GroupByOption for convenience
+export type { GroupByOption } from '../types/tree';
 
 export interface IssueGroup {
   id: string;
@@ -60,22 +58,67 @@ export interface ProjectGroupMetadata {
 export type GroupMetadata = SprintGroupMetadata | AssigneeGroupMetadata | StatusGroupMetadata | ProjectGroupMetadata;
 
 // ============================================
+// Callbacks for grouping changes
+// ============================================
+
+const groupingChangeCallbacks: Array<(groupBy: GroupByOption) => void> = [];
+
+export function setGroupingChangeCallback(callback: (groupBy: GroupByOption) => void): void {
+  if (!groupingChangeCallbacks.includes(callback)) {
+    groupingChangeCallbacks.push(callback);
+  }
+}
+
+function notifyChange(): void {
+  for (const callback of groupingChangeCallbacks) {
+    callback(groupingState.groupBy);
+  }
+}
+
+// ============================================
 // State
 // ============================================
 
-const initialGroupBy = getStorageItem<GroupByOption>(STORAGE_KEYS.GROUP_BY) ?? 'none';
-
 export const groupingState = $state({
-  groupBy: initialGroupBy as GroupByOption
+  groupBy: 'none' as GroupByOption,
+  currentQueryId: null as string | null
 });
 
 // ============================================
 // Actions
 // ============================================
 
+/**
+ * Load grouping configuration for a query
+ */
+export function loadGroupConfig(queryId: string, groupBy?: GroupByOption): void {
+  groupingState.groupBy = groupBy || 'none';
+  groupingState.currentQueryId = queryId;
+  logger.debug('Grouping config loaded for query', { queryId, groupBy: groupingState.groupBy });
+}
+
+/**
+ * Initialize grouping configuration with defaults
+ */
+export function initializeGroupConfig(): void {
+  groupingState.groupBy = 'none';
+  groupingState.currentQueryId = null;
+  logger.debug('Grouping config initialized with defaults');
+}
+
 export function setGroupBy(groupBy: GroupByOption): void {
-  groupingState.groupBy = groupBy;
-  setStorageItem(STORAGE_KEYS.GROUP_BY, groupBy);
+  if (groupingState.groupBy !== groupBy) {
+    groupingState.groupBy = groupBy;
+    notifyChange();
+    logger.debug(`Grouping set to "${groupBy}"`);
+  }
+}
+
+/**
+ * Get current grouping option
+ */
+export function getGroupBy(): GroupByOption {
+  return groupingState.groupBy;
 }
 
 // ============================================
@@ -84,22 +127,23 @@ export function setGroupBy(groupBy: GroupByOption): void {
 
 /**
  * Group issues by the selected grouping option
+ * Note: Grouped views use a flat list (no hierarchy) since parent-child
+ * relationships may span across different groups
  */
 export function groupIssues(
   issues: JiraIssue[],
   groupBy: GroupByOption,
-  epicLinkFieldId?: string,
   sortConfig?: SortConfig
 ): IssueGroup[] {
   switch (groupBy) {
     case 'sprint':
-      return groupBySprint(issues, epicLinkFieldId, sortConfig);
+      return groupBySprint(issues, sortConfig);
     case 'assignee':
-      return groupByAssignee(issues, epicLinkFieldId, sortConfig);
+      return groupByAssignee(issues, sortConfig);
     case 'status':
-      return groupByStatus(issues, epicLinkFieldId, sortConfig);
+      return groupByStatus(issues, sortConfig);
     case 'project':
-      return groupByProject(issues, epicLinkFieldId, sortConfig);
+      return groupByProject(issues, sortConfig);
     default:
       return [];
   }
@@ -108,8 +152,22 @@ export function groupIssues(
 /**
  * Group issues by sprint
  */
-function groupBySprint(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig?: SortConfig): IssueGroup[] {
+function groupBySprint(issues: JiraIssue[], sortConfig?: SortConfig): IssueGroup[] {
   const sprintMap = new Map<string, { sprint: JiraSprint | null; issues: JiraIssue[] }>();
+
+  // Debug: Log first issue to see sprint field structure
+  if (issues.length > 0) {
+    const firstIssue = issues[0];
+    const fields = firstIssue.fields as Record<string, unknown>;
+    const customFieldsWithValues = Object.entries(fields)
+      .filter(([k, v]) => k.startsWith('customfield_') && v !== null && v !== undefined)
+      .map(([k, v]) => ({ key: k, type: Array.isArray(v) ? 'array' : typeof v, value: v }));
+    console.debug('[Sprint Grouping] First issue fields:', {
+      key: firstIssue.key,
+      sprint: fields.sprint,
+      customFieldsWithValues
+    });
+  }
 
   // Group issues by sprint
   for (const issue of issues) {
@@ -145,7 +203,7 @@ function groupBySprint(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig
     const totalCount = groupIssues.length;
 
     // Build hierarchy within the group
-    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId, sortConfig });
+    const treeNodes = buildFlatList(groupIssues, { sortConfig });
 
     // Format dates
     let subtitle: string | undefined;
@@ -205,7 +263,7 @@ function groupBySprint(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig
 /**
  * Group issues by assignee
  */
-function groupByAssignee(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig?: SortConfig): IssueGroup[] {
+function groupByAssignee(issues: JiraIssue[], sortConfig?: SortConfig): IssueGroup[] {
   const assigneeMap = new Map<string, JiraIssue[]>();
 
   for (const issue of issues) {
@@ -224,7 +282,7 @@ function groupByAssignee(issues: JiraIssue[], epicLinkFieldId?: string, sortConf
   for (const [id, groupIssues] of assigneeMap) {
     const firstIssue = groupIssues[0];
     const assignee = firstIssue.fields.assignee;
-    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId, sortConfig });
+    const treeNodes = buildFlatList(groupIssues, { sortConfig });
 
     groups.push({
       id: `assignee-${id}`,
@@ -234,7 +292,9 @@ function groupByAssignee(issues: JiraIssue[], epicLinkFieldId?: string, sortConf
       metadata: {
         type: 'assignee',
         avatarUrl: assignee?.avatarUrls?.['24x24'],
-        accountId: assignee?.accountId ?? assignee?.name,
+        // Keep raw values without fallbacks - the color logic in GroupHeader uses the same
+        // fallback chain as Avatar.svelte: accountId || emailAddress || displayName
+        accountId: assignee?.accountId,
         emailAddress: assignee?.emailAddress,
         displayName: assignee?.displayName
       } as AssigneeGroupMetadata
@@ -254,7 +314,7 @@ function groupByAssignee(issues: JiraIssue[], epicLinkFieldId?: string, sortConf
 /**
  * Group issues by status
  */
-function groupByStatus(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig?: SortConfig): IssueGroup[] {
+function groupByStatus(issues: JiraIssue[], sortConfig?: SortConfig): IssueGroup[] {
   const statusMap = new Map<string, JiraIssue[]>();
 
   for (const issue of issues) {
@@ -272,7 +332,7 @@ function groupByStatus(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig
   for (const [id, groupIssues] of statusMap) {
     const firstIssue = groupIssues[0];
     const status = firstIssue.fields.status;
-    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId, sortConfig });
+    const treeNodes = buildFlatList(groupIssues, { sortConfig });
 
     groups.push({
       id: `status-${id}`,
@@ -306,7 +366,7 @@ function groupByStatus(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig
 /**
  * Group issues by project
  */
-function groupByProject(issues: JiraIssue[], epicLinkFieldId?: string, sortConfig?: SortConfig): IssueGroup[] {
+function groupByProject(issues: JiraIssue[], sortConfig?: SortConfig): IssueGroup[] {
   const projectMap = new Map<string, JiraIssue[]>();
 
   for (const issue of issues) {
@@ -324,7 +384,7 @@ function groupByProject(issues: JiraIssue[], epicLinkFieldId?: string, sortConfi
   for (const [key, groupIssues] of projectMap) {
     const firstIssue = groupIssues[0];
     const project = firstIssue.fields.project;
-    const treeNodes = buildHierarchy(groupIssues, { epicLinkFieldId, sortConfig });
+    const treeNodes = buildFlatList(groupIssues, { sortConfig });
 
     groups.push({
       id: `project-${key}`,
@@ -364,7 +424,7 @@ function formatShortDate(date: Date): string {
 export const GROUP_BY_OPTIONS: { id: GroupByOption; label: string; icon: string }[] = [
   { id: 'none', label: 'No Grouping', icon: 'list' },
   { id: 'sprint', label: 'Sprint', icon: 'sprint' },
-  { id: 'assignee', label: 'Assignee', icon: 'user' },
+  { id: 'assignee', label: 'Assignee', icon: 'person' },
   { id: 'status', label: 'Status', icon: 'status' },
   { id: 'project', label: 'Project', icon: 'folder' }
 ];

@@ -82,6 +82,8 @@ export const QUERY_COLORS: { id: QueryColor; label: string; bg: string; border: 
   { id: 'teal', label: 'Teal', bg: 'bg-teal-500', border: 'border-teal-500' }
 ];
 
+export type GroupByOption = 'none' | 'sprint' | 'assignee' | 'status' | 'project';
+
 export interface SavedQuery {
   id: string;
   title: string;
@@ -94,6 +96,8 @@ export interface SavedQuery {
   activeFilterIds?: string[];
   searchText?: string;
   sortConfig?: SortConfig;
+  /** Grouping mode for the tree view */
+  groupBy?: GroupByOption;
   /** Show a collapsible entry node wrapper with aggregated stats */
   showEntryNode?: boolean;
 }

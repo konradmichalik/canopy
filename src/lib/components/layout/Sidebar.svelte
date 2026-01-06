@@ -28,7 +28,9 @@
     setSearchTextChangeCallback
   } from '../../stores/filters.svelte';
   import { loadSortConfig, setSortConfigChangeCallback } from '../../stores/sortConfig.svelte';
-  import type { SortConfig } from '../../types/tree';
+  import { loadGroupConfig, setGroupingChangeCallback } from '../../stores/grouping.svelte';
+  import type { SortConfig, GroupByOption } from '../../types/tree';
+  import { updateQueryGroupBy } from '../../stores/jql.svelte';
 
   interface Props {
     width: number;
@@ -78,6 +80,13 @@
         updateQuerySortConfig(routerState.activeQueryId, sortConfig);
       }
     });
+
+    // Set callback for grouping changes
+    setGroupingChangeCallback((groupBy: GroupByOption) => {
+      if (routerState.activeQueryId) {
+        updateQueryGroupBy(routerState.activeQueryId, groupBy);
+      }
+    });
   });
 
   function handleNewQuery(): void {
@@ -116,6 +125,7 @@
     loadFieldConfig(query.id, query.displayFields);
     loadActiveFilters(query.activeFilterIds, query.searchText);
     loadSortConfig(query.id, query.sortConfig);
+    loadGroupConfig(query.id, query.groupBy);
     await loadIssues(query.jql);
   }
 

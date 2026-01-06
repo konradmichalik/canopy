@@ -16,9 +16,10 @@ export { JiraServerClient } from './jira-server';
  */
 export function createJiraClient(
   config: JiraConnectionConfig,
-  epicLinkFieldId?: string
+  epicLinkFieldId?: string,
+  sprintFieldId?: string
 ): JiraClient {
-  const options = { config, epicLinkFieldId };
+  const options = { config, epicLinkFieldId, sprintFieldId };
 
   if (config.instanceType === 'cloud') {
     return new JiraCloudClient(options);

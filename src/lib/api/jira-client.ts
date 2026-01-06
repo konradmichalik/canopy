@@ -32,12 +32,14 @@ export const DEFAULT_FIELDS = [
   'aggregateprogress',
   'labels',
   'components',
-  'comment'
+  'comment',
+  'sprint' // For sprint grouping (Cloud uses 'sprint', Server may need custom field discovery)
 ];
 
 export interface JiraClientOptions {
   config: JiraConnectionConfig;
   epicLinkFieldId?: string; // For Server: customfield_XXXXX
+  sprintFieldId?: string; // For sprint grouping: customfield_XXXXX
 }
 
 export interface SearchOptions {
@@ -51,10 +53,12 @@ export interface SearchOptions {
 export abstract class JiraClient {
   protected config: JiraConnectionConfig;
   protected epicLinkFieldId?: string;
+  protected sprintFieldId?: string;
 
   constructor(options: JiraClientOptions) {
     this.config = options.config;
     this.epicLinkFieldId = options.epicLinkFieldId;
+    this.sprintFieldId = options.sprintFieldId;
   }
 
   protected get baseUrl(): string {
@@ -153,8 +157,14 @@ export abstract class JiraClient {
   async searchIssues(options: SearchOptions): Promise<JiraSearchResponse> {
     const { jql, startAt = 0, maxResults = 100, fields = DEFAULT_FIELDS, nextPageToken } = options;
 
-    // Include Epic Link field for Server instances
-    const allFields = this.epicLinkFieldId ? [...fields, this.epicLinkFieldId] : fields;
+    // Include discovered custom fields (Epic Link, Sprint)
+    let allFields = [...fields];
+    if (this.epicLinkFieldId && !allFields.includes(this.epicLinkFieldId)) {
+      allFields.push(this.epicLinkFieldId);
+    }
+    if (this.sprintFieldId && !allFields.includes(this.sprintFieldId)) {
+      allFields.push(this.sprintFieldId);
+    }
 
     if (this.config.instanceType === 'cloud') {
       // New Cloud API format
@@ -251,6 +261,28 @@ export abstract class JiraClient {
       return epicLinkField?.id || null;
     } catch {
       logger.warn('Could not find Epic Link field');
+      return null;
+    }
+  }
+
+  /**
+   * Find the Sprint field ID
+   */
+  async findSprintFieldId(): Promise<string | null> {
+    try {
+      const fields = await this.getFields();
+      const sprintField = fields.find(
+        (f) =>
+          f.name === 'Sprint' ||
+          f.name === 'Sprints' ||
+          f.schema?.custom === 'com.pyxis.greenhopper.jira:gh-sprint'
+      );
+      if (sprintField) {
+        logger.info(`Found Sprint field: ${sprintField.id} (${sprintField.name})`);
+      }
+      return sprintField?.id || null;
+    } catch {
+      logger.warn('Could not find Sprint field');
       return null;
     }
   }

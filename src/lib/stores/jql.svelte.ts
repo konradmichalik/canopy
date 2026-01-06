@@ -3,7 +3,7 @@
  * Manages saved queries with Svelte 5 Runes
  */
 
-import type { SavedQuery, QueryColor, SortConfig } from '../types';
+import type { SavedQuery, QueryColor, SortConfig, GroupByOption } from '../types';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { generateQueryId } from '../types/tree';
 import { logger } from '../utils/logger';
@@ -78,6 +78,7 @@ export function updateQuery(
       | 'activeFilterIds'
       | 'searchText'
       | 'sortConfig'
+      | 'groupBy'
       | 'showEntryNode'
     >
   >
@@ -132,6 +133,13 @@ export function updateQuerySearchText(id: string, searchText: string): boolean {
  */
 export function updateQuerySortConfig(id: string, sortConfig: SortConfig): boolean {
   return updateQuery(id, { sortConfig });
+}
+
+/**
+ * Update grouping configuration for a query
+ */
+export function updateQueryGroupBy(id: string, groupBy: GroupByOption): boolean {
+  return updateQuery(id, { groupBy });
 }
 
 /**

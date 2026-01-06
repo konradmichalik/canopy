@@ -14,6 +14,10 @@ interface BuildOptions {
   sortConfig?: SortConfig;
 }
 
+interface FlatListOptions {
+  sortConfig?: SortConfig;
+}
+
 /**
  * Build a tree structure from a flat list of JIRA issues
  */
@@ -84,6 +88,32 @@ export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}):
   );
 
   return rootNodes;
+}
+
+/**
+ * Build a flat list of tree nodes without hierarchy
+ * Used when grouping is active, since parent-child relationships
+ * may span across different groups
+ */
+export function buildFlatList(issues: JiraIssue[], options: FlatListOptions = {}): TreeNode[] {
+  const { sortConfig } = options;
+
+  // Create flat tree nodes (no children, no expansion)
+  const nodes: TreeNode[] = issues.map((issue) => ({
+    issue,
+    children: [],
+    depth: 0,
+    isExpanded: false,
+    isVisible: true,
+    parentKey: null
+  }));
+
+  // Sort by hierarchy level first, then by configured field
+  nodes.sort((a, b) => compareByHierarchy(a, b, sortConfig));
+
+  logger.debug(`Built flat list: ${issues.length} issues`);
+
+  return nodes;
 }
 
 /**
