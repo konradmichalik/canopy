@@ -2,7 +2,7 @@
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { SavedQuery, QueryColor } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
-  import { validateJql } from '../../utils/jql-helpers';
+  import { validateJql, validateJqlExtended } from '../../utils/jql-helpers';
 
   interface Props {
     query?: SavedQuery | null;
@@ -16,6 +16,10 @@
   let jql = $state(query?.jql || '');
   let color = $state<QueryColor | undefined>(query?.color);
   let error = $state<string | null>(null);
+
+  // Real-time JQL validation
+  const jqlValidation = $derived(validateJqlExtended(jql));
+  const hasJqlWarning = $derived(!jqlValidation.isValid && jql.trim().length > 0);
 
   function handleSubmit(e: Event): void {
     e.preventDefault();
@@ -90,11 +94,22 @@
           bind:value={jql}
           placeholder="project = MYPROJECT AND sprint in openSprints()"
           rows="4"
-          class="w-full px-3 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent font-mono text-sm resize-none"
+          class="w-full px-3 py-2 bg-input border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:border-transparent font-mono text-sm resize-none transition-colors
+            {hasJqlWarning
+            ? 'border-border-danger focus:ring-border-danger'
+            : 'border-border focus:ring-border-focused'}"
         ></textarea>
-        <p class="mt-1 text-xs text-text-subtle">
-          Enter a valid JQL query. The app will automatically build the hierarchy from the results.
-        </p>
+        {#if hasJqlWarning}
+          <div class="flex items-center gap-1.5 mt-1.5 text-xs text-text-warning">
+            <AtlaskitIcon name="warning" size={14} />
+            <span>{jqlValidation.error}</span>
+          </div>
+        {:else}
+          <p class="mt-1 text-xs text-text-subtle">
+            Enter a valid JQL query. The app will automatically build the hierarchy from the
+            results.
+          </p>
+        {/if}
       </div>
 
       <!-- Color Selection -->
