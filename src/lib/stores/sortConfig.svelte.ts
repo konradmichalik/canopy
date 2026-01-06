@@ -23,13 +23,16 @@ export interface SortConfigState {
 }
 
 // ============================================
-// Callback for persistence
+// Callbacks for sort config changes
 // ============================================
 
-let onSortConfigChange: ((config: SortConfig) => void) | null = null;
+const sortConfigChangeCallbacks: Array<(config: SortConfig) => void> = [];
 
 export function setSortConfigChangeCallback(callback: (config: SortConfig) => void): void {
-  onSortConfigChange = callback;
+  // Avoid duplicate callbacks
+  if (!sortConfigChangeCallbacks.includes(callback)) {
+    sortConfigChangeCallbacks.push(callback);
+  }
 }
 
 // ============================================
@@ -129,7 +132,8 @@ export { SORT_FIELDS, DEFAULT_SORT_CONFIG };
 // ============================================
 
 function notifyChange(): void {
-  if (onSortConfigChange) {
-    onSortConfigChange(getSortConfig());
+  const config = getSortConfig();
+  for (const callback of sortConfigChangeCallbacks) {
+    callback(config);
   }
 }
