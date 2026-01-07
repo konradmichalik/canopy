@@ -4,7 +4,7 @@
   import MainLayout from './lib/components/layout/MainLayout.svelte';
   import AppLoader from './lib/components/common/AppLoader.svelte';
   import { connectionState, initializeConnection } from './lib/stores/connection.svelte';
-  import { initializeRouter } from './lib/stores/router.svelte';
+  import { initializeRouter, cleanupRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
   import { initializeFieldConfig } from './lib/stores/fieldConfig.svelte';
   import { initializeDisplayDensity } from './lib/stores/displayDensity.svelte';
@@ -41,6 +41,7 @@
 
     return () => {
       cleanupTheme();
+      cleanupRouter();
     };
   });
 </script>

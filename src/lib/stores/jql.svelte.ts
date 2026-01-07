@@ -7,6 +7,7 @@ import type { SavedQuery, QueryColor, SortConfig, GroupByOption } from '../types
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { generateQueryId } from '../types/tree';
 import { logger } from '../utils/logger';
+import { generateSlug, slugsMatch } from '../utils/slug';
 
 // State container object
 export const jqlState = $state({
@@ -40,6 +41,32 @@ export function getQueries(): SavedQuery[] {
  */
 export function getQueryById(id: string): SavedQuery | undefined {
   return jqlState.queries.find((q) => q.id === id);
+}
+
+/**
+ * Get a query by slug (URL-friendly title)
+ */
+export function getQueryBySlug(slug: string): SavedQuery | undefined {
+  return jqlState.queries.find((q) => generateSlug(q.title) === slug);
+}
+
+/**
+ * Get slug for a query
+ */
+export function getQuerySlug(query: SavedQuery): string {
+  return generateSlug(query.title);
+}
+
+/**
+ * Check if a title is unique (considering slug collisions)
+ * @param title - The title to check
+ * @param excludeId - Optional query ID to exclude (for edits)
+ * @returns true if title is unique, false if it would create a slug collision
+ */
+export function isTitleUnique(title: string, excludeId?: string): boolean {
+  return !jqlState.queries.some(
+    (q) => q.id !== excludeId && slugsMatch(q.title, title)
+  );
 }
 
 /**

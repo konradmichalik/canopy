@@ -4,6 +4,8 @@
   import type { SavedQuery, QueryColor } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { validateJql, validateJqlExtended } from '../../utils/jql-helpers';
+  import { isTitleUnique } from '../../stores/jql.svelte';
+  import { generateSlug } from '../../utils/slug';
 
   interface Props {
     query?: SavedQuery | null;
@@ -23,6 +25,13 @@
   const jqlValidation = $derived(validateJqlExtended(jql));
   const hasJqlWarning = $derived(!jqlValidation.isValid && jql.trim().length > 0);
 
+  // Real-time title validation
+  const titleSlug = $derived(generateSlug(title.trim()));
+  const isTitleDuplicate = $derived(
+    title.trim().length > 0 && !isTitleUnique(title.trim(), query?.id)
+  );
+  const hasTitleWarning = $derived(isTitleDuplicate);
+
   function handleSubmit(e: Event): void {
     e.preventDefault();
     error = null;
@@ -32,6 +41,11 @@
 
     if (!trimmedTitle) {
       error = 'Title is required';
+      return;
+    }
+
+    if (!isTitleUnique(trimmedTitle, query?.id)) {
+      error = 'A query with this title already exists';
       return;
     }
 
@@ -85,8 +99,21 @@
           type="text"
           bind:value={title}
           placeholder="e.g., Sprint 42 Backlog"
-          class="w-full px-3 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
+          class="w-full px-3 py-2 bg-input border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:border-transparent transition-colors
+            {hasTitleWarning
+            ? 'border-border-danger focus:ring-border-danger'
+            : 'border-border focus:ring-border-focused'}"
         />
+        {#if hasTitleWarning}
+          <div class="flex items-center gap-1.5 mt-1.5 text-xs text-text-danger">
+            <AtlaskitIcon name="warning" size={14} />
+            <span>A query with this title already exists</span>
+          </div>
+        {:else if titleSlug}
+          <p class="mt-1 text-xs text-text-subtle">
+            URL: /query/<span class="font-mono text-text-subtlest">{titleSlug}</span>
+          </p>
+        {/if}
       </div>
 
       <div>

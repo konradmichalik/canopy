@@ -16,7 +16,13 @@
     updateQuerySearchText,
     updateQuerySortConfig
   } from '../../stores/jql.svelte';
-  import { routerState, setActiveQuery } from '../../stores/router.svelte';
+  import {
+    routerState,
+    setActiveQuery,
+    onUrlSlugChange,
+    getSlugFromUrl
+  } from '../../stores/router.svelte';
+  import { getQueryBySlug, getQuerySlug } from '../../stores/jql.svelte';
   import { loadIssues, clearIssues } from '../../stores/issues.svelte';
   import {
     loadFieldConfig,
@@ -52,6 +58,34 @@
   // Import state
   let importFileInput: HTMLInputElement;
   let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Load a query and its associated config
+  async function loadQuery(query: SavedQuery, updateUrl: boolean = true): Promise<void> {
+    const slug = getQuerySlug(query);
+    setActiveQuery(query.id, slug, updateUrl);
+    loadFieldConfig(query.id, query.displayFields);
+    loadActiveFilters(query.activeFilterIds, query.searchText);
+    loadSortConfig(query.id, query.sortConfig);
+    loadGroupConfig(query.id, query.groupBy);
+    await loadIssues(query.jql);
+  }
+
+  // Handle slug from URL (initial load or browser navigation)
+  async function handleUrlSlug(slug: string | null): Promise<void> {
+    if (!slug) {
+      setActiveQuery(null, undefined, false);
+      clearIssues();
+      return;
+    }
+
+    const query = getQueryBySlug(slug);
+    if (query) {
+      await loadQuery(query, false);
+    } else {
+      setActiveQuery(null);
+      clearIssues();
+    }
+  }
 
   // Initialize on mount (run only once)
   $effect(() => {
@@ -93,6 +127,16 @@
         updateQueryGroupBy(routerState.activeQueryId, groupBy);
       }
     });
+
+    // Register callback for browser navigation (back/forward)
+    const unsubscribe = onUrlSlugChange(handleUrlSlug);
+
+    // Load query from URL on initial page load
+    handleUrlSlug(getSlugFromUrl());
+
+    return () => {
+      unsubscribe();
+    };
   });
 
   function handleNewQuery(): void {
@@ -132,12 +176,7 @@
   }
 
   async function handleSelectQuery(query: SavedQuery): Promise<void> {
-    setActiveQuery(query.id);
-    loadFieldConfig(query.id, query.displayFields);
-    loadActiveFilters(query.activeFilterIds, query.searchText);
-    loadSortConfig(query.id, query.sortConfig);
-    loadGroupConfig(query.id, query.groupBy);
-    await loadIssues(query.jql);
+    await loadQuery(query);
   }
 
   function handleCancelForm(): void {
