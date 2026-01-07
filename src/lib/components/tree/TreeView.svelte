@@ -24,6 +24,7 @@
   } from '../../stores/keyboardNavigation.svelte';
   import { groupingState, groupIssues, type IssueGroup } from '../../stores/grouping.svelte';
   import { sortConfigState } from '../../stores/sortConfig.svelte';
+  import { connectionState } from '../../stores/connection.svelte';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
@@ -102,7 +103,7 @@
     expandedGroups = new SvelteSet();
   }
 
-  // Debug: Compute effective JQL with filters and sort
+  // Compute effective JQL with filters and sort
   const filterConditions = $derived(getActiveFilterConditions());
   const effectiveJql = $derived.by(() => {
     if (!issuesState.currentJql) return '';
@@ -114,6 +115,19 @@
     }
     return jql;
   });
+
+  // Build JIRA URL for opening in browser
+  const jiraSearchUrl = $derived.by(() => {
+    if (!connectionState.config?.baseUrl || !effectiveJql) return '';
+    const encodedJql = encodeURIComponent(effectiveJql);
+    return `${connectionState.config.baseUrl}/issues/?jql=${encodedJql}`;
+  });
+
+  function openInJira(): void {
+    if (jiraSearchUrl) {
+      window.open(jiraSearchUrl, '_blank', 'noopener,noreferrer');
+    }
+  }
 
   // Handle keyboard navigation
   function onKeyDown(event: KeyboardEvent): void {
@@ -195,6 +209,16 @@
             class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''}
           />
         </button>
+
+        <Tooltip content="Open in JIRA" placement="bottom">
+          <button
+            onclick={openInJira}
+            disabled={!jiraSearchUrl || issuesState.isLoading}
+            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
+          >
+            <AtlaskitIcon name="link-external" size={16} />
+          </button>
+        </Tooltip>
 
         <div class="w-px h-4 bg-border mx-1"></div>
 
