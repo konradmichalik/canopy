@@ -138,7 +138,7 @@ export function toggleFocusedNode(): void {
 }
 
 /**
- * Open focused issue in JIRA
+ * Open focused issue in Jira
  */
 export function openFocusedIssue(): void {
   if (!keyboardNavState.focusedKey) return;

@@ -37,7 +37,7 @@
   }
 
   function handleDisconnect(): void {
-    if (confirm('Disconnect from JIRA?')) {
+    if (confirm('Disconnect from Jira?')) {
       disconnect();
       open = false;
     }

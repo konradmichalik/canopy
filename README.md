@@ -1,6 +1,6 @@
-# JIRA Tree Viewer
+# Canopy
 
-A web application for displaying JIRA tickets in a hierarchical tree structure (Epic → Story → Task → Subtask).
+A hierarchical Jira issue viewer that displays tickets in a tree structure (Epic → Story → Task → Subtask).
 
 ![jira-hierarchy-tree-demo.jpg](docs/images/jira-hierarchy-tree-demo.jpg)
 
@@ -9,7 +9,7 @@ A web application for displaying JIRA tickets in a hierarchical tree structure (
 ### Core Features
 - **Hierarchical Tree View**: Display tickets with correct parent-child relationships (Epic → Story → Task → Subtask)
 - **Multiple JQL Queries**: Save and manage multiple JQL queries with custom titles and colors
-- **JIRA Cloud & Server**: Full support for both JIRA Cloud and Server/Data Center instances
+- **Jira Cloud & Server**: Full support for both Jira Cloud and Server/Data Center instances
 - **Local Storage**: All settings, queries, and preferences are stored in the browser
 - **Import/Export**: Export and import your complete configuration as JSON for backup or use on different devices
 
@@ -17,9 +17,9 @@ A web application for displaying JIRA tickets in a hierarchical tree structure (
 - **Quick Filters**: Pre-defined filters like "Assigned to me", "Unassigned", "Unresolved", and "Current Sprint"
 - **Dynamic Filters**: Automatically generated filters based on loaded issues:
   - Status (with color-coded badges)
-  - Issue Type (with JIRA icons)
+  - Issue Type (with Jira icons)
   - Assignee (with avatars)
-  - Priority (with JIRA icons)
+  - Priority (with Jira icons)
   - Resolution
   - Components
   - Fix Versions
@@ -90,23 +90,23 @@ The proxy runs on `http://localhost:3001`.
 
 ### Connection Setup
 
-1. Enter your JIRA URL in the **JIRA URL** field (e.g., `https://your-domain.atlassian.net`)
+1. Enter your Jira URL in the **Jira URL** field (e.g., `https://your-domain.atlassian.net`)
 2. Expand **Advanced: CORS Proxy** and enter `http://localhost:3001/jira`
 3. Enter your credentials (see Configuration below)
 
 ## Configuration
 
-### JIRA Cloud
+### Jira Cloud
 
 1. Go to https://id.atlassian.com/manage-profile/security/api-tokens
 2. Create an API token
-3. Enter your JIRA Cloud URL (e.g., `https://your-domain.atlassian.net`)
+3. Enter your Jira Cloud URL (e.g., `https://your-domain.atlassian.net`)
 4. Enter your email and API token
 
-### JIRA Server/Data Center
+### Jira Server/Data Center
 
-1. Create a Personal Access Token in JIRA settings
-2. Enter your JIRA Server URL
+1. Create a Personal Access Token in Jira settings
+2. Enter your Jira Server URL
 3. Enter your username and PAT (or use Basic Auth with username/password)
 
 ## How It Works
@@ -114,7 +114,7 @@ The proxy runs on `http://localhost:3001`.
 ### Hierarchy Detection
 
 The app automatically detects parent-child relationships using (in order of priority):
-1. The `parent` field (used in JIRA Cloud and for subtasks)
+1. The `parent` field (used in Jira Cloud and for subtasks)
 2. Epic Link custom field (for Server/Data Center instances)
 3. Issue links with parent-child relationships
 
@@ -133,14 +133,14 @@ Issues are always sorted by hierarchy level first (Epic > Story > Task > Subtask
 - **Svelte 5** with TypeScript and Runes for reactive state management
 - **Tailwind CSS v4** for styling
 - **Vite** as build tool
-- **Atlaskit Tokens** for JIRA-consistent theming
+- **Atlaskit Tokens** for Jira-consistent theming
 
 ## Project Structure
 
 ```
 src/
 ├── lib/
-│   ├── api/          # JIRA API clients (Cloud & Server)
+│   ├── api/          # Jira API clients (Cloud & Server)
 │   ├── components/   # Svelte components
 │   │   ├── common/   # Shared UI components
 │   │   ├── connection/ # Connection form

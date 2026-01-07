@@ -102,7 +102,7 @@
 <form onsubmit={handleSubmit} class="space-y-6">
   <!-- Instance Type -->
   <fieldset>
-    <legend class="block text-sm font-medium text-text mb-2"> JIRA Instance Type </legend>
+    <legend class="block text-sm font-medium text-text mb-2"> Jira Instance Type </legend>
     <div class="flex gap-4">
       <label class="flex items-center gap-2 cursor-pointer">
         <input
@@ -130,7 +130,7 @@
 
   <!-- Base URL -->
   <div class="space-y-2">
-    <Label for="baseUrl">JIRA URL</Label>
+    <Label for="baseUrl">Jira URL</Label>
     <div class="relative">
       <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
         <AtlaskitIcon name="link" size={16} />
@@ -150,7 +150,7 @@
     </div>
     {#if isLocalhostInBaseUrl}
       <p class="text-xs text-text-warning">
-        This looks like a proxy URL. Enter your actual JIRA URL here (e.g.
+        This looks like a proxy URL. Enter your actual Jira URL here (e.g.
         https://your-domain.atlassian.net) and put the proxy URL in "Advanced: CORS Proxy" below.
       </p>
     {/if}
@@ -226,7 +226,7 @@
           id="username"
           type="text"
           bind:value={formData.username}
-          placeholder="Your JIRA username"
+          placeholder="Your Jira username"
           required
           autocomplete="username"
         />

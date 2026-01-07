@@ -69,7 +69,7 @@ export async function loadIssues(jql: string): Promise<boolean> {
   const client = getClient();
 
   if (!client) {
-    issuesState.error = 'Not connected to JIRA';
+    issuesState.error = 'Not connected to Jira';
     return false;
   }
 

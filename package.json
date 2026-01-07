@@ -1,8 +1,8 @@
 {
-  "name": "jira-hierarchy-viewer",
+  "name": "canopy",
   "private": true,
   "version": "1.0.0",
-  "description": "JIRA Hierarchy Viewer - Visualize JIRA tickets in a hierarchical tree structure",
+  "description": "Canopy - Hierarchical JIRA Issue Viewer",
   "type": "module",
   "scripts": {
     "dev": "vite",

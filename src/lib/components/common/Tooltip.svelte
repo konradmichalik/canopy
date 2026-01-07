@@ -40,6 +40,7 @@
         {side}
         sideOffset={4}
         class="bg-popover text-popover-foreground border shadow-md text-xs font-medium px-3 py-1.5 rounded-md max-w-[300px] whitespace-pre-line z-50"
+        arrowClasses="bg-popover border-l border-b"
       >
         {#if html}
           {@html tooltipContent}

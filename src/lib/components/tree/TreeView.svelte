@@ -223,7 +223,7 @@
           </Button>
         </Tooltip>
 
-        <Tooltip content="Open in JIRA" placement="bottom">
+        <Tooltip content="Open in Jira" placement="bottom">
           <Button
             variant="ghost"
             size="icon"
@@ -244,7 +244,7 @@
             <div><kbd class='kbd'>←</kbd> Collapse / Parent</div>
             <div><kbd class='kbd'>→</kbd> Expand / Child</div>
             <div><kbd class='kbd'>Space</kbd> Toggle expand</div>
-            <div><kbd class='kbd'>Enter</kbd> Open in JIRA</div>
+            <div><kbd class='kbd'>Enter</kbd> Open in Jira</div>
             <div><kbd class='kbd'>Home</kbd> <kbd class='kbd'>End</kbd> First / Last</div>
             <div><kbd class='kbd'>Esc</kbd> Clear selection</div>
             <div class='text-muted-foreground mt-2 text-xs'>Also: j/k/h/l (vim)</div>

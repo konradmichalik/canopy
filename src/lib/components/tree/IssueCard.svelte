@@ -111,7 +111,7 @@
   <IssueTypeIcon issueType={issue.fields.issuetype} size={isCompact ? 16 : 20} />
 
   <!-- Issue Key (link) -->
-  <Tooltip text="Open in JIRA">
+  <Tooltip text="Open in Jira">
     <button
       onclick={openIssue}
       class="font-medium text-text-brand hover:underline flex items-center gap-1 flex-shrink-0 {isCompact
@@ -269,7 +269,7 @@
     {@const totalHours = Math.round(total / 3600)}
     {@const remainingHours = Math.round(remaining / 3600)}
     <Tooltip
-      text={`JIRA Progress: ${progressPercent}%\nLogged: ${progressHours}h / ${totalHours}h\nRemaining: ${remainingHours}h`}
+      text={`Progress: ${progressPercent}%\nLogged: ${progressHours}h / ${totalHours}h\nRemaining: ${remainingHours}h`}
     >
       <div class="flex items-center gap-2 flex-shrink-0">
         <AtlaskitIcon name="dashboard" size={12} color="var(--color-text-subtle)" />

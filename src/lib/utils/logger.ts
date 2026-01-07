@@ -49,7 +49,7 @@ class Logger {
     showTimestamp: true
   };
 
-  private prefix = '[JIRA-Tree]';
+  private prefix = '[Canopy]';
 
   configure(config: Partial<LogConfig>): void {
     this.config = { ...this.config, ...config };

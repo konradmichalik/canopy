@@ -100,8 +100,8 @@
     <!-- Connection Form -->
     <div class="max-w-md mx-auto">
       <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-text mb-2">Connect to JIRA</h2>
-        <p class="text-text-subtle">Enter your JIRA credentials to get started</p>
+        <h2 class="text-2xl font-bold text-text mb-2">Connect to Jira</h2>
+        <p class="text-text-subtle">Enter your Jira credentials to get started</p>
       </div>
 
       <div class="bg-surface-raised border border-border rounded-xl p-6">

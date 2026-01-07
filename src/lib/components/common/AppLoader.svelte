@@ -11,7 +11,7 @@
 
     <!-- App name -->
     <h1 class="text-2xl font-bold text-text">
-      <span class="hidden sm:inline">JIRA </span>Hierarchy Viewer
+      Canopy
     </h1>
 
     <!-- Loading spinner -->

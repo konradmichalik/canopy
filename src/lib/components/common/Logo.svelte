@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Tooltip from './Tooltip.svelte';
+
   interface Props {
     size?: 'sm' | 'md' | 'lg';
     showText?: boolean;
@@ -50,8 +52,10 @@
   </svg>
 
   {#if showText}
-    <span class="font-bold text-text {textSizeClasses[size]}">
-      <span class="hidden sm:inline">JIRA </span>Hierarchy Viewer
-    </span>
+    <Tooltip content="Hierarchical JIRA Issue Viewer">
+      <span class="font-bold text-text {textSizeClasses[size]} cursor-default">
+        Canopy
+      </span>
+    </Tooltip>
   {/if}
 </div>
