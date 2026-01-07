@@ -149,6 +149,191 @@ html[data-color-mode='dark'] {
   --ds-blanket: #03040480;
 }
 
+/* Color Theme Overrides - Teal */
+html.color-theme-teal[data-color-mode='light'] {
+  --ds-text-selected: #0891b2;
+  --ds-text-brand: #0891b2;
+  --ds-link: #0891b2;
+  --ds-link-pressed: #0e7490;
+  --ds-border-selected: #0891b2;
+  --ds-border-brand: #0891b2;
+  --ds-background-selected: #e0f7fa;
+  --ds-background-selected-hovered: #b2ebf2;
+  --ds-background-brand-bold: #0891b2;
+  --ds-background-brand-bold-hovered: #0e7490;
+  --ds-background-brand-bold-pressed: #155e75;
+  --ds-background-information: #e0f7fa;
+  --ds-background-information-hovered: #b2ebf2;
+  --ds-background-information-bold: #0891b2;
+  --ds-background-information-bold-hovered: #0e7490;
+}
+
+html.color-theme-teal[data-color-mode='dark'] {
+  --ds-text-selected: #67e8f9;
+  --ds-text-brand: #67e8f9;
+  --ds-link: #67e8f9;
+  --ds-link-pressed: #22d3ee;
+  --ds-border-selected: #67e8f9;
+  --ds-border-brand: #67e8f9;
+  --ds-background-selected: #164e63;
+  --ds-background-selected-hovered: #155e75;
+  --ds-background-brand-bold: #06b6d4;
+  --ds-background-brand-bold-hovered: #22d3ee;
+  --ds-background-brand-bold-pressed: #0891b2;
+  --ds-background-information: #164e63;
+  --ds-background-information-hovered: #155e75;
+  --ds-background-information-bold: #06b6d4;
+  --ds-background-information-bold-hovered: #22d3ee;
+}
+
+/* Color Theme Overrides - Green */
+html.color-theme-green[data-color-mode='light'] {
+  --ds-text-selected: #16a34a;
+  --ds-text-brand: #16a34a;
+  --ds-link: #16a34a;
+  --ds-link-pressed: #15803d;
+  --ds-border-selected: #16a34a;
+  --ds-border-brand: #16a34a;
+  --ds-background-selected: #dcfce7;
+  --ds-background-selected-hovered: #bbf7d0;
+  --ds-background-brand-bold: #16a34a;
+  --ds-background-brand-bold-hovered: #15803d;
+  --ds-background-brand-bold-pressed: #166534;
+  --ds-background-information: #dcfce7;
+  --ds-background-information-hovered: #bbf7d0;
+  --ds-background-information-bold: #16a34a;
+  --ds-background-information-bold-hovered: #15803d;
+}
+
+html.color-theme-green[data-color-mode='dark'] {
+  --ds-text-selected: #86efac;
+  --ds-text-brand: #86efac;
+  --ds-link: #86efac;
+  --ds-link-pressed: #4ade80;
+  --ds-border-selected: #86efac;
+  --ds-border-brand: #86efac;
+  --ds-background-selected: #14532d;
+  --ds-background-selected-hovered: #166534;
+  --ds-background-brand-bold: #22c55e;
+  --ds-background-brand-bold-hovered: #4ade80;
+  --ds-background-brand-bold-pressed: #16a34a;
+  --ds-background-information: #14532d;
+  --ds-background-information-hovered: #166534;
+  --ds-background-information-bold: #22c55e;
+  --ds-background-information-bold-hovered: #4ade80;
+}
+
+/* Color Theme Overrides - Purple */
+html.color-theme-purple[data-color-mode='light'] {
+  --ds-text-selected: #9333ea;
+  --ds-text-brand: #9333ea;
+  --ds-link: #9333ea;
+  --ds-link-pressed: #7e22ce;
+  --ds-border-selected: #9333ea;
+  --ds-border-brand: #9333ea;
+  --ds-background-selected: #f3e8ff;
+  --ds-background-selected-hovered: #e9d5ff;
+  --ds-background-brand-bold: #9333ea;
+  --ds-background-brand-bold-hovered: #7e22ce;
+  --ds-background-brand-bold-pressed: #6b21a8;
+  --ds-background-information: #f3e8ff;
+  --ds-background-information-hovered: #e9d5ff;
+  --ds-background-information-bold: #9333ea;
+  --ds-background-information-bold-hovered: #7e22ce;
+}
+
+html.color-theme-purple[data-color-mode='dark'] {
+  --ds-text-selected: #d8b4fe;
+  --ds-text-brand: #d8b4fe;
+  --ds-link: #d8b4fe;
+  --ds-link-pressed: #c084fc;
+  --ds-border-selected: #d8b4fe;
+  --ds-border-brand: #d8b4fe;
+  --ds-background-selected: #581c87;
+  --ds-background-selected-hovered: #6b21a8;
+  --ds-background-brand-bold: #a855f7;
+  --ds-background-brand-bold-hovered: #c084fc;
+  --ds-background-brand-bold-pressed: #9333ea;
+  --ds-background-information: #581c87;
+  --ds-background-information-hovered: #6b21a8;
+  --ds-background-information-bold: #a855f7;
+  --ds-background-information-bold-hovered: #c084fc;
+}
+
+/* Color Theme Overrides - Orange */
+html.color-theme-orange[data-color-mode='light'] {
+  --ds-text-selected: #ea580c;
+  --ds-text-brand: #ea580c;
+  --ds-link: #ea580c;
+  --ds-link-pressed: #c2410c;
+  --ds-border-selected: #ea580c;
+  --ds-border-brand: #ea580c;
+  --ds-background-selected: #fff7ed;
+  --ds-background-selected-hovered: #ffedd5;
+  --ds-background-brand-bold: #ea580c;
+  --ds-background-brand-bold-hovered: #c2410c;
+  --ds-background-brand-bold-pressed: #9a3412;
+  --ds-background-information: #fff7ed;
+  --ds-background-information-hovered: #ffedd5;
+  --ds-background-information-bold: #ea580c;
+  --ds-background-information-bold-hovered: #c2410c;
+}
+
+html.color-theme-orange[data-color-mode='dark'] {
+  --ds-text-selected: #fdba74;
+  --ds-text-brand: #fdba74;
+  --ds-link: #fdba74;
+  --ds-link-pressed: #fb923c;
+  --ds-border-selected: #fdba74;
+  --ds-border-brand: #fdba74;
+  --ds-background-selected: #7c2d12;
+  --ds-background-selected-hovered: #9a3412;
+  --ds-background-brand-bold: #f97316;
+  --ds-background-brand-bold-hovered: #fb923c;
+  --ds-background-brand-bold-pressed: #ea580c;
+  --ds-background-information: #7c2d12;
+  --ds-background-information-hovered: #9a3412;
+  --ds-background-information-bold: #f97316;
+  --ds-background-information-bold-hovered: #fb923c;
+}
+
+/* Color Theme Overrides - Rose */
+html.color-theme-rose[data-color-mode='light'] {
+  --ds-text-selected: #e11d48;
+  --ds-text-brand: #e11d48;
+  --ds-link: #e11d48;
+  --ds-link-pressed: #be123c;
+  --ds-border-selected: #e11d48;
+  --ds-border-brand: #e11d48;
+  --ds-background-selected: #fff1f2;
+  --ds-background-selected-hovered: #ffe4e6;
+  --ds-background-brand-bold: #e11d48;
+  --ds-background-brand-bold-hovered: #be123c;
+  --ds-background-brand-bold-pressed: #9f1239;
+  --ds-background-information: #fff1f2;
+  --ds-background-information-hovered: #ffe4e6;
+  --ds-background-information-bold: #e11d48;
+  --ds-background-information-bold-hovered: #be123c;
+}
+
+html.color-theme-rose[data-color-mode='dark'] {
+  --ds-text-selected: #fda4af;
+  --ds-text-brand: #fda4af;
+  --ds-link: #fda4af;
+  --ds-link-pressed: #fb7185;
+  --ds-border-selected: #fda4af;
+  --ds-border-brand: #fda4af;
+  --ds-background-selected: #881337;
+  --ds-background-selected-hovered: #9f1239;
+  --ds-background-brand-bold: #f43f5e;
+  --ds-background-brand-bold-hovered: #fb7185;
+  --ds-background-brand-bold-pressed: #e11d48;
+  --ds-background-information: #881337;
+  --ds-background-information-hovered: #9f1239;
+  --ds-background-information-bold: #f43f5e;
+  --ds-background-information-bold-hovered: #fb7185;
+}
+
 /* shadcn-svelte variables mapped to Atlassian tokens */
 :root {
   --radius: 0.5rem;

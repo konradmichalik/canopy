@@ -7,6 +7,12 @@
   import { initializeConnection, disconnect } from '../../stores/connection.svelte';
   import { themeState, setTheme, type Theme } from '../../stores/theme.svelte';
   import {
+    colorThemeState,
+    setColorTheme,
+    COLOR_THEMES,
+    type ColorTheme
+  } from '../../stores/colorTheme.svelte';
+  import {
     displayDensityState,
     setDisplayDensity,
     type DisplayDensity
@@ -25,6 +31,10 @@
 
   function handleThemeChange(theme: Theme): void {
     setTheme(theme);
+  }
+
+  function handleColorThemeChange(colorTheme: ColorTheme): void {
+    setColorTheme(colorTheme);
   }
 
   function handleDensityChange(density: DisplayDensity): void {
@@ -137,6 +147,30 @@
         <AtlaskitIcon name="theme" size={14} />
         Auto
       </button>
+    </div>
+
+    <!-- Color Theme Section -->
+    <DropdownMenu.Label>Color</DropdownMenu.Label>
+    <div class="flex gap-1.5 px-2 pb-2">
+      {#each COLOR_THEMES as theme}
+        <Tooltip text={theme.label}>
+          <button
+            onclick={() => handleColorThemeChange(theme.id)}
+            class="w-6 h-6 rounded-full transition-all flex items-center justify-center
+              {colorThemeState.colorTheme === theme.id
+              ? 'ring-2 ring-offset-2 ring-offset-popover ring-foreground/50'
+              : 'hover:scale-110'}"
+            style="background-color: {theme.color}"
+            aria-label={theme.label}
+          >
+            {#if colorThemeState.colorTheme === theme.id}
+              <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+              </svg>
+            {/if}
+          </button>
+        </Tooltip>
+      {/each}
     </div>
 
     {#if !minimal}

@@ -13,6 +13,7 @@ export const STORAGE_KEYS = {
   CONNECTION: 'connection',
   QUERIES: 'queries',
   THEME: 'theme',
+  COLOR_THEME: 'color-theme',
   EXPANDED_NODES: 'expanded-nodes',
   LAST_QUERY_ID: 'last-query-id',
   SIDEBAR_OPEN: 'sidebar-open',

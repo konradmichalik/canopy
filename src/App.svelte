@@ -6,6 +6,7 @@
   import { connectionState, initializeConnection } from './lib/stores/connection.svelte';
   import { initializeRouter, cleanupRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
+  import { initializeColorTheme } from './lib/stores/colorTheme.svelte';
   import { initializeFieldConfig } from './lib/stores/fieldConfig.svelte';
   import { initializeDisplayDensity } from './lib/stores/displayDensity.svelte';
   import { initializeDebugMode } from './lib/stores/debugMode.svelte';
@@ -18,6 +19,7 @@
   onMount(() => {
     // Initialize theme first (sync, affects appearance immediately)
     initializeTheme();
+    initializeColorTheme();
 
     // Initialize all stores and connection
     async function initialize() {
