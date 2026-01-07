@@ -1,5 +1,8 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import { Button } from '$lib/components/ui/button';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '$lib/components/ui/label';
   import type { JiraInstanceType, ConnectionFormData } from '../../types';
   import { connect, connectionState } from '../../stores/connection.svelte';
   import { detectInstanceType } from '../../api';
@@ -126,13 +129,13 @@
   </fieldset>
 
   <!-- Base URL -->
-  <div>
-    <label for="baseUrl" class="block text-sm font-medium text-text mb-2"> JIRA URL </label>
+  <div class="space-y-2">
+    <Label for="baseUrl">JIRA URL</Label>
     <div class="relative">
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-subtle">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
         <AtlaskitIcon name="link" size={16} />
       </span>
-      <input
+      <Input
         id="baseUrl"
         type="url"
         bind:value={formData.baseUrl}
@@ -142,12 +145,11 @@
           : 'https://jira.your-company.com'}
         required
         autocomplete="url"
-        class="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent
-          {isLocalhostInBaseUrl ? 'border-warning focus:ring-warning' : ''}"
+        class="pl-10 {isLocalhostInBaseUrl ? 'border-warning focus-visible:ring-warning' : ''}"
       />
     </div>
     {#if isLocalhostInBaseUrl}
-      <p class="mt-1 text-xs text-text-warning">
+      <p class="text-xs text-text-warning">
         This looks like a proxy URL. Enter your actual JIRA URL here (e.g.
         https://your-domain.atlassian.net) and put the proxy URL in "Advanced: CORS Proxy" below.
       </p>
@@ -156,39 +158,37 @@
 
   <!-- Cloud Credentials -->
   {#if isCloud}
-    <div>
-      <label for="email" class="block text-sm font-medium text-text mb-2"> Email </label>
-      <input
+    <div class="space-y-2">
+      <Label for="email">Email</Label>
+      <Input
         id="email"
         type="email"
         bind:value={formData.email}
         placeholder="your-email@company.com"
         required
         autocomplete="email"
-        class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
       />
     </div>
 
-    <div>
-      <label for="apiToken" class="block text-sm font-medium text-text mb-2">
+    <div class="space-y-2">
+      <Label for="apiToken">
         API Token
         <a
           href="https://id.atlassian.com/manage-profile/security/api-tokens"
           target="_blank"
           rel="noopener noreferrer"
-          class="ml-2 text-xs text-text-brand hover:underline"
+          class="text-xs text-primary hover:underline"
         >
           Create token
         </a>
-      </label>
-      <input
+      </Label>
+      <Input
         id="apiToken"
         type="password"
         bind:value={formData.apiToken}
         placeholder="Your API token"
         required
         autocomplete="current-password"
-        class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
       />
     </div>
   {:else}
@@ -220,44 +220,39 @@
     </fieldset>
 
     {#if isBasicAuth}
-      <div>
-        <label for="username" class="block text-sm font-medium text-text mb-2"> Username </label>
-        <input
+      <div class="space-y-2">
+        <Label for="username">Username</Label>
+        <Input
           id="username"
           type="text"
           bind:value={formData.username}
           placeholder="Your JIRA username"
           required
           autocomplete="username"
-          class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
         />
       </div>
 
-      <div>
-        <label for="password" class="block text-sm font-medium text-text mb-2"> Password </label>
-        <input
+      <div class="space-y-2">
+        <Label for="password">Password</Label>
+        <Input
           id="password"
           type="password"
           bind:value={formData.password}
           placeholder="Your password"
           required
           autocomplete="current-password"
-          class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
         />
       </div>
     {:else}
-      <div>
-        <label for="pat" class="block text-sm font-medium text-text mb-2">
-          Personal Access Token
-        </label>
-        <input
+      <div class="space-y-2">
+        <Label for="pat">Personal Access Token</Label>
+        <Input
           id="pat"
           type="password"
           bind:value={formData.personalAccessToken}
           placeholder="Your personal access token"
           required
           autocomplete="current-password"
-          class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent"
         />
       </div>
     {/if}
@@ -265,24 +260,25 @@
 
   <!-- Proxy URL (Advanced) -->
   <div>
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="sm"
       onclick={() => (showProxyInput = !showProxyInput)}
-      class="text-sm text-text-subtle hover:text-text flex items-center gap-1"
+      class="text-muted-foreground hover:text-foreground px-0"
     >
       <span class="text-xs">{showProxyInput ? '▼' : '▶'}</span>
       Advanced: CORS Proxy
-    </button>
+    </Button>
 
     {#if showProxyInput}
-      <div class="mt-2">
-        <input
+      <div class="mt-2 space-y-2">
+        <Input
           type="url"
           bind:value={formData.proxyUrl}
           placeholder="http://localhost:3001/jira (optional)"
-          class="w-full px-4 py-2 bg-input border border-border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:ring-border-focused focus:border-transparent text-sm"
         />
-        <p class="mt-1 text-xs text-text-subtle">
+        <p class="text-xs text-muted-foreground">
           If you're having CORS issues, run the included proxy server and enter its URL here.
         </p>
       </div>
@@ -297,11 +293,7 @@
   {/if}
 
   <!-- Submit Button -->
-  <button
-    type="submit"
-    disabled={isSubmitting}
-    class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand text-text-inverse rounded-lg font-medium hover:bg-brand-hovered focus:outline-none focus:ring-2 focus:ring-border-focused focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-  >
+  <Button type="submit" disabled={isSubmitting} class="w-full">
     {#if isSubmitting}
       <AtlaskitIcon name="refresh" size={16} class="animate-spin" />
       Connecting...
@@ -309,5 +301,5 @@
       <AtlaskitIcon name="flask" size={16} />
       Connect
     {/if}
-  </button>
+  </Button>
 </form>

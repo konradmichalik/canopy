@@ -1,6 +1,9 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
+  import { Button } from '$lib/components/ui/button';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '$lib/components/ui/label';
   import type { SavedQuery, QueryColor } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { validateJql, validateJqlExtended } from '../../utils/jql-helpers';
@@ -90,59 +93,57 @@
   >
     <!-- Header -->
     <div class="flex items-center justify-between p-4 border-b border-border">
-      <h2 class="text-lg font-semibold text-text">
+      <h2 class="text-lg font-semibold text-foreground">
         {isEdit ? 'Edit Query' : 'New Query'}
       </h2>
-      <button onclick={onCancel} class="p-1 rounded hover:bg-surface-hovered text-text-subtle">
+      <Button variant="ghost" size="icon-sm" onclick={onCancel}>
         <AtlaskitIcon name="cross" size={20} />
-      </button>
+      </Button>
     </div>
 
     <!-- Form -->
     <form onsubmit={handleSubmit} class="p-4 space-y-4">
-      <div>
-        <label for="queryTitle" class="block text-sm font-medium text-text mb-1"> Title </label>
-        <input
+      <div class="space-y-2">
+        <Label for="queryTitle">Title</Label>
+        <Input
           id="queryTitle"
           type="text"
           bind:value={title}
           placeholder="e.g., Sprint 42 Backlog"
-          class="w-full px-3 py-2 bg-input border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:border-transparent transition-colors
-            {hasTitleWarning
-            ? 'border-border-danger focus:ring-border-danger'
-            : 'border-border focus:ring-border-focused'}"
+          class={hasTitleWarning ? 'border-destructive focus-visible:ring-destructive' : ''}
         />
         {#if hasTitleWarning}
-          <div class="flex items-center gap-1.5 mt-1.5 text-xs text-text-danger">
+          <div class="flex items-center gap-1.5 text-xs text-destructive">
             <AtlaskitIcon name="warning" size={14} />
             <span>A query with this title already exists</span>
           </div>
         {:else if titleSlug}
-          <p class="mt-1 text-xs text-text-subtle">
-            URL: /query/<span class="font-mono text-text-subtlest">{titleSlug}</span>
+          <p class="text-xs text-muted-foreground">
+            URL: /query/<span class="font-mono">{titleSlug}</span>
           </p>
         {/if}
       </div>
 
-      <div>
-        <label for="queryJql" class="block text-sm font-medium text-text mb-1"> JQL Query </label>
+      <div class="space-y-2">
+        <Label for="queryJql">JQL Query</Label>
         <textarea
           id="queryJql"
           bind:value={jql}
           placeholder="project = MYPROJECT AND sprint in openSprints()"
           rows="4"
-          class="w-full px-3 py-2 bg-input border rounded-lg text-text placeholder-text-subtlest focus:outline-none focus:ring-2 focus:border-transparent font-mono text-sm resize-none transition-colors
+          class="flex w-full min-w-0 rounded-md border bg-background px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 font-mono resize-none
+            focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
             {hasJqlWarning
-            ? 'border-border-danger focus:ring-border-danger'
-            : 'border-border focus:ring-border-focused'}"
+            ? 'border-destructive focus-visible:ring-destructive/20'
+            : 'border-input'}"
         ></textarea>
         {#if hasJqlWarning}
-          <div class="flex items-center gap-1.5 mt-1.5 text-xs text-text-warning">
+          <div class="flex items-center gap-1.5 text-xs text-text-warning">
             <AtlaskitIcon name="warning" size={14} />
             <span>{jqlValidation.error}</span>
           </div>
         {:else}
-          <p class="mt-1 text-xs text-text-subtle">
+          <p class="text-xs text-muted-foreground">
             Enter a valid JQL query. The app will automatically build the hierarchy from the
             results.
           </p>
@@ -196,20 +197,13 @@
 
       <!-- Actions -->
       <div class="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onclick={onCancel}
-          class="px-4 py-2 text-sm font-medium text-text hover:bg-surface-hovered rounded-lg transition-colors"
-        >
+        <Button type="button" variant="ghost" onclick={onCancel}>
           Cancel
-        </button>
-        <button
-          type="submit"
-          class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-text-inverse bg-brand hover:bg-brand-hovered rounded-lg transition-colors"
-        >
+        </Button>
+        <Button type="submit">
           <AtlaskitIcon name="save" size={16} />
           {isEdit ? 'Save Changes' : 'Create Query'}
-        </button>
+        </Button>
       </div>
     </form>
   </div>
