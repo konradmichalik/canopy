@@ -1,6 +1,8 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
+  import { Button } from '$lib/components/ui/button';
+  import * as Card from '$lib/components/ui/card';
   import type { SavedQuery } from '../../types';
   import { truncateJql } from '../../utils/jql-helpers';
   import { downloadSingleQuery } from '../../utils/storage';
@@ -27,65 +29,70 @@
   }
 </script>
 
-<div
-  class="group bg-surface-raised border border-border rounded-lg p-4 hover:border-border-brand transition-colors cursor-pointer"
+<Card.Root
+  class="group hover:border-primary transition-colors cursor-pointer"
   onclick={() => onOpen(query)}
   onkeydown={(e) => e.key === 'Enter' && onOpen(query)}
   role="button"
-  tabindex="0"
+  tabindex={0}
 >
-  <div class="flex items-start justify-between gap-2 mb-2">
-    <h3 class="font-medium text-text truncate">
-      {query.title}
-    </h3>
-    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-      <Tooltip text="Edit query">
-        <button
-          onclick={(e) => {
-            e.stopPropagation();
-            onEdit(query);
-          }}
-          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
-        >
-          <AtlaskitIcon name="edit" size={16} />
-        </button>
-      </Tooltip>
-      <Tooltip text="Export query">
-        <button
-          onclick={handleExport}
-          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
-        >
-          <AtlaskitIcon name="download" size={16} />
-        </button>
-      </Tooltip>
-      <Tooltip text="Delete query">
-        <button
-          onclick={handleDelete}
-          class="p-1.5 rounded hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
-        >
-          <AtlaskitIcon name="delete" size={16} />
-        </button>
-      </Tooltip>
+  <Card.Header class="pb-2">
+    <div class="flex items-start justify-between gap-2">
+      <Card.Title class="truncate text-base">{query.title}</Card.Title>
+      <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Tooltip text="Edit query">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-7 w-7"
+            onclick={(e) => {
+              e.stopPropagation();
+              onEdit(query);
+            }}
+          >
+            <AtlaskitIcon name="edit" size={16} />
+          </Button>
+        </Tooltip>
+        <Tooltip text="Export query">
+          <Button variant="ghost" size="icon" class="h-7 w-7" onclick={handleExport}>
+            <AtlaskitIcon name="download" size={16} />
+          </Button>
+        </Tooltip>
+        <Tooltip text="Delete query">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-7 w-7 hover:bg-destructive/10 hover:text-destructive"
+            onclick={handleDelete}
+          >
+            <AtlaskitIcon name="delete" size={16} />
+          </Button>
+        </Tooltip>
+      </div>
     </div>
-  </div>
+  </Card.Header>
 
-  <p class="text-sm text-text-subtle font-mono break-all">
-    {truncateJql(query.jql, 80)}
-  </p>
+  <Card.Content class="pb-3">
+    <p class="text-sm text-muted-foreground font-mono break-all">
+      {truncateJql(query.jql, 80)}
+    </p>
+  </Card.Content>
 
-  <div class="mt-3 flex items-center justify-between">
-    <span class="text-xs text-text-subtle">
+  <Card.Footer class="justify-between">
+    <span class="text-xs text-muted-foreground">
       Updated {new Date(query.updatedAt).toLocaleDateString()}
     </span>
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
+      class="text-primary"
       onclick={(e) => {
         e.stopPropagation();
         onOpen(query);
       }}
-      class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-text-brand hover:bg-brand-subtlest rounded transition-colors"
     >
       <AtlaskitIcon name="video-play" size={16} />
       Open
-    </button>
-  </div>
-</div>
+    </Button>
+  </Card.Footer>
+</Card.Root>
