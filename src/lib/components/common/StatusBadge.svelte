@@ -1,5 +1,6 @@
 <script lang="ts">
   import Tooltip from './Tooltip.svelte';
+  import { Badge } from '$lib/components/ui/badge';
   import type { JiraStatus } from '../../types';
 
   interface Props {
@@ -9,23 +10,23 @@
   let { status }: Props = $props();
 
   // Get color based on status category using Atlassian semantic colors
-  function getStatusColor(categoryKey: string): string {
+  function getStatusClass(categoryKey: string): string {
     switch (categoryKey) {
       case 'done':
-        return 'bg-success text-text-inverse';
+        return 'bg-success text-text-inverse border-transparent hover:bg-success/90';
       case 'indeterminate':
-        return 'bg-information text-text-inverse';
+        return 'bg-information text-text-inverse border-transparent hover:bg-information/90';
       case 'new':
       default:
-        return 'bg-neutral text-text';
+        return 'bg-neutral text-text border-transparent hover:bg-neutral/90';
     }
   }
 
-  const colorClass = $derived(getStatusColor(status.statusCategory?.key || 'new'));
+  const statusClass = $derived(getStatusClass(status.statusCategory?.key || 'new'));
 </script>
 
 <Tooltip text={status.description || status.name}>
-  <span class="inline-flex items-center px-2.5 py-1 text-sm font-medium rounded {colorClass}">
+  <Badge class={statusClass}>
     {status.name}
-  </span>
+  </Badge>
 </Tooltip>

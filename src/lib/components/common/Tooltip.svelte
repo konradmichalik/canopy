@@ -1,15 +1,13 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import tippy, { type Instance, type Placement } from 'tippy.js';
-  import 'tippy.js/dist/tippy.css';
-  import { onMount } from 'svelte';
+  import * as TooltipPrimitive from '$lib/components/ui/tooltip';
 
   interface Props {
     text?: string;
     content?: string;
     html?: boolean;
     position?: 'top' | 'bottom' | 'left' | 'right';
-    placement?: Placement;
+    placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end';
     children: Snippet;
   }
 
@@ -18,71 +16,40 @@
   // Support both text and content props (content takes precedence)
   const tooltipContent = $derived(content ?? text ?? '');
 
-  let containerRef: HTMLSpanElement | undefined = $state();
-  let tippyInstance: Instance | undefined;
-
-  // Map position to tippy placement
-  const placementMap: Record<string, Placement> = {
-    top: 'top',
-    bottom: 'bottom',
-    left: 'left',
-    right: 'right',
-    'bottom-end': 'bottom-end',
-    'bottom-start': 'bottom-start',
-    'top-end': 'top-end',
-    'top-start': 'top-start'
-  };
-
-  onMount(() => {
-    if (containerRef) {
-      tippyInstance = tippy(containerRef, {
-        content: tooltipContent,
-        placement: placement ?? placementMap[position],
-        arrow: true,
-        animation: 'fade',
-        duration: [150, 100],
-        delay: [200, 0],
-        allowHTML: html,
-        appendTo: () => document.body,
-        theme: 'custom',
-        maxWidth: 300,
-        interactive: html
-      });
+  // Map position/placement to shadcn side
+  function getSide(): 'top' | 'bottom' | 'left' | 'right' {
+    if (placement) {
+      if (placement.startsWith('top')) return 'top';
+      if (placement.startsWith('bottom')) return 'bottom';
+      if (placement === 'left') return 'left';
+      if (placement === 'right') return 'right';
     }
+    return position;
+  }
 
-    return () => {
-      tippyInstance?.destroy();
-    };
-  });
-
-  // Update tooltip content when text changes
-  $effect(() => {
-    if (tippyInstance) {
-      tippyInstance.setContent(tooltipContent);
-    }
-  });
+  const side = $derived(getSide());
 </script>
 
-<span class="inline-flex" bind:this={containerRef}>
-  {@render children()}
-</span>
-
-<style>
-  :global(.tippy-box[data-theme~='custom']) {
-    background-color: var(--ds-background-neutral-bold, #44546f);
-    color: var(--ds-text-inverse, #fff);
-    font-size: 0.75rem;
-    font-weight: 500;
-    border-radius: 4px;
-    padding: 2px 4px;
-  }
-
-  :global(.tippy-box[data-theme~='custom'] .tippy-content) {
-    padding: 4px 8px;
-    white-space: pre-line;
-  }
-
-  :global(.tippy-box[data-theme~='custom'] .tippy-arrow) {
-    color: var(--ds-background-neutral-bold, #44546f);
-  }
-</style>
+{#if tooltipContent}
+  <TooltipPrimitive.Provider delayDuration={200}>
+    <TooltipPrimitive.Root>
+      <TooltipPrimitive.Trigger class="inline-flex">
+        {@render children()}
+      </TooltipPrimitive.Trigger>
+      <TooltipPrimitive.Content
+        {side}
+        class="bg-neutral-bold text-text-inverse text-xs font-medium px-2 py-1 rounded max-w-[300px] whitespace-pre-line"
+      >
+        {#if html}
+          {@html tooltipContent}
+        {:else}
+          {tooltipContent}
+        {/if}
+      </TooltipPrimitive.Content>
+    </TooltipPrimitive.Root>
+  </TooltipPrimitive.Provider>
+{:else}
+  <span class="inline-flex">
+    {@render children()}
+  </span>
+{/if}

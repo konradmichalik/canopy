@@ -42,7 +42,6 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
-    "@atlaskit/tokens": "^9.1.0",
-    "tippy.js": "^6.3.7"
+    "@atlaskit/tokens": "^9.1.0"
   }
 }
