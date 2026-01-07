@@ -1,6 +1,12 @@
-# Canopy
+<p align="center">
+  <img src="docs/images/canopy-logo.svg" alt="Canopy Logo" width="200" />
+</p>
 
-A hierarchical Jira issue viewer that displays tickets in a tree structure (Epic → Story → Task → Subtask).
+<h1 align="center">Canopy</h1>
+
+<p align="center">
+  A hierarchical Jira issue viewer that displays tickets in a tree structure (Epic → Story → Task → Subtask).
+</p>
 
 ![jira-hierarchy-tree-demo.jpg](docs/images/jira-hierarchy-tree-demo.jpg)
 

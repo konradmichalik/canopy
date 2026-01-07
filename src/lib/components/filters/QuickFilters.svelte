@@ -173,6 +173,7 @@
           {#if filters.length > 0 && isCategoryVisible(category)}
             <MultiSelectDropdown
               label={config.label}
+              icon={config.icon}
               {filters}
               onToggle={toggleDynamicFilter}
               {getIconName}

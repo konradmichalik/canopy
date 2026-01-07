@@ -49,20 +49,21 @@ export const DYNAMIC_FILTER_CATEGORIES: DynamicFilterCategory[] = [
  */
 export interface DynamicFilterCategoryConfig {
   label: string;
+  icon: string;
   jqlField: string;
   useIdInJql?: boolean; // Whether to use ID instead of name in JQL (for type, resolution)
   useOrJoin?: boolean; // Whether to use OR join for multiple values (for assignee)
 }
 
 export const DYNAMIC_FILTER_CONFIG: Record<DynamicFilterCategory, DynamicFilterCategoryConfig> = {
-  project: { label: 'Project', jqlField: 'project' },
-  status: { label: 'Status', jqlField: 'status' },
-  type: { label: 'Type', jqlField: 'issuetype', useIdInJql: true },
-  assignee: { label: 'Assignee', jqlField: 'assignee', useOrJoin: true },
-  priority: { label: 'Priority', jqlField: 'priority' },
-  resolution: { label: 'Resolution', jqlField: 'resolution', useIdInJql: true },
-  component: { label: 'Component', jqlField: 'component' },
-  fixVersion: { label: 'Release', jqlField: 'fixVersion' }
+  project: { label: 'Project', icon: 'folder', jqlField: 'project' },
+  status: { label: 'Status', icon: 'status', jqlField: 'status' },
+  type: { label: 'Type', icon: 'task', jqlField: 'issuetype', useIdInJql: true },
+  assignee: { label: 'Assignee', icon: 'person', jqlField: 'assignee', useOrJoin: true },
+  priority: { label: 'Priority', icon: 'priority-high', jqlField: 'priority' },
+  resolution: { label: 'Resolution', icon: 'check-circle', jqlField: 'resolution', useIdInJql: true },
+  component: { label: 'Component', icon: 'component', jqlField: 'component' },
+  fixVersion: { label: 'Release', icon: 'release', jqlField: 'fixVersion' }
 };
 
 // Callback for when filters change - set by issues store

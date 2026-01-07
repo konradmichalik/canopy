@@ -6,12 +6,13 @@
 
   interface Props {
     label: string;
+    icon?: string;
     filters: ExtendedQuickFilter[];
     onToggle: (id: string) => void;
     getIconName: (iconName: string | undefined) => AtlaskitIconName;
   }
 
-  let { label, filters, onToggle, getIconName }: Props = $props();
+  let { label, icon, filters, onToggle, getIconName }: Props = $props();
 
   let open = $state(false);
 
@@ -25,6 +26,9 @@
       ? 'bg-accent border-primary text-primary font-medium'
       : 'bg-card border-border text-muted-foreground hover:border-border hover:bg-accent'}"
   >
+    {#if icon}
+      <AtlaskitIcon name={getIconName(icon)} size={12} />
+    {/if}
     <span>{label}</span>
     {#if activeCount > 0}
       <span

@@ -29,26 +29,14 @@
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
-    <!-- Vertical connector line -->
-    <path
-      d="M8 7 L8 26 M8 10 L12 10 M8 18 L12 18 M8 26 L12 26"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      class="text-text-subtle"
-    />
+    <path d="M8,7L8,26M8,10L12,10M8,18L12,18M8,26L12,26" style="fill:none;fill-rule:nonzero;stroke:rgb(100,116,139);stroke-width:2px;"/>
+    <g transform="matrix(0.5,0,0,0.833333,3,0.333333)">
+      <path d="M16,3.8L16,6.2C16,7.193 14.656,8 13,8L7,8C5.344,8 4,7.193 4,6.2L4,3.8C4,2.807 5.344,2 7,2L13,2C14.656,2 16,2.807 16,3.8Z" style="fill:rgb(100,116,139);"/>
+    </g>
+    <path d="M28,8.5L28,11.5C28,12.328 27.328,13 26.5,13L15.5,13C14.672,13 14,12.328 14,11.5L14,8.5C14,7.672 14.672,7 15.5,7L26.5,7C27.328,7 28,7.672 28,8.5Z" style="fill:rgb(168,85,247);"/>
+    <path d="M28,16.5L28,19.5C28,20.328 27.328,21 26.5,21L15.5,21C14.672,21 14,20.328 14,19.5L14,16.5C14,15.672 14.672,15 15.5,15L26.5,15C27.328,15 28,15.672 28,16.5Z" style="fill:rgb(34,197,94);"/>
+    <path d="M28,24.5L28,27.5C28,28.328 27.328,29 26.5,29L15.5,29C14.672,29 14,28.328 14,27.5L14,24.5C14,23.672 14.672,23 15.5,23L26.5,23C27.328,23 28,23.672 28,24.5Z" style="fill:rgb(59,130,246);"/>
 
-    <!-- Root node - subtle blue -->
-    <rect x="4" y="2" width="12" height="6" rx="1.5" fill="#3b82f6" />
-
-    <!-- Child node 1 - subtle green -->
-    <rect x="14" y="7" width="14" height="6" rx="1.5" fill="#22c55e" />
-
-    <!-- Child node 2 - subtle purple -->
-    <rect x="14" y="15" width="14" height="6" rx="1.5" fill="#a855f7" />
-
-    <!-- Child node 3 - subtle orange -->
-    <rect x="14" y="23" width="14" height="6" rx="1.5" fill="#f97316" />
   </svg>
 
   {#if showText}

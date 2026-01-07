@@ -7,10 +7,12 @@
   import SettingsDropdown from '../common/SettingsDropdown.svelte';
   import Avatar from '../common/Avatar.svelte';
   import Logo from '../common/Logo.svelte';
+  import HelpModal from '../help/HelpModal.svelte';
   import { Button } from '$lib/components/ui/button';
   import { routerState, toggleSidebar, setSidebarWidth } from '../../stores/router.svelte';
   import { connectionState } from '../../stores/connection.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
+  import { openHelpModal } from '../../stores/helpModal.svelte';
   import { QUERY_COLORS } from '../../types/tree';
 
   const activeQuery = $derived(
@@ -85,6 +87,11 @@
             </div>
             <div class="h-4 w-px bg-border"></div>
           {/if}
+          <Tooltip text="Help">
+            <Button variant="ghost" size="icon" onclick={openHelpModal} class="h-8 w-8">
+              <AtlaskitIcon name="question-circle" size={18} />
+            </Button>
+          </Tooltip>
           <SettingsDropdown />
         </div>
       </div>
@@ -125,3 +132,5 @@
     </main>
   </div>
 </div>
+
+<HelpModal />
