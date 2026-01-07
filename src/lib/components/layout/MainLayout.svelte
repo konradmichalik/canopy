@@ -25,11 +25,11 @@
 </script>
 
 <div class="h-screen flex bg-muted/40">
-  <!-- Sidebar -->
-  {#if routerState.sidebarOpen}
+  <!-- Sidebar (hidden via CSS to preserve state) -->
+  <div class:hidden={!routerState.sidebarOpen} class="contents">
     <Sidebar width={routerState.sidebarWidth} onClose={toggleSidebar} />
     <SidebarResizer currentWidth={routerState.sidebarWidth} onResize={setSidebarWidth} />
-  {/if}
+  </div>
 
   <!-- Main Content Area (Inset) -->
   <div class="flex-1 flex flex-col min-w-0">
