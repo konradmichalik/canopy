@@ -3,6 +3,7 @@
   import AccordionChevron from '../common/AccordionChevron.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import type { JiraIssue, TreeNode, SavedQuery } from '../../types';
+  import { QUERY_COLORS } from '../../types/tree';
   import {
     calculateIssuesTimeProgress,
     calculateIssuesResolutionProgress,
@@ -26,6 +27,11 @@
   const resolutionProgress = $derived(calculateIssuesResolutionProgress(issues));
   const hasTimeData = $derived(issuesHaveTimeTrackingData(issues));
 
+  // Query color
+  const colorClass = $derived(
+    query.color ? QUERY_COLORS.find((c) => c.id === query.color)?.bg : null
+  );
+
   function handleToggle(): void {
     onToggle?.();
   }
@@ -41,15 +47,22 @@
 <div class="query-entry-node">
   <!-- Header -->
   <div
-    class="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken hover:bg-surface-hovered rounded-lg cursor-pointer select-none transition-colors"
+    class="flex items-center gap-3 pr-3 py-2.5 bg-surface-sunken hover:bg-surface-hovered rounded-lg cursor-pointer select-none transition-colors relative overflow-hidden"
     onclick={handleToggle}
     onkeydown={handleKeydown}
     role="button"
     tabindex="0"
     aria-expanded={isExpanded}
   >
-    <!-- Expand/Collapse icon -->
-    <AccordionChevron {isExpanded} />
+    <!-- Color bar on left edge -->
+    <div
+      class="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-lg {colorClass || 'bg-muted-foreground/30'}"
+    ></div>
+
+    <!-- Expand/Collapse icon with left padding -->
+    <div class="pl-4">
+      <AccordionChevron {isExpanded} />
+    </div>
 
     <!-- Query icon -->
     <AtlaskitIcon name="search" size={18} class="text-brand" />

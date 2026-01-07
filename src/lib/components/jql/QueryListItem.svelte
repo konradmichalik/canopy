@@ -90,7 +90,7 @@
 <div
   role="button"
   tabindex="0"
-  class="group w-full text-left px-2 py-2 rounded-lg transition-all flex items-center justify-between gap-2 cursor-pointer relative
+  class="group w-full text-left py-2 pr-2 rounded-lg transition-all flex items-center justify-between gap-2 cursor-pointer relative overflow-hidden
     {isActive
     ? 'bg-accent text-accent-foreground'
     : 'hover:bg-accent/50 text-muted-foreground hover:text-foreground'}
@@ -101,14 +101,14 @@
   ondragover={handleDragOver}
   ondrop={handleDrop}
 >
-  <!-- Active indicator -->
-  {#if isActive}
-    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-primary"></div>
-  {/if}
+  <!-- Color bar on left edge -->
+  <div
+    class="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-all {colorClass || 'bg-muted-foreground/30'}"
+    class:opacity-100={isActive}
+    class:opacity-70={!isActive}
+  ></div>
 
-  <div class="flex items-center min-w-0 pl-1 gap-2">
-    <!-- Color dot -->
-    <span class="w-2 h-2 rounded-full flex-shrink-0 {colorClass || 'bg-muted-foreground/30'}"></span>
+  <div class="flex items-center min-w-0 pl-3 gap-2">
     <!-- Text -->
     <span class="truncate text-sm font-medium">{query.title}</span>
   </div>
