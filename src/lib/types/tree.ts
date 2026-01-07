@@ -15,6 +15,9 @@ export interface TreeNode {
   isExpanded: boolean;
   isVisible: boolean;
   parentKey: string | null;
+  // Cached aggregated progress (calculated during tree build for performance)
+  cachedTimeProgress?: { logged: number; total: number; percent: number };
+  cachedResolutionProgress?: { done: number; total: number; percent: number };
 }
 
 // ============================================

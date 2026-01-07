@@ -78,8 +78,8 @@ export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}):
   // Sort children recursively
   sortChildrenRecursively(rootNodes, sortConfig);
 
-  // Update depths recursively (in case we missed any)
-  updateDepths(rootNodes, 0);
+  // Cache aggregated progress values (bottom-up calculation for performance)
+  cacheAggregatedProgress(rootNodes);
 
   const duration = timer();
   logger.hierarchy(
@@ -173,15 +173,58 @@ function sortChildrenRecursively(nodes: TreeNode[], sortConfig?: SortConfig): vo
 }
 
 /**
- * Update depths recursively
+ * Cache aggregated progress values on all nodes (bottom-up)
+ * This avoids expensive recursive calculations on every render
  */
-function updateDepths(nodes: TreeNode[], depth: number): void {
-  nodes.forEach((node) => {
-    node.depth = depth;
+function cacheAggregatedProgress(nodes: TreeNode[]): void {
+  for (const node of nodes) {
+    // First, recursively process children (bottom-up)
     if (node.children.length > 0) {
-      updateDepths(node.children, depth + 1);
+      cacheAggregatedProgress(node.children);
     }
-  });
+
+    // Calculate time progress (logged vs estimated)
+    let timeLogged = node.issue.fields.progress?.progress ?? 0;
+    let timeTotal = node.issue.fields.progress?.total ?? 0;
+
+    // Calculate resolution progress (done vs total descendants)
+    let resolutionDone = 0;
+    let resolutionTotal = 0;
+
+    // Aggregate from children
+    for (const child of node.children) {
+      // Add child's cached time progress
+      if (child.cachedTimeProgress) {
+        timeLogged += child.cachedTimeProgress.logged;
+        timeTotal += child.cachedTimeProgress.total;
+      }
+
+      // Count this child for resolution
+      resolutionTotal++;
+      if (child.issue.fields.status.statusCategory.key === 'done') {
+        resolutionDone++;
+      }
+
+      // Add child's descendants for resolution
+      if (child.cachedResolutionProgress) {
+        resolutionDone += child.cachedResolutionProgress.done;
+        resolutionTotal += child.cachedResolutionProgress.total;
+      }
+    }
+
+    // Cache the results
+    node.cachedTimeProgress = {
+      logged: timeLogged,
+      total: timeTotal,
+      percent: timeTotal > 0 ? Math.round((timeLogged / timeTotal) * 100) : 0
+    };
+
+    node.cachedResolutionProgress = {
+      done: resolutionDone,
+      total: resolutionTotal,
+      percent: resolutionTotal > 0 ? Math.round((resolutionDone / resolutionTotal) * 100) : 0
+    };
+  }
 }
 
 /**

@@ -24,6 +24,7 @@ import {
   filterIssuesByRecency
 } from './filters.svelte';
 import { getSortConfig, setSortConfigChangeCallback } from './sortConfig.svelte';
+import { invalidateFlatTreeCache } from './keyboardNavigation.svelte';
 
 // State container object
 export const issuesState = $state({
@@ -156,6 +157,7 @@ export async function refreshIssues(): Promise<boolean> {
  */
 export function toggleNode(key: string): void {
   issuesState.treeNodes = toggleNodeInTree(issuesState.treeNodes, key);
+  invalidateFlatTreeCache(); // Invalidate keyboard navigation cache
   persistExpandedKeys();
 }
 
@@ -164,6 +166,7 @@ export function toggleNode(key: string): void {
  */
 export function expandAll(): void {
   issuesState.treeNodes = expandAllNodes(issuesState.treeNodes);
+  invalidateFlatTreeCache(); // Invalidate keyboard navigation cache
   persistExpandedKeys();
 }
 
@@ -172,6 +175,7 @@ export function expandAll(): void {
  */
 export function collapseAll(): void {
   issuesState.treeNodes = collapseAllNodes(issuesState.treeNodes);
+  invalidateFlatTreeCache(); // Invalidate keyboard navigation cache
   persistExpandedKeys();
 }
 
@@ -219,6 +223,7 @@ export function clearIssues(): void {
   issuesState.treeNodes = [];
   issuesState.currentJql = '';
   issuesState.error = null;
+  invalidateFlatTreeCache(); // Invalidate keyboard navigation cache
 }
 
 /**

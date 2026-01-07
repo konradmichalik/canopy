@@ -7,6 +7,7 @@ import type { JiraConnectionConfig, JiraUser, ConnectionState, StoredConnection 
 import { createJiraClient, type JiraClient } from '../api';
 import { getStorageItem, setStorageItem, removeStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
+import { clearAvatarCache } from '../utils/avatar-cache';
 
 // State container object
 export const connectionState = $state<ConnectionState>({
@@ -120,6 +121,7 @@ export function disconnect(): void {
   epicLinkFieldId = null;
   sprintFieldId = null;
   removeStorageItem(STORAGE_KEYS.CONNECTION);
+  clearAvatarCache(); // Free memory by revoking blob URLs
   logger.connection('Disconnected');
 }
 

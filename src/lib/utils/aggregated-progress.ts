@@ -26,54 +26,21 @@ export interface AggregatedResolutionProgress {
 // ============================================
 
 /**
- * Calculate aggregated time progress from a node and all its descendants
- * Uses the progress field (logged time vs. estimated time)
+ * Get aggregated time progress from a node (pre-calculated during tree build)
+ * O(1) lookup - values are cached in TreeNode
  */
 export function calculateAggregatedTimeProgress(node: TreeNode): AggregatedTimeProgress {
-  let logged = node.issue.fields.progress?.progress ?? 0;
-  let total = node.issue.fields.progress?.total ?? 0;
-
-  // Recursively add children's progress
-  for (const child of node.children) {
-    const childProgress = calculateAggregatedTimeProgress(child);
-    logged += childProgress.logged;
-    total += childProgress.total;
-  }
-
-  return {
-    logged,
-    total,
-    percent: total > 0 ? Math.round((logged / total) * 100) : 0
-  };
+  return node.cachedTimeProgress ?? { logged: 0, total: 0, percent: 0 };
 }
 
 /**
- * Calculate aggregated resolution progress from a node's descendants
- * Counts done vs. total descendant issues (based on statusCategory.key === 'done')
+ * Get aggregated resolution progress from a node (pre-calculated during tree build)
+ * O(1) lookup - values are cached in TreeNode
  */
 export function calculateAggregatedResolutionProgress(
   node: TreeNode
 ): AggregatedResolutionProgress {
-  let done = 0;
-  let total = 0;
-
-  function countDescendants(n: TreeNode): void {
-    for (const child of n.children) {
-      total++;
-      if (child.issue.fields.status.statusCategory.key === 'done') {
-        done++;
-      }
-      countDescendants(child);
-    }
-  }
-
-  countDescendants(node);
-
-  return {
-    done,
-    total,
-    percent: total > 0 ? Math.round((done / total) * 100) : 0
-  };
+  return node.cachedResolutionProgress ?? { done: 0, total: 0, percent: 0 };
 }
 
 // ============================================
@@ -90,10 +57,10 @@ export function formatHours(seconds: number): string {
 
 /**
  * Check if a node has any time tracking data (self or descendants)
+ * O(1) lookup - uses cached value
  */
 export function hasTimeTrackingData(node: TreeNode): boolean {
-  const progress = calculateAggregatedTimeProgress(node);
-  return progress.total > 0;
+  return (node.cachedTimeProgress?.total ?? 0) > 0;
 }
 
 /**

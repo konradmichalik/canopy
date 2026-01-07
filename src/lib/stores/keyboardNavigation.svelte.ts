@@ -14,11 +14,33 @@ export const keyboardNavState = $state({
   isNavigating: false
 });
 
+// Cached flattened tree for performance
+let cachedFlattenedTree: TreeNode[] = [];
+let cachedTreeNodesRef: TreeNode[] | null = null;
+
 /**
  * Get visible (flattened) nodes for navigation
+ * Uses cached value when tree structure hasn't changed
  */
 export function getVisibleNodes(): TreeNode[] {
-  return flattenTree(issuesState.treeNodes);
+  // Check if cache is still valid (same tree reference)
+  if (cachedTreeNodesRef === issuesState.treeNodes && cachedFlattenedTree.length > 0) {
+    return cachedFlattenedTree;
+  }
+
+  // Rebuild cache
+  cachedFlattenedTree = flattenTree(issuesState.treeNodes);
+  cachedTreeNodesRef = issuesState.treeNodes;
+  return cachedFlattenedTree;
+}
+
+/**
+ * Invalidate the flattened tree cache
+ * Call this when expand/collapse state changes
+ */
+export function invalidateFlatTreeCache(): void {
+  cachedTreeNodesRef = null;
+  cachedFlattenedTree = [];
 }
 
 /**
