@@ -28,6 +28,7 @@
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
   let treeContainerRef: HTMLDivElement | null = $state(null);
+  // eslint-disable-next-line svelte/no-unnecessary-state-wrap -- variable is reassigned, not just mutated
   let expandedGroups: SvelteSet<string> = $state(new SvelteSet<string>());
   let entryNodeExpanded = $state(true);
   let hasInitializedGroups = $state(false);
