@@ -386,3 +386,14 @@ export interface ExportedCredentials {
   password?: string;
   personalAccessToken?: string;
 }
+
+// ============================================
+// Single Query Export/Import
+// ============================================
+
+export interface ExportedSingleQuery {
+  version: number;
+  exportedAt: string;
+  type: 'single-query';
+  query: SavedQuery;
+}

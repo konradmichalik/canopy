@@ -7,6 +7,7 @@
     jqlState,
     initializeQueries,
     addQuery,
+    addImportedQuery,
     updateQuery,
     deleteQuery,
     reorderQueries,
@@ -31,6 +32,7 @@
   import { loadGroupConfig, setGroupingChangeCallback } from '../../stores/grouping.svelte';
   import type { SortConfig, GroupByOption } from '../../types/tree';
   import { updateQueryGroupBy } from '../../stores/jql.svelte';
+  import { readSingleQueryFile, importSingleQuery } from '../../utils/storage';
 
   interface Props {
     width: number;
@@ -46,6 +48,10 @@
   // Drag & Drop state
   let draggedIndex = $state<number | null>(null);
   let dragOverIndex = $state<number | null>(null);
+
+  // Import state
+  let importFileInput: HTMLInputElement;
+  let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Initialize on mount (run only once)
   $effect(() => {
@@ -161,6 +167,36 @@
     draggedIndex = null;
     dragOverIndex = null;
   }
+
+  // Import handlers
+  function handleImportClick(): void {
+    importFileInput?.click();
+  }
+
+  async function handleImportFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    try {
+      const config = await readSingleQueryFile(file);
+      const importedQuery = importSingleQuery(config);
+      addImportedQuery(importedQuery);
+      showImportMessage('success', `Query "${importedQuery.title}" imported`);
+    } catch (error) {
+      showImportMessage('error', error instanceof Error ? error.message : 'Import failed');
+    }
+
+    // Reset input
+    input.value = '';
+  }
+
+  function showImportMessage(type: 'success' | 'error', text: string): void {
+    importMessage = { type, text };
+    setTimeout(() => {
+      importMessage = null;
+    }, 4000);
+  }
 </script>
 
 <aside class="h-full bg-surface-sunken flex flex-col" style="width: {width}px;">
@@ -169,15 +205,33 @@
     class="h-14 flex items-center justify-between px-4 border-b border-border-bold bg-gradient-to-b from-surface-raised to-surface"
   >
     <span class="text-sm font-semibold text-text tracking-wide">Queries</span>
-    <button
-      onclick={handleNewQuery}
-      class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-brand text-text-inverse hover:bg-brand-hovered rounded-md transition-all duration-200 shadow-sm hover:shadow"
-      title="New Query"
-    >
-      <AtlaskitIcon name="add" size={16} />
-      <span>New</span>
-    </button>
+    <div class="flex items-center gap-1.5">
+      <button
+        onclick={handleImportClick}
+        class="p-1.5 text-text-subtle hover:text-text hover:bg-surface-hovered rounded-md transition-colors"
+        title="Import Query"
+      >
+        <AtlaskitIcon name="upload" size={18} />
+      </button>
+      <button
+        onclick={handleNewQuery}
+        class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-brand text-text-inverse hover:bg-brand-hovered rounded-md transition-all duration-200 shadow-sm hover:shadow"
+        title="New Query"
+      >
+        <AtlaskitIcon name="add" size={16} />
+        <span>New</span>
+      </button>
+    </div>
   </div>
+
+  <!-- Hidden File Input for Import -->
+  <input
+    bind:this={importFileInput}
+    type="file"
+    accept=".json,application/json"
+    class="hidden"
+    onchange={handleImportFile}
+  />
 
   <!-- Query List -->
   <div class="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
@@ -223,3 +277,29 @@
     <QueryForm query={editingQuery} onSave={handleSaveQuery} onCancel={handleCancelForm} />
   {/if}
 </aside>
+
+<!-- Import Notification Toast -->
+{#if importMessage}
+  <div
+    class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-up
+      {importMessage.type === 'success'
+      ? 'bg-success text-text-inverse'
+      : 'bg-danger text-text-inverse'}"
+  >
+    {#if importMessage.type === 'success'}
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+    {:else}
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    {/if}
+    <span>{importMessage.text}</span>
+  </div>
+{/if}

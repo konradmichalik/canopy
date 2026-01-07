@@ -2,6 +2,7 @@
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { SavedQuery } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
+  import { downloadSingleQuery } from '../../utils/storage';
 
   interface Props {
     query: SavedQuery;
@@ -58,6 +59,11 @@
   function handleEdit(e: Event): void {
     e.stopPropagation();
     onEdit(query);
+  }
+
+  function handleExport(e: Event): void {
+    e.stopPropagation();
+    downloadSingleQuery(query);
   }
 
   function handleClick(): void {
@@ -128,6 +134,14 @@
       title="Edit query"
     >
       <AtlaskitIcon name="edit" size={14} />
+    </button>
+    <button
+      type="button"
+      onclick={handleExport}
+      class="p-1.5 rounded-md hover:bg-neutral text-text-subtle hover:text-text transition-colors"
+      title="Export query"
+    >
+      <AtlaskitIcon name="download" size={14} />
     </button>
     <button
       type="button"

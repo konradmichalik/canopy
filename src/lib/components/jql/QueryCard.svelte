@@ -2,6 +2,7 @@
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { SavedQuery } from '../../types';
   import { truncateJql } from '../../utils/jql-helpers';
+  import { downloadSingleQuery } from '../../utils/storage';
 
   interface Props {
     query: SavedQuery;
@@ -17,6 +18,11 @@
     if (confirm(`Delete query "${query.title}"?`)) {
       onDelete(query);
     }
+  }
+
+  function handleExport(e: Event): void {
+    e.stopPropagation();
+    downloadSingleQuery(query);
   }
 </script>
 
@@ -41,6 +47,13 @@
         title="Edit query"
       >
         <AtlaskitIcon name="edit" size={16} />
+      </button>
+      <button
+        onclick={handleExport}
+        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
+        title="Export query"
+      >
+        <AtlaskitIcon name="download" size={16} />
       </button>
       <button
         onclick={handleDelete}

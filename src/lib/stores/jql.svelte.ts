@@ -194,6 +194,15 @@ export function getDefaultQuery(): SavedQuery | undefined {
 }
 
 /**
+ * Add an already-constructed query (e.g., from import)
+ */
+export function addImportedQuery(query: SavedQuery): void {
+  jqlState.queries = [...jqlState.queries, query];
+  persistQueries();
+  logger.store('jql', 'Added imported query', { id: query.id, title: query.title });
+}
+
+/**
  * Import queries from JSON
  */
 export function importQueries(data: SavedQuery[]): number {

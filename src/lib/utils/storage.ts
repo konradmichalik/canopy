@@ -4,7 +4,7 @@
  */
 
 import { logger } from './logger';
-import type { ExportedConfig, SavedQuery } from '../types';
+import type { ExportedConfig, ExportedSingleQuery, SavedQuery } from '../types';
 import type { StoredConnection } from '../types/connection';
 
 const STORAGE_PREFIX = 'jira-hierarchy:';
@@ -372,4 +372,147 @@ export function readConfigFile(file: File): Promise<ExportedConfig> {
 
     reader.readAsText(file);
   });
+}
+
+// ============================================
+// Single Query Export / Import
+// ============================================
+
+const SINGLE_QUERY_EXPORT_VERSION = 1;
+
+/**
+ * Export a single query as JSON
+ */
+export function exportSingleQuery(query: SavedQuery): ExportedSingleQuery {
+  const config: ExportedSingleQuery = {
+    version: SINGLE_QUERY_EXPORT_VERSION,
+    exportedAt: new Date().toISOString(),
+    type: 'single-query',
+    query
+  };
+
+  logger.info('📦 Single query exported', { title: query.title });
+
+  return config;
+}
+
+/**
+ * Download a single query as JSON file
+ */
+export function downloadSingleQuery(query: SavedQuery): void {
+  const config = exportSingleQuery(query);
+  const json = JSON.stringify(config, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  // Sanitize title for filename
+  const safeTitle = query.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  const filename = `jira-query-${safeTitle}-${new Date().toISOString().split('T')[0]}.json`;
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  logger.info(`📥 Single query downloaded as "${filename}"`);
+}
+
+/**
+ * Validate an imported single query configuration
+ */
+export function validateSingleQueryImport(data: unknown): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  if (!data || typeof data !== 'object') {
+    return { valid: false, errors: ['Invalid JSON structure'] };
+  }
+
+  const config = data as Record<string, unknown>;
+
+  // Check type field
+  if (config.type !== 'single-query') {
+    return { valid: false, errors: ['Not a single query export file'] };
+  }
+
+  // Check version
+  if (typeof config.version !== 'number') {
+    errors.push('Missing or invalid version field');
+  } else if (config.version > SINGLE_QUERY_EXPORT_VERSION) {
+    errors.push(
+      `Config version ${config.version} is newer than supported version ${SINGLE_QUERY_EXPORT_VERSION}`
+    );
+  }
+
+  // Check query
+  if (!config.query || typeof config.query !== 'object') {
+    errors.push('Missing query data');
+  } else {
+    const query = config.query as Record<string, unknown>;
+    if (typeof query.title !== 'string' || !query.title) {
+      errors.push('Query is missing title');
+    }
+    if (typeof query.jql !== 'string' || !query.jql) {
+      errors.push('Query is missing JQL');
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+/**
+ * Read a single query file and parse as JSON
+ */
+export function readSingleQueryFile(file: File): Promise<ExportedSingleQuery> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const data = JSON.parse(text);
+
+        const validation = validateSingleQueryImport(data);
+        if (!validation.valid) {
+          reject(new Error(`Invalid query file: ${validation.errors.join(', ')}`));
+          return;
+        }
+
+        resolve(data as ExportedSingleQuery);
+      } catch {
+        reject(new Error('Failed to parse JSON file'));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+
+    reader.readAsText(file);
+  });
+}
+
+/**
+ * Import a single query from an exported file
+ * Returns the normalized query ready to be added to the store
+ */
+export function importSingleQuery(config: ExportedSingleQuery): SavedQuery {
+  const now = new Date().toISOString();
+
+  const importedQuery: SavedQuery = {
+    ...config.query,
+    id: `query-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    createdAt: config.query.createdAt || now,
+    updatedAt: now,
+    isDefault: false // Never import as default
+  };
+
+  logger.info('📋 Single query imported', { title: importedQuery.title });
+
+  return importedQuery;
 }
