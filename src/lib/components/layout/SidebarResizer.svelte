@@ -42,11 +42,12 @@
 </script>
 
 <div
-  role="separator"
+  role="slider"
   aria-orientation="vertical"
   aria-valuenow={currentWidth}
   aria-valuemin={MIN_SIDEBAR_WIDTH}
   aria-valuemax={MAX_SIDEBAR_WIDTH}
+  aria-label="Resize sidebar"
   tabindex="0"
   class="w-1.5 flex-shrink-0 cursor-col-resize group relative transition-all duration-200
     {isResizing ? 'bg-brand' : 'bg-border hover:bg-brand/60'}"

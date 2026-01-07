@@ -15,9 +15,14 @@
 
   let { query = null, onSave, onCancel }: Props = $props();
 
+  // These intentionally capture initial values only - the modal is opened with fixed query data
+  // svelte-ignore state_referenced_locally
   let title = $state(query?.title || '');
+  // svelte-ignore state_referenced_locally
   let jql = $state(query?.jql || '');
+  // svelte-ignore state_referenced_locally
   let color = $state<QueryColor | undefined>(query?.color);
+  // svelte-ignore state_referenced_locally
   let showEntryNode = $state(query?.showEntryNode ?? false);
   let error = $state<string | null>(null);
 
@@ -66,14 +71,17 @@
 </script>
 
 <!-- Modal Backdrop -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
   class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
   onclick={onCancel}
   onkeydown={(e) => e.key === 'Escape' && onCancel()}
   role="dialog"
   aria-modal="true"
+  tabindex="-1"
 >
   <!-- Modal Content -->
+  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div
     class="bg-surface border border-border rounded-xl shadow-xl w-full max-w-lg"
     onclick={(e) => e.stopPropagation()}
@@ -142,8 +150,8 @@
       </div>
 
       <!-- Color Selection -->
-      <div>
-        <label class="block text-sm font-medium text-text mb-2"> Color (optional) </label>
+      <fieldset>
+        <legend class="block text-sm font-medium text-text mb-2"> Color (optional) </legend>
         <div class="flex flex-wrap gap-2">
           {#each QUERY_COLORS as c (c.id)}
             <Tooltip text={c.label}>
@@ -160,7 +168,7 @@
             </Tooltip>
           {/each}
         </div>
-      </div>
+      </fieldset>
 
       <!-- Entry Node Option -->
       <div class="flex items-center gap-3">

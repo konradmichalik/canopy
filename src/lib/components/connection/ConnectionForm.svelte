@@ -98,8 +98,8 @@
 
 <form onsubmit={handleSubmit} class="space-y-6">
   <!-- Instance Type -->
-  <div>
-    <label class="block text-sm font-medium text-text mb-2"> JIRA Instance Type </label>
+  <fieldset>
+    <legend class="block text-sm font-medium text-text mb-2"> JIRA Instance Type </legend>
     <div class="flex gap-4">
       <label class="flex items-center gap-2 cursor-pointer">
         <input
@@ -123,7 +123,7 @@
         <span class="text-sm text-text">Server / Data Center</span>
       </label>
     </div>
-  </div>
+  </fieldset>
 
   <!-- Base URL -->
   <div>
@@ -193,8 +193,8 @@
     </div>
   {:else}
     <!-- Server Credentials -->
-    <div>
-      <label class="block text-sm font-medium text-text mb-2"> Authentication Method </label>
+    <fieldset>
+      <legend class="block text-sm font-medium text-text mb-2"> Authentication Method </legend>
       <div class="flex gap-4">
         <label class="flex items-center gap-2 cursor-pointer">
           <input
@@ -217,7 +217,7 @@
           <span class="text-sm text-text">Basic Auth</span>
         </label>
       </div>
-    </div>
+    </fieldset>
 
     {#if isBasicAuth}
       <div>

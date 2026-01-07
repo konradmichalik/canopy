@@ -4,6 +4,7 @@
   import IssueCard from './IssueCard.svelte';
   import { toggleNode } from '../../stores/issues.svelte';
   import { keyboardNavState, setFocusedKey } from '../../stores/keyboardNavigation.svelte';
+  import TreeNode from './TreeNode.svelte';
 
   interface Props {
     node: TreeNodeType;
@@ -78,7 +79,7 @@
   {#if node.isExpanded && hasChildren}
     <div class="children">
       {#each node.children as child (child.issue.key)}
-        <svelte:self node={child} />
+        <TreeNode node={child} />
       {/each}
     </div>
   {/if}
