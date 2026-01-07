@@ -115,30 +115,9 @@
 </script>
 
 <div class="space-y-3">
-  <!-- Row 1: Toggle + Search + Quick Filters -->
+  <!-- Row 1: Search + Quick Filters + Toggle -->
   <div class="flex items-center gap-3 min-h-8">
-    <!-- Collapse Toggle -->
-    <button
-      onclick={toggleExpanded}
-      class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-    >
-      <AtlaskitIcon
-        name="chevron-right"
-        size={14}
-        class="transition-transform duration-200 {expanded ? 'rotate-90' : ''}"
-      />
-      <span class="font-medium">Filters</span>
-      {#if !expanded && activeCount > 0}
-        <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary">
-          {activeCount}
-        </span>
-      {/if}
-    </button>
-
     {#if expanded}
-      <!-- Divider -->
-      <div class="h-5 w-px bg-border"></div>
-
       <!-- Search input -->
       <div class="relative flex-shrink-0">
         <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
@@ -155,7 +134,7 @@
         {#if localSearchText}
           <button
             onclick={handleClearSearch}
-            class="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground"
+            class="absolute inset-y-0 right-2 flex items-center cursor-pointer text-muted-foreground hover:text-foreground"
           >
             <AtlaskitIcon name="cross" size={12} />
           </button>
@@ -173,7 +152,7 @@
           <Tooltip text={filter.jqlCondition}>
             <button
               onclick={() => toggleFilter(filter.id)}
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
+              class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
                 {filter.isActive
                 ? 'bg-primary/10 border-primary/30 text-primary font-medium'
                 : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
@@ -185,19 +164,32 @@
         {/each}
       </div>
 
-      <!-- Active filters count + Reset -->
+      <!-- Reset button -->
       {#if activeCount > 0}
-        <div class="ml-auto flex items-center gap-2 flex-shrink-0">
-          <span class="text-xs text-muted-foreground">
-            {activeCount} active
-          </span>
-          <Button variant="ghost" size="sm" class="h-7 text-xs" onclick={resetFilters}>
-            <AtlaskitIcon name="cross" size={12} />
-            Reset
-          </Button>
-        </div>
+        <Button variant="ghost" size="sm" class="h-7 text-xs" onclick={resetFilters}>
+          <AtlaskitIcon name="cross" size={12} />
+          Reset
+        </Button>
       {/if}
     {/if}
+
+    <!-- Collapse Toggle (right side) -->
+    <button
+      onclick={toggleExpanded}
+      class="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 cursor-pointer"
+    >
+      <span class="font-medium">Filters</span>
+      {#if activeCount > 0}
+        <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary">
+          {activeCount}
+        </span>
+      {/if}
+      <AtlaskitIcon
+        name="chevron-right"
+        size={14}
+        class="transition-transform duration-200 {expanded ? 'rotate-90' : ''}"
+      />
+    </button>
   </div>
 
   <!-- Row 2: Data Filters (Dynamic dropdowns) -->

@@ -15,6 +15,7 @@
     hasTimeTrackingData,
     hasDescendants
   } from '../../utils/aggregated-progress';
+  import { toggleDynamicFilter, makeFilterId, makeAssigneeFilterId } from '../../stores/filters.svelte';
 
   interface Props {
     node: TreeNode;
@@ -90,6 +91,12 @@
     });
   }
 
+  // Handle filter click on issue fields
+  function handleFilterClick(event: MouseEvent, filterId: string): void {
+    event.stopPropagation(); // Prevent TreeNode expand/collapse
+    toggleDynamicFilter(filterId);
+  }
+
   // Get comment count from fields (if available)
   const commentCount = $derived(
     (issue.fields as Record<string, unknown>).comment
@@ -108,7 +115,14 @@
 
 <div class="flex items-center min-w-0 flex-1 {isCompact ? 'gap-3 py-1' : 'gap-4 py-2.5'}">
   <!-- Issue Type Icon -->
-  <IssueTypeIcon issueType={issue.fields.issuetype} size={isCompact ? 16 : 20} />
+  <button
+    type="button"
+    class="cursor-pointer hover:bg-surface-hovered rounded p-0.5 -m-0.5 transition-colors flex-shrink-0"
+    onclick={(e) => handleFilterClick(e, makeFilterId('type', issue.fields.issuetype.name))}
+    title={issue.fields.issuetype.name}
+  >
+    <IssueTypeIcon issueType={issue.fields.issuetype} size={isCompact ? 16 : 20} />
+  </button>
 
   <!-- Issue Key (link) -->
   <Tooltip text="Open in Jira">
@@ -130,11 +144,14 @@
 
   <!-- Priority -->
   {#if showPriority && issue.fields.priority}
-    <Tooltip text={`Priority: ${issue.fields.priority.name}`}>
-      <div class="flex items-center gap-1 flex-shrink-0">
-        <img src={issue.fields.priority.iconUrl} alt={issue.fields.priority.name} class="w-4 h-4" />
-      </div>
-    </Tooltip>
+    <button
+      type="button"
+      class="cursor-pointer hover:bg-surface-hovered rounded p-0.5 -m-0.5 transition-colors flex items-center gap-1 flex-shrink-0"
+      onclick={(e) => handleFilterClick(e, makeFilterId('priority', issue.fields.priority!.name))}
+      title={`Priority: ${issue.fields.priority.name}`}
+    >
+      <img src={issue.fields.priority.iconUrl} alt={issue.fields.priority.name} class="w-4 h-4" />
+    </button>
   {/if}
 
   <!-- Created Date -->
@@ -179,14 +196,19 @@
 
   <!-- Components -->
   {#if showComponents && issue.fields.components && issue.fields.components.length > 0}
-    <Tooltip text={`Components: ${issue.fields.components.map((c) => c.name).join(', ')}`}>
-      <div class="flex items-center gap-1 flex-shrink-0">
-        <AtlaskitIcon name="component" size={14} color="var(--color-text-subtle)" />
-        <span class="text-xs text-text-subtle"
-          >{issue.fields.components.map((c) => c.name).join(', ')}</span
+    <div class="flex items-center gap-1 flex-shrink-0">
+      <AtlaskitIcon name="component" size={14} color="var(--color-text-subtle)" />
+      {#each issue.fields.components as component, i}
+        <button
+          type="button"
+          class="cursor-pointer hover:bg-surface-hovered rounded px-0.5 -mx-0.5 transition-colors text-xs text-text-subtle"
+          onclick={(e) => handleFilterClick(e, makeFilterId('component', component.name))}
+          title={component.name}
         >
-      </div>
-    </Tooltip>
+          {component.name}{i < issue.fields.components.length - 1 ? ',' : ''}
+        </button>
+      {/each}
+    </div>
   {/if}
 
   <!-- Resolution -->
@@ -285,11 +307,25 @@
 
   <!-- Status Badge -->
   {#if showStatus}
-    <StatusBadge status={issue.fields.status} />
+    <button
+      type="button"
+      class="cursor-pointer hover:bg-surface-hovered rounded px-0.5 -mx-0.5 transition-colors"
+      onclick={(e) => handleFilterClick(e, makeFilterId('status', issue.fields.status.name))}
+      title={issue.fields.status.name}
+    >
+      <StatusBadge status={issue.fields.status} />
+    </button>
   {/if}
 
   <!-- Assignee Avatar -->
   {#if showAssignee}
-    <Avatar user={issue.fields.assignee} size={isCompact ? 'sm' : 'md'} />
+    <button
+      type="button"
+      class="cursor-pointer hover:bg-surface-hovered rounded-full p-0.5 -m-0.5 transition-colors"
+      onclick={(e) => handleFilterClick(e, issue.fields.assignee ? makeAssigneeFilterId(issue.fields.assignee) : 'assignee-unassigned')}
+      title={issue.fields.assignee ? issue.fields.assignee.displayName : 'Unassigned'}
+    >
+      <Avatar user={issue.fields.assignee} size={isCompact ? 'sm' : 'md'} />
+    </button>
   {/if}
 </div>

@@ -235,33 +235,7 @@
           </Button>
         </Tooltip>
 
-        <div class="w-px h-5 bg-border mx-1"></div>
-
-        <Tooltip
-          content="<div class='text-left space-y-1'>
-            <div class='font-semibold mb-2'>Keyboard Shortcuts</div>
-            <div><kbd class='kbd'>↑</kbd> <kbd class='kbd'>↓</kbd> Navigate</div>
-            <div><kbd class='kbd'>←</kbd> Collapse / Parent</div>
-            <div><kbd class='kbd'>→</kbd> Expand / Child</div>
-            <div><kbd class='kbd'>Space</kbd> Toggle expand</div>
-            <div><kbd class='kbd'>Enter</kbd> Open in Jira</div>
-            <div><kbd class='kbd'>Home</kbd> <kbd class='kbd'>End</kbd> First / Last</div>
-            <div><kbd class='kbd'>Esc</kbd> Clear selection</div>
-            <div class='text-muted-foreground mt-2 text-xs'>Also: j/k/h/l (vim)</div>
-          </div>"
-          placement="bottom-end"
-          html
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            class="h-8 w-8"
-            disabled={isEmpty || issuesState.isLoading}
-          >
-            <AtlaskitIcon name="keyboard" size={16} />
-          </Button>
-        </Tooltip>
-      </div>
+        </div>
     </div>
 
     <!-- Filters row -->

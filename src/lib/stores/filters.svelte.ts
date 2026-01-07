@@ -66,6 +66,31 @@ export const DYNAMIC_FILTER_CONFIG: Record<DynamicFilterCategory, DynamicFilterC
   fixVersion: { label: 'Release', icon: 'release', jqlField: 'fixVersion' }
 };
 
+// ============================================
+// Filter ID Helpers (exported for use in components)
+// ============================================
+
+/**
+ * Generate a filter ID from category prefix and name
+ * Used for status, type, priority, component, resolution, fixVersion, project
+ */
+export function makeFilterId(prefix: string, name: string): string {
+  return `${prefix}-${name.toLowerCase().replace(/\s+/g, '-')}`;
+}
+
+/**
+ * Generate an assignee filter ID (special case with different sanitization)
+ * Must match the uniqueKey logic in updateDynamicFilters: accountId || name || key
+ */
+export function makeAssigneeFilterId(assignee: {
+  accountId?: string;
+  name?: string;
+  key?: string;
+}): string {
+  const uniqueKey = assignee.accountId || assignee.name || assignee.key || 'unknown';
+  return `assignee-${uniqueKey.replace(/[^a-zA-Z0-9]/g, '-')}`;
+}
+
 // Callback for when filters change - set by issues store
 let onFiltersChange: (() => void) | null = null;
 
@@ -715,10 +740,6 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
       .filter((f) => f.isActive)
       .map((f) => f.id)
   );
-
-  // Helper to generate filter ID
-  const makeFilterId = (prefix: string, name: string) =>
-    `${prefix}-${name.toLowerCase().replace(/\s+/g, '-')}`;
 
   // Create project filters sorted alphabetically
   const sortedProjects = Array.from(projectMap.entries()).sort((a, b) =>

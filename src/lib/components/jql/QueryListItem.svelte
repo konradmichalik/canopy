@@ -1,7 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
-  import { Button } from '$lib/components/ui/button';
+  import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import type { SavedQuery } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { downloadSingleQuery } from '../../utils/storage';
@@ -82,6 +82,9 @@
   const colorClass = $derived(
     query.color ? QUERY_COLORS.find((c) => c.id === query.color)?.bg : null
   );
+
+  // Dropdown state
+  let dropdownOpen = $state(false);
 </script>
 
 <div
@@ -113,7 +116,9 @@
   <!-- Actions - visible on hover -->
   <div
     class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+    class:opacity-100={dropdownOpen}
   >
+    <!-- Drag Handle -->
     <Tooltip text="Drag to reorder">
       <div
         draggable="true"
@@ -128,35 +133,31 @@
         <AtlaskitIcon name="drag-handle" size={14} />
       </div>
     </Tooltip>
-    <Tooltip text="Edit query">
-      <Button
-        variant="ghost"
-        size="icon"
-        class="h-6 w-6"
-        onclick={handleEdit}
+
+    <!-- Actions Dropdown -->
+    <DropdownMenu.Root bind:open={dropdownOpen}>
+      <DropdownMenu.Trigger
+        class="p-1 cursor-pointer text-muted-foreground hover:text-foreground rounded hover:bg-accent"
+        onclick={(e: MouseEvent) => e.stopPropagation()}
       >
-        <AtlaskitIcon name="edit" size={14} />
-      </Button>
-    </Tooltip>
-    <Tooltip text="Export query">
-      <Button
-        variant="ghost"
-        size="icon"
-        class="h-6 w-6"
-        onclick={handleExport}
-      >
-        <AtlaskitIcon name="download" size={14} />
-      </Button>
-    </Tooltip>
-    <Tooltip text="Delete query">
-      <Button
-        variant="ghost"
-        size="icon"
-        class="h-6 w-6 hover:bg-destructive/10 hover:text-destructive"
-        onclick={handleDelete}
-      >
-        <AtlaskitIcon name="delete" size={14} />
-      </Button>
-    </Tooltip>
+        <AtlaskitIcon name="more" size={14} />
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Content align="end" class="w-36">
+        <DropdownMenu.Item onclick={handleEdit}>
+          <AtlaskitIcon name="edit" size={14} class="mr-2" />
+          Edit
+        </DropdownMenu.Item>
+        <DropdownMenu.Item onclick={handleExport}>
+          <AtlaskitIcon name="download" size={14} class="mr-2" />
+          Export
+        </DropdownMenu.Item>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item onclick={handleDelete} class="text-destructive focus:text-destructive">
+          <AtlaskitIcon name="delete" size={14} class="mr-2" />
+          Delete
+        </DropdownMenu.Item>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
   </div>
 </div>
