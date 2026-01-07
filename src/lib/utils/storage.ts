@@ -363,7 +363,7 @@ export function readConfigFile(file: File): Promise<ExportedConfig> {
         }
 
         resolve(data as ExportedConfig);
-      } catch (error) {
+      } catch {
         reject(new Error('Failed to parse JSON file'));
       }
     };

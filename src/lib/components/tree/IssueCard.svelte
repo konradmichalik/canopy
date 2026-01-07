@@ -39,9 +39,9 @@
   );
 
   const progressPercent = $derived(
-    hasProgress
+    hasProgress && issue.fields.aggregateprogress
       ? Math.round(
-          (issue.fields.aggregateprogress!.progress / issue.fields.aggregateprogress!.total) * 100
+          (issue.fields.aggregateprogress.progress / issue.fields.aggregateprogress.total) * 100
         )
       : 0
   );
@@ -147,7 +147,7 @@
     <button
       type="button"
       class="cursor-pointer hover:bg-surface-hovered rounded p-0.5 -m-0.5 transition-colors flex items-center gap-1 flex-shrink-0"
-      onclick={(e) => handleFilterClick(e, makeFilterId('priority', issue.fields.priority!.name))}
+      onclick={(e) => issue.fields.priority && handleFilterClick(e, makeFilterId('priority', issue.fields.priority.name))}
       title={`Priority: ${issue.fields.priority.name}`}
     >
       <img src={issue.fields.priority.iconUrl} alt={issue.fields.priority.name} class="w-4 h-4" />
@@ -198,7 +198,7 @@
   {#if showComponents && issue.fields.components && issue.fields.components.length > 0}
     <div class="flex items-center gap-1 flex-shrink-0">
       <AtlaskitIcon name="component" size={14} color="var(--color-text-subtle)" />
-      {#each issue.fields.components as component, i}
+      {#each issue.fields.components as component, i (component.id)}
         <button
           type="button"
           class="cursor-pointer hover:bg-surface-hovered rounded px-0.5 -mx-0.5 transition-colors text-xs text-text-subtle"
@@ -283,9 +283,9 @@
   {/if}
 
   <!-- Progress Bar (JIRA native aggregateprogress) -->
-  {#if showProgress && hasProgress}
-    {@const progress = issue.fields.aggregateprogress!.progress}
-    {@const total = issue.fields.aggregateprogress!.total}
+  {#if showProgress && hasProgress && issue.fields.aggregateprogress}
+    {@const progress = issue.fields.aggregateprogress.progress}
+    {@const total = issue.fields.aggregateprogress.total}
     {@const remaining = total - progress}
     {@const progressHours = Math.round(progress / 3600)}
     {@const totalHours = Math.round(total / 3600)}

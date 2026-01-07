@@ -43,6 +43,7 @@
         arrowClasses="bg-popover border-l border-b"
       >
         {#if html}
+          <!-- eslint-disable-next-line svelte/no-at-html-tags -- HTML mode is opt-in and content is developer-controlled -->
           {@html tooltipContent}
         {:else}
           {tooltipContent}

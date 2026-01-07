@@ -12,14 +12,14 @@
   let { src, alt = '', class: className = '', style = '', fallback }: Props = $props();
 
   let loadedUrl = $state<string | null>(null);
-  let isLoading = $state(false);
-  let loadFailed = $state(false);
+  let _isLoading = $state(false);
+  let _loadFailed = $state(false);
 
   $effect(() => {
     const url = src;
     if (!url) {
       loadedUrl = null;
-      loadFailed = false;
+      _loadFailed = false;
       return;
     }
 
@@ -27,20 +27,20 @@
     const cached = getCachedAvatarUrl(url);
     if (cached) {
       loadedUrl = cached;
-      loadFailed = false;
+      _loadFailed = false;
       return;
     }
 
     // Load with auth
-    isLoading = true;
-    loadFailed = false;
+    _isLoading = true;
+    _loadFailed = false;
 
     getAvatarUrl(url).then((blobUrl) => {
-      isLoading = false;
+      _isLoading = false;
       if (blobUrl) {
         loadedUrl = blobUrl;
       } else {
-        loadFailed = true;
+        _loadFailed = true;
         loadedUrl = null;
       }
     });

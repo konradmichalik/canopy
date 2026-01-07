@@ -197,7 +197,7 @@ class Logger {
   }
 
   // Timing utility
-  time(label: string): () => number {
+  time(_label: string): () => number {
     const start = performance.now();
     return () => {
       const duration = Math.round(performance.now() - start);

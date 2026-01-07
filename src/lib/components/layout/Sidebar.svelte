@@ -44,10 +44,10 @@
 
   interface Props {
     width: number;
-    onClose: () => void;
+    onClose?: () => void;
   }
 
-  let { width, onClose }: Props = $props();
+  let { width, onClose: _onClose }: Props = $props();
 
   let showQueryForm = $state(false);
   let editingQuery = $state<SavedQuery | null>(null);

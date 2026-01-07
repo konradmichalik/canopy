@@ -3,7 +3,7 @@
  */
 
 import type { JiraConnectionConfig } from '../types';
-import { JiraClient, JiraApiError } from './jira-client';
+import { JiraClient } from './jira-client';
 import { JiraCloudClient } from './jira-cloud';
 import { JiraServerClient } from './jira-server';
 

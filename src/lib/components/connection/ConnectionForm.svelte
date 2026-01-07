@@ -3,7 +3,7 @@
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
-  import type { JiraInstanceType, ConnectionFormData } from '../../types';
+  import type { ConnectionFormData } from '../../types';
   import { connect, connectionState } from '../../stores/connection.svelte';
   import { detectInstanceType } from '../../api';
 

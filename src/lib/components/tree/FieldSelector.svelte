@@ -2,11 +2,7 @@
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import {
-    fieldConfigState,
-    toggleField,
-    type DisplayFieldId
-  } from '../../stores/fieldConfig.svelte';
+  import { fieldConfigState, toggleField } from '../../stores/fieldConfig.svelte';
 
   let open = $state(false);
 

@@ -20,7 +20,7 @@
     children?: import('svelte').Snippet;
   }
 
-  let { query, issues, treeNodes, isExpanded = true, onToggle, children }: Props = $props();
+  let { query, issues, treeNodes: _treeNodes, isExpanded = true, onToggle, children }: Props = $props();
 
   // Aggregated stats
   const timeProgress = $derived(calculateIssuesTimeProgress(issues));

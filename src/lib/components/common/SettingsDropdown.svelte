@@ -152,7 +152,7 @@
     <!-- Color Theme Section -->
     <DropdownMenu.Label>Color</DropdownMenu.Label>
     <div class="flex gap-1.5 px-2 pb-2">
-      {#each COLOR_THEMES as theme}
+      {#each COLOR_THEMES as theme (theme.id)}
         <Tooltip text={theme.label}>
           <button
             onclick={() => handleColorThemeChange(theme.id)}

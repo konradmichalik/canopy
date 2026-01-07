@@ -47,7 +47,8 @@ export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}):
   let orphanCount = 0;
 
   issues.forEach((issue) => {
-    const node = nodeMap.get(issue.key)!;
+    const node = nodeMap.get(issue.key);
+    if (!node) return;
     const parentKey = findParentKey(issue, issueMap, epicLinkFieldId);
 
     // Debug: Log subtask parent relationships
@@ -59,7 +60,8 @@ export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}):
 
     if (parentKey && nodeMap.has(parentKey)) {
       // Has a parent in our result set
-      const parentNode = nodeMap.get(parentKey)!;
+      const parentNode = nodeMap.get(parentKey);
+      if (!parentNode) return;
       node.parentKey = parentKey;
       node.depth = parentNode.depth + 1;
       parentNode.children.push(node);

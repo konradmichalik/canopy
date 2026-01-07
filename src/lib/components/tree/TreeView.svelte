@@ -28,7 +28,7 @@
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
   let treeContainerRef: HTMLDivElement | null = $state(null);
-  let expandedGroups = $state(new SvelteSet<string>());
+  let expandedGroups: SvelteSet<string> = new SvelteSet<string>();
   let entryNodeExpanded = $state(true);
   let hasInitializedGroups = $state(false);
 

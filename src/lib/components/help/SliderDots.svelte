@@ -16,7 +16,7 @@
 </script>
 
 <div class="flex items-center justify-center gap-2" role="tablist" aria-label="Slide navigation">
-  {#each Array(total) as _, index}
+  {#each Array(total) as _, index (index)}
     <button
       type="button"
       role="tab"
