@@ -20,6 +20,21 @@
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
   import RecencyDropdown from './RecencyDropdown.svelte';
 
+  // Collapsible state - persisted to localStorage
+  const STORAGE_KEY = 'canopy-filters-expanded';
+  let expanded = $state(
+    typeof window !== 'undefined'
+      ? localStorage.getItem(STORAGE_KEY) !== 'false'
+      : true
+  );
+
+  function toggleExpanded() {
+    expanded = !expanded;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, String(expanded));
+    }
+  }
+
   // Convert icon name to Atlaskit icon name (pass-through with fallback)
   function getIconName(iconName: string | undefined): AtlaskitIconName {
     return (iconName as AtlaskitIconName) || 'circle';
@@ -100,70 +115,93 @@
 </script>
 
 <div class="space-y-3">
-  <!-- Row 1: Search + Quick Filters -->
-  <div class="flex items-center gap-3">
-    <!-- Search input -->
-    <div class="relative flex-shrink-0">
-      <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
-        <AtlaskitIcon name="search" size={14} class="text-muted-foreground" />
-      </div>
-      <Input
-        type="text"
-        placeholder="Search..."
-        value={localSearchText}
-        oninput={handleSearchInput}
-        onkeydown={handleSearchKeydown}
-        class="w-40 h-8 pl-8 pr-8 text-xs"
+  <!-- Row 1: Toggle + Search + Quick Filters -->
+  <div class="flex items-center gap-3 min-h-8">
+    <!-- Collapse Toggle -->
+    <button
+      onclick={toggleExpanded}
+      class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+    >
+      <AtlaskitIcon
+        name="chevron-right"
+        size={14}
+        class="transition-transform duration-200 {expanded ? 'rotate-90' : ''}"
       />
-      {#if localSearchText}
-        <button
-          onclick={handleClearSearch}
-          class="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground"
-        >
-          <AtlaskitIcon name="cross" size={12} />
-        </button>
-      {/if}
-    </div>
-
-    <!-- Divider -->
-    <div class="h-5 w-px bg-border"></div>
-
-    <!-- Quick Filters (Static) -->
-    <div class="flex items-center gap-1.5">
-      <span class="text-xs text-muted-foreground font-medium mr-1">Quick:</span>
-      <RecencyDropdown selectedOption={filtersState.recencyFilter} onSelect={setRecencyFilter} />
-      {#each filtersState.filters as filter (filter.id)}
-        <Tooltip text={filter.jqlCondition}>
-          <button
-            onclick={() => toggleFilter(filter.id)}
-            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
-              {filter.isActive
-              ? 'bg-primary/10 border-primary/30 text-primary font-medium'
-              : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
-          >
-            <AtlaskitIcon name={getIconName(filter.icon)} size={12} />
-            {filter.label}
-          </button>
-        </Tooltip>
-      {/each}
-    </div>
-
-    <!-- Active filters count + Reset -->
-    {#if activeCount > 0}
-      <div class="ml-auto flex items-center gap-2 flex-shrink-0">
-        <span class="text-xs text-muted-foreground">
-          {activeCount} active
+      <span class="font-medium">Filters</span>
+      {#if !expanded && activeCount > 0}
+        <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary">
+          {activeCount}
         </span>
-        <Button variant="ghost" size="sm" class="h-7 text-xs" onclick={resetFilters}>
-          <AtlaskitIcon name="cross" size={12} />
-          Reset
-        </Button>
+      {/if}
+    </button>
+
+    {#if expanded}
+      <!-- Divider -->
+      <div class="h-5 w-px bg-border"></div>
+
+      <!-- Search input -->
+      <div class="relative flex-shrink-0">
+        <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
+          <AtlaskitIcon name="search" size={14} class="text-muted-foreground" />
+        </div>
+        <Input
+          type="text"
+          placeholder="Search..."
+          value={localSearchText}
+          oninput={handleSearchInput}
+          onkeydown={handleSearchKeydown}
+          class="w-40 h-8 pl-8 pr-8 text-xs"
+        />
+        {#if localSearchText}
+          <button
+            onclick={handleClearSearch}
+            class="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground"
+          >
+            <AtlaskitIcon name="cross" size={12} />
+          </button>
+        {/if}
       </div>
+
+      <!-- Divider -->
+      <div class="h-5 w-px bg-border"></div>
+
+      <!-- Quick Filters (Static) -->
+      <div class="flex items-center gap-1.5">
+        <span class="text-xs text-muted-foreground font-medium mr-1">Quick:</span>
+        <RecencyDropdown selectedOption={filtersState.recencyFilter} onSelect={setRecencyFilter} />
+        {#each filtersState.filters as filter (filter.id)}
+          <Tooltip text={filter.jqlCondition}>
+            <button
+              onclick={() => toggleFilter(filter.id)}
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
+                {filter.isActive
+                ? 'bg-primary/10 border-primary/30 text-primary font-medium'
+                : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
+            >
+              <AtlaskitIcon name={getIconName(filter.icon)} size={12} />
+              {filter.label}
+            </button>
+          </Tooltip>
+        {/each}
+      </div>
+
+      <!-- Active filters count + Reset -->
+      {#if activeCount > 0}
+        <div class="ml-auto flex items-center gap-2 flex-shrink-0">
+          <span class="text-xs text-muted-foreground">
+            {activeCount} active
+          </span>
+          <Button variant="ghost" size="sm" class="h-7 text-xs" onclick={resetFilters}>
+            <AtlaskitIcon name="cross" size={12} />
+            Reset
+          </Button>
+        </div>
+      {/if}
     {/if}
   </div>
 
   <!-- Row 2: Data Filters (Dynamic dropdowns) -->
-  {#if hasVisibleDynamicFilters}
+  {#if expanded && hasVisibleDynamicFilters}
     <div class="flex items-center gap-3 pt-2 border-t border-border/50">
       <span class="text-xs text-muted-foreground font-medium">Filter by:</span>
       <div class="flex flex-wrap items-center gap-1.5">
