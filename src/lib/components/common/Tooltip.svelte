@@ -38,7 +38,8 @@
       </TooltipPrimitive.Trigger>
       <TooltipPrimitive.Content
         {side}
-        class="bg-neutral-bold text-text-inverse text-xs font-medium px-2 py-1 rounded max-w-[300px] whitespace-pre-line"
+        sideOffset={4}
+        class="bg-popover text-popover-foreground border shadow-md text-xs font-medium px-3 py-1.5 rounded-md max-w-[300px] whitespace-pre-line z-50"
       >
         {#if html}
           {@html tooltipContent}
