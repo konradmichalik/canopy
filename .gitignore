@@ -4,3 +4,4 @@ nbproject/
 
 node_modules/
 proxy/node_modules/
+.vercel

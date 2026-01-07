@@ -80,6 +80,12 @@ export abstract class JiraClient {
       'X-Atlassian-Token': 'no-check' // Bypass XSRF check for API requests
     };
 
+    // When using a proxy, send the actual JIRA URL as a header
+    // This allows the proxy to forward requests to the correct instance
+    if (this.config.proxyUrl) {
+      headers['X-Jira-Base-Url'] = this.config.baseUrl;
+    }
+
     logger.apiRequest(method, endpoint, body ? { body } : undefined);
     logger.debug(`Request URL: ${url}`);
 
@@ -329,8 +335,10 @@ export abstract class JiraClient {
       let fetchUrl = imageUrl;
       if (this.config.proxyUrl) {
         // Extract base proxy URL (remove /jira suffix if present)
-        const proxyBase = this.config.proxyUrl.replace(/\/jira\/?$/, '');
-        fetchUrl = `${proxyBase}/jira-image?url=${encodeURIComponent(imageUrl)}`;
+        // Supports both local proxy (/jira-image) and Vercel (/api/jira-image)
+        const proxyBase = this.config.proxyUrl.replace(/\/(api\/)?jira\/?$/, '');
+        const imageEndpoint = this.config.proxyUrl.startsWith('/api/') ? '/api/jira-image' : '/jira-image';
+        fetchUrl = `${proxyBase}${imageEndpoint}?url=${encodeURIComponent(imageUrl)}`;
       }
 
       const response = await fetch(fetchUrl, {
