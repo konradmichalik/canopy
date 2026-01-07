@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import Sidebar from './Sidebar.svelte';
   import SidebarResizer from './SidebarResizer.svelte';
   import TreeView from '../tree/TreeView.svelte';
@@ -34,19 +35,20 @@
       <div class="h-full px-4 flex items-center">
         <!-- Left: Toggle + Logo + App Name -->
         <div class="flex items-center gap-3 flex-shrink-0">
-          <button
-            onclick={toggleSidebar}
-            class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle transition-colors"
-            title={routerState.sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-          >
-            <AtlaskitIcon
-              name="panel-left"
-              size={20}
-              class="transition-transform duration-200 {routerState.sidebarOpen
-                ? ''
-                : '-scale-x-100'}"
-            />
-          </button>
+          <Tooltip text={routerState.sidebarOpen ? 'Close sidebar' : 'Open sidebar'}>
+            <button
+              onclick={toggleSidebar}
+              class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle transition-colors"
+            >
+              <AtlaskitIcon
+                name="panel-left"
+                size={20}
+                class="transition-transform duration-200 {routerState.sidebarOpen
+                  ? ''
+                  : '-scale-x-100'}"
+              />
+            </button>
+          </Tooltip>
           <div class="h-6 w-px bg-border"></div>
           <Logo size="sm" showText={true} />
         </div>

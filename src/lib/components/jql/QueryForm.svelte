@@ -146,17 +146,18 @@
         <label class="block text-sm font-medium text-text mb-2"> Color (optional) </label>
         <div class="flex flex-wrap gap-2">
           {#each QUERY_COLORS as c (c.id)}
-            <button
-              type="button"
-              onclick={() => selectColor(c.id)}
-              class="w-8 h-8 rounded-full {c.bg} transition-all
-                {color === c.id
-                ? 'ring-2 ring-offset-2 ring-offset-surface ring-text scale-110'
-                : 'hover:scale-110 opacity-70 hover:opacity-100'}"
-              title={c.label}
-              aria-label={c.label}
-              aria-pressed={color === c.id}
-            ></button>
+            <Tooltip text={c.label}>
+              <button
+                type="button"
+                onclick={() => selectColor(c.id)}
+                class="w-8 h-8 rounded-full {c.bg} transition-all
+                  {color === c.id
+                  ? 'ring-2 ring-offset-2 ring-offset-surface ring-text scale-110'
+                  : 'hover:scale-110 opacity-70 hover:opacity-100'}"
+                aria-label={c.label}
+                aria-pressed={color === c.id}
+              ></button>
+            </Tooltip>
           {/each}
         </div>
       </div>

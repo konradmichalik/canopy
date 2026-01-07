@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import type { SavedQuery } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { downloadSingleQuery } from '../../utils/storage';
@@ -114,42 +115,46 @@
   <div
     class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0"
   >
-    <div
-      draggable="true"
-      ondragstart={handleDragStart}
-      ondragend={onDragEnd}
-      class="p-1.5 cursor-grab active:cursor-grabbing text-text-disabled hover:text-text-subtle rounded-md hover:bg-neutral transition-colors"
-      title="Drag to reorder"
-      role="button"
-      tabindex="-1"
-      onclick={(e: MouseEvent) => e.stopPropagation()}
-      onkeydown={(e: KeyboardEvent) => e.stopPropagation()}
-    >
-      <AtlaskitIcon name="drag-handle" size={14} />
-    </div>
-    <button
-      type="button"
-      onclick={handleEdit}
-      class="p-1.5 rounded-md hover:bg-neutral text-text-subtle hover:text-text transition-colors"
-      title="Edit query"
-    >
-      <AtlaskitIcon name="edit" size={14} />
-    </button>
-    <button
-      type="button"
-      onclick={handleExport}
-      class="p-1.5 rounded-md hover:bg-neutral text-text-subtle hover:text-text transition-colors"
-      title="Export query"
-    >
-      <AtlaskitIcon name="download" size={14} />
-    </button>
-    <button
-      type="button"
-      onclick={handleDelete}
-      class="p-1.5 rounded-md hover:bg-danger-subtlest text-text-subtle hover:text-text-danger transition-colors"
-      title="Delete query"
-    >
-      <AtlaskitIcon name="delete" size={14} />
-    </button>
+    <Tooltip text="Drag to reorder">
+      <div
+        draggable="true"
+        ondragstart={handleDragStart}
+        ondragend={onDragEnd}
+        class="p-1.5 cursor-grab active:cursor-grabbing text-text-disabled hover:text-text-subtle rounded-md hover:bg-neutral transition-colors"
+        role="button"
+        tabindex="-1"
+        onclick={(e: MouseEvent) => e.stopPropagation()}
+        onkeydown={(e: KeyboardEvent) => e.stopPropagation()}
+      >
+        <AtlaskitIcon name="drag-handle" size={14} />
+      </div>
+    </Tooltip>
+    <Tooltip text="Edit query">
+      <button
+        type="button"
+        onclick={handleEdit}
+        class="p-1.5 rounded-md hover:bg-neutral text-text-subtle hover:text-text transition-colors"
+      >
+        <AtlaskitIcon name="edit" size={14} />
+      </button>
+    </Tooltip>
+    <Tooltip text="Export query">
+      <button
+        type="button"
+        onclick={handleExport}
+        class="p-1.5 rounded-md hover:bg-neutral text-text-subtle hover:text-text transition-colors"
+      >
+        <AtlaskitIcon name="download" size={14} />
+      </button>
+    </Tooltip>
+    <Tooltip text="Delete query">
+      <button
+        type="button"
+        onclick={handleDelete}
+        class="p-1.5 rounded-md hover:bg-danger-subtlest text-text-subtle hover:text-text-danger transition-colors"
+      >
+        <AtlaskitIcon name="delete" size={14} />
+      </button>
+    </Tooltip>
   </div>
 </div>

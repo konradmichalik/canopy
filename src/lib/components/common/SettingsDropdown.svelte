@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from './AtlaskitIcon.svelte';
+  import Tooltip from './Tooltip.svelte';
   import { downloadConfig, readConfigFile, importConfig } from '../../utils/storage';
   import { initializeQueries } from '../../stores/jql.svelte';
   import { initializeConnection, disconnect } from '../../stores/connection.svelte';
@@ -111,13 +112,14 @@
 </script>
 
 <div class="settings-dropdown relative">
-  <button
-    onclick={toggleDropdown}
-    class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle transition-colors"
-    title="Settings"
-  >
-    <AtlaskitIcon name="settings" size={20} />
-  </button>
+  <Tooltip text="Settings">
+    <button
+      onclick={toggleDropdown}
+      class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle transition-colors"
+    >
+      <AtlaskitIcon name="settings" size={20} />
+    </button>
+  </Tooltip>
 
   {#if isOpen}
     <div

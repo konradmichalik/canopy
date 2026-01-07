@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Tooltip from './Tooltip.svelte';
   import type { JiraStatus } from '../../types';
 
   interface Props {
@@ -23,9 +24,8 @@
   const colorClass = $derived(getStatusColor(status.statusCategory?.key || 'new'));
 </script>
 
-<span
-  class="inline-flex items-center px-2.5 py-1 text-sm font-medium rounded {colorClass}"
-  title={status.description || status.name}
->
-  {status.name}
-</span>
+<Tooltip text={status.description || status.name}>
+  <span class="inline-flex items-center px-2.5 py-1 text-sm font-medium rounded {colorClass}">
+    {status.name}
+  </span>
+</Tooltip>

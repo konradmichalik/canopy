@@ -179,36 +179,39 @@
 
         <div class="w-px h-4 bg-border mx-1"></div>
 
-        <button
-          onclick={isGrouped ? expandAllGroups : expandAll}
-          disabled={isEmpty || issuesState.isLoading}
-          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
-          title="Expand all"
-        >
-          <AtlaskitIcon name="chevron-down" size={16} />
-        </button>
+        <Tooltip content="Expand all" placement="bottom">
+          <button
+            onclick={isGrouped ? expandAllGroups : expandAll}
+            disabled={isEmpty || issuesState.isLoading}
+            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
+          >
+            <AtlaskitIcon name="chevron-down" size={16} />
+          </button>
+        </Tooltip>
 
-        <button
-          onclick={isGrouped ? collapseAllGroups : collapseAll}
-          disabled={isEmpty || issuesState.isLoading}
-          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
-          title="Collapse all"
-        >
-          <AtlaskitIcon name="chevron-up" size={16} />
-        </button>
+        <Tooltip content="Collapse all" placement="bottom">
+          <button
+            onclick={isGrouped ? collapseAllGroups : collapseAll}
+            disabled={isEmpty || issuesState.isLoading}
+            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
+          >
+            <AtlaskitIcon name="chevron-up" size={16} />
+          </button>
+        </Tooltip>
 
-        <button
-          onclick={handleRefresh}
-          disabled={issuesState.isLoading || isRefreshing}
-          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
-          title="Refresh"
-        >
-          <AtlaskitIcon
-            name="refresh"
-            size={16}
-            class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''}
-          />
-        </button>
+        <Tooltip content="Refresh" placement="bottom">
+          <button
+            onclick={handleRefresh}
+            disabled={issuesState.isLoading || isRefreshing}
+            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
+          >
+            <AtlaskitIcon
+              name="refresh"
+              size={16}
+              class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''}
+            />
+          </button>
+        </Tooltip>
 
         <Tooltip content="Open in JIRA" placement="bottom">
           <button

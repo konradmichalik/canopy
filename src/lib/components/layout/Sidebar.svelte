@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import type { SavedQuery, QueryColor } from '../../types';
   import QueryListItem from '../jql/QueryListItem.svelte';
   import QueryForm from '../jql/QueryForm.svelte';
@@ -245,17 +246,17 @@
   >
     <span class="text-sm font-semibold text-text tracking-wide">Queries</span>
     <div class="flex items-center gap-1.5">
-      <button
-        onclick={handleImportClick}
-        class="p-1.5 text-text-subtle hover:text-text hover:bg-surface-hovered rounded-md transition-colors"
-        title="Import Query"
-      >
-        <AtlaskitIcon name="upload" size={18} />
-      </button>
+      <Tooltip text="Import Query">
+        <button
+          onclick={handleImportClick}
+          class="p-1.5 text-text-subtle hover:text-text hover:bg-surface-hovered rounded-md transition-colors"
+        >
+          <AtlaskitIcon name="upload" size={18} />
+        </button>
+      </Tooltip>
       <button
         onclick={handleNewQuery}
         class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-brand text-text-inverse hover:bg-brand-hovered rounded-md transition-all duration-200 shadow-sm hover:shadow"
-        title="New Query"
       >
         <AtlaskitIcon name="add" size={16} />
         <span>New</span>

@@ -111,16 +111,17 @@
   <IssueTypeIcon issueType={issue.fields.issuetype} size={isCompact ? 16 : 20} />
 
   <!-- Issue Key (link) -->
-  <button
-    onclick={openIssue}
-    class="font-medium text-text-brand hover:underline flex items-center gap-1 flex-shrink-0 {isCompact
-      ? 'text-sm'
-      : 'text-base gap-1.5'}"
-    title="Open in JIRA"
-  >
-    {issue.key}
-    <AtlaskitIcon name="link-external" size={isCompact ? 12 : 14} class="opacity-50" />
-  </button>
+  <Tooltip text="Open in JIRA">
+    <button
+      onclick={openIssue}
+      class="font-medium text-text-brand hover:underline flex items-center gap-1 flex-shrink-0 {isCompact
+        ? 'text-sm'
+        : 'text-base gap-1.5'}"
+    >
+      {issue.key}
+      <AtlaskitIcon name="link-external" size={isCompact ? 12 : 14} class="opacity-50" />
+    </button>
+  </Tooltip>
 
   <!-- Summary -->
   <span class="text-text truncate min-w-0 flex-1 {isCompact ? 'text-sm' : 'text-base'}">

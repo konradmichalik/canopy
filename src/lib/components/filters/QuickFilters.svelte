@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon, { type AtlaskitIconName } from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import {
     filtersState,
     toggleFilter,
@@ -110,13 +111,14 @@
           hover:border-border-bold transition-colors"
       />
       {#if localSearchText}
-        <button
-          onclick={handleClearSearch}
-          class="absolute inset-y-0 right-1.5 flex items-center text-text-subtlest hover:text-text-subtle"
-          title="Clear search (Esc)"
-        >
-          <AtlaskitIcon name="cross" size={12} />
-        </button>
+        <Tooltip text="Clear search (Esc)">
+          <button
+            onclick={handleClearSearch}
+            class="absolute inset-y-0 right-1.5 flex items-center text-text-subtlest hover:text-text-subtle"
+          >
+            <AtlaskitIcon name="cross" size={12} />
+          </button>
+        </Tooltip>
       {/if}
     </div>
 
@@ -125,17 +127,18 @@
 
     <!-- Toggle buttons for static filters (general and sprint) -->
     {#each filtersState.filters as filter (filter.id)}
-      <button
-        onclick={() => toggleFilter(filter.id)}
-        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
-          {filter.isActive
-          ? 'bg-brand-subtlest border-border-brand text-text-brand font-medium'
-          : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
-        title={filter.jqlCondition}
-      >
-        <AtlaskitIcon name={getIconName(filter.icon)} size={12} />
-        {filter.label}
-      </button>
+      <Tooltip text={filter.jqlCondition}>
+        <button
+          onclick={() => toggleFilter(filter.id)}
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
+            {filter.isActive
+            ? 'bg-brand-subtlest border-border-brand text-text-brand font-medium'
+            : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
+        >
+          <AtlaskitIcon name={getIconName(filter.icon)} size={12} />
+          {filter.label}
+        </button>
+      </Tooltip>
     {/each}
 
     <!-- Dynamic filter dropdowns (generated from categories) -->
@@ -159,14 +162,15 @@
       <span class="text-xs text-text-subtle">
         {activeCount} filter{activeCount > 1 ? 's' : ''} active
       </span>
-      <button
-        onclick={resetFilters}
-        class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered transition-colors"
-        title="Reset all filters"
-      >
-        <AtlaskitIcon name="cross" size={12} />
-        Reset
-      </button>
+      <Tooltip text="Reset all filters">
+        <button
+          onclick={resetFilters}
+          class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered transition-colors"
+        >
+          <AtlaskitIcon name="cross" size={12} />
+          Reset
+        </button>
+      </Tooltip>
     </div>
   {/if}
 </div>

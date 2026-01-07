@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import ConnectionForm from '../connection/ConnectionForm.svelte';
   import ThemeToggle from '../common/ThemeToggle.svelte';
   import Logo from '../common/Logo.svelte';
@@ -72,20 +73,22 @@
 
       <div class="flex items-center gap-3">
         <!-- Import/Export Buttons -->
-        <button
-          onclick={handleImportClick}
-          class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
-          title="Import Configuration"
-        >
-          <AtlaskitIcon name="upload" size={20} />
-        </button>
-        <button
-          onclick={handleExport}
-          class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
-          title="Export Configuration"
-        >
-          <AtlaskitIcon name="download" size={20} />
-        </button>
+        <Tooltip text="Import Configuration">
+          <button
+            onclick={handleImportClick}
+            class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
+          >
+            <AtlaskitIcon name="upload" size={20} />
+          </button>
+        </Tooltip>
+        <Tooltip text="Export Configuration">
+          <button
+            onclick={handleExport}
+            class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle"
+          >
+            <AtlaskitIcon name="download" size={20} />
+          </button>
+        </Tooltip>
 
         <ThemeToggle />
       </div>

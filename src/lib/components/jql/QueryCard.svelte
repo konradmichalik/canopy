@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import type { SavedQuery } from '../../types';
   import { truncateJql } from '../../utils/jql-helpers';
   import { downloadSingleQuery } from '../../utils/storage';
@@ -38,30 +39,33 @@
       {query.title}
     </h3>
     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-      <button
-        onclick={(e) => {
-          e.stopPropagation();
-          onEdit(query);
-        }}
-        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
-        title="Edit query"
-      >
-        <AtlaskitIcon name="edit" size={16} />
-      </button>
-      <button
-        onclick={handleExport}
-        class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
-        title="Export query"
-      >
-        <AtlaskitIcon name="download" size={16} />
-      </button>
-      <button
-        onclick={handleDelete}
-        class="p-1.5 rounded hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
-        title="Delete query"
-      >
-        <AtlaskitIcon name="delete" size={16} />
-      </button>
+      <Tooltip text="Edit query">
+        <button
+          onclick={(e) => {
+            e.stopPropagation();
+            onEdit(query);
+          }}
+          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
+        >
+          <AtlaskitIcon name="edit" size={16} />
+        </button>
+      </Tooltip>
+      <Tooltip text="Export query">
+        <button
+          onclick={handleExport}
+          class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle hover:text-text"
+        >
+          <AtlaskitIcon name="download" size={16} />
+        </button>
+      </Tooltip>
+      <Tooltip text="Delete query">
+        <button
+          onclick={handleDelete}
+          class="p-1.5 rounded hover:bg-danger-subtlest text-text-subtle hover:text-text-danger"
+        >
+          <AtlaskitIcon name="delete" size={16} />
+        </button>
+      </Tooltip>
     </div>
   </div>
 

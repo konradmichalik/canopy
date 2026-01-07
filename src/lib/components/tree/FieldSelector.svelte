@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import {
     fieldConfigState,
     toggleField,
@@ -36,27 +37,28 @@
 </script>
 
 <div class="relative" bind:this={dropdownRef}>
-  <button
-    onclick={toggleDropdown}
-    class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors
-      {enabledCount > 0
-      ? 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'
-      : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
-    title="Configure visible fields"
-  >
-    <AtlaskitIcon name="layout-three-columns" size={16} />
-    <span class="hidden sm:inline">Fields</span>
-    <span
-      class="inline-flex items-center justify-center min-w-[1rem] h-4 px-1 text-[10px] font-bold rounded bg-surface-sunken text-text-subtle"
+  <Tooltip text="Configure visible fields">
+    <button
+      onclick={toggleDropdown}
+      class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors
+        {enabledCount > 0
+        ? 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'
+        : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
     >
-      {enabledCount}
-    </span>
-    <AtlaskitIcon
-      name="chevron-down"
-      size={12}
-      class="transition-transform {isOpen ? 'rotate-180' : ''}"
-    />
-  </button>
+      <AtlaskitIcon name="layout-three-columns" size={16} />
+      <span class="hidden sm:inline">Fields</span>
+      <span
+        class="inline-flex items-center justify-center min-w-[1rem] h-4 px-1 text-[10px] font-bold rounded bg-surface-sunken text-text-subtle"
+      >
+        {enabledCount}
+      </span>
+      <AtlaskitIcon
+        name="chevron-down"
+        size={12}
+        class="transition-transform {isOpen ? 'rotate-180' : ''}"
+      />
+    </button>
+  </Tooltip>
 
   {#if isOpen}
     <div

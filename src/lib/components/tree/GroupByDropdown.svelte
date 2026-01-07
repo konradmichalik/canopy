@@ -1,6 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { AtlaskitIconName } from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import {
     groupingState,
     setGroupBy,
@@ -50,20 +51,21 @@
 </script>
 
 <div class="relative" bind:this={dropdownRef}>
-  <button
-    onclick={toggleDropdown}
-    onkeydown={handleKeydown}
-    class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered"
-    title="Group by"
-  >
-    <AtlaskitIcon name="layers" size={16} />
-    <span class="hidden sm:inline">Group: {selectedOption.label}</span>
-    <AtlaskitIcon
-      name="chevron-down"
-      size={12}
-      class="transition-transform {isOpen ? 'rotate-180' : ''}"
-    />
-  </button>
+  <Tooltip text="Group by">
+    <button
+      onclick={toggleDropdown}
+      onkeydown={handleKeydown}
+      class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered"
+    >
+      <AtlaskitIcon name="layers" size={16} />
+      <span class="hidden sm:inline">Group: {selectedOption.label}</span>
+      <AtlaskitIcon
+        name="chevron-down"
+        size={12}
+        class="transition-transform {isOpen ? 'rotate-180' : ''}"
+      />
+    </button>
+  </Tooltip>
 
   {#if isOpen}
     <div

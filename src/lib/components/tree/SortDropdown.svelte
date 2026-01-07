@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import {
     sortConfigState,
     setSortField,
@@ -63,39 +64,40 @@
 </script>
 
 <div class="relative" bind:this={dropdownRef}>
-  <button
-    onclick={toggleDropdown}
-    disabled={isDisabled}
-    class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors
-      {isDisabled
-      ? 'bg-surface-sunken border-border text-text-disabled cursor-not-allowed opacity-50'
-      : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
-    title={isDisabled ? 'Sorting disabled - JQL contains ORDER BY clause' : 'Sort issues'}
-  >
-    <AtlaskitIcon name="sort" size={16} />
-    <span class="hidden sm:inline">Sort: {selectedLabel}</span>
-    <span
-      onclick={handleDirectionToggle}
-      onkeydown={(e) => e.key === 'Enter' && handleDirectionToggle(e as unknown as MouseEvent)}
-      role="button"
-      tabindex={isDisabled ? -1 : 0}
-      class="p-0.5 rounded hover:bg-surface-sunken {isDisabled
-        ? 'cursor-not-allowed'
-        : 'cursor-pointer'}"
-      title={isDisabled
-        ? 'Sorting disabled'
-        : isAscending
-          ? 'Ascending (click to change)'
-          : 'Descending (click to change)'}
+  <Tooltip text={isDisabled ? 'Sorting disabled - JQL contains ORDER BY clause' : 'Sort issues'}>
+    <button
+      onclick={toggleDropdown}
+      disabled={isDisabled}
+      class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors
+        {isDisabled
+        ? 'bg-surface-sunken border-border text-text-disabled cursor-not-allowed opacity-50'
+        : 'bg-surface-raised border-border text-text-subtle hover:border-border-bold hover:bg-surface-hovered'}"
     >
-      <AtlaskitIcon name={isAscending ? 'arrow-up' : 'arrow-down'} size={12} />
-    </span>
-    <AtlaskitIcon
-      name="chevron-down"
-      size={12}
-      class="transition-transform {isOpen ? 'rotate-180' : ''}"
-    />
-  </button>
+      <AtlaskitIcon name="sort" size={16} />
+      <span class="hidden sm:inline">Sort: {selectedLabel}</span>
+      <span
+        onclick={handleDirectionToggle}
+        onkeydown={(e) => e.key === 'Enter' && handleDirectionToggle(e as unknown as MouseEvent)}
+        role="button"
+        tabindex={isDisabled ? -1 : 0}
+        class="p-0.5 rounded hover:bg-surface-sunken {isDisabled
+          ? 'cursor-not-allowed'
+          : 'cursor-pointer'}"
+        title={isDisabled
+          ? 'Sorting disabled'
+          : isAscending
+            ? 'Ascending (click to change)'
+            : 'Descending (click to change)'}
+      >
+        <AtlaskitIcon name={isAscending ? 'arrow-up' : 'arrow-down'} size={12} />
+      </span>
+      <AtlaskitIcon
+        name="chevron-down"
+        size={12}
+        class="transition-transform {isOpen ? 'rotate-180' : ''}"
+      />
+    </button>
+  </Tooltip>
 
   {#if isOpen && !isDisabled}
     <div
