@@ -19,21 +19,16 @@
   import { isFieldEnabled, type DisplayFieldId } from '../../stores/fieldConfig.svelte';
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
   import RecencyDropdown from './RecencyDropdown.svelte';
+  import GroupByDropdown from '../tree/GroupByDropdown.svelte';
+  import FieldSelector from '../tree/FieldSelector.svelte';
+  import SortDropdown from '../tree/SortDropdown.svelte';
 
-  // Collapsible state - persisted to localStorage
-  const STORAGE_KEY = 'canopy-filters-expanded';
-  let expanded = $state(
-    typeof window !== 'undefined'
-      ? localStorage.getItem(STORAGE_KEY) !== 'false'
-      : true
-  );
-
-  function toggleExpanded() {
-    expanded = !expanded;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, String(expanded));
-    }
+  // Props for external control
+  interface Props {
+    expanded: boolean;
   }
+
+  let { expanded }: Props = $props();
 
   // Convert icon name to Atlaskit icon name (pass-through with fallback)
   function getIconName(iconName: string | undefined): AtlaskitIconName {
@@ -114,103 +109,98 @@
   }
 </script>
 
+{#if expanded}
 <div class="space-y-3">
-  <!-- Row 1: Search + Quick Filters + Toggle -->
-  <div class="flex items-center gap-3 min-h-8">
-    {#if expanded}
-      <!-- Search input -->
-      <div class="relative flex-shrink-0">
-        <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
-          <AtlaskitIcon name="search" size={14} class="text-muted-foreground" />
-        </div>
-        <Input
-          type="text"
-          placeholder="Search..."
-          value={localSearchText}
-          oninput={handleSearchInput}
-          onkeydown={handleSearchKeydown}
-          class="w-40 h-8 pl-8 pr-8 text-xs"
-        />
-        {#if localSearchText}
-          <button
-            onclick={handleClearSearch}
-            class="absolute inset-y-0 right-2 flex items-center cursor-pointer text-muted-foreground hover:text-foreground"
-          >
-            <AtlaskitIcon name="cross" size={12} />
-          </button>
-        {/if}
+  <!-- Row 1: Search + Quick Filters -->
+  <div class="flex items-center gap-3">
+    <!-- Search input -->
+    <div class="relative flex-shrink-0">
+      <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
+        <AtlaskitIcon name="search" size={14} class="text-muted-foreground" />
       </div>
-
-      <!-- Divider -->
-      <div class="h-5 w-px bg-border"></div>
-
-      <!-- Quick Filters (Static) -->
-      <div class="flex items-center gap-1.5">
-        <span class="text-xs text-muted-foreground font-medium mr-1">Quick:</span>
-        <RecencyDropdown selectedOption={filtersState.recencyFilter} onSelect={setRecencyFilter} />
-        {#each filtersState.filters as filter (filter.id)}
-          <Tooltip text={filter.jqlCondition}>
-            <button
-              onclick={() => toggleFilter(filter.id)}
-              class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
-                {filter.isActive
-                ? 'bg-primary/10 border-primary/30 text-primary font-medium'
-                : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
-            >
-              <AtlaskitIcon name={getIconName(filter.icon)} size={12} />
-              {filter.label}
-            </button>
-          </Tooltip>
-        {/each}
-      </div>
-
-      <!-- Reset button -->
-      {#if activeCount > 0}
-        <Button variant="ghost" size="sm" class="h-7 text-xs" onclick={resetFilters}>
-          <AtlaskitIcon name="cross" size={12} />
-          Reset
-        </Button>
-      {/if}
-    {/if}
-
-    <!-- Collapse Toggle (right side) -->
-    <button
-      onclick={toggleExpanded}
-      class="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 cursor-pointer"
-    >
-      <span class="font-medium">Filters</span>
-      {#if activeCount > 0}
-        <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary">
-          {activeCount}
-        </span>
-      {/if}
-      <AtlaskitIcon
-        name="chevron-right"
-        size={14}
-        class="transition-transform duration-200 {expanded ? 'rotate-90' : ''}"
+      <Input
+        type="text"
+        placeholder="Search..."
+        value={localSearchText}
+        oninput={handleSearchInput}
+        onkeydown={handleSearchKeydown}
+        class="w-40 h-8 pl-8 pr-8 text-xs"
       />
-    </button>
+      {#if localSearchText}
+        <button
+          onclick={handleClearSearch}
+          class="absolute inset-y-0 right-2 flex items-center cursor-pointer text-muted-foreground hover:text-foreground"
+        >
+          <AtlaskitIcon name="cross" size={12} />
+        </button>
+      {/if}
+    </div>
+
+    <!-- Divider -->
+    <div class="h-5 w-px bg-border"></div>
+
+    <!-- Quick Filters (Static) -->
+    <div class="flex items-center gap-1.5">
+      <span class="text-xs text-muted-foreground font-medium mr-1">Quick:</span>
+      <RecencyDropdown selectedOption={filtersState.recencyFilter} onSelect={setRecencyFilter} />
+      {#each filtersState.filters as filter (filter.id)}
+        <Tooltip text={filter.jqlCondition}>
+          <button
+            onclick={() => toggleFilter(filter.id)}
+            class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
+              {filter.isActive
+              ? 'bg-primary/10 border-primary/30 text-primary font-medium'
+              : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
+          >
+            <AtlaskitIcon name={getIconName(filter.icon)} size={12} />
+            {filter.label}
+          </button>
+        </Tooltip>
+      {/each}
+    </div>
+
+    <!-- Reset button -->
+    {#if activeCount > 0}
+      <Button variant="ghost" size="sm" class="h-7 text-xs" onclick={resetFilters}>
+        <AtlaskitIcon name="cross" size={12} />
+        Reset
+      </Button>
+    {/if}
   </div>
 
-  <!-- Row 2: Data Filters (Dynamic dropdowns) -->
-  {#if expanded && hasVisibleDynamicFilters}
-    <div class="flex items-center gap-3 pt-2 border-t border-border/50">
-      <span class="text-xs text-muted-foreground font-medium">Filter by:</span>
-      <div class="flex flex-wrap items-center gap-1.5">
-        {#each DYNAMIC_FILTER_CATEGORIES as category (category)}
-          {@const filters = filtersState.dynamicFilters[category]}
-          {@const config = DYNAMIC_FILTER_CONFIG[category]}
-          {#if filters.length > 0 && isCategoryVisible(category)}
-            <MultiSelectDropdown
-              label={config.label}
-              icon={config.icon}
-              {filters}
-              onToggle={toggleDynamicFilter}
-              {getIconName}
-            />
-          {/if}
-        {/each}
+  <!-- Row 2: Filter by (left) + View Controls (right) -->
+  <div class="flex items-center justify-between gap-3 pt-2 border-t border-border/50">
+    <!-- Left: Data Filters (Dynamic dropdowns) -->
+    <div class="flex items-center gap-3">
+      {#if hasVisibleDynamicFilters}
+        <span class="text-xs text-muted-foreground font-medium">Filter by:</span>
+        <div class="flex flex-wrap items-center gap-1.5">
+          {#each DYNAMIC_FILTER_CATEGORIES as category (category)}
+            {@const filters = filtersState.dynamicFilters[category]}
+            {@const config = DYNAMIC_FILTER_CONFIG[category]}
+            {#if filters.length > 0 && isCategoryVisible(category)}
+              <MultiSelectDropdown
+                label={config.label}
+                icon={config.icon}
+                {filters}
+                onToggle={toggleDynamicFilter}
+                {getIconName}
+              />
+            {/if}
+          {/each}
+        </div>
+      {/if}
+    </div>
+
+    <!-- Right: View Controls (Grouping, Fields, Sorting) -->
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <span class="text-xs text-muted-foreground font-medium">View:</span>
+      <div class="flex items-center gap-1.5">
+        <GroupByDropdown />
+        <FieldSelector />
+        <SortDropdown />
       </div>
     </div>
-  {/if}
+  </div>
 </div>
+{/if}

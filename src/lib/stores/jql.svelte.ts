@@ -107,6 +107,7 @@ export function updateQuery(
       | 'sortConfig'
       | 'groupBy'
       | 'showEntryNode'
+      | 'optionsExpanded'
     >
   >
 ): boolean {
@@ -167,6 +168,13 @@ export function updateQuerySortConfig(id: string, sortConfig: SortConfig): boole
  */
 export function updateQueryGroupBy(id: string, groupBy: GroupByOption): boolean {
   return updateQuery(id, { groupBy });
+}
+
+/**
+ * Update options panel expanded state for a query
+ */
+export function updateQueryOptionsExpanded(id: string, optionsExpanded: boolean): boolean {
+  return updateQuery(id, { optionsExpanded });
 }
 
 /**

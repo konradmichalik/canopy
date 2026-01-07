@@ -4,16 +4,14 @@
   import TreeNode from './TreeNode.svelte';
   import IssueCardSkeleton from './IssueCardSkeleton.svelte';
   import QuickFilters from '../filters/QuickFilters.svelte';
-  import FieldSelector from './FieldSelector.svelte';
-  import SortDropdown from './SortDropdown.svelte';
-  import GroupByDropdown from './GroupByDropdown.svelte';
   import GroupHeader from './GroupHeader.svelte';
   import QueryEntryNode from './QueryEntryNode.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import { Button } from '$lib/components/ui/button';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
+  import { filtersState, getActiveFilters } from '../../stores/filters.svelte';
   import { routerState } from '../../stores/router.svelte';
-  import { getQueryById } from '../../stores/jql.svelte';
+  import { getQueryById, updateQueryOptionsExpanded } from '../../stores/jql.svelte';
   import { getTreeStats } from '../../utils/hierarchy-builder';
   import { getActiveFilterConditions } from '../../stores/filters.svelte';
   import { applyQuickFilters, setOrderBy, hasOrderByClause } from '../../utils/jql-helpers';
@@ -39,6 +37,22 @@
     routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : undefined
   );
   const showEntryNode = $derived(currentQuery?.showEntryNode ?? false);
+
+  // Options panel (filters, grouping, sorting) - persisted per query
+  const optionsExpanded = $derived(currentQuery?.optionsExpanded ?? true);
+
+  function toggleOptionsExpanded() {
+    if (routerState.activeQueryId) {
+      updateQueryOptionsExpanded(routerState.activeQueryId, !optionsExpanded);
+    }
+  }
+
+  // Active filter count for badge
+  const activeFilterCount = $derived(
+    getActiveFilters().length +
+      (filtersState.searchText ? 1 : 0) +
+      (filtersState.recencyFilter ? 1 : 0)
+  );
 
   async function handleRefresh(): Promise<void> {
     isRefreshing = true;
@@ -177,12 +191,6 @@
       </div>
 
       <div class="flex items-center gap-1.5">
-        <GroupByDropdown />
-        <FieldSelector />
-        <SortDropdown />
-
-        <div class="w-px h-5 bg-border mx-1"></div>
-
         <Tooltip content="Expand all" placement="bottom">
           <Button
             variant="ghost"
@@ -235,13 +243,34 @@
           </Button>
         </Tooltip>
 
-        </div>
+        <div class="w-px h-5 bg-border mx-1"></div>
+
+        <!-- Options Toggle (Filters, Grouping, Sorting) -->
+        <button
+          onclick={toggleOptionsExpanded}
+          class="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer px-2 py-1.5 rounded-md hover:bg-accent"
+        >
+          <span class="font-medium">Options</span>
+          {#if activeFilterCount > 0}
+            <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary">
+              {activeFilterCount}
+            </span>
+          {/if}
+          <AtlaskitIcon
+            name="chevron-right"
+            size={14}
+            class="transition-transform duration-200 {optionsExpanded ? 'rotate-90' : ''}"
+          />
+        </button>
+      </div>
     </div>
 
-    <!-- Filters row -->
-    <div class="px-4 pb-3">
-      <QuickFilters />
-    </div>
+    <!-- Options panel (Filters, Grouping, Sorting) -->
+    {#if optionsExpanded}
+      <div class="px-4 pb-3">
+        <QuickFilters expanded={optionsExpanded} />
+      </div>
+    {/if}
 
     <!-- JQL Debug (only visible when debug mode is enabled) -->
     {#if debugModeState.enabled}

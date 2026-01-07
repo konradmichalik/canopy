@@ -103,6 +103,8 @@ export interface SavedQuery {
   groupBy?: GroupByOption;
   /** Show a collapsible entry node wrapper with aggregated stats */
   showEntryNode?: boolean;
+  /** Whether the options panel (filters, grouping, sorting) is expanded */
+  optionsExpanded?: boolean;
 }
 
 // ============================================
