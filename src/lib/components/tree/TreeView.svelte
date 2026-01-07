@@ -10,6 +10,7 @@
   import GroupHeader from './GroupHeader.svelte';
   import QueryEntryNode from './QueryEntryNode.svelte';
   import Tooltip from '../common/Tooltip.svelte';
+  import { Button } from '$lib/components/ui/button';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
   import { routerState } from '../../stores/router.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
@@ -153,77 +154,88 @@
 </script>
 
 <div class="tree-view flex flex-col h-full">
-  <!-- Toolbar -->
-  <div class="border-b border-border bg-surface-raised">
+  <!-- Toolbar Section -->
+  <div class="flex-shrink-0 border-b bg-muted/30">
     <!-- Actions row -->
-    <div class="flex items-center justify-between gap-4 px-3 py-2">
-      <div class="flex items-center gap-2">
+    <div class="flex items-center justify-between gap-4 px-4 py-3">
+      <div class="flex items-center gap-3">
         {#if !isEmpty}
-          <span class="text-sm font-medium text-text">
-            {stats.totalIssues} Issues
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium text-foreground">
+              {stats.totalIssues}
+            </span>
+            <span class="text-sm text-muted-foreground">Issues</span>
+          </div>
         {/if}
         {#if keyboardNavState.isNavigating}
           <span
-            class="text-xs text-text-subtlest bg-surface-sunken px-1.5 py-0.5 rounded font-mono"
+            class="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded font-mono"
           >
             {keyboardNavState.focusedKey}
           </span>
         {/if}
       </div>
 
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-1.5">
         <GroupByDropdown />
         <FieldSelector />
         <SortDropdown />
 
-        <div class="w-px h-4 bg-border mx-1"></div>
+        <div class="w-px h-5 bg-border mx-1"></div>
 
         <Tooltip content="Expand all" placement="bottom">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8"
             onclick={isGrouped ? expandAllGroups : expandAll}
             disabled={isEmpty || issuesState.isLoading}
-            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           >
             <AtlaskitIcon name="chevron-down" size={16} />
-          </button>
+          </Button>
         </Tooltip>
 
         <Tooltip content="Collapse all" placement="bottom">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8"
             onclick={isGrouped ? collapseAllGroups : collapseAll}
             disabled={isEmpty || issuesState.isLoading}
-            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           >
             <AtlaskitIcon name="chevron-up" size={16} />
-          </button>
+          </Button>
         </Tooltip>
 
         <Tooltip content="Refresh" placement="bottom">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8"
             onclick={handleRefresh}
             disabled={issuesState.isLoading || isRefreshing}
-            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           >
             <AtlaskitIcon
               name="refresh"
               size={16}
               class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''}
             />
-          </button>
+          </Button>
         </Tooltip>
 
         <Tooltip content="Open in JIRA" placement="bottom">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8"
             onclick={openInJira}
             disabled={!jiraSearchUrl || issuesState.isLoading}
-            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
           >
             <AtlaskitIcon name="link-external" size={16} />
-          </button>
+          </Button>
         </Tooltip>
 
-        <div class="w-px h-4 bg-border mx-1"></div>
+        <div class="w-px h-5 bg-border mx-1"></div>
 
         <Tooltip
           content="<div class='text-left space-y-1'>
@@ -235,32 +247,34 @@
             <div><kbd class='kbd'>Enter</kbd> Open in JIRA</div>
             <div><kbd class='kbd'>Home</kbd> <kbd class='kbd'>End</kbd> First / Last</div>
             <div><kbd class='kbd'>Esc</kbd> Clear selection</div>
-            <div class='text-text-subtlest mt-2 text-xs'>Also: j/k/h/l (vim)</div>
+            <div class='text-muted-foreground mt-2 text-xs'>Also: j/k/h/l (vim)</div>
           </div>"
           placement="bottom-end"
           html
         >
-          <button
-            class="p-1.5 rounded hover:bg-surface-hovered text-text-subtle disabled:opacity-50"
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8"
             disabled={isEmpty || issuesState.isLoading}
           >
             <AtlaskitIcon name="keyboard" size={16} />
-          </button>
+          </Button>
         </Tooltip>
       </div>
     </div>
 
     <!-- Filters row -->
-    <div class="px-3 py-2 border-t border-border">
+    <div class="px-4 pb-3">
       <QuickFilters />
     </div>
 
     <!-- JQL Debug (only visible when debug mode is enabled) -->
     {#if debugModeState.enabled}
-      <div class="px-3 py-1.5 border-t border-border bg-surface-sunken">
+      <div class="px-4 py-2 border-t bg-muted/50">
         <button
           onclick={() => (showJqlDebug = !showJqlDebug)}
-          class="flex items-center gap-1.5 text-xs text-text-subtlest hover:text-text-subtle transition-colors"
+          class="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           <AtlaskitIcon
             name="chevron-right"
@@ -269,28 +283,28 @@
           />
           <span>JQL Debug</span>
           {#if filterConditions.length > 0}
-            <span class="text-text-brand"
+            <span class="text-primary"
               >({filterConditions.length} filter{filterConditions.length > 1 ? 's' : ''})</span
             >
           {/if}
         </button>
         {#if showJqlDebug}
-          <div class="mt-2 space-y-2 text-xs">
+          <div class="mt-3 space-y-3 text-xs">
             <div>
-              <span class="text-text-subtlest">Base JQL:</span>
+              <span class="text-muted-foreground">Base JQL:</span>
               <code
-                class="block mt-1 p-2 bg-surface rounded border border-border text-text-subtle break-all font-mono"
+                class="block mt-1.5 p-2.5 bg-background rounded-lg border text-muted-foreground break-all font-mono"
               >
                 {issuesState.currentJql || '(none)'}
               </code>
             </div>
             {#if filterConditions.length > 0}
               <div>
-                <span class="text-text-subtlest">Filter conditions:</span>
-                <ul class="mt-1 space-y-1">
+                <span class="text-muted-foreground">Filter conditions:</span>
+                <ul class="mt-1.5 space-y-1">
                   {#each filterConditions as condition (condition)}
                     <li
-                      class="p-1.5 bg-brand-subtlest rounded border border-brand-subtle text-text-brand font-mono"
+                      class="p-2 bg-primary/10 rounded-lg border border-primary/20 text-primary font-mono"
                     >
                       {condition}
                     </li>
@@ -299,9 +313,9 @@
               </div>
             {/if}
             <div>
-              <span class="text-text-subtlest">Effective JQL:</span>
+              <span class="text-muted-foreground">Effective JQL:</span>
               <code
-                class="block mt-1 p-2 bg-surface rounded border border-border text-text break-all font-mono font-medium"
+                class="block mt-1.5 p-2.5 bg-background rounded-lg border text-foreground break-all font-mono font-medium"
               >
                 {effectiveJql || '(none)'}
               </code>
@@ -315,7 +329,7 @@
   <!-- Tree Content -->
   <div
     bind:this={treeContainerRef}
-    class="flex-1 overflow-auto p-2 outline-none"
+    class="flex-1 overflow-auto p-3 outline-none"
     tabindex="0"
     role="tree"
     aria-label="Issue hierarchy tree"
@@ -324,34 +338,33 @@
     onfocus={onTreeFocus}
   >
     {#if issuesState.isLoading}
-      <div class="tree-container">
+      <div class="tree-container space-y-1">
         {#each Array(8) as _, i (i)}
           <IssueCardSkeleton depth={i < 2 ? 0 : i < 5 ? 1 : 2} />
         {/each}
       </div>
     {:else if issuesState.error}
       <div class="flex items-center justify-center h-full">
-        <div class="flex flex-col items-center gap-3 text-center max-w-md">
-          <AtlaskitIcon name="warning" size={32} color="var(--color-text-danger)" />
-          <p class="text-text-danger">{issuesState.error}</p>
-          <button
-            onclick={handleRefresh}
-            class="px-4 py-2 text-sm font-medium text-text-brand hover:bg-brand-subtlest rounded-lg"
-          >
+        <div class="flex flex-col items-center gap-4 text-center max-w-md">
+          <div class="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+            <AtlaskitIcon name="warning" size={24} class="text-destructive" />
+          </div>
+          <p class="text-destructive text-sm">{issuesState.error}</p>
+          <Button variant="outline" size="sm" onclick={handleRefresh}>
             Try again
-          </button>
+          </Button>
         </div>
       </div>
     {:else if isEmpty}
       <div class="flex items-center justify-center h-full">
-        <div class="text-center text-text-subtle">
+        <div class="text-center">
           <div
-            class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-hovered flex items-center justify-center"
+            class="w-14 h-14 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center"
           >
-            <AtlaskitIcon name="search" size={32} color="var(--color-text-subtlest)" />
+            <AtlaskitIcon name="search" size={28} class="text-muted-foreground" />
           </div>
-          <p class="text-lg mb-2">No issues found <span class="opacity-70">:(</span></p>
-          <p class="text-sm">Try adjusting your JQL query or filters</p>
+          <p class="text-base font-medium text-foreground mb-1">No issues found</p>
+          <p class="text-sm text-muted-foreground">Try adjusting your JQL query or filters</p>
         </div>
       </div>
     {:else if showEntryNode && currentQuery}

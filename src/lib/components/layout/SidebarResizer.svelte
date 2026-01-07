@@ -49,22 +49,10 @@
   aria-valuemax={MAX_SIDEBAR_WIDTH}
   aria-label="Resize sidebar"
   tabindex="0"
-  class="w-1.5 flex-shrink-0 cursor-col-resize group relative transition-all duration-200
-    {isResizing ? 'bg-brand' : 'bg-border hover:bg-brand/60'}"
+  class="w-1 flex-shrink-0 cursor-col-resize group relative
+    {isResizing ? 'bg-primary' : 'bg-transparent hover:bg-primary/50'}"
   onmousedown={handleMouseDown}
 >
   <!-- Wider hit area -->
-  <div
-    class="absolute inset-y-0 -left-1.5 -right-1.5 transition-colors duration-200
-      {isResizing ? 'bg-brand/10' : 'group-hover:bg-brand/5'}"
-  ></div>
-  <!-- Grip indicator on hover -->
-  <div
-    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200
-      {isResizing ? 'opacity-100' : ''}"
-  >
-    <div class="w-0.5 h-0.5 rounded-full bg-text-subtlest"></div>
-    <div class="w-0.5 h-0.5 rounded-full bg-text-subtlest"></div>
-    <div class="w-0.5 h-0.5 rounded-full bg-text-subtlest"></div>
-  </div>
+  <div class="absolute inset-y-0 -left-1 -right-1"></div>
 </div>

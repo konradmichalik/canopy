@@ -1,6 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
+  import { Button } from '$lib/components/ui/button';
   import type { SavedQuery } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { downloadSingleQuery } from '../../utils/storage';
@@ -86,12 +87,12 @@
 <div
   role="button"
   tabindex="0"
-  class="group w-full text-left px-2 py-2.5 rounded-lg transition-all duration-200 flex items-center justify-between gap-2 cursor-pointer relative
+  class="group w-full text-left px-2 py-2 rounded-lg transition-all flex items-center justify-between gap-2 cursor-pointer relative
     {isActive
-    ? 'bg-brand-subtlest shadow-sm ring-1 ring-brand/20 text-text'
-    : 'hover:bg-surface-hovered text-text-subtle hover:text-text hover:shadow-sm'}
+    ? 'bg-accent text-accent-foreground'
+    : 'hover:bg-accent/50 text-muted-foreground hover:text-foreground'}
     {isDragging ? 'opacity-50 scale-95' : ''}
-    {isDragOver ? 'ring-2 ring-brand ring-offset-1' : ''}"
+    {isDragOver ? 'ring-2 ring-primary ring-offset-1' : ''}"
   onclick={handleClick}
   onkeydown={handleKeydown}
   ondragover={handleDragOver}
@@ -99,28 +100,26 @@
 >
   <!-- Active indicator -->
   {#if isActive}
-    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-brand"></div>
+    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-primary"></div>
   {/if}
 
-  <div class="flex items-center min-w-0 pl-1">
-    <!-- Farbpunkt - immer 20px breit für konsistente Ausrichtung -->
-    <div class="w-5 flex-shrink-0 flex items-center justify-center">
-      <span class="w-2.5 h-2.5 rounded-full {colorClass || 'bg-text-disabled/30'}"></span>
-    </div>
+  <div class="flex items-center min-w-0 pl-1 gap-2">
+    <!-- Color dot -->
+    <span class="w-2 h-2 rounded-full flex-shrink-0 {colorClass || 'bg-muted-foreground/30'}"></span>
     <!-- Text -->
     <span class="truncate text-sm font-medium">{query.title}</span>
   </div>
 
-  <!-- Aktionen - immer sichtbar bei hover -->
+  <!-- Actions - visible on hover -->
   <div
-    class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0"
+    class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
   >
     <Tooltip text="Drag to reorder">
       <div
         draggable="true"
         ondragstart={handleDragStart}
         ondragend={onDragEnd}
-        class="p-1.5 cursor-grab active:cursor-grabbing text-text-disabled hover:text-text-subtle rounded-md hover:bg-neutral transition-colors"
+        class="p-1 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground rounded hover:bg-accent"
         role="button"
         tabindex="-1"
         onclick={(e: MouseEvent) => e.stopPropagation()}
@@ -130,31 +129,34 @@
       </div>
     </Tooltip>
     <Tooltip text="Edit query">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
+        class="h-6 w-6"
         onclick={handleEdit}
-        class="p-1.5 rounded-md hover:bg-neutral text-text-subtle hover:text-text transition-colors"
       >
         <AtlaskitIcon name="edit" size={14} />
-      </button>
+      </Button>
     </Tooltip>
     <Tooltip text="Export query">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
+        class="h-6 w-6"
         onclick={handleExport}
-        class="p-1.5 rounded-md hover:bg-neutral text-text-subtle hover:text-text transition-colors"
       >
         <AtlaskitIcon name="download" size={14} />
-      </button>
+      </Button>
     </Tooltip>
     <Tooltip text="Delete query">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
+        class="h-6 w-6 hover:bg-destructive/10 hover:text-destructive"
         onclick={handleDelete}
-        class="p-1.5 rounded-md hover:bg-danger-subtlest text-text-subtle hover:text-text-danger transition-colors"
       >
         <AtlaskitIcon name="delete" size={14} />
-      </button>
+      </Button>
     </Tooltip>
   </div>
 </div>

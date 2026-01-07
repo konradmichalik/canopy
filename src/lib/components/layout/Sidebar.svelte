@@ -1,6 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
+  import { Button } from '$lib/components/ui/button';
   import type { SavedQuery, QueryColor } from '../../types';
   import QueryListItem from '../jql/QueryListItem.svelte';
   import QueryForm from '../jql/QueryForm.svelte';
@@ -239,28 +240,23 @@
   }
 </script>
 
-<aside class="h-full bg-surface-sunken flex flex-col" style="width: {width}px;">
-  <!-- Query List Header -->
-  <div
-    class="h-14 flex items-center justify-between px-4 border-b border-border-bold bg-gradient-to-b from-surface-raised to-surface"
-  >
-    <span class="text-sm font-semibold text-text tracking-wide">Queries</span>
-    <div class="flex items-center gap-1.5">
+<aside
+  class="h-full bg-background border-r flex flex-col"
+  style="width: {width}px;"
+>
+  <!-- Sidebar Header -->
+  <div class="h-14 flex items-center justify-between px-4 border-b flex-shrink-0">
+    <span class="text-sm font-semibold text-foreground">Queries</span>
+    <div class="flex items-center gap-1">
       <Tooltip text="Import Query">
-        <button
-          onclick={handleImportClick}
-          class="p-1.5 text-text-subtle hover:text-text hover:bg-surface-hovered rounded-md transition-colors"
-        >
-          <AtlaskitIcon name="upload" size={18} />
-        </button>
+        <Button variant="ghost" size="icon" class="h-8 w-8" onclick={handleImportClick}>
+          <AtlaskitIcon name="upload" size={16} />
+        </Button>
       </Tooltip>
-      <button
-        onclick={handleNewQuery}
-        class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-brand text-text-inverse hover:bg-brand-hovered rounded-md transition-all duration-200 shadow-sm hover:shadow"
-      >
-        <AtlaskitIcon name="add" size={16} />
-        <span>New</span>
-      </button>
+      <Button size="sm" onclick={handleNewQuery} class="h-8">
+        <AtlaskitIcon name="add" size={14} />
+        New
+      </Button>
     </div>
   </div>
 
@@ -274,41 +270,40 @@
   />
 
   <!-- Query List -->
-  <div class="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
+  <div class="flex-1 overflow-y-auto p-2">
     {#if jqlState.queries.length === 0}
       <div class="text-center py-12 px-4">
         <div
-          class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-subtlest flex items-center justify-center"
+          class="w-14 h-14 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center"
         >
-          <AtlaskitIcon name="search" size={28} color="var(--ds-text-brand)" />
+          <AtlaskitIcon name="search" size={24} class="text-primary" />
         </div>
-        <p class="text-base font-medium text-text mb-1">No saved queries</p>
-        <p class="text-sm text-text-subtlest mb-4">Create your first query to get started</p>
-        <button
-          onclick={handleNewQuery}
-          class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-text-brand hover:bg-brand-subtlest rounded-md transition-colors"
-        >
-          <AtlaskitIcon name="add" size={16} />
+        <p class="text-sm font-medium text-foreground mb-1">No saved queries</p>
+        <p class="text-xs text-muted-foreground mb-4">Create your first query to get started</p>
+        <Button variant="outline" size="sm" onclick={handleNewQuery}>
+          <AtlaskitIcon name="add" size={14} />
           Create query
-        </button>
+        </Button>
       </div>
     {:else}
-      {#each jqlState.queries as query, index (query.id)}
-        <QueryListItem
-          {query}
-          {index}
-          isActive={routerState.activeQueryId === query.id}
-          isDragging={draggedIndex === index}
-          isDragOver={dragOverIndex === index && draggedIndex !== index}
-          onSelect={handleSelectQuery}
-          onEdit={handleEditQuery}
-          onDelete={handleDeleteQuery}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragEnd={handleDragEnd}
-        />
-      {/each}
+      <div class="space-y-1">
+        {#each jqlState.queries as query, index (query.id)}
+          <QueryListItem
+            {query}
+            {index}
+            isActive={routerState.activeQueryId === query.id}
+            isDragging={draggedIndex === index}
+            isDragOver={dragOverIndex === index && draggedIndex !== index}
+            onSelect={handleSelectQuery}
+            onEdit={handleEditQuery}
+            onDelete={handleDeleteQuery}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onDragEnd={handleDragEnd}
+          />
+        {/each}
+      </div>
     {/if}
   </div>
 
@@ -321,10 +316,10 @@
 <!-- Import Notification Toast -->
 {#if importMessage}
   <div
-    class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-up
+    class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-in slide-in-from-bottom-2
       {importMessage.type === 'success'
-      ? 'bg-success text-text-inverse'
-      : 'bg-danger text-text-inverse'}"
+      ? 'bg-chart-2 text-primary-foreground'
+      : 'bg-destructive text-destructive-foreground'}"
   >
     {#if importMessage.type === 'success'}
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -340,6 +335,6 @@
         />
       </svg>
     {/if}
-    <span>{importMessage.text}</span>
+    <span class="text-sm font-medium">{importMessage.text}</span>
   </div>
 {/if}

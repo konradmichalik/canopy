@@ -7,6 +7,7 @@
   import SettingsDropdown from '../common/SettingsDropdown.svelte';
   import Avatar from '../common/Avatar.svelte';
   import Logo from '../common/Logo.svelte';
+  import { Button } from '$lib/components/ui/button';
   import { routerState, toggleSidebar, setSidebarWidth } from '../../stores/router.svelte';
   import { connectionState } from '../../stores/connection.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
@@ -21,83 +22,91 @@
   );
 </script>
 
-<div class="h-screen flex bg-surface overflow-hidden">
+<div class="h-screen flex bg-muted/40">
   <!-- Sidebar -->
   {#if routerState.sidebarOpen}
     <Sidebar width={routerState.sidebarWidth} onClose={toggleSidebar} />
     <SidebarResizer currentWidth={routerState.sidebarWidth} onResize={setSidebarWidth} />
   {/if}
 
-  <!-- Main Content -->
+  <!-- Main Content Area (Inset) -->
   <div class="flex-1 flex flex-col min-w-0">
     <!-- Header -->
-    <header class="h-14 border-b border-border-bold bg-surface-raised flex-shrink-0 shadow-sm">
-      <div class="h-full px-4 flex items-center">
-        <!-- Left: Toggle + Logo + App Name -->
-        <div class="flex items-center gap-3 flex-shrink-0">
+    <header
+      class="h-14 border-b bg-background flex-shrink-0 sticky top-0 z-10"
+    >
+      <div class="h-full px-4 flex items-center gap-2">
+        <!-- Left: Toggle + Breadcrumb -->
+        <div class="flex items-center gap-2 flex-shrink-0">
           <Tooltip text={routerState.sidebarOpen ? 'Close sidebar' : 'Open sidebar'}>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onclick={toggleSidebar}
-              class="p-2 rounded-lg hover:bg-surface-hovered text-text-subtle transition-colors"
+              class="h-8 w-8"
             >
               <AtlaskitIcon
                 name="panel-left"
-                size={20}
+                size={18}
                 class="transition-transform duration-200 {routerState.sidebarOpen
                   ? ''
                   : '-scale-x-100'}"
               />
-            </button>
+            </Button>
           </Tooltip>
-          <div class="h-6 w-px bg-border"></div>
-          <Logo size="sm" showText={true} />
-        </div>
 
-        <!-- Center: Query Name -->
-        <div class="flex-1 flex items-center justify-center min-w-0 px-4">
+          <div class="h-4 w-px bg-border"></div>
+
+          <Logo size="sm" showText={true} />
+
           {#if queryTitle}
-            <div class="flex items-center gap-2 max-w-md">
+            <AtlaskitIcon name="chevron-right" size={14} class="text-muted-foreground" />
+            <div class="flex items-center gap-2">
               {#if colorClass}
-                <span class="w-3 h-3 rounded-full flex-shrink-0 {colorClass}"></span>
+                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 {colorClass}"></span>
               {/if}
-              <span class="text-base font-medium text-text truncate">
+              <span class="text-sm font-medium text-foreground truncate max-w-[200px]">
                 {queryTitle}
               </span>
             </div>
           {/if}
         </div>
 
+        <div class="flex-1"></div>
+
         <!-- Right: User + Settings -->
         <div class="flex items-center gap-2 flex-shrink-0">
           {#if connectionState.currentUser}
-            <div class="flex items-center gap-2">
-              <Avatar user={connectionState.currentUser} size="md" />
-              <span class="text-sm text-text-subtle hidden sm:block">
+            <div class="flex items-center gap-2 px-2">
+              <Avatar user={connectionState.currentUser} size="sm" />
+              <span class="text-sm text-muted-foreground hidden sm:block">
                 {connectionState.currentUser.displayName}
               </span>
             </div>
-            <div class="h-6 w-px bg-border mx-1"></div>
+            <div class="h-4 w-px bg-border"></div>
           {/if}
           <SettingsDropdown />
         </div>
       </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col overflow-hidden bg-surface-sunken">
+    <!-- Main Content -->
+    <main class="flex-1 overflow-hidden p-4">
       {#if routerState.activeQueryId}
-        <TreeView />
+        <div class="h-full bg-background rounded-xl border shadow-sm overflow-hidden">
+          <TreeView />
+        </div>
       {:else}
         <!-- Empty State -->
-        <div class="flex-1 flex items-center justify-center">
+        <div class="h-full bg-background rounded-xl border shadow-sm flex items-center justify-center">
           <div class="text-center max-w-md px-4">
             <div
-              class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-hovered flex items-center justify-center"
+              class="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center"
             >
-              <AtlaskitIcon name="folder-open" size={32} color="var(--color-text-subtle)" />
+              <AtlaskitIcon name="folder-open" size={32} class="text-muted-foreground" />
             </div>
-            <h2 class="text-xl font-semibold text-text mb-2">No Query Selected</h2>
-            <p class="text-text-subtle">
+            <h2 class="text-xl font-semibold text-foreground mb-2">No Query Selected</h2>
+            <p class="text-muted-foreground mb-6">
               {#if routerState.sidebarOpen}
                 Select a query from the sidebar to view issues, or create a new one.
               {:else}
@@ -105,12 +114,10 @@
               {/if}
             </p>
             {#if !routerState.sidebarOpen}
-              <button
-                onclick={toggleSidebar}
-                class="mt-4 px-4 py-2 bg-brand text-text-inverse rounded-lg font-medium hover:bg-brand-hovered transition-colors"
-              >
+              <Button onclick={toggleSidebar}>
+                <AtlaskitIcon name="panel-left" size={16} />
                 Open Sidebar
-              </button>
+              </Button>
             {/if}
           </div>
         </div>
