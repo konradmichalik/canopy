@@ -26,7 +26,7 @@
   // svelte-ignore state_referenced_locally
   let color = $state<QueryColor | undefined>(query?.color);
   // svelte-ignore state_referenced_locally
-  let showEntryNode = $state(query?.showEntryNode ?? false);
+  let showEntryNode = $state(query?.showEntryNode ?? true);
   let error = $state<string | null>(null);
 
   // Real-time JQL validation
@@ -146,6 +146,14 @@
           <p class="text-xs text-muted-foreground">
             Enter a valid JQL query. The app will automatically build the hierarchy from the
             results.
+            <a
+              href="https://www.atlassian.com/software/jira/guides/jql/overview"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-brand hover:underline"
+            >
+              Learn JQL
+            </a>
           </p>
         {/if}
       </div>
