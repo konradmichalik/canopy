@@ -164,8 +164,18 @@
             aria-label={theme.label}
           >
             {#if colorThemeState.colorTheme === theme.id}
-              <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+              <svg
+                class="w-3.5 h-3.5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="3"
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             {/if}
           </button>
@@ -202,7 +212,10 @@
       <DropdownMenu.Separator />
 
       <!-- Debug Mode Toggle -->
-      <DropdownMenu.Item onclick={() => setDebugMode(!debugModeState.enabled)} class="justify-between">
+      <DropdownMenu.Item
+        onclick={() => setDebugMode(!debugModeState.enabled)}
+        class="justify-between"
+      >
         <span class="flex items-center gap-2">
           <AtlaskitIcon name="flask" size={16} />
           Debug Mode

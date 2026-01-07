@@ -10,9 +10,7 @@
     </div>
 
     <!-- App name -->
-    <h1 class="text-2xl font-bold text-text">
-      Canopy
-    </h1>
+    <h1 class="text-2xl font-bold text-text">Canopy</h1>
 
     <!-- Loading spinner -->
     <div class="flex items-center gap-3 text-text-subtle">

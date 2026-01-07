@@ -71,11 +71,7 @@
             <AtlaskitIcon name="check-mark" size={14} class="text-primary" />
           {/if}
         </span>
-        <AtlaskitIcon
-          name={getIconName(option.icon)}
-          size={14}
-          class="text-muted-foreground"
-        />
+        <AtlaskitIcon name={getIconName(option.icon)} size={14} class="text-muted-foreground" />
         <span class={option.id === selectedOption ? 'text-primary font-medium' : 'text-foreground'}>
           {option.label}
         </span>

@@ -240,10 +240,7 @@
   }
 </script>
 
-<aside
-  class="h-full bg-background border-r flex flex-col"
-  style="width: {width}px;"
->
+<aside class="h-full bg-background border-r flex flex-col" style="width: {width}px;">
   <!-- Sidebar Header -->
   <div class="h-14 flex items-center justify-between px-4 border-b flex-shrink-0">
     <span class="text-sm font-semibold text-foreground">Queries</span>

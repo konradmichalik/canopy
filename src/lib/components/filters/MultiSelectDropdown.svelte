@@ -87,16 +87,10 @@
         {:else if filter.icon && filter.color}
           <AtlaskitIcon name={getIconName(filter.icon)} size={14} color={filter.color} />
         {:else if filter.color}
-          <span
-            class="w-3 h-3 rounded-full flex-shrink-0"
-            style="background-color: {filter.color}"
+          <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {filter.color}"
           ></span>
         {:else}
-          <AtlaskitIcon
-            name={getIconName(filter.icon)}
-            size={14}
-            class="text-muted-foreground"
-          />
+          <AtlaskitIcon name={getIconName(filter.icon)} size={14} class="text-muted-foreground" />
         {/if}
         <span class={filter.isActive ? 'text-primary font-medium' : 'text-foreground'}>
           {filter.label}

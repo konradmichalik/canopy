@@ -4,7 +4,9 @@
   import { themeState, toggleTheme } from '../../stores/theme.svelte';
 </script>
 
-<Tooltip text={themeState.resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+<Tooltip
+  text={themeState.resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+>
   <button
     onclick={toggleTheme}
     class="p-2 rounded-lg transition-colors hover:bg-surface-hovered"

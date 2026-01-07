@@ -7,7 +7,15 @@
     content?: string;
     html?: boolean;
     position?: 'top' | 'bottom' | 'left' | 'right';
-    placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end';
+    placement?:
+      | 'top'
+      | 'bottom'
+      | 'left'
+      | 'right'
+      | 'top-start'
+      | 'top-end'
+      | 'bottom-start'
+      | 'bottom-end';
     children: Snippet;
   }
 

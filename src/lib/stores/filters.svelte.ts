@@ -61,7 +61,12 @@ export const DYNAMIC_FILTER_CONFIG: Record<DynamicFilterCategory, DynamicFilterC
   type: { label: 'Type', icon: 'task', jqlField: 'issuetype', useIdInJql: true },
   assignee: { label: 'Assignee', icon: 'person', jqlField: 'assignee', useOrJoin: true },
   priority: { label: 'Priority', icon: 'priority-high', jqlField: 'priority' },
-  resolution: { label: 'Resolution', icon: 'check-circle', jqlField: 'resolution', useIdInJql: true },
+  resolution: {
+    label: 'Resolution',
+    icon: 'check-circle',
+    jqlField: 'resolution',
+    useIdInJql: true
+  },
   component: { label: 'Component', icon: 'component', jqlField: 'component' },
   fixVersion: { label: 'Release', icon: 'release', jqlField: 'fixVersion' }
 };

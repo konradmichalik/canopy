@@ -15,7 +15,11 @@
     hasTimeTrackingData,
     hasDescendants
   } from '../../utils/aggregated-progress';
-  import { toggleDynamicFilter, makeFilterId, makeAssigneeFilterId } from '../../stores/filters.svelte';
+  import {
+    toggleDynamicFilter,
+    makeFilterId,
+    makeAssigneeFilterId
+  } from '../../stores/filters.svelte';
 
   interface Props {
     node: TreeNode;
@@ -147,7 +151,9 @@
     <button
       type="button"
       class="cursor-pointer hover:bg-surface-hovered rounded p-0.5 -m-0.5 transition-colors flex items-center gap-1 flex-shrink-0"
-      onclick={(e) => issue.fields.priority && handleFilterClick(e, makeFilterId('priority', issue.fields.priority.name))}
+      onclick={(e) =>
+        issue.fields.priority &&
+        handleFilterClick(e, makeFilterId('priority', issue.fields.priority.name))}
       title={`Priority: ${issue.fields.priority.name}`}
     >
       <img src={issue.fields.priority.iconUrl} alt={issue.fields.priority.name} class="w-4 h-4" />
@@ -322,7 +328,13 @@
     <button
       type="button"
       class="cursor-pointer hover:bg-surface-hovered rounded-full p-0.5 -m-0.5 transition-colors"
-      onclick={(e) => handleFilterClick(e, issue.fields.assignee ? makeAssigneeFilterId(issue.fields.assignee) : 'assignee-unassigned')}
+      onclick={(e) =>
+        handleFilterClick(
+          e,
+          issue.fields.assignee
+            ? makeAssigneeFilterId(issue.fields.assignee)
+            : 'assignee-unassigned'
+        )}
       title={issue.fields.assignee ? issue.fields.assignee.displayName : 'Unassigned'}
     >
       <Avatar user={issue.fields.assignee} size={isCompact ? 'sm' : 'md'} />

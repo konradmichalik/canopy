@@ -21,7 +21,8 @@
       type="button"
       role="tab"
       tabindex={index === current ? 0 : -1}
-      class="h-2 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 {index === current
+      class="h-2 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 {index ===
+      current
         ? 'bg-primary w-6'
         : 'bg-muted-foreground/30 hover:bg-muted-foreground/50 w-2'}"
       onclick={() => onSelect(index)}

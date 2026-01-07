@@ -103,7 +103,8 @@
 >
   <!-- Color bar on left edge -->
   <div
-    class="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-all {colorClass || 'bg-muted-foreground/30'}"
+    class="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-all {colorClass ||
+      'bg-muted-foreground/30'}"
     class:opacity-100={isActive}
     class:opacity-70={!isActive}
   ></div>

@@ -64,9 +64,7 @@ export function getQuerySlug(query: SavedQuery): string {
  * @returns true if title is unique, false if it would create a slug collision
  */
 export function isTitleUnique(title: string, excludeId?: string): boolean {
-  return !jqlState.queries.some(
-    (q) => q.id !== excludeId && slugsMatch(q.title, title)
-  );
+  return !jqlState.queries.some((q) => q.id !== excludeId && slugsMatch(q.title, title));
 }
 
 /**

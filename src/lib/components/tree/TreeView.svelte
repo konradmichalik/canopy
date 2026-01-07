@@ -182,9 +182,7 @@
           </div>
         {/if}
         {#if keyboardNavState.isNavigating}
-          <span
-            class="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded font-mono"
-          >
+          <span class="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded font-mono">
             {keyboardNavState.focusedKey}
           </span>
         {/if}
@@ -252,7 +250,9 @@
         >
           <span class="font-medium">Options</span>
           {#if activeFilterCount > 0}
-            <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary">
+            <span
+              class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary"
+            >
               {activeFilterCount}
             </span>
           {/if}
@@ -353,9 +353,7 @@
             <AtlaskitIcon name="warning" size={24} class="text-destructive" />
           </div>
           <p class="text-destructive text-sm">{issuesState.error}</p>
-          <Button variant="outline" size="sm" onclick={handleRefresh}>
-            Try again
-          </Button>
+          <Button variant="outline" size="sm" onclick={handleRefresh}>Try again</Button>
         </div>
       </div>
     {:else if isEmpty}

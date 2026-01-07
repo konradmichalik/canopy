@@ -20,7 +20,14 @@
     children?: import('svelte').Snippet;
   }
 
-  let { query, issues, treeNodes: _treeNodes, isExpanded = true, onToggle, children }: Props = $props();
+  let {
+    query,
+    issues,
+    treeNodes: _treeNodes,
+    isExpanded = true,
+    onToggle,
+    children
+  }: Props = $props();
 
   // Aggregated stats
   const timeProgress = $derived(calculateIssuesTimeProgress(issues));
@@ -56,7 +63,8 @@
   >
     <!-- Color bar on left edge -->
     <div
-      class="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-lg {colorClass || 'bg-muted-foreground/30'}"
+      class="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-lg {colorClass ||
+        'bg-muted-foreground/30'}"
     ></div>
 
     <!-- Expand/Collapse icon with left padding -->

@@ -41,10 +41,7 @@
     <DropdownMenu.Label>Group By</DropdownMenu.Label>
     <DropdownMenu.Separator />
     {#each GROUP_BY_OPTIONS as option (option.id)}
-      <DropdownMenu.Item
-        onclick={() => selectOption(option.id)}
-        class="flex items-center gap-2"
-      >
+      <DropdownMenu.Item onclick={() => selectOption(option.id)} class="flex items-center gap-2">
         <span class="w-4 h-4 flex items-center justify-center flex-shrink-0">
           {#if groupingState.groupBy === option.id}
             <AtlaskitIcon name="check-mark" size={14} class="text-primary" />

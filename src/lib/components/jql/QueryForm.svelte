@@ -205,9 +205,7 @@
 
       <!-- Actions -->
       <div class="flex justify-end gap-3 pt-2">
-        <Button type="button" variant="ghost" onclick={onCancel}>
-          Cancel
-        </Button>
+        <Button type="button" variant="ghost" onclick={onCancel}>Cancel</Button>
         <Button type="submit">
           <AtlaskitIcon name="save" size={16} />
           {isEdit ? 'Save Changes' : 'Create Query'}

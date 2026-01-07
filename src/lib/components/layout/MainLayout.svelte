@@ -34,19 +34,12 @@
   <!-- Main Content Area (Inset) -->
   <div class="flex-1 flex flex-col min-w-0">
     <!-- Header -->
-    <header
-      class="h-14 border-b bg-background flex-shrink-0 sticky top-0 z-10"
-    >
+    <header class="h-14 border-b bg-background flex-shrink-0 sticky top-0 z-10">
       <div class="h-full px-4 flex items-center gap-2">
         <!-- Left: Toggle + Breadcrumb -->
         <div class="flex items-center gap-2 flex-shrink-0">
           <Tooltip text={routerState.sidebarOpen ? 'Close sidebar' : 'Open sidebar'}>
-            <Button
-              variant="ghost"
-              size="icon"
-              onclick={toggleSidebar}
-              class="h-8 w-8"
-            >
+            <Button variant="ghost" size="icon" onclick={toggleSidebar} class="h-8 w-8">
               <AtlaskitIcon
                 name="panel-left"
                 size={18}
@@ -124,7 +117,9 @@
         </div>
       {:else}
         <!-- Empty State -->
-        <div class="h-full bg-background rounded-xl border shadow-sm flex items-center justify-center">
+        <div
+          class="h-full bg-background rounded-xl border shadow-sm flex items-center justify-center"
+        >
           <div class="text-center max-w-md px-4">
             <div
               class="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center"

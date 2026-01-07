@@ -337,7 +337,9 @@ export abstract class JiraClient {
         // Extract base proxy URL (remove /jira suffix if present)
         // Supports both local proxy (/jira-image) and Vercel (/api/jira-image)
         const proxyBase = this.config.proxyUrl.replace(/\/(api\/)?jira\/?$/, '');
-        const imageEndpoint = this.config.proxyUrl.startsWith('/api/') ? '/api/jira-image' : '/jira-image';
+        const imageEndpoint = this.config.proxyUrl.startsWith('/api/')
+          ? '/api/jira-image'
+          : '/jira-image';
         fetchUrl = `${proxyBase}${imageEndpoint}?url=${encodeURIComponent(imageUrl)}`;
       }
 
