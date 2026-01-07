@@ -17,11 +17,17 @@
   const isInteractive = $derived(!!onClick);
 </script>
 
-<div class="{containerSize} flex items-center justify-center flex-shrink-0 {isInteractive ? '' : 'pointer-events-none'}">
+<div
+  class="{containerSize} flex items-center justify-center flex-shrink-0 {isInteractive
+    ? ''
+    : 'pointer-events-none'}"
+>
   {#if isInteractive}
     <button
       onclick={onClick}
-      class="p-0.5 rounded hover:bg-surface-hovered text-text-subtle transition-transform duration-150 {isExpanded ? 'rotate-90' : ''}"
+      class="p-0.5 rounded hover:bg-surface-hovered text-text-subtle transition-transform duration-150 {isExpanded
+        ? 'rotate-90'
+        : ''}"
       tabindex="-1"
       aria-expanded={isExpanded}
       aria-label={isExpanded ? 'Collapse' : 'Expand'}
@@ -30,7 +36,9 @@
     </button>
   {:else}
     <span
-      class="p-0.5 text-text-subtle transition-transform duration-150 {isExpanded ? 'rotate-90' : ''}"
+      class="p-0.5 text-text-subtle transition-transform duration-150 {isExpanded
+        ? 'rotate-90'
+        : ''}"
       aria-hidden="true"
     >
       <AtlaskitIcon name="chevron-right" size={iconSize} />

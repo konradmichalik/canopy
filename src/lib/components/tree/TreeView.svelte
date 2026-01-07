@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { SvelteSet } from 'svelte/reactivity';
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import TreeNode from './TreeNode.svelte';
   import IssueCardSkeleton from './IssueCardSkeleton.svelte';
@@ -27,7 +28,7 @@
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
   let treeContainerRef: HTMLDivElement | null = $state(null);
-  let expandedGroups = $state<Set<string>>(new Set());
+  let expandedGroups = new SvelteSet<string>();
   let entryNodeExpanded = $state(true);
   let hasInitializedGroups = $state(false);
 
@@ -65,7 +66,7 @@
   $effect(() => {
     if (isGrouped && issueGroups.length > 0 && !hasInitializedGroups) {
       hasInitializedGroups = true;
-      const initialExpanded = new Set<string>();
+      const initialExpanded = new SvelteSet<string>();
       for (const group of issueGroups) {
         // Auto-expand active sprints
         if (
@@ -84,7 +85,7 @@
   });
 
   function toggleGroup(groupId: string): void {
-    const newExpanded = new Set(expandedGroups);
+    const newExpanded = new SvelteSet(expandedGroups);
     if (newExpanded.has(groupId)) {
       newExpanded.delete(groupId);
     } else {
@@ -94,11 +95,11 @@
   }
 
   function expandAllGroups(): void {
-    expandedGroups = new Set(issueGroups.map((g) => g.id));
+    expandedGroups = new SvelteSet(issueGroups.map((g) => g.id));
   }
 
   function collapseAllGroups(): void {
-    expandedGroups = new Set();
+    expandedGroups = new SvelteSet();
   }
 
   // Debug: Compute effective JQL with filters and sort

@@ -366,13 +366,7 @@ function tryParseSprintData(value: unknown): JiraSprint[] {
   }
 
   // Handle single sprint object (some JIRA configurations)
-  if (
-    value &&
-    typeof value === 'object' &&
-    'id' in value &&
-    'name' in value &&
-    'state' in value
-  ) {
+  if (value && typeof value === 'object' && 'id' in value && 'name' in value && 'state' in value) {
     return [value as JiraSprint];
   }
 

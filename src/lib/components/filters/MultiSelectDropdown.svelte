@@ -92,7 +92,11 @@
                   }}
                 />
                 <span class="hidden">
-                  <AtlaskitIcon name={getIconName(filter.icon)} size={16} color="var(--color-text-subtle)" />
+                  <AtlaskitIcon
+                    name={getIconName(filter.icon)}
+                    size={16}
+                    color="var(--color-text-subtle)"
+                  />
                 </span>
               </span>
             {:else if filter.iconUrl}
@@ -108,7 +112,11 @@
                   }}
                 />
                 <span class="hidden">
-                  <AtlaskitIcon name={getIconName(filter.icon)} size={14} color="var(--color-text-subtle)" />
+                  <AtlaskitIcon
+                    name={getIconName(filter.icon)}
+                    size={14}
+                    color="var(--color-text-subtle)"
+                  />
                 </span>
               </span>
             {:else if filter.icon && filter.color}

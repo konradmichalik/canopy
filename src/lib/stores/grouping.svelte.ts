@@ -55,7 +55,11 @@ export interface ProjectGroupMetadata {
   avatarUrl?: string;
 }
 
-export type GroupMetadata = SprintGroupMetadata | AssigneeGroupMetadata | StatusGroupMetadata | ProjectGroupMetadata;
+export type GroupMetadata =
+  | SprintGroupMetadata
+  | AssigneeGroupMetadata
+  | StatusGroupMetadata
+  | ProjectGroupMetadata;
 
 // ============================================
 // Callbacks for grouping changes

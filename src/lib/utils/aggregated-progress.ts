@@ -129,7 +129,9 @@ export function calculateIssuesTimeProgress(issues: JiraIssue[]): AggregatedTime
 /**
  * Calculate aggregated resolution progress from a flat array of issues
  */
-export function calculateIssuesResolutionProgress(issues: JiraIssue[]): AggregatedResolutionProgress {
+export function calculateIssuesResolutionProgress(
+  issues: JiraIssue[]
+): AggregatedResolutionProgress {
   let done = 0;
   const total = issues.length;
 

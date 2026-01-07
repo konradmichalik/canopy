@@ -5,7 +5,7 @@
 
 import type { JiraIssue, TreeNode } from '../types';
 import type { SortConfig } from '../types/tree';
-import { getHierarchyLevel, compareByHierarchy, HIERARCHY_ORDER } from '../types/tree';
+import { compareByHierarchy } from '../types/tree';
 import { logger } from './logger';
 
 interface BuildOptions {

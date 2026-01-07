@@ -158,7 +158,7 @@ export abstract class JiraClient {
     const { jql, startAt = 0, maxResults = 100, fields = DEFAULT_FIELDS, nextPageToken } = options;
 
     // Include discovered custom fields (Epic Link, Sprint)
-    let allFields = [...fields];
+    const allFields = [...fields];
     if (this.epicLinkFieldId && !allFields.includes(this.epicLinkFieldId)) {
       allFields.push(this.epicLinkFieldId);
     }

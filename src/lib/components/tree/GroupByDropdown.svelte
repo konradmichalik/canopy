@@ -1,7 +1,12 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import type { AtlaskitIconName } from '../common/AtlaskitIcon.svelte';
-  import { groupingState, setGroupBy, GROUP_BY_OPTIONS, type GroupByOption } from '../../stores/grouping.svelte';
+  import {
+    groupingState,
+    setGroupBy,
+    GROUP_BY_OPTIONS,
+    type GroupByOption
+  } from '../../stores/grouping.svelte';
 
   let isOpen = $state(false);
   let dropdownRef: HTMLDivElement | null = $state(null);
@@ -79,7 +84,11 @@
                   <AtlaskitIcon name="check-mark" size={14} color="var(--color-text-brand)" />
                 {/if}
               </span>
-              <AtlaskitIcon name={option.icon as AtlaskitIconName} size={16} class="text-text-subtle" />
+              <AtlaskitIcon
+                name={option.icon as AtlaskitIconName}
+                size={16}
+                class="text-text-subtle"
+              />
               <span
                 class={groupingState.groupBy === option.id
                   ? 'text-text-brand font-medium'

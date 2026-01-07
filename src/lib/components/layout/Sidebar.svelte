@@ -99,7 +99,12 @@
     showQueryForm = true;
   }
 
-  function handleSaveQuery(title: string, jql: string, color?: QueryColor, showEntryNode?: boolean): void {
+  function handleSaveQuery(
+    title: string,
+    jql: string,
+    color?: QueryColor,
+    showEntryNode?: boolean
+  ): void {
     if (editingQuery) {
       updateQuery(editingQuery.id, { title, jql, color, showEntryNode });
     } else {

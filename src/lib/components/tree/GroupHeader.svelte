@@ -2,7 +2,13 @@
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import AccordionChevron from '../common/AccordionChevron.svelte';
   import Tooltip from '../common/Tooltip.svelte';
-  import type { IssueGroup, SprintGroupMetadata, AssigneeGroupMetadata, StatusGroupMetadata, ProjectGroupMetadata } from '../../stores/grouping.svelte';
+  import type {
+    IssueGroup,
+    SprintGroupMetadata,
+    AssigneeGroupMetadata,
+    StatusGroupMetadata,
+    ProjectGroupMetadata
+  } from '../../stores/grouping.svelte';
   import {
     calculateIssuesTimeProgress,
     calculateIssuesResolutionProgress,
@@ -60,7 +66,9 @@
   // Use same identifier fallback as Avatar.svelte for consistent colors
   const assigneeBorderColor = $derived(
     assigneeMeta
-      ? getAvatarColor(assigneeMeta.accountId || assigneeMeta.emailAddress || assigneeMeta.displayName || '')
+      ? getAvatarColor(
+          assigneeMeta.accountId || assigneeMeta.emailAddress || assigneeMeta.displayName || ''
+        )
       : '#6B778C'
   );
 
@@ -146,7 +154,11 @@
       </div>
     {/if}
   {:else if isStatus && statusMeta}
-    <span class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded {getStatusColor(statusMeta.categoryKey)}">
+    <span
+      class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded {getStatusColor(
+        statusMeta.categoryKey
+      )}"
+    >
       {group.label}
     </span>
   {:else if isProject && projectMeta}
@@ -179,7 +191,10 @@
       <span class="font-medium text-text truncate">{group.label}</span>
 
       {#if isSprint && sprintMeta && sprintMeta.state !== 'none'}
-        <span class="px-1.5 py-0.5 text-xs font-medium rounded {sprintStateStyles().bg} {sprintStateStyles().text}">
+        <span
+          class="px-1.5 py-0.5 text-xs font-medium rounded {sprintStateStyles()
+            .bg} {sprintStateStyles().text}"
+        >
           {sprintStateStyles().label}
         </span>
       {/if}
