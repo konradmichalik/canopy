@@ -204,12 +204,12 @@
             Debug Mode
           </span>
           <span
-            class="w-8 h-5 rounded-full transition-colors relative {debugModeState.enabled
+            class="w-8 h-5 rounded-full transition-colors relative flex-shrink-0 {debugModeState.enabled
               ? 'bg-brand'
               : 'bg-neutral-bold'}"
           >
             <span
-              class="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform {debugModeState.enabled
+              class="absolute left-0 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform {debugModeState.enabled
                 ? 'translate-x-3.5'
                 : 'translate-x-0.5'}"
             ></span>
