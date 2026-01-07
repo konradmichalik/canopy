@@ -318,6 +318,40 @@ export abstract class JiraClient {
   getIssueUrl(issueKey: string): string {
     return `${this.config.baseUrl}/browse/${issueKey}`;
   }
+
+  /**
+   * Fetch an image with authentication and return as blob URL
+   * Used for avatars and other images that require auth
+   */
+  async fetchImageAsBlob(imageUrl: string): Promise<string | null> {
+    try {
+      // If using proxy, route through the image proxy endpoint
+      let fetchUrl = imageUrl;
+      if (this.config.proxyUrl) {
+        // Extract base proxy URL (remove /jira suffix if present)
+        const proxyBase = this.config.proxyUrl.replace(/\/jira\/?$/, '');
+        fetchUrl = `${proxyBase}/jira-image?url=${encodeURIComponent(imageUrl)}`;
+      }
+
+      const response = await fetch(fetchUrl, {
+        headers: {
+          Authorization: this.getAuthHeader(),
+          Accept: 'image/*'
+        }
+      });
+
+      if (!response.ok) {
+        logger.warn(`Failed to fetch image: ${response.status}`);
+        return null;
+      }
+
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      logger.warn('Failed to fetch image', error);
+      return null;
+    }
+  }
 }
 
 /**

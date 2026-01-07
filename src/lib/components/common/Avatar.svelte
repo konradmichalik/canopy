@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { JiraUser } from '../../types';
+  import AuthImage from './AuthImage.svelte';
   import Tooltip from './Tooltip.svelte';
 
   interface Props {
@@ -73,25 +74,13 @@
       ]}"
       style="border: 2px solid {borderColor}"
     >
-      {#if avatarUrl}
-        <img
-          src={avatarUrl}
-          alt={user.displayName}
-          class="w-full h-full object-cover"
-          onerror={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            target.nextElementSibling?.classList.remove('hidden');
-          }}
-        />
-        <span class="hidden font-medium text-[var(--color-text-secondary)]">
-          {initials}
-        </span>
-      {:else}
-        <span class="font-medium text-[var(--color-text-secondary)]">
-          {initials}
-        </span>
-      {/if}
+      <AuthImage src={avatarUrl} alt={user.displayName} class="w-full h-full object-cover">
+        {#snippet fallback()}
+          <span class="font-medium text-[var(--color-text-secondary)]">
+            {initials}
+          </span>
+        {/snippet}
+      </AuthImage>
     </div>
   </Tooltip>
 {:else}

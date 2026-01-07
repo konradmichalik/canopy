@@ -15,6 +15,7 @@
     issuesHaveTimeTrackingData,
     formatHours
   } from '../../utils/aggregated-progress';
+  import AuthImage from '../common/AuthImage.svelte';
 
   interface Props {
     group: IssueGroup;
@@ -138,21 +139,18 @@
   {#if isSprint}
     <AtlaskitIcon name="sprint" size={18} class="text-brand" />
   {:else if isAssignee && assigneeMeta}
-    {#if assigneeMeta.avatarUrl}
-      <div
-        class="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 box-content"
-        style="border: 2px solid {assigneeBorderColor}"
-      >
-        <img src={assigneeMeta.avatarUrl} alt="" class="w-full h-full object-cover" />
-      </div>
-    {:else}
-      <div
-        class="w-5 h-5 rounded-full bg-neutral flex items-center justify-center text-xs font-medium text-text-subtle flex-shrink-0 box-content"
-        style="border: 2px solid {assigneeBorderColor}"
-      >
-        {getInitials(group.label || '?')}
-      </div>
-    {/if}
+    <div
+      class="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 box-content flex items-center justify-center bg-neutral"
+      style="border: 2px solid {assigneeBorderColor}"
+    >
+      <AuthImage src={assigneeMeta.avatarUrl} alt="" class="w-full h-full object-cover">
+        {#snippet fallback()}
+          <span class="text-xs font-medium text-text-subtle">
+            {getInitials(group.label || '?')}
+          </span>
+        {/snippet}
+      </AuthImage>
+    </div>
   {:else if isStatus && statusMeta}
     <span
       class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded {getStatusColor(
@@ -162,25 +160,13 @@
       {group.label}
     </span>
   {:else if isProject && projectMeta}
-    {#if projectMeta.avatarUrl}
-      <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-        <img
-          src={projectMeta.avatarUrl}
-          alt=""
-          class="w-5 h-5 rounded"
-          onerror={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            target.nextElementSibling?.classList.remove('hidden');
-          }}
-        />
-        <span class="hidden">
+    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+      <AuthImage src={projectMeta.avatarUrl} alt="" class="w-5 h-5 rounded">
+        {#snippet fallback()}
           <AtlaskitIcon name="folder" size={18} class="text-brand" />
-        </span>
-      </div>
-    {:else}
-      <AtlaskitIcon name="folder" size={18} class="text-brand" />
-    {/if}
+        {/snippet}
+      </AuthImage>
+    </div>
   {:else}
     <AtlaskitIcon name="layers" size={18} class="text-text-subtle" />
   {/if}

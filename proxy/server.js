@@ -57,6 +57,54 @@ app.get('/jira', (req, res, next) => {
   `);
 });
 
+// Proxy images (avatars, icons, etc.) with authentication
+app.get('/jira-image', async (req, res) => {
+  const imageUrl = req.query.url;
+
+  if (!imageUrl) {
+    return res.status(400).json({ error: 'Missing url parameter' });
+  }
+
+  console.log(`[Proxy] IMAGE ${imageUrl}`);
+
+  // Build headers for JIRA request
+  const headers = {
+    'Accept': 'image/*,*/*'
+  };
+
+  // Forward Authorization header
+  if (req.headers.authorization) {
+    headers['Authorization'] = req.headers.authorization;
+  } else {
+    console.log('[Proxy] WARNING: No Authorization header for image!');
+  }
+
+  try {
+    const response = await fetch(imageUrl, { headers });
+
+    if (!response.ok) {
+      console.log(`[Proxy] Image error: ${response.status}`);
+      return res.status(response.status).send('Image not found');
+    }
+
+    // Forward content type
+    const contentType = response.headers.get('content-type');
+    if (contentType) {
+      res.setHeader('Content-Type', contentType);
+    }
+
+    // Cache for 1 hour
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+
+    // Stream the image
+    const buffer = await response.arrayBuffer();
+    res.send(Buffer.from(buffer));
+  } catch (error) {
+    console.error('[Proxy] Image fetch error:', error.message);
+    res.status(500).json({ error: 'Image proxy error', message: error.message });
+  }
+});
+
 // Proxy all /jira/* requests
 app.all('/jira/*', async (req, res) => {
   const path = req.path.replace('/jira', '');

@@ -164,3 +164,14 @@ export function getConnectionState(): ConnectionState {
 export function clearError(): void {
   connectionState.error = null;
 }
+
+/**
+ * Fetch an image with authentication and return as blob URL
+ * Used for avatars and other images that require authentication
+ */
+export async function fetchImageWithAuth(imageUrl: string): Promise<string | null> {
+  if (!client) {
+    return null;
+  }
+  return client.fetchImageAsBlob(imageUrl);
+}

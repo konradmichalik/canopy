@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon, { type AtlaskitIconName } from '../common/AtlaskitIcon.svelte';
+  import AuthImage from '../common/AuthImage.svelte';
   import type { ExtendedQuickFilter } from '../../stores/filters.svelte';
 
   interface Props {
@@ -80,44 +81,32 @@
             </span>
             {#if filter.avatarUrl}
               <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                <img
+                <AuthImage
                   src={filter.avatarUrl}
                   alt=""
                   class="w-5 h-5 rounded-full {filter.color ? 'ring-1' : ''}"
                   style={filter.color ? `--tw-ring-color: ${filter.color}` : ''}
-                  onerror={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    target.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-                <span class="hidden">
-                  <AtlaskitIcon
-                    name={getIconName(filter.icon)}
-                    size={16}
-                    color="var(--color-text-subtle)"
-                  />
-                </span>
+                >
+                  {#snippet fallback()}
+                    <AtlaskitIcon
+                      name={getIconName(filter.icon)}
+                      size={16}
+                      color="var(--color-text-subtle)"
+                    />
+                  {/snippet}
+                </AuthImage>
               </span>
             {:else if filter.iconUrl}
               <span class="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                <img
-                  src={filter.iconUrl}
-                  alt=""
-                  class="w-4 h-4"
-                  onerror={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    target.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-                <span class="hidden">
-                  <AtlaskitIcon
-                    name={getIconName(filter.icon)}
-                    size={14}
-                    color="var(--color-text-subtle)"
-                  />
-                </span>
+                <AuthImage src={filter.iconUrl} alt="" class="w-4 h-4">
+                  {#snippet fallback()}
+                    <AtlaskitIcon
+                      name={getIconName(filter.icon)}
+                      size={14}
+                      color="var(--color-text-subtle)"
+                    />
+                  {/snippet}
+                </AuthImage>
               </span>
             {:else if filter.icon && filter.color}
               <AtlaskitIcon name={getIconName(filter.icon)} size={14} color={filter.color} />
