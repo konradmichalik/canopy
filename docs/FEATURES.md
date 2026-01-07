@@ -1,0 +1,296 @@
+# ✨ Features
+
+Complete documentation of all Canopy features.
+
+## Table of Contents
+
+- [🌳 Hierarchical Tree View](#-hierarchical-tree-view)
+- [📝 Query Management](#-query-management)
+- [🔍 Filtering](#-filtering)
+- [🎛️ Display Options](#️-display-options)
+- [⌨️ Keyboard Navigation](#️-keyboard-navigation)
+- [🎨 Theming](#-theming)
+- [📤 Import/Export](#-importexport)
+
+---
+
+## 🌳 Hierarchical Tree View
+
+Canopy displays Jira issues in a tree structure that reflects their parent-child relationships.
+
+### Hierarchy Levels
+
+| Level | Issue Type | Parent Detection |
+|-------|------------|------------------|
+| 1 | Epic | Root level |
+| 2 | Story | `parent` field or Epic Link |
+| 3 | Task | `parent` field or issue links |
+| 4 | Subtask | `parent` field |
+
+### Hierarchy Detection
+
+Parent-child relationships are detected using (in order of priority):
+
+1. **`parent` field** - Used in Jira Cloud and for all subtasks
+2. **Epic Link** - Custom field for Server/Data Center (auto-discovered)
+3. **Issue Links** - Links with parent-child relationship types
+
+### Tree Controls
+
+| Action | Description |
+|--------|-------------|
+| Click chevron | Expand/collapse single node |
+| **Expand All** | Expand all nodes in the tree |
+| **Collapse All** | Collapse all nodes |
+
+### Progress Indicators
+
+Issue cards can display several progress metrics:
+
+| Indicator | Description |
+|-----------|-------------|
+| **Individual Progress** | Time logged vs. estimated for the issue |
+| **Aggregated Time** | Sum of time progress for all children |
+| **Aggregated Resolution** | Percentage of resolved child issues |
+
+---
+
+## 📝 Query Management
+
+Save and organize multiple JQL queries for quick access.
+
+### Creating Queries
+
+1. Click **Add Query** in the sidebar
+2. Enter a title for the query
+3. Write your JQL query
+4. Optionally select a color for visual distinction
+5. Save the query
+
+### Query Features
+
+| Feature | Description |
+|---------|-------------|
+| **Custom Title** | Descriptive name for the query |
+| **Color Coding** | Visual identification in the sidebar |
+| **URL Slugs** | Shareable URLs based on query title |
+| **Active Query** | Currently selected query is highlighted |
+
+### Query Actions
+
+- **Edit** - Modify title, JQL, or color
+- **Duplicate** - Create a copy of the query
+- **Delete** - Remove the query
+- **Reorder** - Drag to reorder in sidebar
+
+---
+
+## 🔍 Filtering
+
+### Quick Filters
+
+Pre-defined filters for common use cases:
+
+| Filter | JQL Equivalent |
+|--------|----------------|
+| Assigned to me | `assignee = currentUser()` |
+| Unassigned | `assignee is EMPTY` |
+| Unresolved | `resolution is EMPTY` |
+| Current Sprint | `sprint in openSprints()` |
+
+### Dynamic Filters
+
+Automatically generated from loaded issues:
+
+| Filter Type | Description |
+|-------------|-------------|
+| **Status** | All statuses in current results (color-coded badges) |
+| **Issue Type** | All issue types with Jira icons |
+| **Assignee** | Team members with avatars |
+| **Priority** | Priority levels with Jira icons |
+| **Resolution** | Resolution types |
+| **Components** | Project components |
+| **Fix Versions** | Version labels |
+
+### Recency Filters
+
+Filter by recent activity:
+
+| Filter | Description |
+|--------|-------------|
+| Recently Created | Created in the last 7 days |
+| Recently Updated | Updated in the last 7 days |
+| Recently Commented | Commented in the last 7 days |
+
+### Text Search
+
+Search issues by key or summary with partial matching:
+
+- Type `127` to find `PROJECT-127`
+- Type `login` to find issues with "login" in the summary
+
+### Filter Logic
+
+- Filters **within the same category** are combined with **OR**
+- Filters **from different categories** are combined with **AND**
+
+**Example:**
+Selecting "In Progress" + "In Review" (status) AND "High" (priority) shows issues that are:
+`(In Progress OR In Review) AND High priority`
+
+### Filter Persistence
+
+Active filters are automatically saved per query and restored when switching between queries.
+
+### Collapsible Filter Section
+
+The filter section can be collapsed to maximize tree view space. State is persisted across sessions.
+
+---
+
+## 🎛️ Display Options
+
+### Sorting
+
+Issues are sorted by hierarchy level first, then by your selected field:
+
+| Sort Field | Description |
+|------------|-------------|
+| Key | Issue key (PROJECT-123) |
+| Priority | Jira priority level |
+| Created | Creation date |
+| Updated | Last update date |
+| Status | Status category |
+
+Toggle ascending/descending with the sort direction button.
+
+### Display Density
+
+| Mode | Description |
+|------|-------------|
+| **Comfortable** | More spacing, larger cards |
+| **Compact** | Reduced spacing, more issues visible |
+
+### Configurable Fields
+
+Choose which fields to display on issue cards:
+
+| Field | Description |
+|-------|-------------|
+| Progress | Individual time tracking progress |
+| Aggregated Time | Sum of children's time progress |
+| Aggregated Resolution | Percentage of resolved children |
+| Status | Current status with color |
+| Assignee | Assigned user with avatar |
+| Priority | Priority icon |
+| Created | Creation date |
+| Updated | Last update date |
+| Comments | Comment count |
+| Components | Project components |
+| Labels | Issue labels |
+| Resolution | Resolution type |
+| Fix Versions | Target versions |
+
+### Resizable Sidebar
+
+Drag the sidebar edge to resize. Width is persisted across sessions.
+
+---
+
+## ⌨️ Keyboard Navigation
+
+Navigate the tree using keyboard shortcuts:
+
+### Movement
+
+| Key | Vim | Action |
+|-----|-----|--------|
+| `Arrow Down` | `j` | Move to next issue |
+| `Arrow Up` | `k` | Move to previous issue |
+| `Arrow Right` | `l` | Expand node or move to first child |
+| `Arrow Left` | `h` | Collapse node or move to parent |
+| `Home` | - | Move to first issue |
+| `End` | - | Move to last issue |
+
+### Actions
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Open issue in Jira (new tab) |
+| `Space` | Toggle expand/collapse |
+| `Escape` | Clear focus |
+
+---
+
+## 🎨 Theming
+
+### Color Mode
+
+| Mode | Description |
+|------|-------------|
+| **Light** | Light background, dark text |
+| **Dark** | Dark background, light text |
+| **System** | Follows OS preference |
+
+### Accent Colors
+
+Customize the app's accent color:
+
+| Color | Hex |
+|-------|-----|
+| Blue (default) | `#1868db` |
+| Teal | `#0891b2` |
+| Green | `#16a34a` |
+| Purple | `#9333ea` |
+| Orange | `#ea580c` |
+| Rose | `#e11d48` |
+
+---
+
+## 📤 Import/Export
+
+### Export Configuration
+
+Export your complete setup as a JSON file:
+
+**Included:**
+- Saved JQL queries
+- Filter states per query
+- Display preferences
+- Theme settings
+- Field configurations
+
+**Not included (for security):**
+- Jira credentials
+- API tokens
+
+### Import Configuration
+
+Restore settings from a previously exported JSON file. Useful for:
+
+- Backup and restore
+- Sharing queries with team members
+- Syncing between devices
+
+---
+
+## 🐛 Developer Tools
+
+### Debug Mode
+
+Enable detailed logging in the browser console:
+
+1. Click **Settings** icon
+2. Toggle **Debug Mode**
+
+Debug logs include:
+- API requests and responses
+- State changes
+- Filter operations
+- Performance metrics
+
+---
+
+## ❓ Help Modal
+
+First-time users are shown an introductory slideshow explaining key features. Access it anytime via **Settings > Show Help**.
