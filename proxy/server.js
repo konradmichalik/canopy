@@ -29,7 +29,7 @@ app.use(cors({
   origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Atlassian-Token']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Atlassian-Token', 'X-Jira-Base-Url']
 }));
 
 // Health check
