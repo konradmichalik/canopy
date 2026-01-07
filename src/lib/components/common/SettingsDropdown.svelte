@@ -13,6 +13,12 @@
   } from '../../stores/displayDensity.svelte';
   import { debugModeState, setDebugMode } from '../../stores/debugMode.svelte';
 
+  interface Props {
+    minimal?: boolean;
+  }
+
+  let { minimal = false }: Props = $props();
+
   let open = $state(false);
   let fileInput: HTMLInputElement;
   let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -133,51 +139,53 @@
       </button>
     </div>
 
-    <DropdownMenu.Separator />
+    {#if !minimal}
+      <DropdownMenu.Separator />
 
-    <!-- Display Density Section -->
-    <DropdownMenu.Label>Display Density</DropdownMenu.Label>
-    <div class="flex gap-1 px-2 pb-2">
-      <button
-        onclick={() => handleDensityChange('comfortable')}
-        class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors
-          {displayDensityState.density === 'comfortable'
-          ? 'bg-accent text-primary font-medium'
-          : 'text-muted-foreground hover:bg-accent'}"
-      >
-        Comfortable
-      </button>
-      <button
-        onclick={() => handleDensityChange('compact')}
-        class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors
-          {displayDensityState.density === 'compact'
-          ? 'bg-accent text-primary font-medium'
-          : 'text-muted-foreground hover:bg-accent'}"
-      >
-        Compact
-      </button>
-    </div>
+      <!-- Display Density Section -->
+      <DropdownMenu.Label>Display Density</DropdownMenu.Label>
+      <div class="flex gap-1 px-2 pb-2">
+        <button
+          onclick={() => handleDensityChange('comfortable')}
+          class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors
+            {displayDensityState.density === 'comfortable'
+            ? 'bg-accent text-primary font-medium'
+            : 'text-muted-foreground hover:bg-accent'}"
+        >
+          Comfortable
+        </button>
+        <button
+          onclick={() => handleDensityChange('compact')}
+          class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors
+            {displayDensityState.density === 'compact'
+            ? 'bg-accent text-primary font-medium'
+            : 'text-muted-foreground hover:bg-accent'}"
+        >
+          Compact
+        </button>
+      </div>
 
-    <DropdownMenu.Separator />
+      <DropdownMenu.Separator />
 
-    <!-- Debug Mode Toggle -->
-    <DropdownMenu.Item onclick={() => setDebugMode(!debugModeState.enabled)} class="justify-between">
-      <span class="flex items-center gap-2">
-        <AtlaskitIcon name="flask" size={16} />
-        Debug Mode
-      </span>
-      <span
-        class="w-8 h-5 rounded-full transition-colors relative flex-shrink-0 {debugModeState.enabled
-          ? 'bg-primary'
-          : 'bg-muted'}"
-      >
+      <!-- Debug Mode Toggle -->
+      <DropdownMenu.Item onclick={() => setDebugMode(!debugModeState.enabled)} class="justify-between">
+        <span class="flex items-center gap-2">
+          <AtlaskitIcon name="flask" size={16} />
+          Debug Mode
+        </span>
         <span
-          class="absolute left-0 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform {debugModeState.enabled
-            ? 'translate-x-3.5'
-            : 'translate-x-0.5'}"
-        ></span>
-      </span>
-    </DropdownMenu.Item>
+          class="w-8 h-5 rounded-full transition-colors relative flex-shrink-0 {debugModeState.enabled
+            ? 'bg-primary'
+            : 'bg-muted'}"
+        >
+          <span
+            class="absolute left-0 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform {debugModeState.enabled
+              ? 'translate-x-3.5'
+              : 'translate-x-0.5'}"
+          ></span>
+        </span>
+      </DropdownMenu.Item>
+    {/if}
 
     <DropdownMenu.Separator />
 
@@ -186,18 +194,20 @@
       <AtlaskitIcon name="upload" size={16} />
       Import Configuration
     </DropdownMenu.Item>
-    <DropdownMenu.Item onclick={handleExport}>
-      <AtlaskitIcon name="download" size={16} />
-      Export Configuration
-    </DropdownMenu.Item>
+    {#if !minimal}
+      <DropdownMenu.Item onclick={handleExport}>
+        <AtlaskitIcon name="download" size={16} />
+        Export Configuration
+      </DropdownMenu.Item>
 
-    <DropdownMenu.Separator />
+      <DropdownMenu.Separator />
 
-    <!-- Logout -->
-    <DropdownMenu.Item onclick={handleDisconnect} variant="destructive">
-      <AtlaskitIcon name="log-out" size={16} />
-      Disconnect
-    </DropdownMenu.Item>
+      <!-- Logout -->
+      <DropdownMenu.Item onclick={handleDisconnect} variant="destructive">
+        <AtlaskitIcon name="log-out" size={16} />
+        Disconnect
+      </DropdownMenu.Item>
+    {/if}
   </DropdownMenu.Content>
 </DropdownMenu.Root>
 
