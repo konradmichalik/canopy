@@ -151,7 +151,10 @@
     <div class="px-6 py-8 min-h-[320px] flex flex-col">
       <!-- Image Area -->
       <div
-        class="flex-1 mb-6 rounded-lg flex items-center justify-center min-h-[160px] overflow-hidden {!currentSlideData.image && !currentSlideData.hasLogo ? 'bg-muted/50 border-2 border-dashed border-muted-foreground/20' : ''}"
+        class="flex-1 mb-6 rounded-lg flex items-center justify-center min-h-[160px] overflow-hidden {!currentSlideData.image &&
+        !currentSlideData.hasLogo
+          ? 'bg-muted/50 border-2 border-dashed border-muted-foreground/20'
+          : ''}"
       >
         {#if currentSlideData.hasLogo}
           <Logo size="lg" showText={true} />

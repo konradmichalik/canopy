@@ -16,6 +16,22 @@ export const keyboardNavState = $state({
   isNavigating: false
 });
 
+// Track the previous query ID to detect changes
+let previousQueryId: string | null = null;
+
+// Clear focus when query changes
+$effect.root(() => {
+  $effect(() => {
+    const currentQueryId = routerState.activeQueryId;
+    if (previousQueryId !== null && currentQueryId !== previousQueryId) {
+      // Query changed - clear focus
+      keyboardNavState.focusedKey = null;
+      keyboardNavState.isNavigating = false;
+    }
+    previousQueryId = currentQueryId;
+  });
+});
+
 // Cached flattened tree for performance
 let cachedFlattenedTree: TreeNode[] = [];
 let cachedTreeNodesRef: TreeNode[] | null = null;

@@ -307,7 +307,11 @@
   <!-- Privacy Info -->
   <div class="p-3 bg-information-subtlest border border-border-information rounded-lg">
     <div class="flex gap-2">
-      <AtlaskitIcon name="status-information" size={16} class="text-icon-information shrink-0 mt-0.5" />
+      <AtlaskitIcon
+        name="status-information"
+        size={16}
+        class="text-icon-information shrink-0 mt-0.5"
+      />
       <div class="text-xs text-text-subtle">
         <p class="font-medium text-text-subtle">Your data stays local</p>
         <p class="mt-1">
