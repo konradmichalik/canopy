@@ -303,4 +303,18 @@
       Connect
     {/if}
   </Button>
+
+  <!-- Privacy Info -->
+  <div class="p-3 bg-information-subtlest border border-border-information rounded-lg">
+    <div class="flex gap-2">
+      <AtlaskitIcon name="status-information" size={16} class="text-icon-information shrink-0 mt-0.5" />
+      <div class="text-xs text-text-subtle">
+        <p class="font-medium text-text-subtle">Your data stays local</p>
+        <p class="mt-1">
+          All credentials and settings are stored only in your browser's local storage. No data is
+          sent to any server except your Jira instance.
+        </p>
+      </div>
+    </div>
+  </div>
 </form>
