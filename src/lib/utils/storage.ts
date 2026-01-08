@@ -4,7 +4,7 @@
  */
 
 import { logger } from './logger';
-import type { ExportedConfig, ExportedSingleQuery, SavedQuery } from '../types';
+import type { ExportedConfig, ExportedSingleQuery, SavedQuery, QueryListItem } from '../types';
 import type { StoredConnection } from '../types/connection';
 
 const STORAGE_PREFIX = 'jira-hierarchy:';
@@ -226,16 +226,24 @@ export function validateImportedConfig(data: unknown): { valid: boolean; errors:
   if (config.queries !== undefined && !Array.isArray(config.queries)) {
     errors.push('Queries must be an array');
   } else if (Array.isArray(config.queries)) {
-    config.queries.forEach((query, index) => {
-      if (!query || typeof query !== 'object') {
-        errors.push(`Query at index ${index} is invalid`);
+    config.queries.forEach((item, index) => {
+      if (!item || typeof item !== 'object') {
+        errors.push(`Item at index ${index} is invalid`);
       } else {
-        const q = query as Record<string, unknown>;
-        if (typeof q.title !== 'string' || !q.title) {
-          errors.push(`Query at index ${index} is missing title`);
-        }
-        if (typeof q.jql !== 'string' || !q.jql) {
-          errors.push(`Query at index ${index} is missing JQL`);
+        const q = item as Record<string, unknown>;
+        // Separators only need a title
+        if (q.type === 'separator') {
+          if (typeof q.title !== 'string' || !q.title) {
+            errors.push(`Separator at index ${index} is missing title`);
+          }
+        } else {
+          // Queries need both title and JQL
+          if (typeof q.title !== 'string' || !q.title) {
+            errors.push(`Query at index ${index} is missing title`);
+          }
+          if (typeof q.jql !== 'string' || !q.jql) {
+            errors.push(`Query at index ${index} is missing JQL`);
+          }
         }
       }
     });
@@ -295,31 +303,38 @@ export function importConfig(
     logger.info('🔗 Connection imported', { baseUrl: config.connection.baseUrl });
   }
 
-  // Import queries (including their displayFields)
+  // Import queries and separators (including their displayFields)
   if (config.queries && config.queries.length > 0) {
-    const existingQueries = getStorageItem<SavedQuery[]>(STORAGE_KEYS.QUERIES) || [];
+    const existingItems = getStorageItem<QueryListItem[]>(STORAGE_KEYS.QUERIES) || [];
 
-    let newQueries: SavedQuery[];
+    let newItems: QueryListItem[];
 
     if (overwriteQueries) {
-      // Replace all queries
-      newQueries = config.queries.map(normalizeImportedQuery);
-      queriesImported = newQueries.length;
+      // Replace all items
+      newItems = config.queries.map(normalizeImportedItem);
+      queriesImported = newItems.length;
     } else if (mergeQueries) {
-      // Merge: add new queries, skip duplicates by title
-      const existingTitles = new Set(existingQueries.map((q) => q.title.toLowerCase()));
+      // Merge: add new items, skip duplicates by title (for items that have titles)
+      const existingTitles = new Set(
+        existingItems
+          .filter((item) => 'title' in item && item.title)
+          .map((item) => (item.title ?? '').toLowerCase())
+      );
       const toAdd = config.queries
-        .filter((q) => !existingTitles.has(q.title.toLowerCase()))
-        .map(normalizeImportedQuery);
-      newQueries = [...existingQueries, ...toAdd];
+        .filter((item) => {
+          const title = 'title' in item ? item.title : undefined;
+          return !title || !existingTitles.has(title.toLowerCase());
+        })
+        .map(normalizeImportedItem);
+      newItems = [...existingItems, ...toAdd];
       queriesImported = toAdd.length;
     } else {
       // Keep existing
-      newQueries = existingQueries;
+      newItems = existingItems;
     }
 
-    setStorageItem(STORAGE_KEYS.QUERIES, newQueries);
-    logger.info(`📋 Queries imported: ${queriesImported} new queries`);
+    setStorageItem(STORAGE_KEYS.QUERIES, newItems);
+    logger.info(`📋 Items imported: ${queriesImported} new items`);
   }
 
   logger.info('✅ Config import completed', {
@@ -337,16 +352,30 @@ export function importConfig(
 }
 
 /**
- * Normalize an imported query (ensure all required fields)
+ * Normalize an imported query or separator (ensure all required fields)
  */
-function normalizeImportedQuery(query: SavedQuery): SavedQuery {
+function normalizeImportedItem(item: QueryListItem): QueryListItem {
+  const now = new Date().toISOString();
+
+  // For separators, only normalize the separator-specific fields
+  if (item.type === 'separator') {
+    return {
+      ...item,
+      id: item.id || `separator-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: item.createdAt || now,
+      updatedAt: item.updatedAt || now
+    };
+  }
+
+  // For queries, normalize all query fields
   return {
-    id: query.id || `query-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    title: query.title,
-    jql: query.jql,
-    createdAt: query.createdAt || new Date().toISOString(),
-    updatedAt: query.updatedAt || new Date().toISOString(),
-    isDefault: query.isDefault || false
+    ...item,
+    id: item.id || `query-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    title: item.title,
+    jql: item.jql,
+    createdAt: item.createdAt || now,
+    updatedAt: item.updatedAt || now,
+    isDefault: item.isDefault || false
   };
 }
 

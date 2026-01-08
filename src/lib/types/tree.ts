@@ -412,7 +412,7 @@ export interface ExportedConfig {
   version: number;
   exportedAt: string;
   connection: ExportedConnection | null;
-  queries: SavedQuery[];
+  queries: QueryListItem[];
   displayFields?: string[];
 }
 
