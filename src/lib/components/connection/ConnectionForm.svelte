@@ -274,12 +274,13 @@
     {#if showProxyInput}
       <div class="mt-2 space-y-2">
         <Input
-          type="url"
+          type="text"
           bind:value={formData.proxyUrl}
-          placeholder="http://localhost:3001/jira (optional)"
+          placeholder="/api/jira or http://localhost:3001/jira"
         />
         <p class="text-xs text-muted-foreground">
-          If you're having CORS issues, run the included proxy server and enter its URL here.
+          Use <code class="bg-muted px-1 rounded">/api/jira</code> for Vercel deployment, or run the
+          local proxy and use <code class="bg-muted px-1 rounded">http://localhost:3001/jira</code>.
         </p>
       </div>
     {/if}
