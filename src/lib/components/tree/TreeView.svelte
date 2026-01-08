@@ -6,6 +6,7 @@
   import QuickFilters from '../filters/QuickFilters.svelte';
   import GroupHeader from './GroupHeader.svelte';
   import QueryEntryNode from './QueryEntryNode.svelte';
+  import ChangeSummary from './ChangeSummary.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import { Button } from '$lib/components/ui/button';
   import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
@@ -20,6 +21,7 @@
   import { groupingState, groupIssues, type IssueGroup } from '../../stores/grouping.svelte';
   import { sortConfigState } from '../../stores/sortConfig.svelte';
   import { connectionState } from '../../stores/connection.svelte';
+  import { changeTrackingState, saveCheckpoint } from '../../stores/changeTracking.svelte';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
@@ -147,6 +149,13 @@
     // Only clear if clicking the container itself, not a tree node
     if (target === treeContainerRef || target.classList.contains('tree-container')) {
       clearFocus();
+    }
+  }
+
+  // Change tracking handlers
+  function handleSaveCheckpoint(): void {
+    if (routerState.activeQueryId) {
+      saveCheckpoint(routerState.activeQueryId, issuesState.rawIssues);
     }
   }
 </script>
@@ -323,6 +332,14 @@
     aria-label="Issue hierarchy tree"
     onclick={onTreeClick}
   >
+    <!-- Change Summary Banner -->
+    {#if changeTrackingState.isEnabled && changeTrackingState.currentChanges?.hasChanges}
+      <ChangeSummary
+        changes={changeTrackingState.currentChanges}
+        onAcknowledge={handleSaveCheckpoint}
+      />
+    {/if}
+
     {#if issuesState.isLoading}
       <div class="tree-container space-y-1">
         {#each Array(8) as _, i (i)}

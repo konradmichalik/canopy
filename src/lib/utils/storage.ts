@@ -24,7 +24,10 @@ export const STORAGE_KEYS = {
   GROUP_BY: 'group-by',
   HELP_MODAL_SEEN: 'help-modal-seen',
   DATE_FORMAT: 'date-format',
-  AUTO_REFRESH_INTERVAL: 'auto-refresh-interval'
+  AUTO_REFRESH_INTERVAL: 'auto-refresh-interval',
+  CHANGE_TRACKING_ENABLED: 'change-tracking-enabled',
+  CHANGE_TRACKING_ACTIVITY_PERIOD: 'change-tracking-activity-period',
+  CHANGE_TRACKING_CHECKPOINTS: 'change-tracking-checkpoints'
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

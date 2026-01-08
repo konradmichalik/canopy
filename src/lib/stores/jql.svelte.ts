@@ -15,6 +15,7 @@ import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { generateQueryId, generateSeparatorId, isQuery, isSeparator } from '../types/tree';
 import { logger } from '../utils/logger';
 import { generateSlug, slugsMatch } from '../utils/slug';
+import { clearCheckpoint } from './changeTracking.svelte';
 
 // State container object - now stores both queries and separators
 export const jqlState = $state({
@@ -249,6 +250,10 @@ export function deleteQuery(id: string): boolean {
 
   jqlState.items = [...jqlState.items.slice(0, index), ...jqlState.items.slice(index + 1)];
   persistItems();
+
+  // Clean up any stored checkpoint for this query
+  clearCheckpoint(id);
+
   logger.store('jql', 'Deleted query', { id });
 
   return true;

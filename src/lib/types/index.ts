@@ -5,3 +5,4 @@
 export * from './jira';
 export * from './connection';
 export * from './tree';
+export * from './changeTracking';

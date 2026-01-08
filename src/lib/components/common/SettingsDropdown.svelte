@@ -25,6 +25,13 @@
     AUTO_REFRESH_OPTIONS,
     type AutoRefreshInterval
   } from '../../stores/autoRefresh.svelte';
+  import {
+    changeTrackingState,
+    setChangeTrackingEnabled,
+    setActivityPeriod,
+    ACTIVITY_PERIOD_OPTIONS
+  } from '../../stores/changeTracking.svelte';
+  import type { ActivityPeriod } from '../../types/changeTracking';
 
   interface Props {
     minimal?: boolean;
@@ -54,6 +61,10 @@
 
   function handleAutoRefreshChange(interval: AutoRefreshInterval): void {
     setAutoRefreshInterval(interval);
+  }
+
+  function handleActivityPeriodChange(period: ActivityPeriod): void {
+    setActivityPeriod(period);
   }
 
   function handleExport(): void {
@@ -261,6 +272,53 @@
             {option.label}
           </button>
         {/each}
+      </div>
+
+      <DropdownMenu.Separator />
+
+      <!-- Change Tracking Section (Beta) -->
+      <DropdownMenu.Label class="flex items-center gap-2">
+        Change Tracking
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium">
+          Beta
+        </span>
+      </DropdownMenu.Label>
+      <div class="px-2 pb-2 space-y-2">
+        <!-- Enable/Disable Toggle -->
+        <button
+          onclick={() => setChangeTrackingEnabled(!changeTrackingState.isEnabled)}
+          class="w-full flex items-center justify-between px-2 py-1.5 text-xs rounded transition-colors hover:bg-accent"
+        >
+          <span class="text-muted-foreground">Enable tracking</span>
+          <span
+            class="w-8 h-5 rounded-full transition-colors relative flex-shrink-0 {changeTrackingState.isEnabled
+              ? 'bg-primary'
+              : 'bg-muted'}"
+          >
+            <span
+              class="absolute left-0 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform {changeTrackingState.isEnabled
+                ? 'translate-x-3.5'
+                : 'translate-x-0.5'}"
+            ></span>
+          </span>
+        </button>
+
+        <!-- Activity Period (only shown when enabled) -->
+        {#if changeTrackingState.isEnabled}
+          <div class="flex gap-1">
+            {#each ACTIVITY_PERIOD_OPTIONS as option (option.value)}
+              <button
+                onclick={() => handleActivityPeriodChange(option.value)}
+                class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors
+                  {changeTrackingState.activityPeriod === option.value
+                  ? 'bg-accent text-primary font-medium'
+                  : 'text-muted-foreground hover:bg-accent'}"
+              >
+                {option.label}
+              </button>
+            {/each}
+          </div>
+        {/if}
       </div>
 
       <DropdownMenu.Separator />

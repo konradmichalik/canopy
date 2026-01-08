@@ -1,5 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import ActivityBadge from '../common/ActivityBadge.svelte';
   import type { TreeNode } from '../../types';
   import StatusBadge from '../common/StatusBadge.svelte';
   import IssueTypeIcon from '../common/IssueTypeIcon.svelte';
@@ -21,6 +22,11 @@
     makeAssigneeFilterId
   } from '../../stores/filters.svelte';
   import { formatDate, formatDateTime, getDueDateStatus } from '../../utils/formatDate';
+  import {
+    changeTrackingState,
+    getIssueChangeType,
+    isRecentlyUpdated
+  } from '../../stores/changeTracking.svelte';
 
   interface Props {
     node: TreeNode;
@@ -95,6 +101,13 @@
 
   // Display density
   const isCompact = $derived(displayDensityState.density === 'compact');
+
+  // Change tracking
+  const changeType = $derived(getIssueChangeType(issue.key));
+  const recentlyUpdated = $derived(isRecentlyUpdated(issue));
+  const showActivityBadge = $derived(
+    changeTrackingState.isEnabled && (changeType !== null || recentlyUpdated)
+  );
 </script>
 
 <div class="flex items-center min-w-0 flex-1 {isCompact ? 'gap-3 py-1' : 'gap-4 py-2.5'}">
@@ -109,17 +122,22 @@
   </button>
 
   <!-- Issue Key (link) -->
-  <Tooltip text="Open in Jira">
-    <button
-      onclick={openIssue}
-      class="font-medium text-text-brand hover:underline flex items-center gap-1 flex-shrink-0 {isCompact
-        ? 'text-sm'
-        : 'text-base gap-1.5'}"
-    >
-      {issue.key}
-      <AtlaskitIcon name="link-external" size={isCompact ? 12 : 14} class="opacity-50" />
-    </button>
-  </Tooltip>
+  <div class="flex items-center gap-1.5 flex-shrink-0">
+    {#if showActivityBadge}
+      <ActivityBadge {changeType} isRecentlyActive={recentlyUpdated && changeType === null} />
+    {/if}
+    <Tooltip text="Open in Jira">
+      <button
+        onclick={openIssue}
+        class="font-medium text-text-brand hover:underline flex items-center gap-1 {isCompact
+          ? 'text-sm'
+          : 'text-base gap-1.5'}"
+      >
+        {issue.key}
+        <AtlaskitIcon name="link-external" size={isCompact ? 12 : 14} class="opacity-50" />
+      </button>
+    </Tooltip>
+  </div>
 
   <!-- Summary -->
   <span class="text-text truncate min-w-0 flex-1 {isCompact ? 'text-sm' : 'text-base'}">

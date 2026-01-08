@@ -27,6 +27,7 @@ import { getSortConfig, setSortConfigChangeCallback } from './sortConfig.svelte'
 import { invalidateFlatTreeCache } from './keyboardNavigation.svelte';
 import { routerState } from './router.svelte';
 import { updateQueryIssueCount } from './jql.svelte';
+import { detectChanges } from './changeTracking.svelte';
 
 // State container object
 export const issuesState = $state({
@@ -126,6 +127,11 @@ export async function loadIssues(jql: string): Promise<boolean> {
     // Update cached issue count for the active query
     if (routerState.activeQueryId) {
       updateQueryIssueCount(routerState.activeQueryId, stats.totalIssues);
+
+      // Detect changes from checkpoint (only on initial load to avoid re-detecting on filter changes)
+      if (issuesState.isInitialLoad) {
+        detectChanges(routerState.activeQueryId, fetchedIssues);
+      }
     }
 
     issuesState.isLoading = false;

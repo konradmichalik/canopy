@@ -18,6 +18,7 @@
     initializeKeyboardNavigation,
     cleanupKeyboardNavigation
   } from './lib/stores/keyboardNavigation.svelte';
+  import { initializeChangeTracking } from './lib/stores/changeTracking.svelte';
   import { onMount } from 'svelte';
 
   let isInitializing = $state(true);
@@ -39,6 +40,7 @@
         initializeHelpModal();
         initializeAutoRefresh();
         initializeKeyboardNavigation();
+        initializeChangeTracking();
 
         // Try to restore connection from storage
         await initializeConnection();
