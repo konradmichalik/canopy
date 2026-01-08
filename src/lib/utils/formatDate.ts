@@ -6,17 +6,14 @@
 import { dateFormatState } from '../stores/dateFormat.svelte';
 
 /**
- * Format a date string as relative time (e.g., "2 minutes ago", "3 days ago")
+ * Core relative time formatting logic
+ * Returns null for future dates (caller handles fallback)
  */
-function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr);
+function getRelativeTimeString(date: Date): string | null {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
 
-  // Future dates fall back to absolute
-  if (diffMs < 0) {
-    return formatAbsoluteDate(dateStr);
-  }
+  if (diffMs < 0) return null;
 
   const diffMinutes = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMinutes / 60);
@@ -41,6 +38,20 @@ function formatRelativeDate(dateStr: string): string {
   const diffYears = Math.floor(diffDays / 365);
   if (diffYears === 1) return '1 year ago';
   return `${diffYears} years ago`;
+}
+
+/**
+ * Format a Date object as relative time (e.g., "2 minutes ago")
+ */
+export function formatRelativeTime(date: Date): string {
+  return getRelativeTimeString(date) ?? formatDateTime(date.toISOString());
+}
+
+/**
+ * Format a date string as relative time (internal use)
+ */
+function formatRelativeDate(dateStr: string): string {
+  return getRelativeTimeString(new Date(dateStr)) ?? formatAbsoluteDate(dateStr);
 }
 
 /**

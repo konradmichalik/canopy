@@ -36,7 +36,8 @@ export const issuesState = $state({
   isLoading: false,
   error: null as string | null,
   currentJql: '',
-  isInitialLoad: true
+  isInitialLoad: true,
+  lastUpdated: null as Date | null
 });
 
 // Track if a reload is pending (triggered while loading)
@@ -123,6 +124,9 @@ export async function loadIssues(jql: string): Promise<boolean> {
 
     const stats = getTreeStats(issuesState.treeNodes);
     logger.info('Issues loaded', stats);
+
+    // Update last updated timestamp
+    issuesState.lastUpdated = new Date();
 
     // Update cached issue count for the active query
     if (routerState.activeQueryId) {
@@ -236,6 +240,7 @@ export function clearIssues(): void {
   issuesState.treeNodes = [];
   issuesState.currentJql = '';
   issuesState.error = null;
+  issuesState.lastUpdated = null;
   invalidateFlatTreeCache(); // Invalidate keyboard navigation cache
 }
 

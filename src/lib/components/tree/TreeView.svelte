@@ -22,10 +22,14 @@
   import { sortConfigState } from '../../stores/sortConfig.svelte';
   import { connectionState } from '../../stores/connection.svelte';
   import { changeTrackingState, saveCheckpoint } from '../../stores/changeTracking.svelte';
+  import { formatRelativeTime, formatDateTime } from '../../utils/formatDate';
+  import { autoRefreshState } from '../../stores/autoRefresh.svelte';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
   let treeContainerRef: HTMLDivElement | null = $state(null);
+  // Tick counter to force re-render of relative time every 30 seconds
+  let timeTick = $state(0);
   // eslint-disable-next-line svelte/no-unnecessary-state-wrap -- variable is reassigned, not just mutated
   let expandedGroups: SvelteSet<string> = $state(new SvelteSet<string>());
   let entryNodeExpanded = $state(true);
@@ -158,6 +162,15 @@
       saveCheckpoint(routerState.activeQueryId, issuesState.rawIssues);
     }
   }
+
+  // Timer to update relative time display every 30 seconds
+  $effect(() => {
+    const interval = setInterval(() => {
+      timeTick++;
+    }, 30000);
+
+    return () => clearInterval(interval);
+  });
 </script>
 
 <div class="tree-view flex flex-col h-full">
@@ -182,6 +195,41 @@
       </div>
 
       <div class="flex items-center gap-1.5">
+        <!-- Last updated time + Refresh button -->
+        <div class="flex items-center gap-1.5">
+          {#if issuesState.lastUpdated}
+            {#key `${issuesState.lastUpdated.getTime()}-${timeTick}`}
+              <Tooltip content={formatDateTime(issuesState.lastUpdated.toISOString())} placement="bottom">
+                <span class="text-xs text-muted-foreground whitespace-nowrap cursor-default">
+                  {formatRelativeTime(issuesState.lastUpdated)}
+                </span>
+              </Tooltip>
+            {/key}
+          {/if}
+          <Tooltip
+            content={autoRefreshState.interval !== 'off'
+              ? `Refresh (Auto: ${autoRefreshState.interval})`
+              : 'Refresh'}
+            placement="bottom"
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              class="h-8 w-8"
+              onclick={handleRefresh}
+              disabled={issuesState.isLoading || isRefreshing}
+            >
+              <AtlaskitIcon
+                name="refresh"
+                size={16}
+                class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''}
+              />
+            </Button>
+          </Tooltip>
+        </div>
+
+        <div class="w-px h-5 bg-border mx-1"></div>
+
         <Tooltip content="Expand all" placement="bottom">
           <Button
             variant="ghost"
@@ -203,22 +251,6 @@
             disabled={isEmpty || issuesState.isLoading}
           >
             <AtlaskitIcon name="chevron-up" size={16} />
-          </Button>
-        </Tooltip>
-
-        <Tooltip content="Refresh" placement="bottom">
-          <Button
-            variant="ghost"
-            size="icon"
-            class="h-8 w-8"
-            onclick={handleRefresh}
-            disabled={issuesState.isLoading || isRefreshing}
-          >
-            <AtlaskitIcon
-              name="refresh"
-              size={16}
-              class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''}
-            />
           </Button>
         </Tooltip>
 
