@@ -2,6 +2,7 @@
   import type { ChangeDetection } from '../../types/changeTracking';
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import { formatDateTime } from '../../utils/formatDate';
+  import { getIssueUrl } from '../../stores/issues.svelte';
 
   interface Props {
     changes: ChangeDetection;
@@ -15,6 +16,15 @@
   const checkpointTime = $derived(
     changes.checkpointTimestamp ? formatDateTime(changes.checkpointTimestamp) : null
   );
+
+  function openIssue(issueKey: string, e: Event): void {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = getIssueUrl(issueKey);
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  }
 </script>
 
 {#if changes.hasChanges}
@@ -68,9 +78,10 @@
         <button
           type="button"
           onclick={onAcknowledge}
-          class="px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+          class="px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors flex items-center gap-1"
           title="Acknowledge changes and save new checkpoint"
         >
+          <AtlaskitIcon name="check" size={14} />
           Acknowledge
         </button>
       </div>
@@ -84,9 +95,13 @@
             <div class="font-medium text-green-700 dark:text-green-400 mb-1">New Issues:</div>
             <div class="flex flex-wrap gap-1">
               {#each changes.newIssues as issueKey (issueKey)}
-                <span class="px-1.5 py-0.5 bg-green-100 dark:bg-green-900 rounded text-green-800 dark:text-green-200">
+                <button
+                  type="button"
+                  onclick={(e) => openIssue(issueKey, e)}
+                  class="px-1.5 py-0.5 bg-green-100 dark:bg-green-900 rounded text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 hover:underline cursor-pointer transition-colors"
+                >
                   {issueKey}
-                </span>
+                </button>
               {/each}
             </div>
           </div>
@@ -97,9 +112,13 @@
             <div class="font-medium text-red-700 dark:text-red-400 mb-1">Removed Issues:</div>
             <div class="flex flex-wrap gap-1">
               {#each changes.removedIssues as removed (removed.key)}
-                <span class="px-1.5 py-0.5 bg-red-100 dark:bg-red-900 rounded text-red-800 dark:text-red-200">
+                <button
+                  type="button"
+                  onclick={(e) => openIssue(removed.key, e)}
+                  class="px-1.5 py-0.5 bg-red-100 dark:bg-red-900 rounded text-red-800 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-800 hover:underline cursor-pointer transition-colors"
+                >
                   {removed.key} <span class="opacity-70">(was: {removed.lastStatus})</span>
-                </span>
+                </button>
               {/each}
             </div>
           </div>
@@ -110,9 +129,13 @@
             <div class="font-medium text-blue-700 dark:text-blue-400 mb-1">Status Changes:</div>
             <div class="flex flex-wrap gap-1">
               {#each changes.statusChanges as change (change.key)}
-                <span class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 rounded text-blue-800 dark:text-blue-200">
+                <button
+                  type="button"
+                  onclick={(e) => openIssue(change.key, e)}
+                  class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 rounded text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800 hover:underline cursor-pointer transition-colors"
+                >
                   {change.key}: {change.previousStatus} → {change.currentStatus}
-                </span>
+                </button>
               {/each}
             </div>
           </div>
