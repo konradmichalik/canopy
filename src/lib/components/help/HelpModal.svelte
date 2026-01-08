@@ -21,6 +21,7 @@
     content: string;
     hasLogo?: boolean;
     badge?: string;
+    image?: string;
   }
 
   // Slide definitions
@@ -38,35 +39,40 @@
       title: 'Connect to Jira',
       icon: 'link',
       content:
-        'Connect to Jira Cloud or Server/Data Center. Use API tokens (Cloud) or Personal Access Tokens (Server) for authentication. A CORS proxy is required for local development.'
+        'Connect to Jira Cloud or Server/Data Center. Use API tokens (Cloud) or Personal Access Tokens (Server) for authentication. A CORS proxy is required for local development.',
+      image: '/images/connect.jpg'
     },
     {
       id: 'tree-view',
       title: 'Hierarchical Tree View',
       icon: 'git-branch',
       content:
-        'View your issues in their natural hierarchy: Epic → Story → Task → Subtask. Expand and collapse branches to focus on what matters.'
+        'View your issues in their natural hierarchy: Epic → Story → Task → Subtask. Expand and collapse branches to focus on what matters.',
+      image: '/images/hierarchical.jpg'
     },
     {
       id: 'filters',
       title: 'Powerful Filters',
       icon: 'filter',
       content:
-        'Use quick filters for assignee and status. Dynamic filters are automatically generated from your loaded issues. Text search finds issues instantly.'
+        'Use quick filters for assignee and status. Dynamic filters are automatically generated from your loaded issues. Text search finds issues instantly.',
+      image: '/images/filter.jpg'
     },
     {
       id: 'grouping',
       title: 'Flexible Grouping',
       icon: 'folder',
       content:
-        'Group issues by Sprint, Assignee, Status, Project, or Recency. Perfect for sprint planning or tracking recent activity across your team.'
+        'Group issues by Sprint, Assignee, Status, Project, or Recency. Perfect for sprint planning or tracking recent activity across your team.',
+      image: '/images/grouping.jpg'
     },
     {
       id: 'jql-queries',
       title: 'Saved JQL Queries',
       icon: 'search',
       content:
-        'Create and save custom JQL queries. Assign colors, duplicate queries, and organize with separators. Issue counts are shown in the sidebar.'
+        'Create and save custom JQL queries. Assign colors, duplicate queries, and organize with separators. Issue counts are shown in the sidebar.',
+      image: '/images/jql.jpg'
     },
     {
       id: 'change-tracking',
@@ -143,12 +149,18 @@
 
     <!-- Slide Content -->
     <div class="px-6 py-8 min-h-[320px] flex flex-col">
-      <!-- Image Placeholder -->
+      <!-- Image Area -->
       <div
-        class="flex-1 mb-6 bg-muted/50 rounded-lg flex items-center justify-center min-h-[160px] border-2 border-dashed border-muted-foreground/20"
+        class="flex-1 mb-6 rounded-lg flex items-center justify-center min-h-[160px] overflow-hidden {!currentSlideData.image && !currentSlideData.hasLogo ? 'bg-muted/50 border-2 border-dashed border-muted-foreground/20' : ''}"
       >
         {#if currentSlideData.hasLogo}
           <Logo size="lg" showText={true} />
+        {:else if currentSlideData.image}
+          <img
+            src={currentSlideData.image}
+            alt={currentSlideData.title}
+            class="max-h-[200px] w-auto rounded-lg shadow-md object-contain"
+          />
         {:else}
           <div class="text-center text-muted-foreground">
             <AtlaskitIcon name={currentSlideData.icon} size={48} class="mx-auto mb-2 opacity-50" />
