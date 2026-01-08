@@ -5,7 +5,7 @@
 
 import type { JiraIssue, TreeNode } from '../types';
 import type { SortConfig } from '../types/tree';
-import { compareByHierarchy } from '../types/tree';
+import { compareNodes } from '../types/tree';
 import { logger } from './logger';
 
 interface BuildOptions {
@@ -111,7 +111,7 @@ export function buildFlatList(issues: JiraIssue[], options: FlatListOptions = {}
   }));
 
   // Sort by hierarchy level first, then by configured field
-  nodes.sort((a, b) => compareByHierarchy(a, b, sortConfig));
+  nodes.sort((a, b) => compareNodes(a, b, sortConfig));
 
   logger.debug(`Built flat list: ${issues.length} issues`);
 
@@ -166,7 +166,7 @@ function findParentKey(
  * Sort children recursively by hierarchy level and configured secondary field
  */
 function sortChildrenRecursively(nodes: TreeNode[], sortConfig?: SortConfig): void {
-  nodes.sort((a, b) => compareByHierarchy(a, b, sortConfig));
+  nodes.sort((a, b) => compareNodes(a, b, sortConfig));
   nodes.forEach((node) => {
     if (node.children.length > 0) {
       sortChildrenRecursively(node.children, sortConfig);

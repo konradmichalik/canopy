@@ -327,17 +327,9 @@ function getPriorityOrder(priorityName: string | undefined | null): number {
 }
 
 /**
- * Compare two tree nodes by hierarchy level and secondary sort field
+ * Compare two tree nodes by user-selected sort field
  */
-export function compareByHierarchy(a: TreeNode, b: TreeNode, sortConfig?: SortConfig): number {
-  // Primary sort: hierarchy level
-  const levelA = getHierarchyLevel(a.issue.fields.issuetype.name);
-  const levelB = getHierarchyLevel(b.issue.fields.issuetype.name);
-
-  const orderDiff = HIERARCHY_ORDER[levelA] - HIERARCHY_ORDER[levelB];
-  if (orderDiff !== 0) return orderDiff;
-
-  // Secondary sort: user-selected field (default: key asc)
+export function compareNodes(a: TreeNode, b: TreeNode, sortConfig?: SortConfig): number {
   const field = sortConfig?.field ?? 'key';
   const direction = sortConfig?.direction ?? 'asc';
   const multiplier = direction === 'asc' ? 1 : -1;
@@ -371,6 +363,22 @@ export function compareByHierarchy(a: TreeNode, b: TreeNode, sortConfig?: SortCo
       const updatedA = new Date(a.issue.fields.updated).getTime();
       const updatedB = new Date(b.issue.fields.updated).getTime();
       comparison = updatedA - updatedB;
+      break;
+    }
+
+    case 'duedate': {
+      // Null/undefined due dates go to the end
+      const dueDateA = a.issue.fields.duedate
+        ? new Date(a.issue.fields.duedate).getTime()
+        : Number.MAX_SAFE_INTEGER;
+      const dueDateB = b.issue.fields.duedate
+        ? new Date(b.issue.fields.duedate).getTime()
+        : Number.MAX_SAFE_INTEGER;
+      comparison = dueDateA - dueDateB;
+      // Fallback to key if due dates are equal
+      if (comparison === 0) {
+        comparison = a.issue.key.localeCompare(b.issue.key, undefined, { numeric: true });
+      }
       break;
     }
 
