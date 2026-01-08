@@ -112,6 +112,13 @@
   <div class="flex items-center min-w-0 pl-3 gap-2">
     <!-- Text -->
     <span class="truncate text-sm font-medium">{query.title}</span>
+    {#if query.cachedIssueCount !== undefined}
+      <span
+        class="inline-flex items-center justify-center min-w-[1rem] h-4 px-1 text-[10px] font-bold rounded bg-muted text-muted-foreground flex-shrink-0"
+      >
+        {query.cachedIssueCount}
+      </span>
+    {/if}
   </div>
 
   <!-- Actions - visible on hover -->

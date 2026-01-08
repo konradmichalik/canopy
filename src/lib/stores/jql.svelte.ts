@@ -106,6 +106,7 @@ export function updateQuery(
       | 'groupBy'
       | 'showEntryNode'
       | 'optionsExpanded'
+      | 'cachedIssueCount'
     >
   >
 ): boolean {
@@ -173,6 +174,13 @@ export function updateQueryGroupBy(id: string, groupBy: GroupByOption): boolean 
  */
 export function updateQueryOptionsExpanded(id: string, optionsExpanded: boolean): boolean {
   return updateQuery(id, { optionsExpanded });
+}
+
+/**
+ * Update cached issue count for a query
+ */
+export function updateQueryIssueCount(id: string, cachedIssueCount: number): boolean {
+  return updateQuery(id, { cachedIssueCount });
 }
 
 /**

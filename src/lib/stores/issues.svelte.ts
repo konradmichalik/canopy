@@ -25,6 +25,8 @@ import {
 } from './filters.svelte';
 import { getSortConfig, setSortConfigChangeCallback } from './sortConfig.svelte';
 import { invalidateFlatTreeCache } from './keyboardNavigation.svelte';
+import { routerState } from './router.svelte';
+import { updateQueryIssueCount } from './jql.svelte';
 
 // State container object
 export const issuesState = $state({
@@ -120,6 +122,11 @@ export async function loadIssues(jql: string): Promise<boolean> {
 
     const stats = getTreeStats(issuesState.treeNodes);
     logger.info('Issues loaded', stats);
+
+    // Update cached issue count for the active query
+    if (routerState.activeQueryId) {
+      updateQueryIssueCount(routerState.activeQueryId, stats.totalIssues);
+    }
 
     issuesState.isLoading = false;
 

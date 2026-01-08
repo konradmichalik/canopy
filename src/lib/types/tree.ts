@@ -105,6 +105,8 @@ export interface SavedQuery {
   showEntryNode?: boolean;
   /** Whether the options panel (filters, grouping, sorting) is expanded */
   optionsExpanded?: boolean;
+  /** Cached issue count from last query execution */
+  cachedIssueCount?: number;
 }
 
 // ============================================
