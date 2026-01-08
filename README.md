@@ -36,9 +36,12 @@ Canopy visualizes Jira issues in a hierarchical tree view (Epic → Story → Ta
 | Category | Highlights |
 |----------|------------|
 | **Tree View** | Hierarchical display with expand/collapse, keyboard navigation (vim-style), and progress aggregation |
+| **Grouping** | Group by Sprint, Assignee, Status, Project, or Recency for flexible organization |
 | **Filtering** | Quick filters, dynamic filters (status, assignee, priority), text search, and recency filters |
+| **Change Tracking** | Checkpoint-based change detection with visual indicators for new issues and status changes (Beta) |
+| **Auto-Refresh** | Automatic data refresh at configurable intervals (5min, 30min, 1h) |
 | **Theming** | Light/dark mode, system theme detection, and 6 customizable accent colors |
-| **Data Management** | Multiple saved JQL queries, import/export configuration, local storage persistence |
+| **Data Management** | Multiple saved JQL queries with colors, separators, duplication, and issue counts |
 | **Jira Support** | Both Jira Cloud and Server/Data Center instances |
 
 > **[View all features →](docs/FEATURES.md)**

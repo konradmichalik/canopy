@@ -5,8 +5,11 @@ Complete documentation of all Canopy features.
 ## Table of Contents
 
 - [🌳 Hierarchical Tree View](#-hierarchical-tree-view)
+- [📂 Grouping](#-grouping)
 - [📝 Query Management](#-query-management)
 - [🔍 Filtering](#-filtering)
+- [🔄 Change Tracking (Beta)](#-change-tracking-beta)
+- [⏰ Auto-Refresh](#-auto-refresh)
 - [🎛️ Display Options](#️-display-options)
 - [⌨️ Keyboard Navigation](#️-keyboard-navigation)
 - [🎨 Theming](#-theming)
@@ -55,6 +58,41 @@ Issue cards can display several progress metrics:
 
 ---
 
+## 📂 Grouping
+
+Organize issues by different criteria for better overview and sprint planning.
+
+### Grouping Options
+
+| Option | Description |
+|--------|-------------|
+| **No Grouping** | Default hierarchical tree view |
+| **Sprint** | Group by sprint (Active → Future → Closed → No Sprint) |
+| **Assignee** | Group by team member with avatars |
+| **Status** | Group by status (To Do → In Progress → Done) |
+| **Project** | Group by Jira project |
+| **Recency** | Group by last update time |
+
+### Recency Buckets
+
+When grouping by recency, issues are organized into time-based groups:
+
+| Bucket | Description |
+|--------|-------------|
+| **Last 3 Days** | Recently updated issues |
+| **Last 7 Days** | Updated this week |
+| **Last Month** | Updated in the last 30 days |
+| **Older** | Updated more than 30 days ago |
+
+### Sprint Grouping Features
+
+- Progress bar showing completion percentage
+- Sprint date range display
+- Active sprint highlighted
+- Sprint state badges (Active, Future, Closed)
+
+---
+
 ## 📝 Query Management
 
 Save and organize multiple JQL queries for quick access.
@@ -73,15 +111,26 @@ Save and organize multiple JQL queries for quick access.
 |---------|-------------|
 | **Custom Title** | Descriptive name for the query |
 | **Color Coding** | Visual identification in the sidebar |
+| **Issue Count** | Cached count displayed next to query name |
 | **URL Slugs** | Shareable URLs based on query title |
 | **Active Query** | Currently selected query is highlighted |
+| **Dynamic Page Title** | Browser tab shows current query name |
 
 ### Query Actions
 
 - **Edit** - Modify title, JQL, or color
-- **Duplicate** - Create a copy of the query
-- **Delete** - Remove the query
+- **Duplicate** - Create a copy with unique title
+- **Delete** - Remove with confirmation dialog
 - **Reorder** - Drag to reorder in sidebar
+
+### Query Separators
+
+Organize your queries with visual separators:
+
+- Add separators between query groups
+- Optional titles for sections (e.g., "Sprint Queries", "Team Queries")
+- Drag to reorder separators like queries
+- Delete or edit separator titles anytime
 
 ---
 
@@ -148,6 +197,70 @@ The filter section can be collapsed to maximize tree view space. State is persis
 
 ---
 
+## 🔄 Change Tracking (Beta)
+
+> **Note:** This feature is currently in beta and may change in future versions.
+
+Track changes to your issues since your last checkpoint.
+
+### How It Works
+
+1. When you first load a query, a checkpoint is automatically created
+2. On subsequent loads, changes since the checkpoint are detected
+3. Visual indicators highlight new issues and status changes
+4. Save a new checkpoint to acknowledge changes
+
+### Change Types Detected
+
+| Type | Indicator | Description |
+|------|-----------|-------------|
+| **New Issues** | Green highlight | Issues added since checkpoint |
+| **Removed Issues** | Listed in summary | Issues no longer matching query |
+| **Status Changes** | Blue highlight | Issues with changed status |
+
+### Activity Period
+
+Filter recent activity by time window:
+
+| Period | Description |
+|--------|-------------|
+| **24 hours** | Show activity from last day |
+| **7 days** | Show activity from last week |
+| **Off** | Disable activity indicators |
+
+### Change Summary
+
+- View summary of all changes at a glance
+- Click issue keys to open in Jira
+- Pending changes indicator on query list
+
+---
+
+## ⏰ Auto-Refresh
+
+Keep your data up to date automatically.
+
+### Refresh Intervals
+
+| Interval | Description |
+|----------|-------------|
+| **Off** | Manual refresh only |
+| **5 minutes** | Frequent updates |
+| **30 minutes** | Balanced updates |
+| **1 hour** | Less frequent updates |
+
+### What Gets Refreshed
+
+- Current query issues
+- Issue counts for all queries in sidebar
+- Change tracking comparisons
+
+### Configuration
+
+Enable auto-refresh from Settings. The interval is persisted across sessions.
+
+---
+
 ## 🎛️ Display Options
 
 ### Sorting
@@ -185,11 +298,23 @@ Choose which fields to display on issue cards:
 | Priority | Priority icon |
 | Created | Creation date |
 | Updated | Last update date |
+| Due Date | Due date with overdue highlighting |
 | Comments | Comment count |
 | Components | Project components |
 | Labels | Issue labels |
 | Resolution | Resolution type |
 | Fix Versions | Target versions |
+
+### Date Format
+
+Choose how dates are displayed:
+
+| Format | Example |
+|--------|---------|
+| **Absolute** | Jan 8, 2026 |
+| **Relative** | 2 days ago |
+
+Toggle between formats in Settings. Applies to all date fields (Created, Updated, Due Date).
 
 ### Resizable Sidebar
 

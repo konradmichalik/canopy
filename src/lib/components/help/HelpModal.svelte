@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as Dialog from '$lib/components/ui/dialog';
   import { Button } from '$lib/components/ui/button';
+  import { Badge } from '$lib/components/ui/badge';
   import AtlaskitIcon, { type AtlaskitIconName } from '../common/AtlaskitIcon.svelte';
   import Logo from '../common/Logo.svelte';
   import SliderDots from './SliderDots.svelte';
@@ -19,6 +20,7 @@
     icon: AtlaskitIconName;
     content: string;
     hasLogo?: boolean;
+    badge?: string;
   }
 
   // Slide definitions
@@ -53,11 +55,33 @@
         'Use quick filters for assignee and status. Dynamic filters are automatically generated from your loaded issues. Text search finds issues instantly.'
     },
     {
+      id: 'grouping',
+      title: 'Flexible Grouping',
+      icon: 'folder',
+      content:
+        'Group issues by Sprint, Assignee, Status, Project, or Recency. Perfect for sprint planning or tracking recent activity across your team.'
+    },
+    {
       id: 'jql-queries',
       title: 'Saved JQL Queries',
       icon: 'search',
       content:
-        'Create and save custom JQL queries. Assign colors for better organization. Import and export queries between instances.'
+        'Create and save custom JQL queries. Assign colors, duplicate queries, and organize with separators. Issue counts are shown in the sidebar.'
+    },
+    {
+      id: 'change-tracking',
+      title: 'Change Tracking',
+      icon: 'clock',
+      content:
+        'Track changes since your last checkpoint. See new issues, removed issues, and status changes at a glance. Visual indicators highlight recent activity.',
+      badge: 'Beta'
+    },
+    {
+      id: 'auto-refresh',
+      title: 'Auto-Refresh',
+      icon: 'refresh',
+      content:
+        'Keep your data up to date with automatic refresh intervals. Choose between 5 minutes, 30 minutes, or 1 hour. Issue counts update automatically.'
     },
     {
       id: 'keyboard',
@@ -138,6 +162,9 @@
         <div class="flex items-center justify-center gap-2 mb-3">
           <AtlaskitIcon name={currentSlideData.icon} size={24} class="text-primary" />
           <h2 class="text-xl font-semibold">{currentSlideData.title}</h2>
+          {#if currentSlideData.badge}
+            <Badge variant="secondary">{currentSlideData.badge}</Badge>
+          {/if}
         </div>
         <p class="text-muted-foreground leading-relaxed max-w-md mx-auto">
           {currentSlideData.content}
