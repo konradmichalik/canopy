@@ -69,7 +69,7 @@
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
   // Local search text that tracks store but can be edited independently
   // Uses a reference to track and sync with store changes
-  let inputElement: HTMLInputElement | undefined = $state();
+  let inputElement: HTMLInputElement | null = $state(null);
   let lastStoreValue = '';
 
   // Sync input with store when store changes externally (e.g., reset)
