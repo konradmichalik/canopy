@@ -1,6 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
+  import ConfirmDeleteModal from '../common/ConfirmDeleteModal.svelte';
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import type { SavedQuery } from '../../types';
@@ -16,11 +17,15 @@
 
   let { query, onOpen, onEdit, onDelete }: Props = $props();
 
+  let showDeleteModal = $state(false);
+
   function handleDelete(e: Event): void {
     e.stopPropagation();
-    if (confirm(`Delete query "${query.title}"?`)) {
-      onDelete(query);
-    }
+    showDeleteModal = true;
+  }
+
+  function confirmDelete(): void {
+    onDelete(query);
   }
 
   function handleExport(e: Event): void {
@@ -96,3 +101,5 @@
     </Button>
   </Card.Footer>
 </Card.Root>
+
+<ConfirmDeleteModal bind:open={showDeleteModal} itemName={query.title} onConfirm={confirmDelete} />

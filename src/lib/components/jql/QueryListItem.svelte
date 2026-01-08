@@ -1,6 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
+  import ConfirmDeleteModal from '../common/ConfirmDeleteModal.svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import type { SavedQuery } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
@@ -38,6 +39,8 @@
     onDragEnd
   }: Props = $props();
 
+  let showDeleteModal = $state(false);
+
   function handleDragStart(e: DragEvent): void {
     e.dataTransfer?.setData('text/plain', index.toString());
     onDragStart(index);
@@ -55,9 +58,11 @@
 
   function handleDelete(e: Event): void {
     e.stopPropagation();
-    if (confirm(`Delete query "${query.title}"?`)) {
-      onDelete(query);
-    }
+    showDeleteModal = true;
+  }
+
+  function confirmDelete(): void {
+    onDelete(query);
   }
 
   function handleEdit(e: Event): void {
@@ -180,3 +185,5 @@
     </DropdownMenu.Root>
   </div>
 </div>
+
+<ConfirmDeleteModal bind:open={showDeleteModal} itemName={query.title} onConfirm={confirmDelete} />
