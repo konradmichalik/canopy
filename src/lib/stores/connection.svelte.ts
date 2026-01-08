@@ -39,6 +39,11 @@ export async function initializeConnection(): Promise<boolean> {
     return false;
   }
 
+  // Sanitize baseUrl (fix for whitespace from copy-paste)
+  if (stored.baseUrl) {
+    stored.baseUrl = stored.baseUrl.trim().replace(/\/$/, '');
+  }
+
   logger.connection('Restoring connection from storage');
   return connect(stored);
 }

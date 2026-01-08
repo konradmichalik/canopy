@@ -60,7 +60,7 @@
   }
 
   function buildConfig() {
-    const baseUrl = formData.baseUrl.replace(/\/$/, ''); // Remove trailing slash
+    const baseUrl = formData.baseUrl.trim().replace(/\/$/, ''); // Trim whitespace and remove trailing slash
 
     if (formData.instanceType === 'cloud') {
       return {

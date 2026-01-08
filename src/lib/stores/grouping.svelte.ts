@@ -55,11 +55,21 @@ export interface ProjectGroupMetadata {
   avatarUrl?: string;
 }
 
+export type RecencyBucket = 'last-3-days' | 'last-7-days' | 'last-month' | 'older';
+
+export interface RecencyGroupMetadata {
+  type: 'recency';
+  bucket: RecencyBucket;
+  icon: 'clock' | 'calendar' | 'folder';
+  colorClass: string;
+}
+
 export type GroupMetadata =
   | SprintGroupMetadata
   | AssigneeGroupMetadata
   | StatusGroupMetadata
-  | ProjectGroupMetadata;
+  | ProjectGroupMetadata
+  | RecencyGroupMetadata;
 
 // ============================================
 // Callbacks for grouping changes
@@ -148,6 +158,8 @@ export function groupIssues(
       return groupByStatus(issues, sortConfig);
     case 'project':
       return groupByProject(issues, sortConfig);
+    case 'recency':
+      return groupByRecency(issues, sortConfig);
     default:
       return [];
   }
@@ -410,6 +422,61 @@ function groupByProject(issues: JiraIssue[], sortConfig?: SortConfig): IssueGrou
   return groups;
 }
 
+// Recency bucket configuration - order in array determines display order
+const RECENCY_BUCKETS: {
+  id: RecencyBucket;
+  label: string;
+  subtitle: string;
+  daysAgo: number;
+  icon: RecencyGroupMetadata['icon'];
+  colorClass: string;
+}[] = [
+  { id: 'last-3-days', label: 'Last 3 Days', subtitle: 'Recently updated', daysAgo: 3, icon: 'clock', colorClass: 'text-success' },
+  { id: 'last-7-days', label: 'Last 7 Days', subtitle: 'This week', daysAgo: 7, icon: 'calendar', colorClass: 'text-information' },
+  { id: 'last-month', label: 'Last Month', subtitle: 'Last 30 days', daysAgo: 30, icon: 'calendar', colorClass: 'text-warning' },
+  { id: 'older', label: 'Older', subtitle: 'More than 30 days ago', daysAgo: Infinity, icon: 'folder', colorClass: 'text-text-subtle' }
+];
+
+/**
+ * Group issues by recency (when they were last updated)
+ */
+function groupByRecency(issues: JiraIssue[], sortConfig?: SortConfig): IssueGroup[] {
+  const now = Date.now();
+  const msPerDay = 24 * 60 * 60 * 1000;
+
+  // Initialize buckets
+  const bucketMap = new Map<RecencyBucket, JiraIssue[]>(
+    RECENCY_BUCKETS.map((b) => [b.id, []])
+  );
+
+  // Categorize issues
+  for (const issue of issues) {
+    const daysAgo = (now - new Date(issue.fields.updated).getTime()) / msPerDay;
+    const bucket = RECENCY_BUCKETS.find((b) => daysAgo <= b.daysAgo) ?? RECENCY_BUCKETS.at(-1)!;
+    bucketMap.get(bucket.id)!.push(issue);
+  }
+
+  // Build groups in order (RECENCY_BUCKETS array order = display order)
+  return RECENCY_BUCKETS
+    .filter((config) => bucketMap.get(config.id)!.length > 0)
+    .map((config) => {
+      const bucketIssues = bucketMap.get(config.id)!;
+      return {
+        id: `recency-${config.id}`,
+        label: config.label,
+        subtitle: config.subtitle,
+        issues: bucketIssues,
+        treeNodes: buildFlatList(bucketIssues, { sortConfig }),
+        metadata: {
+          type: 'recency',
+          bucket: config.id,
+          icon: config.icon,
+          colorClass: config.colorClass
+        } as RecencyGroupMetadata
+      };
+    });
+}
+
 // ============================================
 // Helpers
 // ============================================
@@ -430,5 +497,6 @@ export const GROUP_BY_OPTIONS: { id: GroupByOption; label: string; icon: string 
   { id: 'sprint', label: 'Sprint', icon: 'sprint' },
   { id: 'assignee', label: 'Assignee', icon: 'person' },
   { id: 'status', label: 'Status', icon: 'status' },
-  { id: 'project', label: 'Project', icon: 'folder' }
+  { id: 'project', label: 'Project', icon: 'folder' },
+  { id: 'recency', label: 'Recency', icon: 'clock' }
 ];
