@@ -13,6 +13,7 @@
   import { initializeDebugMode } from './lib/stores/debugMode.svelte';
   import { initializeQueries } from './lib/stores/jql.svelte';
   import { initializeHelpModal } from './lib/stores/helpModal.svelte';
+  import { initializeAutoRefresh, cleanupAutoRefresh } from './lib/stores/autoRefresh.svelte';
   import { onMount } from 'svelte';
 
   let isInitializing = $state(true);
@@ -32,6 +33,7 @@
         initializeDebugMode();
         initializeQueries();
         initializeHelpModal();
+        initializeAutoRefresh();
 
         // Try to restore connection from storage
         await initializeConnection();
@@ -48,6 +50,7 @@
     return () => {
       cleanupTheme();
       cleanupRouter();
+      cleanupAutoRefresh();
     };
   });
 </script>

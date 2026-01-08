@@ -23,7 +23,8 @@ export const STORAGE_KEYS = {
   DEBUG_MODE: 'debug-mode',
   GROUP_BY: 'group-by',
   HELP_MODAL_SEEN: 'help-modal-seen',
-  DATE_FORMAT: 'date-format'
+  DATE_FORMAT: 'date-format',
+  AUTO_REFRESH_INTERVAL: 'auto-refresh-interval'
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

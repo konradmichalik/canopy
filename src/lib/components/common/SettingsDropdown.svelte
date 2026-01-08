@@ -19,6 +19,12 @@
   } from '../../stores/displayDensity.svelte';
   import { dateFormatState, setDateFormat, type DateFormat } from '../../stores/dateFormat.svelte';
   import { debugModeState, setDebugMode } from '../../stores/debugMode.svelte';
+  import {
+    autoRefreshState,
+    setAutoRefreshInterval,
+    AUTO_REFRESH_OPTIONS,
+    type AutoRefreshInterval
+  } from '../../stores/autoRefresh.svelte';
 
   interface Props {
     minimal?: boolean;
@@ -44,6 +50,10 @@
 
   function handleDateFormatChange(format: DateFormat): void {
     setDateFormat(format);
+  }
+
+  function handleAutoRefreshChange(interval: AutoRefreshInterval): void {
+    setAutoRefreshInterval(interval);
   }
 
   function handleExport(): void {
@@ -235,6 +245,22 @@
         >
           Relative
         </button>
+      </div>
+
+      <!-- Auto-Refresh Section -->
+      <DropdownMenu.Label>Auto-Refresh</DropdownMenu.Label>
+      <div class="flex gap-1 px-2 pb-2">
+        {#each AUTO_REFRESH_OPTIONS as option (option.value)}
+          <button
+            onclick={() => handleAutoRefreshChange(option.value)}
+            class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors
+              {autoRefreshState.interval === option.value
+              ? 'bg-accent text-primary font-medium'
+              : 'text-muted-foreground hover:bg-accent'}"
+          >
+            {option.label}
+          </button>
+        {/each}
       </div>
 
       <DropdownMenu.Separator />
