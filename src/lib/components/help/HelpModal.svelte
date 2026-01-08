@@ -1,8 +1,6 @@
 <script lang="ts">
   import * as Dialog from '$lib/components/ui/dialog';
   import { Button } from '$lib/components/ui/button';
-  import { Checkbox } from '$lib/components/ui/checkbox';
-  import { Label } from '$lib/components/ui/label';
   import AtlaskitIcon, { type AtlaskitIconName } from '../common/AtlaskitIcon.svelte';
   import Logo from '../common/Logo.svelte';
   import SliderDots from './SliderDots.svelte';
@@ -77,10 +75,8 @@
     }
   ];
 
-  let dontShowAgain = $state(false);
-
   function handleClose(markAsSeen = false) {
-    if (markAsSeen || dontShowAgain) {
+    if (markAsSeen) {
       markIntroAsSeen();
     }
     closeHelpModal();
@@ -151,14 +147,6 @@
 
     <!-- Footer -->
     <div class="px-6 py-4 border-t bg-muted/30">
-      <!-- Don't show again checkbox -->
-      <div class="flex items-center justify-center gap-2 mb-4">
-        <Checkbox id="dont-show-again" bind:checked={dontShowAgain} />
-        <Label for="dont-show-again" class="text-sm text-muted-foreground cursor-pointer">
-          Don't show again
-        </Label>
-      </div>
-
       <!-- Dots -->
       <div class="mb-4">
         <SliderDots
