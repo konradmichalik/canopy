@@ -15,6 +15,7 @@
     onSelect: (query: SavedQuery) => void;
     onEdit: (query: SavedQuery) => void;
     onDelete: (query: SavedQuery) => void;
+    onDuplicate: (query: SavedQuery) => void;
     onDragStart: (index: number) => void;
     onDragOver: (e: DragEvent, index: number) => void;
     onDrop: (index: number) => void;
@@ -30,6 +31,7 @@
     onSelect,
     onEdit,
     onDelete,
+    onDuplicate,
     onDragStart,
     onDragOver,
     onDrop,
@@ -66,6 +68,11 @@
   function handleExport(e: Event): void {
     e.stopPropagation();
     downloadSingleQuery(query);
+  }
+
+  function handleDuplicate(e: Event): void {
+    e.stopPropagation();
+    onDuplicate(query);
   }
 
   function handleClick(): void {
@@ -159,6 +166,10 @@
         <DropdownMenu.Item onclick={handleExport}>
           <AtlaskitIcon name="download" size={14} class="mr-2" />
           Export
+        </DropdownMenu.Item>
+        <DropdownMenu.Item onclick={handleDuplicate}>
+          <AtlaskitIcon name="copy" size={14} class="mr-2" />
+          Duplicate
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
         <DropdownMenu.Item onclick={handleDelete} class="text-destructive focus:text-destructive">

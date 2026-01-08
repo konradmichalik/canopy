@@ -20,7 +20,7 @@
     makeFilterId,
     makeAssigneeFilterId
   } from '../../stores/filters.svelte';
-  import { formatDate, formatDateTime } from '../../utils/formatDate';
+  import { formatDate, formatDateTime, getDueDateStatus } from '../../utils/formatDate';
 
   interface Props {
     node: TreeNode;
@@ -74,25 +74,6 @@
   // Check if aggregated progress should be displayed
   const hasAggregatedTimeData = $derived(hasTimeTrackingData(node));
   const hasChildIssues = $derived(hasDescendants(node));
-
-  // Helper to get due date status (color and tooltip)
-  function getDueDateStatus(dateStr: string): { colorClass: string; iconColor: string; label: string } {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dueDate = new Date(dateStr);
-    dueDate.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      return { colorClass: 'text-destructive', iconColor: 'var(--color-destructive)', label: 'Overdue' };
-    }
-    if (diffDays <= 2) {
-      const label = diffDays === 0 ? 'Due today' : `Due in ${diffDays} day${diffDays > 1 ? 's' : ''}`;
-      return { colorClass: 'text-warning', iconColor: 'var(--color-warning)', label };
-    }
-    const label = diffDays <= 7 ? `Due in ${diffDays} days` : 'Due';
-    return { colorClass: 'text-text-subtle', iconColor: 'var(--color-text-subtle)', label };
-  }
 
   // Handle filter click on issue fields
   function handleFilterClick(event: MouseEvent, filterId: string): void {

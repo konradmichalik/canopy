@@ -432,10 +432,38 @@ const RECENCY_BUCKETS: {
   icon: RecencyGroupMetadata['icon'];
   colorClass: string;
 }[] = [
-  { id: 'last-3-days', label: 'Last 3 Days', subtitle: 'Recently updated', daysAgo: 3, icon: 'clock', colorClass: 'text-success' },
-  { id: 'last-7-days', label: 'Last 7 Days', subtitle: 'This week', daysAgo: 7, icon: 'calendar', colorClass: 'text-information' },
-  { id: 'last-month', label: 'Last Month', subtitle: 'Last 30 days', daysAgo: 30, icon: 'calendar', colorClass: 'text-warning' },
-  { id: 'older', label: 'Older', subtitle: 'More than 30 days ago', daysAgo: Infinity, icon: 'folder', colorClass: 'text-text-subtle' }
+  {
+    id: 'last-3-days',
+    label: 'Last 3 Days',
+    subtitle: 'Recently updated',
+    daysAgo: 3,
+    icon: 'clock',
+    colorClass: 'text-success'
+  },
+  {
+    id: 'last-7-days',
+    label: 'Last 7 Days',
+    subtitle: 'This week',
+    daysAgo: 7,
+    icon: 'calendar',
+    colorClass: 'text-information'
+  },
+  {
+    id: 'last-month',
+    label: 'Last Month',
+    subtitle: 'Last 30 days',
+    daysAgo: 30,
+    icon: 'calendar',
+    colorClass: 'text-warning'
+  },
+  {
+    id: 'older',
+    label: 'Older',
+    subtitle: 'More than 30 days ago',
+    daysAgo: Infinity,
+    icon: 'folder',
+    colorClass: 'text-text-subtle'
+  }
 ];
 
 /**
@@ -446,9 +474,7 @@ function groupByRecency(issues: JiraIssue[], sortConfig?: SortConfig): IssueGrou
   const msPerDay = 24 * 60 * 60 * 1000;
 
   // Initialize buckets
-  const bucketMap = new Map<RecencyBucket, JiraIssue[]>(
-    RECENCY_BUCKETS.map((b) => [b.id, []])
-  );
+  const bucketMap = new Map<RecencyBucket, JiraIssue[]>(RECENCY_BUCKETS.map((b) => [b.id, []]));
 
   // Categorize issues
   for (const issue of issues) {
@@ -458,24 +484,22 @@ function groupByRecency(issues: JiraIssue[], sortConfig?: SortConfig): IssueGrou
   }
 
   // Build groups in order (RECENCY_BUCKETS array order = display order)
-  return RECENCY_BUCKETS
-    .filter((config) => bucketMap.get(config.id)!.length > 0)
-    .map((config) => {
-      const bucketIssues = bucketMap.get(config.id)!;
-      return {
-        id: `recency-${config.id}`,
-        label: config.label,
-        subtitle: config.subtitle,
-        issues: bucketIssues,
-        treeNodes: buildFlatList(bucketIssues, { sortConfig }),
-        metadata: {
-          type: 'recency',
-          bucket: config.id,
-          icon: config.icon,
-          colorClass: config.colorClass
-        } as RecencyGroupMetadata
-      };
-    });
+  return RECENCY_BUCKETS.filter((config) => bucketMap.get(config.id)!.length > 0).map((config) => {
+    const bucketIssues = bucketMap.get(config.id)!;
+    return {
+      id: `recency-${config.id}`,
+      label: config.label,
+      subtitle: config.subtitle,
+      issues: bucketIssues,
+      treeNodes: buildFlatList(bucketIssues, { sortConfig }),
+      metadata: {
+        type: 'recency',
+        bucket: config.id,
+        icon: config.icon,
+        colorClass: config.colorClass
+      } as RecencyGroupMetadata
+    };
+  });
 }
 
 // ============================================

@@ -17,11 +17,7 @@
     setDisplayDensity,
     type DisplayDensity
   } from '../../stores/displayDensity.svelte';
-  import {
-    dateFormatState,
-    setDateFormat,
-    type DateFormat
-  } from '../../stores/dateFormat.svelte';
+  import { dateFormatState, setDateFormat, type DateFormat } from '../../stores/dateFormat.svelte';
   import { debugModeState, setDebugMode } from '../../stores/debugMode.svelte';
 
   interface Props {

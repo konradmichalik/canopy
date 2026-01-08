@@ -184,6 +184,39 @@ export function updateQueryIssueCount(id: string, cachedIssueCount: number): boo
 }
 
 /**
+ * Duplicate a query
+ */
+export function duplicateQuery(id: string): SavedQuery | null {
+  const original = getQueryById(id);
+  if (!original) {
+    logger.warn(`Query ${id} not found for duplication`);
+    return null;
+  }
+
+  // Generate unique title
+  let copyTitle = `${original.title} (Copy)`;
+  let copyNumber = 1;
+  while (!isTitleUnique(copyTitle)) {
+    copyNumber++;
+    copyTitle = `${original.title} (Copy ${copyNumber})`;
+  }
+
+  const now = new Date().toISOString();
+  const duplicatedQuery: SavedQuery = {
+    ...original,
+    id: generateQueryId(),
+    title: copyTitle,
+    isDefault: false,
+    createdAt: now,
+    updatedAt: now,
+    cachedIssueCount: undefined
+  };
+
+  addImportedQuery(duplicatedQuery);
+  return duplicatedQuery;
+}
+
+/**
  * Delete a query
  */
 export function deleteQuery(id: string): boolean {

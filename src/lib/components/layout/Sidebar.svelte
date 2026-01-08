@@ -12,6 +12,7 @@
     addImportedQuery,
     updateQuery,
     deleteQuery,
+    duplicateQuery,
     reorderQueries,
     updateQueryDisplayFields,
     updateQueryActiveFilters,
@@ -177,6 +178,13 @@
     }
   }
 
+  function handleDuplicateQuery(query: SavedQuery): void {
+    const duplicated = duplicateQuery(query.id);
+    if (duplicated) {
+      handleEditQuery(duplicated);
+    }
+  }
+
   async function handleSelectQuery(query: SavedQuery): Promise<void> {
     await loadQuery(query);
   }
@@ -294,6 +302,7 @@
             onSelect={handleSelectQuery}
             onEdit={handleEditQuery}
             onDelete={handleDeleteQuery}
+            onDuplicate={handleDuplicateQuery}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
