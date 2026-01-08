@@ -2,8 +2,11 @@
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import { Button } from '$lib/components/ui/button';
-  import type { SavedQuery, QueryColor } from '../../types';
+  import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+  import type { SavedQuery, QueryColor, QuerySeparator } from '../../types';
+  import { isSeparator } from '../../types/tree';
   import QueryListItem from '../jql/QueryListItem.svelte';
+  import SeparatorListItem from '../jql/SeparatorListItem.svelte';
   import QueryForm from '../jql/QueryForm.svelte';
   import {
     jqlState,
@@ -13,7 +16,10 @@
     updateQuery,
     deleteQuery,
     duplicateQuery,
-    reorderQueries,
+    reorderItems,
+    addSeparator,
+    updateSeparator,
+    deleteSeparator,
     updateQueryDisplayFields,
     updateQueryActiveFilters,
     updateQuerySearchText,
@@ -206,7 +212,7 @@
 
   function handleDrop(index: number): void {
     if (draggedIndex !== null && draggedIndex !== index) {
-      reorderQueries(draggedIndex, index);
+      reorderItems(draggedIndex, index);
     }
     draggedIndex = null;
     dragOverIndex = null;
@@ -246,6 +252,19 @@
       importMessage = null;
     }, 4000);
   }
+
+  // Separator handlers
+  function handleNewSeparator(): void {
+    addSeparator();
+  }
+
+  function handleEditSeparator(separator: QuerySeparator): void {
+    updateSeparator(separator.id, separator.title);
+  }
+
+  function handleDeleteSeparator(separator: QuerySeparator): void {
+    deleteSeparator(separator.id);
+  }
 </script>
 
 <aside class="h-full bg-background border-r flex flex-col" style="width: {width}px;">
@@ -258,10 +277,25 @@
           <AtlaskitIcon name="upload" size={16} />
         </Button>
       </Tooltip>
-      <Button size="sm" onclick={handleNewQuery} class="h-8">
-        <AtlaskitIcon name="add" size={14} />
-        New
-      </Button>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger
+          class="inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3"
+        >
+          <AtlaskitIcon name="add" size={14} />
+          New
+          <AtlaskitIcon name="chevron-down" size={12} />
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content align="end" class="w-36">
+          <DropdownMenu.Item onclick={handleNewQuery}>
+            <AtlaskitIcon name="search" size={14} class="mr-2" />
+            Query
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onclick={handleNewSeparator}>
+            <AtlaskitIcon name="priority-medium" size={14} class="mr-2" />
+            Separator
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
     </div>
   </div>
 
@@ -276,7 +310,7 @@
 
   <!-- Query List -->
   <div class="flex-1 overflow-y-auto p-2">
-    {#if jqlState.queries.length === 0}
+    {#if jqlState.items.length === 0}
       <div class="text-center py-12 px-4">
         <div
           class="w-14 h-14 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center"
@@ -292,22 +326,37 @@
       </div>
     {:else}
       <div class="space-y-1">
-        {#each jqlState.queries as query, index (query.id)}
-          <QueryListItem
-            {query}
-            {index}
-            isActive={routerState.activeQueryId === query.id}
-            isDragging={draggedIndex === index}
-            isDragOver={dragOverIndex === index && draggedIndex !== index}
-            onSelect={handleSelectQuery}
-            onEdit={handleEditQuery}
-            onDelete={handleDeleteQuery}
-            onDuplicate={handleDuplicateQuery}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            onDragEnd={handleDragEnd}
-          />
+        {#each jqlState.items as item, index (item.id)}
+          {#if isSeparator(item)}
+            <SeparatorListItem
+              separator={item}
+              {index}
+              isDragging={draggedIndex === index}
+              isDragOver={dragOverIndex === index && draggedIndex !== index}
+              onEdit={handleEditSeparator}
+              onDelete={handleDeleteSeparator}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onDragEnd={handleDragEnd}
+            />
+          {:else}
+            <QueryListItem
+              query={item}
+              {index}
+              isActive={routerState.activeQueryId === item.id}
+              isDragging={draggedIndex === index}
+              isDragOver={dragOverIndex === index && draggedIndex !== index}
+              onSelect={handleSelectQuery}
+              onEdit={handleEditQuery}
+              onDelete={handleDeleteQuery}
+              onDuplicate={handleDuplicateQuery}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onDragEnd={handleDragEnd}
+            />
+          {/if}
         {/each}
       </div>
     {/if}

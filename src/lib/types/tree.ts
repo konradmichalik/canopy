@@ -88,6 +88,8 @@ export const QUERY_COLORS: { id: QueryColor; label: string; bg: string; border: 
 export type GroupByOption = 'none' | 'sprint' | 'assignee' | 'status' | 'project' | 'recency';
 
 export interface SavedQuery {
+  /** Discriminator for union type (optional for backward compatibility) */
+  type?: 'query';
   id: string;
   title: string;
   jql: string;
@@ -107,6 +109,36 @@ export interface SavedQuery {
   optionsExpanded?: boolean;
   /** Cached issue count from last query execution */
   cachedIssueCount?: number;
+}
+
+// ============================================
+// Query Separators
+// ============================================
+
+export interface QuerySeparator {
+  type: 'separator';
+  id: string;
+  /** Optional title - empty means just a line divider */
+  title?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Union type for items in the query list */
+export type QueryListItem = SavedQuery | QuerySeparator;
+
+/** Type guard: check if item is a separator */
+export function isSeparator(item: QueryListItem): item is QuerySeparator {
+  return item.type === 'separator';
+}
+
+/** Type guard: check if item is a query */
+export function isQuery(item: QueryListItem): item is SavedQuery {
+  return item.type === 'query' || item.type === undefined;
+}
+
+export function generateSeparatorId(): string {
+  return `separator-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 // ============================================

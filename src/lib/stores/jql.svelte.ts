@@ -1,53 +1,75 @@
 /**
  * JQL Queries Store
- * Manages saved queries with Svelte 5 Runes
+ * Manages saved queries and separators with Svelte 5 Runes
  */
 
-import type { SavedQuery, QueryColor, SortConfig, GroupByOption } from '../types';
+import type {
+  SavedQuery,
+  QueryColor,
+  SortConfig,
+  GroupByOption,
+  QueryListItem,
+  QuerySeparator
+} from '../types';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
-import { generateQueryId } from '../types/tree';
+import { generateQueryId, generateSeparatorId, isQuery, isSeparator } from '../types/tree';
 import { logger } from '../utils/logger';
 import { generateSlug, slugsMatch } from '../utils/slug';
 
-// State container object
+// State container object - now stores both queries and separators
 export const jqlState = $state({
-  queries: [] as SavedQuery[]
+  items: [] as QueryListItem[]
 });
 
 /**
- * Initialize queries from storage
+ * Initialize items from storage (with migration for old format)
  */
 export function initializeQueries(): void {
-  const stored = getStorageItem<SavedQuery[]>(STORAGE_KEYS.QUERIES);
+  const stored = getStorageItem<QueryListItem[]>(STORAGE_KEYS.QUERIES);
 
   if (stored && Array.isArray(stored)) {
-    jqlState.queries = stored;
-    logger.store('jql', 'Loaded queries from storage', { count: jqlState.queries.length });
+    // Migrate old format: items without 'type' field get type: 'query'
+    jqlState.items = stored.map((item) => {
+      if (!item.type) {
+        return { ...item, type: 'query' as const };
+      }
+      return item;
+    });
+    logger.store('jql', 'Loaded items from storage', { count: jqlState.items.length });
   } else {
-    jqlState.queries = [];
-    logger.store('jql', 'No stored queries found');
+    jqlState.items = [];
+    logger.store('jql', 'No stored items found');
   }
 }
 
 /**
- * Get all queries
+ * Get all items (queries and separators)
+ */
+export function getAllItems(): QueryListItem[] {
+  return jqlState.items;
+}
+
+/**
+ * Get only queries (filter out separators)
  */
 export function getQueries(): SavedQuery[] {
-  return jqlState.queries;
+  return jqlState.items.filter(isQuery) as SavedQuery[];
 }
 
 /**
  * Get a query by ID
  */
 export function getQueryById(id: string): SavedQuery | undefined {
-  return jqlState.queries.find((q) => q.id === id);
+  const queries = getQueries();
+  return queries.find((q) => q.id === id);
 }
 
 /**
  * Get a query by slug (URL-friendly title)
  */
 export function getQueryBySlug(slug: string): SavedQuery | undefined {
-  return jqlState.queries.find((q) => generateSlug(q.title) === slug);
+  const queries = getQueries();
+  return queries.find((q) => generateSlug(q.title) === slug);
 }
 
 /**
@@ -64,7 +86,8 @@ export function getQuerySlug(query: SavedQuery): string {
  * @returns true if title is unique, false if it would create a slug collision
  */
 export function isTitleUnique(title: string, excludeId?: string): boolean {
-  return !jqlState.queries.some((q) => q.id !== excludeId && slugsMatch(q.title, title));
+  const queries = getQueries();
+  return !queries.some((q) => q.id !== excludeId && slugsMatch(q.title, title));
 }
 
 /**
@@ -73,6 +96,7 @@ export function isTitleUnique(title: string, excludeId?: string): boolean {
 export function addQuery(title: string, jql: string, color?: QueryColor): SavedQuery {
   const now = new Date().toISOString();
   const newQuery: SavedQuery = {
+    type: 'query',
     id: generateQueryId(),
     title: title.trim(),
     jql: jql.trim(),
@@ -81,8 +105,8 @@ export function addQuery(title: string, jql: string, color?: QueryColor): SavedQ
     updatedAt: now
   };
 
-  jqlState.queries = [...jqlState.queries, newQuery];
-  persistQueries();
+  jqlState.items = [...jqlState.items, newQuery];
+  persistItems();
   logger.store('jql', 'Added query', { id: newQuery.id, title: newQuery.title, color });
 
   return newQuery;
@@ -110,7 +134,7 @@ export function updateQuery(
     >
   >
 ): boolean {
-  const index = jqlState.queries.findIndex((q) => q.id === id);
+  const index = jqlState.items.findIndex((item) => isQuery(item) && item.id === id);
 
   if (index === -1) {
     logger.warn(`Query ${id} not found for update`);
@@ -118,17 +142,13 @@ export function updateQuery(
   }
 
   const updated: SavedQuery = {
-    ...jqlState.queries[index],
+    ...(jqlState.items[index] as SavedQuery),
     ...updates,
     updatedAt: new Date().toISOString()
   };
 
-  jqlState.queries = [
-    ...jqlState.queries.slice(0, index),
-    updated,
-    ...jqlState.queries.slice(index + 1)
-  ];
-  persistQueries();
+  jqlState.items = [...jqlState.items.slice(0, index), updated, ...jqlState.items.slice(index + 1)];
+  persistItems();
   logger.store('jql', 'Updated query', { id, updates });
 
   return true;
@@ -220,59 +240,63 @@ export function duplicateQuery(id: string): SavedQuery | null {
  * Delete a query
  */
 export function deleteQuery(id: string): boolean {
-  const index = jqlState.queries.findIndex((q) => q.id === id);
+  const index = jqlState.items.findIndex((item) => isQuery(item) && item.id === id);
 
   if (index === -1) {
     logger.warn(`Query ${id} not found for deletion`);
     return false;
   }
 
-  jqlState.queries = [...jqlState.queries.slice(0, index), ...jqlState.queries.slice(index + 1)];
-  persistQueries();
+  jqlState.items = [...jqlState.items.slice(0, index), ...jqlState.items.slice(index + 1)];
+  persistItems();
   logger.store('jql', 'Deleted query', { id });
 
   return true;
 }
 
 /**
- * Reorder queries
+ * Reorder items (queries and separators)
  */
-export function reorderQueries(fromIndex: number, toIndex: number): void {
-  if (fromIndex < 0 || fromIndex >= jqlState.queries.length) return;
-  if (toIndex < 0 || toIndex >= jqlState.queries.length) return;
+export function reorderItems(fromIndex: number, toIndex: number): void {
+  if (fromIndex < 0 || fromIndex >= jqlState.items.length) return;
+  if (toIndex < 0 || toIndex >= jqlState.items.length) return;
 
-  const newQueries = [...jqlState.queries];
-  const [removed] = newQueries.splice(fromIndex, 1);
-  newQueries.splice(toIndex, 0, removed);
+  const newItems = [...jqlState.items];
+  const [removed] = newItems.splice(fromIndex, 1);
+  newItems.splice(toIndex, 0, removed);
 
-  jqlState.queries = newQueries;
-  persistQueries();
+  jqlState.items = newItems;
+  persistItems();
 }
 
 /**
  * Set default query
  */
 export function setDefaultQuery(id: string): void {
-  jqlState.queries = jqlState.queries.map((q) => ({
-    ...q,
-    isDefault: q.id === id
-  }));
-  persistQueries();
+  jqlState.items = jqlState.items.map((item) => {
+    if (isQuery(item)) {
+      return { ...item, isDefault: item.id === id };
+    }
+    return item;
+  });
+  persistItems();
 }
 
 /**
  * Get default query
  */
 export function getDefaultQuery(): SavedQuery | undefined {
-  return jqlState.queries.find((q) => q.isDefault) || jqlState.queries[0];
+  const queries = getQueries();
+  return queries.find((q) => q.isDefault) || queries[0];
 }
 
 /**
  * Add an already-constructed query (e.g., from import)
  */
 export function addImportedQuery(query: SavedQuery): void {
-  jqlState.queries = [...jqlState.queries, query];
-  persistQueries();
+  const queryWithType: SavedQuery = { ...query, type: 'query' };
+  jqlState.items = [...jqlState.items, queryWithType];
+  persistItems();
   logger.store('jql', 'Added imported query', { id: query.id, title: query.title });
 }
 
@@ -286,30 +310,97 @@ export function importQueries(data: SavedQuery[]): number {
   data.forEach((q) => {
     const newQuery: SavedQuery = {
       ...q,
+      type: 'query',
       id: generateQueryId(),
       createdAt: q.createdAt || now,
       updatedAt: now
     };
-    jqlState.queries = [...jqlState.queries, newQuery];
+    jqlState.items = [...jqlState.items, newQuery];
     imported++;
   });
 
-  persistQueries();
+  persistItems();
   logger.store('jql', 'Imported queries', { count: imported });
 
   return imported;
 }
 
 /**
- * Export queries as JSON
+ * Export queries as JSON (only queries, not separators)
  */
 export function exportQueries(): string {
-  return JSON.stringify(jqlState.queries, null, 2);
+  return JSON.stringify(getQueries(), null, 2);
+}
+
+// ============================================
+// Separator Management
+// ============================================
+
+/**
+ * Add a new separator
+ */
+export function addSeparator(title?: string): QuerySeparator {
+  const now = new Date().toISOString();
+  const newSeparator: QuerySeparator = {
+    type: 'separator',
+    id: generateSeparatorId(),
+    title: title?.trim() || undefined,
+    createdAt: now,
+    updatedAt: now
+  };
+
+  jqlState.items = [...jqlState.items, newSeparator];
+  persistItems();
+  logger.store('jql', 'Added separator', { id: newSeparator.id, title: newSeparator.title });
+
+  return newSeparator;
 }
 
 /**
- * Persist queries to storage
+ * Update a separator
  */
-function persistQueries(): void {
-  setStorageItem(STORAGE_KEYS.QUERIES, jqlState.queries);
+export function updateSeparator(id: string, title?: string): boolean {
+  const index = jqlState.items.findIndex((item) => isSeparator(item) && item.id === id);
+
+  if (index === -1) {
+    logger.warn(`Separator ${id} not found for update`);
+    return false;
+  }
+
+  const updated: QuerySeparator = {
+    ...(jqlState.items[index] as QuerySeparator),
+    title: title?.trim() || undefined,
+    updatedAt: new Date().toISOString()
+  };
+
+  jqlState.items = [...jqlState.items.slice(0, index), updated, ...jqlState.items.slice(index + 1)];
+  persistItems();
+  logger.store('jql', 'Updated separator', { id, title });
+
+  return true;
+}
+
+/**
+ * Delete a separator
+ */
+export function deleteSeparator(id: string): boolean {
+  const index = jqlState.items.findIndex((item) => isSeparator(item) && item.id === id);
+
+  if (index === -1) {
+    logger.warn(`Separator ${id} not found for deletion`);
+    return false;
+  }
+
+  jqlState.items = [...jqlState.items.slice(0, index), ...jqlState.items.slice(index + 1)];
+  persistItems();
+  logger.store('jql', 'Deleted separator', { id });
+
+  return true;
+}
+
+/**
+ * Persist items to storage
+ */
+function persistItems(): void {
+  setStorageItem(STORAGE_KEYS.QUERIES, jqlState.items);
 }
