@@ -9,6 +9,7 @@
   import { initializeColorTheme } from './lib/stores/colorTheme.svelte';
   import { initializeFieldConfig } from './lib/stores/fieldConfig.svelte';
   import { initializeDisplayDensity } from './lib/stores/displayDensity.svelte';
+  import { initializeDateFormat } from './lib/stores/dateFormat.svelte';
   import { initializeDebugMode } from './lib/stores/debugMode.svelte';
   import { initializeQueries } from './lib/stores/jql.svelte';
   import { initializeHelpModal } from './lib/stores/helpModal.svelte';
@@ -27,6 +28,7 @@
         initializeRouter();
         initializeFieldConfig();
         initializeDisplayDensity();
+        initializeDateFormat();
         initializeDebugMode();
         initializeQueries();
         initializeHelpModal();

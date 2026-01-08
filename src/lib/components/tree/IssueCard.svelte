@@ -20,6 +20,7 @@
     makeFilterId,
     makeAssigneeFilterId
   } from '../../stores/filters.svelte';
+  import { formatDate, formatDateTime } from '../../utils/formatDate';
 
   interface Props {
     node: TreeNode;
@@ -73,28 +74,6 @@
   // Check if aggregated progress should be displayed
   const hasAggregatedTimeData = $derived(hasTimeTrackingData(node));
   const hasChildIssues = $derived(hasDescendants(node));
-
-  // Helper to format date
-  function formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  }
-
-  // Helper to format date with time for tooltip
-  function formatDateTime(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
 
   // Helper to get due date status (color and tooltip)
   function getDueDateStatus(dateStr: string): { colorClass: string; iconColor: string; label: string } {

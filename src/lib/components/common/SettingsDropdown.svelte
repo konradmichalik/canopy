@@ -17,6 +17,11 @@
     setDisplayDensity,
     type DisplayDensity
   } from '../../stores/displayDensity.svelte';
+  import {
+    dateFormatState,
+    setDateFormat,
+    type DateFormat
+  } from '../../stores/dateFormat.svelte';
   import { debugModeState, setDebugMode } from '../../stores/debugMode.svelte';
 
   interface Props {
@@ -39,6 +44,10 @@
 
   function handleDensityChange(density: DisplayDensity): void {
     setDisplayDensity(density);
+  }
+
+  function handleDateFormatChange(format: DateFormat): void {
+    setDateFormat(format);
   }
 
   function handleExport(): void {
@@ -206,6 +215,29 @@
             : 'text-muted-foreground hover:bg-accent'}"
         >
           Compact
+        </button>
+      </div>
+
+      <!-- Date Format Section -->
+      <DropdownMenu.Label>Date Format</DropdownMenu.Label>
+      <div class="flex gap-1 px-2 pb-2">
+        <button
+          onclick={() => handleDateFormatChange('absolute')}
+          class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors
+            {dateFormatState.format === 'absolute'
+            ? 'bg-accent text-primary font-medium'
+            : 'text-muted-foreground hover:bg-accent'}"
+        >
+          Absolute
+        </button>
+        <button
+          onclick={() => handleDateFormatChange('relative')}
+          class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors
+            {dateFormatState.format === 'relative'
+            ? 'bg-accent text-primary font-medium'
+            : 'text-muted-foreground hover:bg-accent'}"
+        >
+          Relative
         </button>
       </div>
 

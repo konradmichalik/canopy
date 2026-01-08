@@ -8,6 +8,7 @@ import type { TreeNode, SortConfig, GroupByOption } from '../types/tree';
 import { extractSprints, SPRINT_STATE_ORDER } from '../types/jira';
 import { buildFlatList } from '../utils/hierarchy-builder';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { formatShortDate } from '../utils/formatDate';
 import { logger } from '../utils/logger';
 
 // Re-export GroupByOption for convenience
@@ -475,17 +476,6 @@ function groupByRecency(issues: JiraIssue[], sortConfig?: SortConfig): IssueGrou
         } as RecencyGroupMetadata
       };
     });
-}
-
-// ============================================
-// Helpers
-// ============================================
-
-function formatShortDate(date: Date): string {
-  return date.toLocaleDateString('de-DE', {
-    day: 'numeric',
-    month: 'short'
-  });
 }
 
 // ============================================

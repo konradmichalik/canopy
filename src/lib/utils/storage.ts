@@ -22,7 +22,8 @@ export const STORAGE_KEYS = {
   DISPLAY_DENSITY: 'display-density',
   DEBUG_MODE: 'debug-mode',
   GROUP_BY: 'group-by',
-  HELP_MODAL_SEEN: 'help-modal-seen'
+  HELP_MODAL_SEEN: 'help-modal-seen',
+  DATE_FORMAT: 'date-format'
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
