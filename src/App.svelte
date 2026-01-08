@@ -14,6 +14,10 @@
   import { initializeQueries } from './lib/stores/jql.svelte';
   import { initializeHelpModal } from './lib/stores/helpModal.svelte';
   import { initializeAutoRefresh, cleanupAutoRefresh } from './lib/stores/autoRefresh.svelte';
+  import {
+    initializeKeyboardNavigation,
+    cleanupKeyboardNavigation
+  } from './lib/stores/keyboardNavigation.svelte';
   import { onMount } from 'svelte';
 
   let isInitializing = $state(true);
@@ -34,6 +38,7 @@
         initializeQueries();
         initializeHelpModal();
         initializeAutoRefresh();
+        initializeKeyboardNavigation();
 
         // Try to restore connection from storage
         await initializeConnection();
@@ -51,6 +56,7 @@
       cleanupTheme();
       cleanupRouter();
       cleanupAutoRefresh();
+      cleanupKeyboardNavigation();
     };
   });
 </script>

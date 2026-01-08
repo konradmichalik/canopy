@@ -1,12 +1,14 @@
 /**
  * Keyboard Navigation Store
  * Manages focus state for tree keyboard navigation
+ * Provides global keyboard shortcuts when TreeView is active
  */
 
 import type { TreeNode } from '../types';
 import { flattenTree, findNode } from '../utils/hierarchy-builder';
 import { issuesState, toggleNode } from './issues.svelte';
 import { getIssueUrl } from './issues.svelte';
+import { routerState } from './router.svelte';
 
 // State container for keyboard navigation
 export const keyboardNavState = $state({
@@ -174,69 +176,73 @@ export function openFocusedIssue(): void {
 /**
  * Handle keyboard events for tree navigation
  */
-export function handleTreeKeydown(event: KeyboardEvent): boolean {
-  // Ignore if typing in an input
-  const target = event.target as HTMLElement;
-  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-    return false;
-  }
-
-  // Ignore if no issues loaded
-  if (issuesState.treeNodes.length === 0 || issuesState.isLoading) {
-    return false;
+function handleTreeKeydown(event: KeyboardEvent): void {
+  // Ignore if not on TreeView, typing in input, modal open, or no issues
+  if (
+    !routerState.activeQueryId ||
+    (event.target as HTMLElement).tagName === 'INPUT' ||
+    (event.target as HTMLElement).tagName === 'TEXTAREA' ||
+    (event.target as HTMLElement).isContentEditable ||
+    document.querySelector('[role="dialog"]') ||
+    issuesState.treeNodes.length === 0 ||
+    issuesState.isLoading
+  ) {
+    return;
   }
 
   switch (event.key) {
     case 'ArrowDown':
-    case 'j': // vim-style
+    case 'j':
       event.preventDefault();
       focusNext();
-      return true;
-
+      break;
     case 'ArrowUp':
-    case 'k': // vim-style
+    case 'k':
       event.preventDefault();
       focusPrevious();
-      return true;
-
+      break;
     case 'ArrowRight':
-    case 'l': // vim-style
+    case 'l':
       event.preventDefault();
       expandOrDescend();
-      return true;
-
+      break;
     case 'ArrowLeft':
-    case 'h': // vim-style
+    case 'h':
       event.preventDefault();
       collapseOrAscend();
-      return true;
-
+      break;
     case 'Home':
       event.preventDefault();
       focusFirst();
-      return true;
-
+      break;
     case 'End':
       event.preventDefault();
       focusLast();
-      return true;
-
+      break;
     case 'Enter':
       event.preventDefault();
       openFocusedIssue();
-      return true;
-
-    case ' ': // Space
+      break;
+    case ' ':
       event.preventDefault();
       toggleFocusedNode();
-      return true;
-
+      break;
     case 'Escape':
       event.preventDefault();
       clearFocus();
-      return true;
-
-    default:
-      return false;
+      break;
   }
+}
+
+let isListenerActive = false;
+
+export function initializeKeyboardNavigation(): void {
+  if (isListenerActive) return;
+  window.addEventListener('keydown', handleTreeKeydown);
+  isListenerActive = true;
+}
+
+export function cleanupKeyboardNavigation(): void {
+  window.removeEventListener('keydown', handleTreeKeydown);
+  isListenerActive = false;
 }

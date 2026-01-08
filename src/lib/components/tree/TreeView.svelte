@@ -16,11 +16,7 @@
   import { getActiveFilterConditions } from '../../stores/filters.svelte';
   import { applyQuickFilters, setOrderBy, hasOrderByClause } from '../../utils/jql-helpers';
   import { debugModeState } from '../../stores/debugMode.svelte';
-  import {
-    keyboardNavState,
-    handleTreeKeydown,
-    clearFocus
-  } from '../../stores/keyboardNavigation.svelte';
+  import { keyboardNavState, clearFocus } from '../../stores/keyboardNavigation.svelte';
   import { groupingState, groupIssues, type IssueGroup } from '../../stores/grouping.svelte';
   import { sortConfigState } from '../../stores/sortConfig.svelte';
   import { connectionState } from '../../stores/connection.svelte';
@@ -145,25 +141,12 @@
     }
   }
 
-  // Handle keyboard navigation
-  function onKeyDown(event: KeyboardEvent): void {
-    handleTreeKeydown(event);
-  }
-
   // Clear focus when clicking outside tree nodes
   function onTreeClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     // Only clear if clicking the container itself, not a tree node
     if (target === treeContainerRef || target.classList.contains('tree-container')) {
       clearFocus();
-    }
-  }
-
-  // Focus the container when entering for keyboard nav
-  function onTreeFocus(): void {
-    // Auto-select first node if nothing selected
-    if (!keyboardNavState.focusedKey && issuesState.treeNodes.length > 0) {
-      // Don't auto-select, let user press arrow key first
     }
   }
 </script>
@@ -331,15 +314,14 @@
   </div>
 
   <!-- Tree Content -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div
     bind:this={treeContainerRef}
     class="flex-1 overflow-auto p-3 outline-none"
     tabindex="0"
     role="tree"
     aria-label="Issue hierarchy tree"
-    onkeydown={onKeyDown}
     onclick={onTreeClick}
-    onfocus={onTreeFocus}
   >
     {#if issuesState.isLoading}
       <div class="tree-container space-y-1">
