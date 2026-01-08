@@ -24,6 +24,7 @@ export interface JiraIssueFields {
   reporter?: JiraUser | null;
   created: string;
   updated: string;
+  duedate?: string | null;
   resolutiondate?: string | null;
   resolution?: JiraResolution | null;
 

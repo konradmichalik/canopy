@@ -22,6 +22,7 @@ export const DEFAULT_FIELDS = [
   'reporter',
   'created',
   'updated',
+  'duedate',
   'parent',
   'subtasks',
   'issuelinks',

@@ -19,6 +19,7 @@ export type DisplayFieldId =
   | 'priority'
   | 'created'
   | 'updated'
+  | 'dueDate'
   | 'comments'
   | 'components'
   | 'labels'
@@ -60,6 +61,7 @@ const ALL_FIELDS: Omit<DisplayField, 'isEnabled'>[] = [
   { id: 'priority', label: 'Priority', labelDe: 'Priorität' },
   { id: 'created', label: 'Created', labelDe: 'Erstelldatum' },
   { id: 'updated', label: 'Updated', labelDe: 'Bearbeitungsdatum' },
+  { id: 'dueDate', label: 'Due Date', labelDe: 'Fälligkeitsdatum' },
   { id: 'comments', label: 'Comments', labelDe: 'Kommentare' },
   { id: 'components', label: 'Components', labelDe: 'Komponenten' },
   { id: 'labels', label: 'Labels', labelDe: 'Stichwörter' },

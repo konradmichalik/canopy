@@ -113,7 +113,7 @@ export interface SavedQuery {
 // Sort Configuration
 // ============================================
 
-export type SortField = 'key' | 'priority' | 'created' | 'updated' | 'status';
+export type SortField = 'key' | 'priority' | 'created' | 'updated' | 'duedate' | 'status';
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortConfig {
@@ -131,6 +131,7 @@ export const SORT_FIELDS: SortFieldDefinition[] = [
   { id: 'priority', label: 'Priority' },
   { id: 'created', label: 'Created' },
   { id: 'updated', label: 'Updated' },
+  { id: 'duedate', label: 'Due Date' },
   { id: 'status', label: 'Status' }
 ];
 

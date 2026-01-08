@@ -57,6 +57,7 @@
   const showPriority = $derived(isFieldEnabled('priority'));
   const showCreated = $derived(isFieldEnabled('created'));
   const showUpdated = $derived(isFieldEnabled('updated'));
+  const showDueDate = $derived(isFieldEnabled('dueDate'));
   const showComments = $derived(isFieldEnabled('comments'));
   const showComponents = $derived(isFieldEnabled('components'));
   const showLabels = $derived(isFieldEnabled('labels'));
@@ -93,6 +94,25 @@
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  // Helper to get due date status (color and tooltip)
+  function getDueDateStatus(dateStr: string): { colorClass: string; iconColor: string; label: string } {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(dateStr);
+    dueDate.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return { colorClass: 'text-destructive', iconColor: 'var(--color-destructive)', label: 'Overdue' };
+    }
+    if (diffDays <= 2) {
+      const label = diffDays === 0 ? 'Due today' : `Due in ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+      return { colorClass: 'text-warning', iconColor: 'var(--color-warning)', label };
+    }
+    const label = diffDays <= 7 ? `Due in ${diffDays} days` : 'Due';
+    return { colorClass: 'text-text-subtle', iconColor: 'var(--color-text-subtle)', label };
   }
 
   // Handle filter click on issue fields
@@ -176,6 +196,17 @@
       <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0">
         <AtlaskitIcon name="clock" size={14} />
         <span>{formatDate(issue.fields.updated)}</span>
+      </div>
+    </Tooltip>
+  {/if}
+
+  <!-- Due Date -->
+  {#if showDueDate && issue.fields.duedate}
+    {@const dueDateStatus = getDueDateStatus(issue.fields.duedate)}
+    <Tooltip text={`${dueDateStatus.label}: ${formatDate(issue.fields.duedate)}`}>
+      <div class="flex items-center gap-1 text-xs {dueDateStatus.colorClass} flex-shrink-0">
+        <AtlaskitIcon name="calendar" size={14} color={dueDateStatus.iconColor} />
+        <span>{formatDate(issue.fields.duedate)}</span>
       </div>
     </Tooltip>
   {/if}
