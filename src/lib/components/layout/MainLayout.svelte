@@ -24,6 +24,10 @@
   );
 </script>
 
+<svelte:head>
+  <title>{queryTitle ? `${queryTitle} - Canopy` : 'Canopy'}</title>
+</svelte:head>
+
 <div class="h-screen flex bg-muted/40">
   <!-- Sidebar (hidden via CSS to preserve state) -->
   <div class:hidden={!routerState.sidebarOpen} class="contents">
