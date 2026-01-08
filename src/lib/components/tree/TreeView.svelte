@@ -199,7 +199,10 @@
         <div class="flex items-center gap-1.5">
           {#if issuesState.lastUpdated}
             {#key `${issuesState.lastUpdated.getTime()}-${timeTick}`}
-              <Tooltip content={formatDateTime(issuesState.lastUpdated.toISOString())} placement="bottom">
+              <Tooltip
+                content={formatDateTime(issuesState.lastUpdated.toISOString())}
+                placement="bottom"
+              >
                 <span class="text-xs text-muted-foreground whitespace-nowrap cursor-default">
                   {formatRelativeTime(issuesState.lastUpdated)}
                 </span>

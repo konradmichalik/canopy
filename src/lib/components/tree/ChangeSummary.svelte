@@ -28,14 +28,12 @@
 </script>
 
 {#if changes.hasChanges}
-  <div
-    class="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg mx-2 mb-2"
-  >
+  <div class="bg-primary/10 border border-primary/30 rounded-lg mx-2 mb-2">
     <!-- Summary Header -->
     <div class="flex items-center justify-between px-3 py-2">
       <div class="flex items-center gap-2 text-sm">
-        <AtlaskitIcon name="status" size={16} class="text-blue-600 dark:text-blue-400" />
-        <span class="text-blue-800 dark:text-blue-200">
+        <AtlaskitIcon name="status" size={16} class="text-primary" />
+        <span class="text-foreground">
           {#if changes.newIssues.length > 0}
             <span class="font-medium text-green-700 dark:text-green-400"
               >{changes.newIssues.length} new</span
@@ -48,16 +46,15 @@
             >
           {/if}
           {#if changes.statusChanges.length > 0}
-            {#if changes.newIssues.length > 0 || changes.removedIssues.length > 0}<span
-                class="mx-1">&middot;</span
+            {#if changes.newIssues.length > 0 || changes.removedIssues.length > 0}<span class="mx-1"
+                >&middot;</span
               >{/if}
-            <span class="font-medium text-blue-700 dark:text-blue-400"
+            <span class="font-medium text-primary"
               >{changes.statusChanges.length} status changed</span
             >
           {/if}
           {#if checkpointTime}
-            <span class="text-blue-600/70 dark:text-blue-400/70 ml-2">(since {checkpointTime})</span
-            >
+            <span class="text-muted-foreground ml-2">(since {checkpointTime})</span>
           {/if}
         </span>
       </div>
@@ -66,19 +63,19 @@
         <button
           type="button"
           onclick={() => (isExpanded = !isExpanded)}
-          class="p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+          class="p-1 hover:bg-primary/20 rounded transition-colors"
           title={isExpanded ? 'Collapse details' : 'Show details'}
         >
           <AtlaskitIcon
             name={isExpanded ? 'chevron-up' : 'chevron-down'}
             size={16}
-            class="text-blue-600 dark:text-blue-400"
+            class="text-primary"
           />
         </button>
         <button
           type="button"
           onclick={onAcknowledge}
-          class="px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors flex items-center gap-1"
+          class="px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20 rounded transition-colors flex items-center gap-1"
           title="Acknowledge changes and save new checkpoint"
         >
           <AtlaskitIcon name="check" size={14} />
@@ -89,7 +86,7 @@
 
     <!-- Expanded Details -->
     {#if isExpanded}
-      <div class="border-t border-blue-200 dark:border-blue-800 px-3 py-2 text-xs space-y-2">
+      <div class="border-t border-primary/30 px-3 py-2 text-xs space-y-2">
         {#if changes.newIssues.length > 0}
           <div>
             <div class="font-medium text-green-700 dark:text-green-400 mb-1">New Issues:</div>
@@ -126,13 +123,13 @@
 
         {#if changes.statusChanges.length > 0}
           <div>
-            <div class="font-medium text-blue-700 dark:text-blue-400 mb-1">Status Changes:</div>
+            <div class="font-medium text-primary mb-1">Status Changes:</div>
             <div class="flex flex-wrap gap-1">
               {#each changes.statusChanges as change (change.key)}
                 <button
                   type="button"
                   onclick={(e) => openIssue(change.key, e)}
-                  class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 rounded text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800 hover:underline cursor-pointer transition-colors"
+                  class="px-1.5 py-0.5 bg-primary/20 rounded text-primary hover:bg-primary/30 hover:underline cursor-pointer transition-colors"
                 >
                   {change.key}: {change.previousStatus} → {change.currentStatus}
                 </button>

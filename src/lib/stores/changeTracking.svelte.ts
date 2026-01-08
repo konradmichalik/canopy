@@ -22,7 +22,8 @@ export const changeTrackingState = $state({
   isEnabled: false,
   activityPeriod: '24h' as ActivityPeriod,
   checkpoints: {} as CheckpointStore,
-  currentChanges: null as ChangeDetection | null
+  currentChanges: null as ChangeDetection | null,
+  queriesWithPendingChanges: {} as Record<string, boolean>
 });
 
 /**
@@ -53,6 +54,13 @@ export function initializeChangeTracking(): void {
   );
   if (storedCheckpoints) {
     changeTrackingState.checkpoints = storedCheckpoints;
+  }
+
+  const storedPendingChanges = getStorageItem<Record<string, boolean>>(
+    STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES
+  );
+  if (storedPendingChanges) {
+    changeTrackingState.queriesWithPendingChanges = storedPendingChanges;
   }
 
   logger.store('changeTracking', 'Initialized', {
@@ -119,6 +127,11 @@ export function saveCheckpoint(queryId: string, issues: JiraIssue[]): void {
 
   // Clear current changes after saving checkpoint (user acknowledged changes)
   changeTrackingState.currentChanges = null;
+
+  // Clear pending changes indicator for this query
+  const { [queryId]: _pending, ...restPending } = changeTrackingState.queriesWithPendingChanges;
+  changeTrackingState.queriesWithPendingChanges = restPending;
+  persistPendingChanges();
 
   persistCheckpoints();
   logger.store('changeTracking', 'Checkpoint saved', {
@@ -210,6 +223,15 @@ export function detectChanges(queryId: string, currentIssues: JiraIssue[]): Chan
 
   changeTrackingState.currentChanges = changes;
 
+  // Track pending changes for query list indicator
+  if (changes.hasChanges) {
+    changeTrackingState.queriesWithPendingChanges = {
+      ...changeTrackingState.queriesWithPendingChanges,
+      [queryId]: true
+    };
+    persistPendingChanges();
+  }
+
   return changes;
 }
 
@@ -253,9 +275,12 @@ export function getIssueChangeType(issueKey: string): ChangeType {
  * Clear checkpoint for a query
  */
 export function clearCheckpoint(queryId: string): void {
-  const { [queryId]: _, ...rest } = changeTrackingState.checkpoints;
-  changeTrackingState.checkpoints = rest;
+  const { [queryId]: _checkpoint, ...restCheckpoints } = changeTrackingState.checkpoints;
+  const { [queryId]: _pending, ...restPending } = changeTrackingState.queriesWithPendingChanges;
+  changeTrackingState.checkpoints = restCheckpoints;
+  changeTrackingState.queriesWithPendingChanges = restPending;
   persistCheckpoints();
+  persistPendingChanges();
   logger.store('changeTracking', 'Checkpoint cleared', { queryId });
 }
 
@@ -264,8 +289,10 @@ export function clearCheckpoint(queryId: string): void {
  */
 export function clearAllCheckpoints(): void {
   changeTrackingState.checkpoints = {};
+  changeTrackingState.queriesWithPendingChanges = {};
   changeTrackingState.currentChanges = null;
   persistCheckpoints();
+  persistPendingChanges();
   logger.store('changeTracking', 'All checkpoints cleared');
 }
 
@@ -274,6 +301,24 @@ export function clearAllCheckpoints(): void {
  */
 function persistCheckpoints(): void {
   setStorageItem(STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS, changeTrackingState.checkpoints);
+}
+
+/**
+ * Persist pending changes to storage
+ */
+function persistPendingChanges(): void {
+  setStorageItem(
+    STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES,
+    changeTrackingState.queriesWithPendingChanges
+  );
+}
+
+/**
+ * Check if a query has unacknowledged changes (for query list indicator)
+ */
+export function hasUnacknowledgedChanges(queryId: string): boolean {
+  if (!changeTrackingState.isEnabled) return false;
+  return changeTrackingState.queriesWithPendingChanges[queryId] === true;
 }
 
 /**

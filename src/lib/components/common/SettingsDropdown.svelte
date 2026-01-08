@@ -279,7 +279,9 @@
       <!-- Change Tracking Section (Beta) -->
       <DropdownMenu.Label class="flex items-center gap-2">
         Change Tracking
-        <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium">
+        <span
+          class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium"
+        >
           Beta
         </span>
       </DropdownMenu.Label>

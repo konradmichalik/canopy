@@ -6,6 +6,7 @@
   import type { SavedQuery } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { downloadSingleQuery } from '../../utils/storage';
+  import { hasUnacknowledgedChanges } from '../../stores/changeTracking.svelte';
 
   interface Props {
     query: SavedQuery;
@@ -95,6 +96,9 @@
     query.color ? QUERY_COLORS.find((c) => c.id === query.color)?.bg : null
   );
 
+  // Check for unacknowledged changes
+  const hasPendingChanges = $derived(hasUnacknowledgedChanges(query.id));
+
   // Dropdown state
   let dropdownOpen = $state(false);
 </script>
@@ -122,6 +126,12 @@
   ></div>
 
   <div class="flex items-center min-w-0 pl-3 gap-2">
+    <!-- Pending changes indicator -->
+    {#if hasPendingChanges}
+      <Tooltip text="Changes since last checkpoint">
+        <span class="inline-block w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+      </Tooltip>
+    {/if}
     <!-- Text -->
     <span class="truncate text-sm font-medium">{query.title}</span>
     {#if query.cachedIssueCount !== undefined}
