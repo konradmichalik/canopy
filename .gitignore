@@ -5,3 +5,5 @@ nbproject/
 node_modules/
 proxy/node_modules/
 .vercel
+src-tauri/target
+src-tauri/gen
