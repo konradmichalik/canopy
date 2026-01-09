@@ -204,7 +204,9 @@
                 content={formatDateTime(issuesState.lastUpdated.toISOString())}
                 placement="bottom"
               >
-                <span class="text-xs text-muted-foreground whitespace-nowrap cursor-default">
+                <span
+                  class="inline-flex items-center justify-center h-5 px-2 text-[10px] font-medium rounded-full bg-muted text-muted-foreground whitespace-nowrap cursor-default"
+                >
                   {formatRelativeTime(issuesState.lastUpdated)}
                 </span>
               </Tooltip>
