@@ -168,8 +168,8 @@ export const SORT_FIELDS: SortFieldDefinition[] = [
 ];
 
 export const DEFAULT_SORT_CONFIG: SortConfig = {
-  field: 'key',
-  direction: 'asc'
+  field: 'updated',
+  direction: 'desc'
 };
 
 // ============================================
