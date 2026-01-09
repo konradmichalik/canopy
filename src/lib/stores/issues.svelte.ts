@@ -140,9 +140,7 @@ export async function loadIssues(jql: string): Promise<boolean> {
       // Detect changes from checkpoint (only on initial load and when no filters are active)
       // Filter changes would cause false positives (e.g., filtered-out issues appear as "removed")
       const hasNoActiveFilters =
-        filterConditions.length === 0 &&
-        !filtersState.searchText &&
-        !filtersState.recencyFilter;
+        filterConditions.length === 0 && !filtersState.searchText && !filtersState.recencyFilter;
 
       if (issuesState.isInitialLoad && hasNoActiveFilters) {
         detectChanges(routerState.activeQueryId, fetchedIssues);

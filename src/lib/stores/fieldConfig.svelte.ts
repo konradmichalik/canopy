@@ -11,7 +11,6 @@ import { logger } from '../utils/logger';
 // ============================================
 
 export type DisplayFieldId =
-  | 'progress'
   | 'aggregatedTimeProgress'
   | 'aggregatedResolutionProgress'
   | 'status'
@@ -42,19 +41,18 @@ export interface FieldConfigState {
 // Default Configuration
 // ============================================
 
-export const DEFAULT_FIELD_IDS: DisplayFieldId[] = ['progress', 'status', 'assignee'];
+export const DEFAULT_FIELD_IDS: DisplayFieldId[] = ['aggregatedTimeProgress', 'status', 'assignee'];
 
 const ALL_FIELDS: Omit<DisplayField, 'isEnabled'>[] = [
-  { id: 'progress', label: 'Progress', labelDe: 'Fortschritt' },
   {
     id: 'aggregatedTimeProgress',
-    label: 'Time Progress (Sum)',
-    labelDe: 'Summe Fortschritt (Zeit)'
+    label: 'Time Progress',
+    labelDe: 'Zeitfortschritt'
   },
   {
     id: 'aggregatedResolutionProgress',
-    label: 'Resolution Progress (Sum)',
-    labelDe: 'Summe Fortschritt (Lösung)'
+    label: 'Completion',
+    labelDe: 'Abschluss'
   },
   { id: 'status', label: 'Status', labelDe: 'Status' },
   { id: 'assignee', label: 'Assignee', labelDe: 'Bearbeiter' },

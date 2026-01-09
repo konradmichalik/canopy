@@ -20,9 +20,7 @@ let platformFetch: typeof fetch | null = null;
 
 async function getPlatformFetch(): Promise<typeof fetch> {
   if (!platformFetch) {
-    platformFetch = isTauri()
-      ? (await import('@tauri-apps/plugin-http')).fetch
-      : fetch;
+    platformFetch = isTauri() ? (await import('@tauri-apps/plugin-http')).fetch : fetch;
   }
   return platformFetch;
 }

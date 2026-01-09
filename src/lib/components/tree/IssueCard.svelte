@@ -46,20 +46,7 @@
     }
   }
 
-  const hasProgress = $derived(
-    issue.fields.aggregateprogress && issue.fields.aggregateprogress.total > 0
-  );
-
-  const progressPercent = $derived(
-    hasProgress && issue.fields.aggregateprogress
-      ? Math.round(
-          (issue.fields.aggregateprogress.progress / issue.fields.aggregateprogress.total) * 100
-        )
-      : 0
-  );
-
   // Field visibility
-  const showProgress = $derived(isFieldEnabled('progress'));
   const showStatus = $derived(isFieldEnabled('status'));
   const showAssignee = $derived(isFieldEnabled('assignee'));
   const showPriority = $derived(isFieldEnabled('priority'));
@@ -250,7 +237,7 @@
     </Tooltip>
   {/if}
 
-  <!-- Aggregated Time Progress (Sum) -->
+  <!-- Time Progress -->
   {#if showAggregatedTimeProgress && hasAggregatedTimeData}
     {@const logged = aggregatedTimeProgress.logged}
     {@const total = aggregatedTimeProgress.total}
@@ -259,7 +246,7 @@
     {@const totalHours = formatHours(total)}
     {@const remainingHours = formatHours(remaining)}
     <Tooltip
-      text={`Time Progress (Sum): ${aggregatedTimeProgress.percent}%\nLogged: ${loggedHours} / ${totalHours}\nRemaining: ${remainingHours}`}
+      text={`Time Progress: ${aggregatedTimeProgress.percent}%\nLogged: ${loggedHours} / ${totalHours}\nRemaining: ${remainingHours}`}
     >
       <div class="flex items-center gap-2 flex-shrink-0">
         <AtlaskitIcon name="clock" size={12} color="var(--color-text-subtle)" />
@@ -276,12 +263,12 @@
     </Tooltip>
   {/if}
 
-  <!-- Aggregated Resolution Progress (Sum) -->
+  <!-- Completion -->
   {#if showAggregatedResolutionProgress && hasChildIssues}
     {@const done = aggregatedResolutionProgress.done}
     {@const total = aggregatedResolutionProgress.total}
     <Tooltip
-      text={`Resolution Progress (Sum): ${aggregatedResolutionProgress.percent}%\nDone: ${done} / ${total}`}
+      text={`Completion: ${aggregatedResolutionProgress.percent}%\nDone: ${done} / ${total}`}
     >
       <div class="flex items-center gap-2 flex-shrink-0">
         <AtlaskitIcon name="subtasks" size={12} color="var(--color-text-subtle)" />
@@ -293,29 +280,6 @@
         </div>
         <span class="text-xs text-text-subtle w-8 text-right">
           {done}/{total}
-        </span>
-      </div>
-    </Tooltip>
-  {/if}
-
-  <!-- Progress Bar (JIRA native aggregateprogress) -->
-  {#if showProgress && hasProgress && issue.fields.aggregateprogress}
-    {@const progress = issue.fields.aggregateprogress.progress}
-    {@const total = issue.fields.aggregateprogress.total}
-    {@const remaining = total - progress}
-    {@const progressHours = Math.round(progress / 3600)}
-    {@const totalHours = Math.round(total / 3600)}
-    {@const remainingHours = Math.round(remaining / 3600)}
-    <Tooltip
-      text={`Progress: ${progressPercent}%\nLogged: ${progressHours}h / ${totalHours}h\nRemaining: ${remainingHours}h`}
-    >
-      <div class="flex items-center gap-2 flex-shrink-0">
-        <AtlaskitIcon name="dashboard" size={12} color="var(--color-text-subtle)" />
-        <div class="w-14 h-1.5 bg-progress-track rounded-full overflow-hidden">
-          <div class="h-full bg-warning transition-all" style="width: {progressPercent}%"></div>
-        </div>
-        <span class="text-xs text-text-subtle w-8 text-right">
-          {progressPercent}%
         </span>
       </div>
     </Tooltip>
