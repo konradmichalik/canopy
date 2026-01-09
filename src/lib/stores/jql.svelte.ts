@@ -30,12 +30,35 @@ export function initializeQueries(): void {
 
   if (stored && Array.isArray(stored)) {
     // Migrate old format: items without 'type' field get type: 'query'
-    jqlState.items = stored.map((item) => {
+    const migrated = stored.map((item) => {
       if (!item.type) {
         return { ...item, type: 'query' as const };
       }
       return item;
     });
+
+    // Deduplicate by ID (keep first occurrence)
+    const seen = new Set<string>();
+    const deduplicated = migrated.filter((item) => {
+      if (seen.has(item.id)) {
+        logger.warn(`Duplicate item ID found and removed: ${item.id}`);
+        return false;
+      }
+      seen.add(item.id);
+      return true;
+    });
+
+    jqlState.items = deduplicated;
+
+    // Persist if we removed duplicates
+    if (deduplicated.length !== stored.length) {
+      persistItems();
+      logger.store('jql', 'Removed duplicate items', {
+        original: stored.length,
+        deduplicated: deduplicated.length
+      });
+    }
+
     logger.store('jql', 'Loaded items from storage', { count: jqlState.items.length });
   } else {
     jqlState.items = [];

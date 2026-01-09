@@ -3,6 +3,7 @@
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import { formatDateTime } from '../../utils/formatDate';
   import { getIssueUrl } from '../../stores/issues.svelte';
+  import { openExternalUrl } from '../../utils/external-link';
 
   interface Props {
     changes: ChangeDetection;
@@ -22,7 +23,7 @@
     e.stopPropagation();
     const url = getIssueUrl(issueKey);
     if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      openExternalUrl(url);
     }
   }
 </script>

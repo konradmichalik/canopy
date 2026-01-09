@@ -9,6 +9,7 @@ import { flattenTree, findNode } from '../utils/hierarchy-builder';
 import { issuesState, toggleNode } from './issues.svelte';
 import { getIssueUrl } from './issues.svelte';
 import { routerState } from './router.svelte';
+import { openExternalUrl } from '../utils/external-link';
 
 // State container for keyboard navigation
 export const keyboardNavState = $state({
@@ -185,7 +186,7 @@ export function openFocusedIssue(): void {
 
   const url = getIssueUrl(keyboardNavState.focusedKey);
   if (url) {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    openExternalUrl(url);
   }
 }
 

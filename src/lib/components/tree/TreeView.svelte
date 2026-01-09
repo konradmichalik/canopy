@@ -24,6 +24,7 @@
   import { changeTrackingState, saveCheckpoint } from '../../stores/changeTracking.svelte';
   import { formatRelativeTime, formatDateTime } from '../../utils/formatDate';
   import { autoRefreshState } from '../../stores/autoRefresh.svelte';
+  import { openExternalUrl } from '../../utils/external-link';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
@@ -143,7 +144,7 @@
 
   function openInJira(): void {
     if (jiraSearchUrl) {
-      window.open(jiraSearchUrl, '_blank', 'noopener,noreferrer');
+      openExternalUrl(jiraSearchUrl);
     }
   }
 

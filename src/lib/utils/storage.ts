@@ -1,6 +1,8 @@
 /**
  * LocalStorage Wrapper with Type Safety
  * All keys are prefixed with 'jira-hierarchy:' for namespacing
+ *
+ * Supports both Browser (localStorage) and Tauri (plugin-store) platforms.
  */
 
 import { logger } from './logger';
@@ -8,6 +10,33 @@ import type { ExportedConfig, ExportedSingleQuery, SavedQuery, QueryListItem } f
 import type { StoredConnection } from '../types/connection';
 
 const STORAGE_PREFIX = 'jira-hierarchy:';
+
+// ============================================
+// Platform Detection
+// ============================================
+
+/**
+ * Check if running in Tauri desktop environment
+ */
+export function isTauri(): boolean {
+  return typeof window !== 'undefined' && '__TAURI__' in window;
+}
+
+// Lazy-loaded Tauri store instance
+let tauriStorePromise: Promise<import('@tauri-apps/plugin-store').Store> | null = null;
+
+/**
+ * Get the Tauri store instance (lazy-loaded)
+ */
+async function getTauriStore(): Promise<import('@tauri-apps/plugin-store').Store> {
+  if (!tauriStorePromise) {
+    tauriStorePromise = (async () => {
+      const { load } = await import('@tauri-apps/plugin-store');
+      return load('settings.json', { defaults: {} });
+    })();
+  }
+  return tauriStorePromise;
+}
 
 export const STORAGE_KEYS = {
   CONNECTION: 'connection',
@@ -33,8 +62,85 @@ export const STORAGE_KEYS = {
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
 
+// ============================================
+// Async Storage Functions (Platform-Aware)
+// ============================================
+
 /**
- * Get a value from localStorage
+ * Get a value from storage (async, supports Tauri and Browser)
+ */
+export async function getStorageItemAsync<T>(key: StorageKey): Promise<T | null> {
+  const fullKey = `${STORAGE_PREFIX}${key}`;
+
+  try {
+    if (isTauri()) {
+      const store = await getTauriStore();
+      const value = await store.get<T>(fullKey);
+      if (value !== undefined && value !== null) {
+        logger.debug(`Storage (Tauri): loaded "${key}"`, value);
+        return value;
+      }
+      return null;
+    }
+
+    // Browser fallback
+    return getStorageItem<T>(key);
+  } catch (error) {
+    logger.error(`Storage: failed to load "${key}"`, error);
+    return null;
+  }
+}
+
+/**
+ * Set a value in storage (async, supports Tauri and Browser)
+ */
+export async function setStorageItemAsync<T>(key: StorageKey, value: T): Promise<boolean> {
+  const fullKey = `${STORAGE_PREFIX}${key}`;
+
+  try {
+    if (isTauri()) {
+      const store = await getTauriStore();
+      await store.set(fullKey, value);
+      logger.debug(`Storage (Tauri): saved "${key}"`, value);
+      return true;
+    }
+
+    // Browser fallback
+    return setStorageItem(key, value);
+  } catch (error) {
+    logger.error(`Storage: failed to save "${key}"`, error);
+    return false;
+  }
+}
+
+/**
+ * Remove a value from storage (async, supports Tauri and Browser)
+ */
+export async function removeStorageItemAsync(key: StorageKey): Promise<boolean> {
+  const fullKey = `${STORAGE_PREFIX}${key}`;
+
+  try {
+    if (isTauri()) {
+      const store = await getTauriStore();
+      await store.delete(fullKey);
+      logger.debug(`Storage (Tauri): removed "${key}"`);
+      return true;
+    }
+
+    // Browser fallback
+    return removeStorageItem(key);
+  } catch (error) {
+    logger.error(`Storage: failed to remove "${key}"`, error);
+    return false;
+  }
+}
+
+// ============================================
+// Sync Storage Functions (Browser Only)
+// ============================================
+
+/**
+ * Get a value from localStorage (sync, browser only)
  */
 export function getStorageItem<T>(key: StorageKey): T | null {
   try {

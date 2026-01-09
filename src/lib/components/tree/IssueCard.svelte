@@ -27,6 +27,7 @@
     getIssueChangeType,
     isRecentlyUpdated
   } from '../../stores/changeTracking.svelte';
+  import { openExternalUrl } from '../../utils/external-link';
 
   interface Props {
     node: TreeNode;
@@ -41,7 +42,7 @@
     e.stopPropagation();
     const url = getIssueUrl(issue.key);
     if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      openExternalUrl(url);
     }
   }
 

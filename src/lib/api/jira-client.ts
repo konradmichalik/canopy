@@ -1,6 +1,8 @@
 /**
  * JIRA API Client
  * Factory pattern for Cloud and Server/Data Center clients
+ *
+ * Supports both Browser (via proxy) and Tauri (direct connection) modes.
  */
 
 import type {
@@ -11,6 +13,19 @@ import type {
   JiraFieldsResponse
 } from '../types';
 import { logger } from '../utils/logger';
+import { isTauri } from '../utils/storage';
+
+// Cached platform fetch - initialized once on first use
+let platformFetch: typeof fetch | null = null;
+
+async function getPlatformFetch(): Promise<typeof fetch> {
+  if (!platformFetch) {
+    platformFetch = isTauri()
+      ? (await import('@tauri-apps/plugin-http')).fetch
+      : fetch;
+  }
+  return platformFetch;
+}
 
 // Fields to request for issue queries
 export const DEFAULT_FIELDS = [
@@ -63,7 +78,11 @@ export abstract class JiraClient {
   }
 
   protected get baseUrl(): string {
-    // Use proxy URL if configured, otherwise direct URL
+    // In Tauri (desktop), connect directly to Jira (no CORS restrictions)
+    // In Browser, use proxy URL if configured
+    if (isTauri()) {
+      return this.config.baseUrl;
+    }
     return this.config.proxyUrl || this.config.baseUrl;
   }
 
@@ -81,9 +100,9 @@ export abstract class JiraClient {
       'X-Atlassian-Token': 'no-check' // Bypass XSRF check for API requests
     };
 
-    // When using a proxy, send the actual JIRA URL as a header
+    // When using a proxy (browser mode only), send the actual JIRA URL as a header
     // This allows the proxy to forward requests to the correct instance
-    if (this.config.proxyUrl) {
+    if (this.config.proxyUrl && !isTauri()) {
       headers['X-Jira-Base-Url'] = this.config.baseUrl;
     }
 
@@ -95,7 +114,9 @@ export abstract class JiraClient {
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
     try {
-      const response = await fetch(url, {
+      // Use Tauri's fetch in desktop mode (bypasses CORS), browser fetch otherwise
+      const platformFetch = await getPlatformFetch();
+      const response = await platformFetch(url, {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
@@ -332,9 +353,11 @@ export abstract class JiraClient {
    */
   async fetchImageAsBlob(imageUrl: string): Promise<string | null> {
     try {
-      // If using proxy, route through the image proxy endpoint
       let fetchUrl = imageUrl;
-      if (this.config.proxyUrl) {
+
+      // In Tauri (desktop), fetch directly from Jira
+      // In Browser, route through the image proxy endpoint if proxy is configured
+      if (!isTauri() && this.config.proxyUrl) {
         // Extract base proxy URL (remove /jira suffix if present)
         // Supports both local proxy (/jira-image) and Vercel (/api/jira-image)
         const proxyBase = this.config.proxyUrl.replace(/\/(api\/)?jira\/?$/, '');
@@ -344,7 +367,8 @@ export abstract class JiraClient {
         fetchUrl = `${proxyBase}${imageEndpoint}?url=${encodeURIComponent(imageUrl)}`;
       }
 
-      const response = await fetch(fetchUrl, {
+      const platformFetch = await getPlatformFetch();
+      const response = await platformFetch(fetchUrl, {
         headers: {
           Authorization: this.getAuthHeader(),
           Accept: 'image/*'
