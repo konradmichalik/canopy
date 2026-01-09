@@ -8,6 +8,7 @@ import { logger } from '../utils/logger';
 import { refreshIssues, issuesState } from './issues.svelte';
 import { getQueries, updateQueryIssueCount } from './jql.svelte';
 import { getClient } from './connection.svelte';
+import { routerState } from './router.svelte';
 
 export type AutoRefreshInterval = 'off' | '5m' | '30m' | '1h';
 
@@ -110,20 +111,24 @@ async function performRefresh(): Promise<void> {
       await refreshIssues();
     }
 
-    // Refresh issue counts for all queries in sidebar
+    // Refresh issue counts for all queries in sidebar (except the active query,
+    // which was already updated by refreshIssues with the correct filtered count)
     const queries = getQueries();
+    const activeQueryId = routerState.activeQueryId;
     await Promise.all(
-      queries.map(async (query) => {
-        try {
-          const response = await client.searchIssues({
-            jql: query.jql,
-            maxResults: 0
-          });
-          updateQueryIssueCount(query.id, response.total);
-        } catch {
-          // Silently ignore individual query failures
-        }
-      })
+      queries
+        .filter((query) => query.id !== activeQueryId)
+        .map(async (query) => {
+          try {
+            const response = await client.searchIssues({
+              jql: query.jql,
+              maxResults: 0
+            });
+            updateQueryIssueCount(query.id, response.total);
+          } catch {
+            // Silently ignore individual query failures
+          }
+        })
     );
 
     logger.info('Auto-refresh completed');
