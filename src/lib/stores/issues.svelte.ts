@@ -21,13 +21,14 @@ import {
   setFiltersChangeCallback,
   updateDynamicFilters,
   filterIssuesBySearchText,
-  filterIssuesByRecency
+  filterIssuesByRecency,
+  filtersState
 } from './filters.svelte';
 import { getSortConfig, setSortConfigChangeCallback } from './sortConfig.svelte';
 import { invalidateFlatTreeCache } from './keyboardNavigation.svelte';
 import { routerState } from './router.svelte';
 import { updateQueryIssueCount } from './jql.svelte';
-import { detectChanges } from './changeTracking.svelte';
+import { detectChanges, changeTrackingState } from './changeTracking.svelte';
 
 // State container object
 export const issuesState = $state({
@@ -51,6 +52,8 @@ setFiltersChangeCallback(() => {
       pendingReload = true;
     } else {
       issuesState.isInitialLoad = false;
+      // Clear change tracking summary - filter changes are internal, not external changes
+      changeTrackingState.currentChanges = null;
       loadIssues(issuesState.currentJql);
     }
   }
@@ -62,6 +65,8 @@ setSortConfigChangeCallback(() => {
     // Only reload if the base JQL doesn't have its own ORDER BY
     if (!hasOrderByClause(issuesState.currentJql)) {
       issuesState.isInitialLoad = false;
+      // Clear change tracking summary - sort changes are internal, not external changes
+      changeTrackingState.currentChanges = null;
       loadIssues(issuesState.currentJql);
     }
   }
@@ -132,9 +137,18 @@ export async function loadIssues(jql: string): Promise<boolean> {
     if (routerState.activeQueryId) {
       updateQueryIssueCount(routerState.activeQueryId, stats.totalIssues);
 
-      // Detect changes from checkpoint (only on initial load to avoid re-detecting on filter changes)
-      if (issuesState.isInitialLoad) {
+      // Detect changes from checkpoint (only on initial load and when no filters are active)
+      // Filter changes would cause false positives (e.g., filtered-out issues appear as "removed")
+      const hasNoActiveFilters =
+        filterConditions.length === 0 &&
+        !filtersState.searchText &&
+        !filtersState.recencyFilter;
+
+      if (issuesState.isInitialLoad && hasNoActiveFilters) {
         detectChanges(routerState.activeQueryId, fetchedIssues);
+      } else if (issuesState.isInitialLoad && !hasNoActiveFilters) {
+        // Clear any stale change detection when filters are active
+        changeTrackingState.currentChanges = null;
       }
     }
 
@@ -144,6 +158,8 @@ export async function loadIssues(jql: string): Promise<boolean> {
     if (pendingReload) {
       pendingReload = false;
       issuesState.isInitialLoad = false;
+      // Clear change tracking summary - pending reload is from internal changes (filters)
+      changeTrackingState.currentChanges = null;
       // Use setTimeout to avoid potential recursion issues
       setTimeout(() => loadIssues(issuesState.currentJql), 0);
     }
