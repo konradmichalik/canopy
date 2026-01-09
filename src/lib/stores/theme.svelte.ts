@@ -4,7 +4,7 @@
  */
 
 import type { Theme as ThemeType } from '../types';
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
 export type Theme = ThemeType;
@@ -21,9 +21,9 @@ let mediaQuery: MediaQueryList | null = null;
 /**
  * Initialize theme from storage and system preference
  */
-export function initializeTheme(): void {
+export async function initializeTheme(): Promise<void> {
   // Load saved preference
-  const stored = getStorageItem<Theme>(STORAGE_KEYS.THEME);
+  const stored = await getStorageItemAsync<Theme>(STORAGE_KEYS.THEME);
   if (stored && ['light', 'dark', 'system'].includes(stored)) {
     themeState.theme = stored;
   }
@@ -90,7 +90,7 @@ export function setTheme(newTheme: Theme): void {
   themeState.theme = newTheme;
   updateResolvedTheme();
   applyTheme();
-  setStorageItem(STORAGE_KEYS.THEME, themeState.theme);
+  saveStorage(STORAGE_KEYS.THEME, themeState.theme);
   logger.store('theme', 'Theme changed', {
     theme: themeState.theme,
     resolvedTheme: themeState.resolvedTheme

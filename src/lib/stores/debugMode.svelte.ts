@@ -3,7 +3,7 @@
  * Manages debug/developer features visibility with Svelte 5 Runes
  */
 
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
 // State container
@@ -14,8 +14,8 @@ export const debugModeState = $state({
 /**
  * Initialize debug mode from storage
  */
-export function initializeDebugMode(): void {
-  const stored = getStorageItem<boolean>(STORAGE_KEYS.DEBUG_MODE);
+export async function initializeDebugMode(): Promise<void> {
+  const stored = await getStorageItemAsync<boolean>(STORAGE_KEYS.DEBUG_MODE);
   if (stored !== null) {
     debugModeState.enabled = stored;
   }
@@ -30,7 +30,7 @@ export function initializeDebugMode(): void {
  */
 export function setDebugMode(enabled: boolean): void {
   debugModeState.enabled = enabled;
-  setStorageItem(STORAGE_KEYS.DEBUG_MODE, enabled);
+  saveStorage(STORAGE_KEYS.DEBUG_MODE, enabled);
   logger.store('debugMode', 'Changed', { enabled });
 }
 

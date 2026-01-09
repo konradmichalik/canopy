@@ -98,8 +98,8 @@
       });
 
       // Reload stores to reflect changes
-      initializeQueries();
-      initializeConnection();
+      await initializeQueries();
+      await initializeConnection();
 
       const messages: string[] = [];
       if (result.imported.connection) {

@@ -5,7 +5,12 @@
 
 import type { JiraConnectionConfig, JiraUser, ConnectionState, StoredConnection } from '../types';
 import { createJiraClient, type JiraClient } from '../api';
-import { getStorageItem, setStorageItem, removeStorageItem, STORAGE_KEYS } from '../utils/storage';
+import {
+  getStorageItemAsync,
+  setStorageItemAsync,
+  removeStorageItemAsync,
+  STORAGE_KEYS
+} from '../utils/storage';
 import { logger } from '../utils/logger';
 import { clearAvatarCache } from '../utils/avatar-cache';
 
@@ -32,7 +37,7 @@ let sprintFieldId: string | null = null;
  * Initialize connection from storage
  */
 export async function initializeConnection(): Promise<boolean> {
-  const stored = getStorageItem<StoredConnection>(STORAGE_KEYS.CONNECTION);
+  const stored = await getStorageItemAsync<StoredConnection>(STORAGE_KEYS.CONNECTION);
 
   if (!stored) {
     logger.info('No stored connection found');
@@ -94,7 +99,7 @@ export async function connect(config: JiraConnectionConfig): Promise<boolean> {
       ...config,
       lastConnected: connectionState.lastConnected
     };
-    setStorageItem(STORAGE_KEYS.CONNECTION, toStore);
+    await setStorageItemAsync(STORAGE_KEYS.CONNECTION, toStore);
 
     logger.connectionSuccess(`Connected as ${result.user!.displayName}`);
     return true;
@@ -115,7 +120,7 @@ export async function connect(config: JiraConnectionConfig): Promise<boolean> {
 /**
  * Disconnect from JIRA
  */
-export function disconnect(): void {
+export async function disconnect(): Promise<void> {
   connectionState.config = null;
   connectionState.isConnected = false;
   connectionState.isConnecting = false;
@@ -125,7 +130,7 @@ export function disconnect(): void {
   client = null;
   epicLinkFieldId = null;
   sprintFieldId = null;
-  removeStorageItem(STORAGE_KEYS.CONNECTION);
+  await removeStorageItemAsync(STORAGE_KEYS.CONNECTION);
   clearAvatarCache(); // Free memory by revoking blob URLs
   logger.connection('Disconnected');
 }

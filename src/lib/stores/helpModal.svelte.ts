@@ -3,7 +3,7 @@
  * Manages help modal visibility and first-visit detection
  */
 
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
 export const helpModalState = $state({
@@ -15,8 +15,8 @@ export const helpModalState = $state({
 /**
  * Initialize help modal state from storage
  */
-export function initializeHelpModal(): void {
-  const hasSeen = getStorageItem<boolean>(STORAGE_KEYS.HELP_MODAL_SEEN);
+export async function initializeHelpModal(): Promise<void> {
+  const hasSeen = await getStorageItemAsync<boolean>(STORAGE_KEYS.HELP_MODAL_SEEN);
   helpModalState.hasSeenIntro = hasSeen ?? false;
 
   // Auto-open on first visit
@@ -49,7 +49,7 @@ export function closeHelpModal(): void {
  */
 export function markIntroAsSeen(): void {
   helpModalState.hasSeenIntro = true;
-  setStorageItem(STORAGE_KEYS.HELP_MODAL_SEEN, true);
+  saveStorage(STORAGE_KEYS.HELP_MODAL_SEEN, true);
   logger.store('helpModal', 'Marked as seen');
 }
 
@@ -58,7 +58,7 @@ export function markIntroAsSeen(): void {
  */
 export function resetIntro(): void {
   helpModalState.hasSeenIntro = false;
-  setStorageItem(STORAGE_KEYS.HELP_MODAL_SEEN, false);
+  saveStorage(STORAGE_KEYS.HELP_MODAL_SEEN, false);
   logger.store('helpModal', 'Reset intro');
 }
 

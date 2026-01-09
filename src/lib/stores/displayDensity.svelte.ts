@@ -3,7 +3,7 @@
  * Manages compact vs comfortable display mode with Svelte 5 Runes
  */
 
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
 export type DisplayDensity = 'comfortable' | 'compact';
@@ -16,8 +16,8 @@ export const displayDensityState = $state({
 /**
  * Initialize display density from storage
  */
-export function initializeDisplayDensity(): void {
-  const stored = getStorageItem<DisplayDensity>(STORAGE_KEYS.DISPLAY_DENSITY);
+export async function initializeDisplayDensity(): Promise<void> {
+  const stored = await getStorageItemAsync<DisplayDensity>(STORAGE_KEYS.DISPLAY_DENSITY);
   if (stored && ['comfortable', 'compact'].includes(stored)) {
     displayDensityState.density = stored;
   }
@@ -32,7 +32,7 @@ export function initializeDisplayDensity(): void {
  */
 export function setDisplayDensity(density: DisplayDensity): void {
   displayDensityState.density = density;
-  setStorageItem(STORAGE_KEYS.DISPLAY_DENSITY, density);
+  saveStorage(STORAGE_KEYS.DISPLAY_DENSITY, density);
   logger.store('displayDensity', 'Changed', { density });
 }
 

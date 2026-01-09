@@ -3,7 +3,7 @@
  * Manages absolute vs relative date display mode with Svelte 5 Runes
  */
 
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
 export type DateFormat = 'absolute' | 'relative';
@@ -16,8 +16,8 @@ export const dateFormatState = $state({
 /**
  * Initialize date format from storage
  */
-export function initializeDateFormat(): void {
-  const stored = getStorageItem<DateFormat>(STORAGE_KEYS.DATE_FORMAT);
+export async function initializeDateFormat(): Promise<void> {
+  const stored = await getStorageItemAsync<DateFormat>(STORAGE_KEYS.DATE_FORMAT);
   if (stored && ['absolute', 'relative'].includes(stored)) {
     dateFormatState.format = stored;
   }
@@ -32,7 +32,7 @@ export function initializeDateFormat(): void {
  */
 export function setDateFormat(format: DateFormat): void {
   dateFormatState.format = format;
-  setStorageItem(STORAGE_KEYS.DATE_FORMAT, format);
+  saveStorage(STORAGE_KEYS.DATE_FORMAT, format);
   logger.store('dateFormat', 'Changed', { format });
 }
 

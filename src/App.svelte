@@ -24,23 +24,27 @@
   let isInitializing = $state(true);
 
   onMount(() => {
-    // Initialize theme first (sync, affects appearance immediately)
-    initializeTheme();
-    initializeColorTheme();
-
     // Initialize all stores and connection
     async function initialize() {
       try {
-        initializeRouter();
+        // Initialize theme first (affects appearance immediately)
+        await Promise.all([initializeTheme(), initializeColorTheme()]);
+
+        // Initialize all other stores in parallel
+        await Promise.all([
+          initializeRouter(),
+          initializeDisplayDensity(),
+          initializeDateFormat(),
+          initializeDebugMode(),
+          initializeQueries(),
+          initializeHelpModal(),
+          initializeAutoRefresh(),
+          initializeChangeTracking()
+        ]);
+
+        // These are still sync
         initializeFieldConfig();
-        initializeDisplayDensity();
-        initializeDateFormat();
-        initializeDebugMode();
-        initializeQueries();
-        initializeHelpModal();
-        initializeAutoRefresh();
         initializeKeyboardNavigation();
-        initializeChangeTracking();
 
         // Try to restore connection from storage
         await initializeConnection();

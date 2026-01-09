@@ -3,7 +3,7 @@
  * Manages automatic refresh of issues and sidebar counts
  */
 
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 import { refreshIssues, issuesState } from './issues.svelte';
 import { getQueries, updateQueryIssueCount } from './jql.svelte';
@@ -37,8 +37,8 @@ let refreshTimerId: ReturnType<typeof setInterval> | null = null;
 /**
  * Initialize auto-refresh from storage
  */
-export function initializeAutoRefresh(): void {
-  const stored = getStorageItem<AutoRefreshInterval>(STORAGE_KEYS.AUTO_REFRESH_INTERVAL);
+export async function initializeAutoRefresh(): Promise<void> {
+  const stored = await getStorageItemAsync<AutoRefreshInterval>(STORAGE_KEYS.AUTO_REFRESH_INTERVAL);
   if (stored && Object.keys(INTERVAL_MS).includes(stored)) {
     autoRefreshState.interval = stored;
     startTimer();
@@ -54,7 +54,7 @@ export function initializeAutoRefresh(): void {
  */
 export function setAutoRefreshInterval(interval: AutoRefreshInterval): void {
   autoRefreshState.interval = interval;
-  setStorageItem(STORAGE_KEYS.AUTO_REFRESH_INTERVAL, interval);
+  saveStorage(STORAGE_KEYS.AUTO_REFRESH_INTERVAL, interval);
 
   // Restart timer with new interval
   stopTimer();

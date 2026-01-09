@@ -11,7 +11,7 @@ import type {
   QueryListItem,
   QuerySeparator
 } from '../types';
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { generateQueryId, generateSeparatorId, isQuery, isSeparator } from '../types/tree';
 import { logger } from '../utils/logger';
 import { generateSlug, slugsMatch } from '../utils/slug';
@@ -25,8 +25,8 @@ export const jqlState = $state({
 /**
  * Initialize items from storage (with migration for old format)
  */
-export function initializeQueries(): void {
-  const stored = getStorageItem<QueryListItem[]>(STORAGE_KEYS.QUERIES);
+export async function initializeQueries(): Promise<void> {
+  const stored = await getStorageItemAsync<QueryListItem[]>(STORAGE_KEYS.QUERIES);
 
   if (stored && Array.isArray(stored)) {
     // Migrate old format: items without 'type' field get type: 'query'
@@ -430,5 +430,5 @@ export function deleteSeparator(id: string): boolean {
  * Persist items to storage
  */
 function persistItems(): void {
-  setStorageItem(STORAGE_KEYS.QUERIES, jqlState.items);
+  saveStorage(STORAGE_KEYS.QUERIES, jqlState.items);
 }

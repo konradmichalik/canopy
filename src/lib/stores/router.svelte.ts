@@ -5,7 +5,7 @@
  */
 
 import type { RouterState } from '../types';
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
 const QUERY_PATH_PREFIX = '/query/';
@@ -26,7 +26,7 @@ export const routerState = $state<RouterState>({
  */
 export function toggleSidebar(): void {
   routerState.sidebarOpen = !routerState.sidebarOpen;
-  setStorageItem(STORAGE_KEYS.SIDEBAR_OPEN, routerState.sidebarOpen);
+  saveStorage(STORAGE_KEYS.SIDEBAR_OPEN, routerState.sidebarOpen);
   logger.store('router', 'Toggle sidebar', { open: routerState.sidebarOpen });
 }
 
@@ -35,7 +35,7 @@ export function toggleSidebar(): void {
  */
 export function setSidebarWidth(width: number): void {
   routerState.sidebarWidth = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, width));
-  setStorageItem(STORAGE_KEYS.SIDEBAR_WIDTH, routerState.sidebarWidth);
+  saveStorage(STORAGE_KEYS.SIDEBAR_WIDTH, routerState.sidebarWidth);
   logger.store('router', 'Set sidebar width', { width: routerState.sidebarWidth });
 }
 
@@ -85,7 +85,7 @@ export function setActiveQuery(
   routerState.activeQueryId = queryId;
 
   if (queryId) {
-    setStorageItem(STORAGE_KEYS.LAST_QUERY_ID, queryId);
+    saveStorage(STORAGE_KEYS.LAST_QUERY_ID, queryId);
   }
 
   if (updateUrlPath) {
@@ -130,11 +130,13 @@ function handlePopState(event: PopStateEvent): void {
 }
 
 /**
- * Initialize router (restore state from localStorage, register popstate handler)
+ * Initialize router (restore state from storage, register popstate handler)
  */
-export function initializeRouter(): void {
-  const sidebarOpen = getStorageItem<boolean>(STORAGE_KEYS.SIDEBAR_OPEN);
-  const sidebarWidth = getStorageItem<number>(STORAGE_KEYS.SIDEBAR_WIDTH);
+export async function initializeRouter(): Promise<void> {
+  const [sidebarOpen, sidebarWidth] = await Promise.all([
+    getStorageItemAsync<boolean>(STORAGE_KEYS.SIDEBAR_OPEN),
+    getStorageItemAsync<number>(STORAGE_KEYS.SIDEBAR_WIDTH)
+  ]);
 
   routerState.activeQueryId = null;
 

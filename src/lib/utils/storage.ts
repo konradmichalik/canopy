@@ -68,6 +68,7 @@ type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
 
 /**
  * Get a value from storage (async, supports Tauri and Browser)
+ * In Tauri: Falls back to localStorage for migration from browser version
  */
 export async function getStorageItemAsync<T>(key: StorageKey): Promise<T | null> {
   const fullKey = `${STORAGE_PREFIX}${key}`;
@@ -80,6 +81,17 @@ export async function getStorageItemAsync<T>(key: StorageKey): Promise<T | null>
         logger.debug(`Storage (Tauri): loaded "${key}"`, value);
         return value;
       }
+
+      // Fallback: Check localStorage for migration from browser/dev version
+      const localValue = getStorageItem<T>(key);
+      if (localValue !== null) {
+        // Migrate to Tauri store
+        await store.set(fullKey, localValue);
+        await store.save();
+        logger.info(`Storage (Tauri): migrated "${key}" from localStorage`);
+        return localValue;
+      }
+
       return null;
     }
 
@@ -101,6 +113,7 @@ export async function setStorageItemAsync<T>(key: StorageKey, value: T): Promise
     if (isTauri()) {
       const store = await getTauriStore();
       await store.set(fullKey, value);
+      await store.save(); // Persist to disk
       logger.debug(`Storage (Tauri): saved "${key}"`, value);
       return true;
     }
@@ -123,6 +136,7 @@ export async function removeStorageItemAsync(key: StorageKey): Promise<boolean> 
     if (isTauri()) {
       const store = await getTauriStore();
       await store.delete(fullKey);
+      await store.save(); // Persist to disk
       logger.debug(`Storage (Tauri): removed "${key}"`);
       return true;
     }
@@ -133,6 +147,21 @@ export async function removeStorageItemAsync(key: StorageKey): Promise<boolean> 
     logger.error(`Storage: failed to remove "${key}"`, error);
     return false;
   }
+}
+
+/**
+ * Save to storage without waiting (fire and forget)
+ * Use for non-blocking saves where completion isn't critical
+ */
+export function saveStorage<T>(key: StorageKey, value: T): void {
+  void setStorageItemAsync(key, value);
+}
+
+/**
+ * Remove from storage without waiting (fire and forget)
+ */
+export function removeStorage(key: StorageKey): void {
+  void removeStorageItemAsync(key);
 }
 
 // ============================================

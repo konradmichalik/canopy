@@ -100,7 +100,7 @@
   $effect(() => {
     if (initialized) return;
     initialized = true;
-    initializeQueries();
+    void initializeQueries();
 
     // Set callback for field config changes
     setFieldConfigChangeCallback((enabledFields: DisplayFieldId[]) => {

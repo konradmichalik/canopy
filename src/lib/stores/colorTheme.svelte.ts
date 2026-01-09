@@ -3,7 +3,7 @@
  * Manages accent color themes with Svelte 5 Runes
  */
 
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
 export type ColorTheme = 'blue' | 'teal' | 'green' | 'purple' | 'orange' | 'rose';
@@ -31,8 +31,8 @@ export const colorThemeState = $state({
 /**
  * Initialize color theme from storage
  */
-export function initializeColorTheme(): void {
-  const stored = getStorageItem<ColorTheme>(STORAGE_KEYS.COLOR_THEME);
+export async function initializeColorTheme(): Promise<void> {
+  const stored = await getStorageItemAsync<ColorTheme>(STORAGE_KEYS.COLOR_THEME);
   if (stored && COLOR_THEMES.some((t) => t.id === stored)) {
     colorThemeState.colorTheme = stored;
   }
@@ -67,7 +67,7 @@ function applyColorTheme(): void {
 export function setColorTheme(newTheme: ColorTheme): void {
   colorThemeState.colorTheme = newTheme;
   applyColorTheme();
-  setStorageItem(STORAGE_KEYS.COLOR_THEME, colorThemeState.colorTheme);
+  saveStorage(STORAGE_KEYS.COLOR_THEME, colorThemeState.colorTheme);
   logger.store('colorTheme', 'Color theme changed', {
     colorTheme: colorThemeState.colorTheme
   });

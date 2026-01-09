@@ -14,7 +14,7 @@ import {
   getTreeStats
 } from '../utils/hierarchy-builder';
 import { applyQuickFilters, setOrderBy, hasOrderByClause } from '../utils/jql-helpers';
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 import {
   getActiveFilterConditions,
@@ -118,7 +118,7 @@ export async function loadIssues(jql: string): Promise<boolean> {
     issuesState.rawIssues = filteredIssues;
 
     // Build hierarchy
-    const savedExpandedKeys = getStorageItem<string[]>(STORAGE_KEYS.EXPANDED_NODES);
+    const savedExpandedKeys = await getStorageItemAsync<string[]>(STORAGE_KEYS.EXPANDED_NODES);
     const expandedKeys = savedExpandedKeys ? new Set(savedExpandedKeys) : new Set<string>();
 
     issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
@@ -223,10 +223,10 @@ export function reloadWithFilters(): void {
 /**
  * Rebuild tree with current sort config (without refetching from API)
  */
-export function rebuildTree(): void {
+export async function rebuildTree(): Promise<void> {
   if (issuesState.rawIssues.length === 0) return;
 
-  const savedExpandedKeys = getStorageItem<string[]>(STORAGE_KEYS.EXPANDED_NODES);
+  const savedExpandedKeys = await getStorageItemAsync<string[]>(STORAGE_KEYS.EXPANDED_NODES);
   const expandedKeys = savedExpandedKeys ? new Set(savedExpandedKeys) : new Set<string>();
 
   issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
@@ -271,5 +271,5 @@ export function getIssueUrl(issueKey: string): string | null {
  */
 function persistExpandedKeys(): void {
   const keys = getExpandedKeys(issuesState.treeNodes);
-  setStorageItem(STORAGE_KEYS.EXPANDED_NODES, Array.from(keys));
+  saveStorage(STORAGE_KEYS.EXPANDED_NODES, Array.from(keys));
 }

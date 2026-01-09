@@ -14,7 +14,7 @@ import type {
   ActivityPeriod,
   ChangeType
 } from '../types/changeTracking';
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
 // State container
@@ -38,27 +38,26 @@ export const ACTIVITY_PERIOD_OPTIONS: { value: ActivityPeriod; label: string }[]
 /**
  * Initialize change tracking from storage
  */
-export function initializeChangeTracking(): void {
-  const storedEnabled = getStorageItem<boolean>(STORAGE_KEYS.CHANGE_TRACKING_ENABLED);
+export async function initializeChangeTracking(): Promise<void> {
+  const [storedEnabled, storedPeriod, storedCheckpoints, storedPendingChanges] = await Promise.all([
+    getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_ENABLED),
+    getStorageItemAsync<ActivityPeriod>(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD),
+    getStorageItemAsync<CheckpointStore>(STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS),
+    getStorageItemAsync<Record<string, boolean>>(STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES)
+  ]);
+
   if (storedEnabled !== null) {
     changeTrackingState.isEnabled = storedEnabled;
   }
 
-  const storedPeriod = getStorageItem<ActivityPeriod>(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD);
   if (storedPeriod && ['24h', '7d', 'off'].includes(storedPeriod)) {
     changeTrackingState.activityPeriod = storedPeriod;
   }
 
-  const storedCheckpoints = getStorageItem<CheckpointStore>(
-    STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS
-  );
   if (storedCheckpoints) {
     changeTrackingState.checkpoints = storedCheckpoints;
   }
 
-  const storedPendingChanges = getStorageItem<Record<string, boolean>>(
-    STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES
-  );
   if (storedPendingChanges) {
     changeTrackingState.queriesWithPendingChanges = storedPendingChanges;
   }
@@ -75,7 +74,7 @@ export function initializeChangeTracking(): void {
  */
 export function setChangeTrackingEnabled(enabled: boolean): void {
   changeTrackingState.isEnabled = enabled;
-  setStorageItem(STORAGE_KEYS.CHANGE_TRACKING_ENABLED, enabled);
+  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_ENABLED, enabled);
 
   if (!enabled) {
     // Clear current changes display when disabled
@@ -90,7 +89,7 @@ export function setChangeTrackingEnabled(enabled: boolean): void {
  */
 export function setActivityPeriod(period: ActivityPeriod): void {
   changeTrackingState.activityPeriod = period;
-  setStorageItem(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD, period);
+  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD, period);
   logger.store('changeTracking', 'Activity period changed', { period });
 }
 
@@ -300,17 +299,14 @@ export function clearAllCheckpoints(): void {
  * Persist checkpoints to storage
  */
 function persistCheckpoints(): void {
-  setStorageItem(STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS, changeTrackingState.checkpoints);
+  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS, changeTrackingState.checkpoints);
 }
 
 /**
  * Persist pending changes to storage
  */
 function persistPendingChanges(): void {
-  setStorageItem(
-    STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES,
-    changeTrackingState.queriesWithPendingChanges
-  );
+  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES, changeTrackingState.queriesWithPendingChanges);
 }
 
 /**
