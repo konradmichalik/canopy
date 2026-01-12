@@ -59,6 +59,13 @@
       image: '/images/filter.jpg'
     },
     {
+      id: 'custom-filters',
+      title: 'Custom Filters',
+      icon: 'tag',
+      content:
+        'Save your current filter combination as a Custom Filter. Includes selected filters, search text, and recency settings. Choose from different icons and quickly switch between saved filters.'
+    },
+    {
       id: 'grouping',
       title: 'Flexible Grouping',
       icon: 'folder',
