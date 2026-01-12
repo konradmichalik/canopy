@@ -306,7 +306,10 @@ function persistCheckpoints(): void {
  * Persist pending changes to storage
  */
 function persistPendingChanges(): void {
-  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES, changeTrackingState.queriesWithPendingChanges);
+  saveStorage(
+    STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES,
+    changeTrackingState.queriesWithPendingChanges
+  );
 }
 
 /**

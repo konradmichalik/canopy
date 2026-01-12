@@ -71,7 +71,7 @@
       parts.push(`${filter.filterIds.length} filter${filter.filterIds.length > 1 ? 's' : ''}`);
     }
     if (filter.recencyFilter) {
-      const recencyLabel = RECENCY_FILTER_OPTIONS.find(o => o.id === filter.recencyFilter)?.label;
+      const recencyLabel = RECENCY_FILTER_OPTIONS.find((o) => o.id === filter.recencyFilter)?.label;
       if (recencyLabel) parts.push(recencyLabel);
     }
     if (filter.searchText) {
@@ -180,9 +180,10 @@
   // Dialog config based on mode
   const dialogConfig = $derived({
     title: dialogMode === 'save' ? 'Save Custom Filter' : 'Edit Filter',
-    description: dialogMode === 'save'
-      ? 'Save the current filter selection as a reusable custom filter.'
-      : 'Update the name and icon for this saved filter.',
+    description:
+      dialogMode === 'save'
+        ? 'Save the current filter selection as a reusable custom filter.'
+        : 'Update the name and icon for this saved filter.',
     buttonText: dialogMode === 'save' ? 'Save Filter' : 'Save'
   });
 
@@ -238,17 +239,17 @@
     {#each filtersState.customFilters as customFilter (customFilter.id)}
       {@const isActive = filtersState.activeCustomFilterId === customFilter.id}
       <Tooltip text={getSavedFilterTooltip(customFilter)}>
-        <div class="inline-flex items-center rounded-full border transition-colors
+        <div
+          class="inline-flex items-center rounded-full border transition-colors
           {isActive
             ? 'bg-primary/10 border-primary/30'
-            : 'bg-card border-border hover:border-primary/30'}">
+            : 'bg-card border-border hover:border-primary/30'}"
+        >
           <!-- Main button - applies filter on click -->
           <button
             onclick={() => applyCustomFilter(customFilter.id)}
             class="cursor-pointer inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 text-xs transition-colors
-            {isActive
-              ? 'text-primary font-medium'
-              : 'text-muted-foreground hover:text-foreground'}"
+            {isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}"
           >
             <AtlaskitIcon name={customFilter.icon || 'filter'} size={12} />
             {customFilter.name}
@@ -266,7 +267,10 @@
               </button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content align="start" class="min-w-32">
-              <DropdownMenu.Item onclick={() => openRenameDialog(customFilter.id, customFilter.name, customFilter.icon)}>
+              <DropdownMenu.Item
+                onclick={() =>
+                  openRenameDialog(customFilter.id, customFilter.name, customFilter.icon)}
+              >
                 <AtlaskitIcon name="edit" size={14} class="mr-2" />
                 Edit
               </DropdownMenu.Item>
@@ -423,11 +427,11 @@
           {#each CUSTOM_FILTER_ICONS as icon (icon)}
             <button
               type="button"
-              onclick={() => dialogFilterIcon = dialogFilterIcon === icon ? undefined : icon}
+              onclick={() => (dialogFilterIcon = dialogFilterIcon === icon ? undefined : icon)}
               class="p-2 rounded-md border transition-colors cursor-pointer
                 {dialogFilterIcon === icon
-                  ? 'bg-primary/10 border-primary/30 text-primary'
-                  : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
+                ? 'bg-primary/10 border-primary/30 text-primary'
+                : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
             >
               <AtlaskitIcon name={icon} size={16} />
             </button>
@@ -437,7 +441,9 @@
     </div>
     <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
       <Button variant="outline" onclick={() => (dialogOpen = false)}>Cancel</Button>
-      <Button onclick={handleDialogSubmit} disabled={!dialogFilterName.trim()}>{dialogConfig.buttonText}</Button>
+      <Button onclick={handleDialogSubmit} disabled={!dialogFilterName.trim()}
+        >{dialogConfig.buttonText}</Button
+      >
     </div>
   </Dialog.Content>
 </Dialog.Root>

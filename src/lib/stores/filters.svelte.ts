@@ -979,10 +979,15 @@ import { routerState } from './router.svelte';
 /**
  * Load custom filters from a query into the UI state
  */
-export function loadCustomFilters(customFilters?: CustomFilter[], activeCustomFilterId?: string | null): void {
+export function loadCustomFilters(
+  customFilters?: CustomFilter[],
+  activeCustomFilterId?: string | null
+): void {
   filtersState.customFilters = customFilters || [];
   filtersState.activeCustomFilterId = activeCustomFilterId || null;
-  logger.store('filters', 'Loaded custom filters from query', { count: filtersState.customFilters.length });
+  logger.store('filters', 'Loaded custom filters from query', {
+    count: filtersState.customFilters.length
+  });
 }
 
 /**
@@ -1227,9 +1232,7 @@ export function filterIdsToJqlConditions(filterIds: string[]): string[] {
 
     const { jqlField } = DYNAMIC_FILTER_CONFIG[category];
     conditions.push(
-      values.length === 1
-        ? `${jqlField} = ${values[0]}`
-        : `${jqlField} IN (${values.join(', ')})`
+      values.length === 1 ? `${jqlField} = ${values[0]}` : `${jqlField} IN (${values.join(', ')})`
     );
   }
 

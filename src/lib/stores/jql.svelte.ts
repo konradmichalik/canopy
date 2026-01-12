@@ -510,7 +510,8 @@ export function deleteQueryCustomFilter(queryId: string, filterId: string): bool
   }
 
   const customFilters = query.customFilters.filter((f) => f.id !== filterId);
-  const activeCustomFilterId = query.activeCustomFilterId === filterId ? null : query.activeCustomFilterId;
+  const activeCustomFilterId =
+    query.activeCustomFilterId === filterId ? null : query.activeCustomFilterId;
   updateQuery(queryId, { customFilters, activeCustomFilterId });
 
   logger.store('jql', 'Deleted custom filter', { queryId, filterId });

@@ -41,7 +41,12 @@ export interface FieldConfigState {
 // Default Configuration
 // ============================================
 
-export const DEFAULT_FIELD_IDS: DisplayFieldId[] = ['aggregatedTimeProgress', 'status', 'assignee', 'updated'];
+export const DEFAULT_FIELD_IDS: DisplayFieldId[] = [
+  'aggregatedTimeProgress',
+  'status',
+  'assignee',
+  'updated'
+];
 
 const ALL_FIELDS: Omit<DisplayField, 'isEnabled'>[] = [
   {
