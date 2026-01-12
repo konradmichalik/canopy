@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ChangeDetection } from '../../types/changeTracking';
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
-  import { formatDateTime } from '../../utils/formatDate';
+  import { formatDateTime, formatDateTimeWithSetting } from '../../utils/formatDate';
   import { getIssueUrl } from '../../stores/issues.svelte';
   import { openExternalUrl } from '../../utils/external-link';
 
@@ -15,6 +15,10 @@
   let isExpanded = $state(false);
 
   const checkpointTime = $derived(
+    changes.checkpointTimestamp ? formatDateTimeWithSetting(changes.checkpointTimestamp) : null
+  );
+
+  const checkpointTimeAbsolute = $derived(
     changes.checkpointTimestamp ? formatDateTime(changes.checkpointTimestamp) : null
   );
 
@@ -55,7 +59,9 @@
             >
           {/if}
           {#if checkpointTime}
-            <span class="text-muted-foreground ml-2">(since {checkpointTime})</span>
+            <span class="text-muted-foreground ml-2" title={checkpointTimeAbsolute}
+              >(since {checkpointTime})</span
+            >
           {/if}
         </span>
       </div>
@@ -76,7 +82,7 @@
         <button
           type="button"
           onclick={onAcknowledge}
-          class="px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20 rounded transition-colors flex items-center gap-1"
+          class="px-3 py-1.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-md shadow-sm transition-colors flex items-center gap-1.5"
           title="Acknowledge changes and save new checkpoint"
         >
           <AtlaskitIcon name="check" size={14} />

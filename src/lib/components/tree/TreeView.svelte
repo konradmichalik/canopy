@@ -296,12 +296,10 @@
       </div>
     </div>
 
-    <!-- Options panel (Filters, Grouping, Sorting) -->
-    {#if optionsExpanded}
-      <div class="px-4 pb-3">
-        <QuickFilters expanded={optionsExpanded} />
-      </div>
-    {/if}
+    <!-- Saved Filters (always visible) + Options panel (Filters, Grouping, Sorting) -->
+    <div class="px-4 pb-3">
+      <QuickFilters expanded={optionsExpanded} />
+    </div>
 
     <!-- JQL Debug (only visible when debug mode is enabled) -->
     {#if debugModeState.enabled}

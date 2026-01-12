@@ -44,6 +44,9 @@ export const issuesState = $state({
 // Track if a reload is pending (triggered while loading)
 let pendingReload = false;
 
+// Track which query started the current load (to avoid race conditions when switching queries quickly)
+let loadingQueryId: string | null = null;
+
 // Set up filter change callback
 setFiltersChangeCallback(() => {
   if (issuesState.currentJql) {
@@ -92,6 +95,9 @@ export async function loadIssues(jql: string): Promise<boolean> {
   issuesState.error = null;
   issuesState.currentJql = jql;
 
+  // Capture the query ID at load start to avoid race conditions when switching queries quickly
+  loadingQueryId = routerState.activeQueryId;
+
   try {
     // Apply quick filters if active
     const filterConditions = getActiveFilterConditions();
@@ -133,9 +139,10 @@ export async function loadIssues(jql: string): Promise<boolean> {
     // Update last updated timestamp
     issuesState.lastUpdated = new Date();
 
-    // Update cached issue count for the active query
-    if (routerState.activeQueryId) {
-      updateQueryIssueCount(routerState.activeQueryId, stats.totalIssues);
+    // Update cached issue count for the query that started this load
+    // (use loadingQueryId to avoid race conditions when switching queries quickly)
+    if (loadingQueryId) {
+      updateQueryIssueCount(loadingQueryId, stats.totalIssues);
 
       // Detect changes from checkpoint (only on initial load and when no filters are active)
       // Filter changes would cause false positives (e.g., filtered-out issues appear as "removed")
@@ -143,7 +150,7 @@ export async function loadIssues(jql: string): Promise<boolean> {
         filterConditions.length === 0 && !filtersState.searchText && !filtersState.recencyFilter;
 
       if (issuesState.isInitialLoad && hasNoActiveFilters) {
-        detectChanges(routerState.activeQueryId, fetchedIssues);
+        detectChanges(loadingQueryId, fetchedIssues);
       } else if (issuesState.isInitialLoad && !hasNoActiveFilters) {
         // Clear any stale change detection when filters are active
         changeTrackingState.currentChanges = null;

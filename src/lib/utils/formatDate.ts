@@ -88,6 +88,18 @@ export function formatDateTime(dateStr: string): string {
 }
 
 /**
+ * Format a date with time based on the current date format setting
+ * - relative: "2 hours ago"
+ * - absolute: "08.01.2026, 13:07"
+ */
+export function formatDateTimeWithSetting(dateStr: string): string {
+  if (dateFormatState.format === 'relative') {
+    return getRelativeTimeString(new Date(dateStr)) ?? formatDateTime(dateStr);
+  }
+  return formatDateTime(dateStr);
+}
+
+/**
  * Format a short date (e.g., for sprint labels: "8. Jan")
  */
 export function formatShortDate(date: Date): string {

@@ -6,14 +6,21 @@
   interface Props {
     open: boolean;
     itemName: string;
+    itemType?: string;
     onConfirm: () => void;
+    onClose?: () => void;
   }
 
-  let { open = $bindable(), itemName, onConfirm }: Props = $props();
+  let { open = $bindable(), itemName, itemType = 'query', onConfirm, onClose }: Props = $props();
+
+  function handleClose() {
+    open = false;
+    onClose?.();
+  }
 
   function handleConfirm() {
     onConfirm();
-    open = false;
+    handleClose();
   }
 </script>
 
@@ -26,13 +33,13 @@
         <AtlaskitIcon name="delete" size={24} />
       </div>
 
-      <h2 class="text-lg font-semibold">Delete query?</h2>
+      <h2 class="text-lg font-semibold">Delete {itemType}?</h2>
       <p class="text-sm text-muted-foreground">
         Are you sure you want to delete "{itemName}"? This action cannot be undone.
       </p>
 
       <div class="flex items-center gap-3 w-full mt-2">
-        <Button variant="outline" class="flex-1" onclick={() => (open = false)}>Cancel</Button>
+        <Button variant="outline" class="flex-1" onclick={handleClose}>Cancel</Button>
         <Button variant="destructive" class="flex-1" onclick={handleConfirm}>Delete</Button>
       </div>
     </div>

@@ -9,6 +9,8 @@ import { refreshIssues, issuesState } from './issues.svelte';
 import { getQueries, updateQueryIssueCount } from './jql.svelte';
 import { getClient } from './connection.svelte';
 import { routerState } from './router.svelte';
+import { filterIdsToJqlConditions } from './filters.svelte';
+import { applyQuickFilters } from '../utils/jql-helpers';
 
 export type AutoRefreshInterval = 'off' | '5m' | '30m' | '1h';
 
@@ -120,8 +122,15 @@ async function performRefresh(): Promise<void> {
         .filter((query) => query.id !== activeQueryId)
         .map(async (query) => {
           try {
+            // Apply saved filters to get accurate count
+            let effectiveJql = query.jql;
+            if (query.activeFilterIds && query.activeFilterIds.length > 0) {
+              const filterConditions = filterIdsToJqlConditions(query.activeFilterIds);
+              effectiveJql = applyQuickFilters(effectiveJql, filterConditions);
+            }
+
             const response = await client.searchIssues({
-              jql: query.jql,
+              jql: effectiveJql,
               maxResults: 0
             });
             updateQueryIssueCount(query.id, response.total);

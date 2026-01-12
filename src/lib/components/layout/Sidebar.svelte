@@ -40,6 +40,7 @@
   } from '../../stores/fieldConfig.svelte';
   import {
     loadActiveFilters,
+    loadCustomFilters,
     setActiveFiltersChangeCallback,
     setSearchTextChangeCallback
   } from '../../stores/filters.svelte';
@@ -74,6 +75,7 @@
     setActiveQuery(query.id, slug, updateUrl);
     loadFieldConfig(query.id, query.displayFields);
     loadActiveFilters(query.activeFilterIds, query.searchText);
+    loadCustomFilters(query.customFilters, query.activeCustomFilterId);
     loadSortConfig(query.id, query.sortConfig);
     loadGroupConfig(query.id, query.groupBy);
     await loadIssues(query.jql);

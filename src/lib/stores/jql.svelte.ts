@@ -9,7 +9,9 @@ import type {
   SortConfig,
   GroupByOption,
   QueryListItem,
-  QuerySeparator
+  QuerySeparator,
+  CustomFilter,
+  CustomFilterIcon
 } from '../types';
 import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { generateQueryId, generateSeparatorId, isQuery, isSeparator } from '../types/tree';
@@ -155,6 +157,8 @@ export function updateQuery(
       | 'showEntryNode'
       | 'optionsExpanded'
       | 'cachedIssueCount'
+      | 'customFilters'
+      | 'activeCustomFilterId'
     >
   >
 ): boolean {
@@ -424,6 +428,100 @@ export function deleteSeparator(id: string): boolean {
   logger.store('jql', 'Deleted separator', { id });
 
   return true;
+}
+
+// ============================================
+// Custom Filter Management (per-query)
+// ============================================
+
+/**
+ * Generate a unique ID for a custom filter
+ */
+function generateCustomFilterId(): string {
+  return `cf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Add a custom filter to a query
+ */
+export function addQueryCustomFilter(
+  queryId: string,
+  name: string,
+  filterIds: string[],
+  recencyFilter: import('../types').RecencyFilterOption,
+  searchText: string,
+  icon?: CustomFilterIcon
+): CustomFilter | null {
+  const query = getQueryById(queryId);
+  if (!query) {
+    logger.warn(`Query ${queryId} not found for adding custom filter`);
+    return null;
+  }
+
+  const customFilter: CustomFilter = {
+    id: generateCustomFilterId(),
+    name: name.trim(),
+    icon,
+    filterIds,
+    recencyFilter,
+    searchText,
+    createdAt: new Date().toISOString()
+  };
+
+  const customFilters = [...(query.customFilters || []), customFilter];
+  updateQuery(queryId, { customFilters });
+
+  logger.store('jql', 'Added custom filter to query', { queryId, filterId: customFilter.id, name });
+  return customFilter;
+}
+
+/**
+ * Update a custom filter in a query
+ */
+export function updateQueryCustomFilter(
+  queryId: string,
+  filterId: string,
+  name: string,
+  icon?: CustomFilterIcon
+): boolean {
+  const query = getQueryById(queryId);
+  if (!query || !query.customFilters) {
+    logger.warn(`Query ${queryId} or custom filters not found`);
+    return false;
+  }
+
+  const customFilters = query.customFilters.map((f) =>
+    f.id === filterId ? { ...f, name: name.trim(), icon } : f
+  );
+  updateQuery(queryId, { customFilters });
+
+  logger.store('jql', 'Updated custom filter', { queryId, filterId, name });
+  return true;
+}
+
+/**
+ * Delete a custom filter from a query
+ */
+export function deleteQueryCustomFilter(queryId: string, filterId: string): boolean {
+  const query = getQueryById(queryId);
+  if (!query || !query.customFilters) {
+    logger.warn(`Query ${queryId} or custom filters not found`);
+    return false;
+  }
+
+  const customFilters = query.customFilters.filter((f) => f.id !== filterId);
+  const activeCustomFilterId = query.activeCustomFilterId === filterId ? null : query.activeCustomFilterId;
+  updateQuery(queryId, { customFilters, activeCustomFilterId });
+
+  logger.store('jql', 'Deleted custom filter', { queryId, filterId });
+  return true;
+}
+
+/**
+ * Set active custom filter for a query
+ */
+export function setQueryActiveCustomFilter(queryId: string, filterId: string | null): boolean {
+  return updateQuery(queryId, { activeCustomFilterId: filterId });
 }
 
 /**

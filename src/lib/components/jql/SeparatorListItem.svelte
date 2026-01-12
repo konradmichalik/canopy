@@ -1,6 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
+  import ConfirmDeleteModal from '../common/ConfirmDeleteModal.svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import type { QuerySeparator } from '../../types';
 
@@ -34,6 +35,7 @@
   let isEditing = $state(false);
   let editValue = $state('');
   let inputElement = $state<HTMLInputElement | null>(null);
+  let showDeleteModal = $state(false);
 
   function handleDragStart(e: DragEvent): void {
     e.dataTransfer?.setData('text/plain', index.toString());
@@ -52,6 +54,10 @@
 
   function handleDelete(e: Event): void {
     e.stopPropagation();
+    showDeleteModal = true;
+  }
+
+  function confirmDelete(): void {
     onDelete(separator);
   }
 
@@ -172,3 +178,10 @@
     </div>
   {/if}
 </div>
+
+<ConfirmDeleteModal
+  bind:open={showDeleteModal}
+  itemName={separator.title || 'Separator'}
+  itemType="separator"
+  onConfirm={confirmDelete}
+/>

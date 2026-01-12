@@ -9,9 +9,15 @@ import {
   RECENCY_FILTER_OPTIONS,
   type FilterCategory,
   type QuickFilterDefinition,
-  type RecencyFilterOption
+  type RecencyFilterOption,
+  type CustomFilter,
+  type CustomFilterIcon,
+  CUSTOM_FILTER_ICONS
 } from '../types/tree';
 import { logger } from '../utils/logger';
+
+// Re-export for convenience
+export { CUSTOM_FILTER_ICONS, type CustomFilter, type CustomFilterIcon };
 
 // ============================================
 // Dynamic Filter Categories
@@ -260,7 +266,11 @@ export const filtersState = $state({
   // Text search for summary and key
   searchText: '' as string,
   // Recency filter (single select: recently-created, recently-updated, recently-commented)
-  recencyFilter: null as RecencyFilterOption
+  recencyFilter: null as RecencyFilterOption,
+  // Custom filters (user-saved filter combinations)
+  customFilters: [] as CustomFilter[],
+  // Currently active custom filter ID (null if none active)
+  activeCustomFilterId: null as string | null
 });
 
 // ============================================
@@ -324,6 +334,11 @@ export function getActiveFilters(): QuickFilter[] {
  * Toggle a filter by ID
  */
 export function toggleFilter(id: string): void {
+  // Clear active custom filter when manually changing filters
+  if (filtersState.activeCustomFilterId) {
+    filtersState.activeCustomFilterId = null;
+  }
+
   filtersState.filters = filtersState.filters.map((f) =>
     f.id === id ? { ...f, isActive: !f.isActive } : f
   );
@@ -347,6 +362,10 @@ export function setFilter(id: string, isActive: boolean): void {
 export function setSearchText(text: string): void {
   const trimmedText = text.trim();
   if (filtersState.searchText !== trimmedText) {
+    // Clear active custom filter when manually changing search
+    if (filtersState.activeCustomFilterId) {
+      filtersState.activeCustomFilterId = null;
+    }
     filtersState.searchText = trimmedText;
     logger.store('filters', 'Set search text', { text: trimmedText });
     notifyFiltersChange();
@@ -376,6 +395,10 @@ export function clearSearchText(): void {
  */
 export function setRecencyFilter(option: RecencyFilterOption): void {
   if (filtersState.recencyFilter !== option) {
+    // Clear active custom filter when manually changing recency
+    if (filtersState.activeCustomFilterId) {
+      filtersState.activeCustomFilterId = null;
+    }
     filtersState.recencyFilter = option;
     logger.store('filters', 'Set recency filter', { option });
     notifyFiltersChange();
@@ -408,6 +431,7 @@ export function resetFilters(): void {
   clearAllDynamicFilters();
   filtersState.searchText = '';
   filtersState.recencyFilter = null;
+  filtersState.activeCustomFilterId = null;
   logger.store('filters', 'Reset all filters');
   notifyFiltersChange();
 }
@@ -420,6 +444,7 @@ export function clearFilters(): void {
   clearAllDynamicFilters();
   filtersState.searchText = '';
   filtersState.recencyFilter = null;
+  filtersState.activeCustomFilterId = null;
   logger.store('filters', 'Cleared all filters');
 }
 
@@ -914,6 +939,11 @@ function getStatusIcon(categoryKey: string): string {
  * Toggle a dynamic filter by ID
  */
 export function toggleDynamicFilter(id: string): void {
+  // Clear active custom filter when manually changing filters
+  if (filtersState.activeCustomFilterId) {
+    filtersState.activeCustomFilterId = null;
+  }
+
   // Search in all dynamic filter categories
   for (const category of DYNAMIC_FILTER_CATEGORIES) {
     const filters = filtersState.dynamicFilters[category];
@@ -931,4 +961,277 @@ export function toggleDynamicFilter(id: string): void {
 
   // Otherwise, toggle regular filter
   toggleFilter(id);
+}
+
+// ============================================
+// Custom Filter Management (per-query)
+// ============================================
+
+// Import jql store functions for per-query storage
+import {
+  addQueryCustomFilter,
+  updateQueryCustomFilter,
+  deleteQueryCustomFilter,
+  setQueryActiveCustomFilter
+} from './jql.svelte';
+import { routerState } from './router.svelte';
+
+/**
+ * Load custom filters from a query into the UI state
+ */
+export function loadCustomFilters(customFilters?: CustomFilter[], activeCustomFilterId?: string | null): void {
+  filtersState.customFilters = customFilters || [];
+  filtersState.activeCustomFilterId = activeCustomFilterId || null;
+  logger.store('filters', 'Loaded custom filters from query', { count: filtersState.customFilters.length });
+}
+
+/**
+ * Check if there are any active filters that can be saved
+ */
+export function hasActiveFiltersToSave(): boolean {
+  const hasStaticFilters = filtersState.filters.some((f) => f.isActive);
+  const hasDynamicFilters = getAllDynamicFiltersFlat().some((f) => f.isActive);
+  const hasRecency = filtersState.recencyFilter !== null;
+  const hasSearch = filtersState.searchText.trim().length > 0;
+  return hasStaticFilters || hasDynamicFilters || hasRecency || hasSearch;
+}
+
+/**
+ * Save current filter state as a custom filter (per-query)
+ */
+export function saveCustomFilter(name: string, icon?: CustomFilterIcon): CustomFilter | null {
+  const queryId = routerState.activeQueryId;
+  if (!queryId) {
+    logger.warn('Cannot save custom filter: no active query');
+    return null;
+  }
+
+  if (!name.trim()) {
+    logger.warn('Cannot save custom filter: name is empty');
+    return null;
+  }
+
+  // Collect all active filter IDs
+  const activeStaticFilterIds = filtersState.filters.filter((f) => f.isActive).map((f) => f.id);
+  const activeDynamicFilterIds = getAllDynamicFiltersFlat()
+    .filter((f) => f.isActive)
+    .map((f) => f.id);
+
+  const filterIds = [...activeStaticFilterIds, ...activeDynamicFilterIds];
+
+  // Save to jql store (persisted with query)
+  const customFilter = addQueryCustomFilter(
+    queryId,
+    name,
+    filterIds,
+    filtersState.recencyFilter,
+    filtersState.searchText,
+    icon
+  );
+
+  if (customFilter) {
+    // Update local UI state
+    filtersState.customFilters = [...filtersState.customFilters, customFilter];
+  }
+
+  return customFilter;
+}
+
+/**
+ * Delete a custom filter by ID (per-query)
+ */
+export function deleteCustomFilter(id: string): void {
+  const queryId = routerState.activeQueryId;
+  if (!queryId) {
+    logger.warn('Cannot delete custom filter: no active query');
+    return;
+  }
+
+  // Delete from jql store
+  deleteQueryCustomFilter(queryId, id);
+
+  // Update local UI state
+  filtersState.customFilters = filtersState.customFilters.filter((f) => f.id !== id);
+  if (filtersState.activeCustomFilterId === id) {
+    filtersState.activeCustomFilterId = null;
+  }
+}
+
+/**
+ * Update a custom filter (name and/or icon) - per-query
+ */
+export function updateCustomFilter(id: string, newName: string, icon?: CustomFilterIcon): void {
+  const queryId = routerState.activeQueryId;
+  if (!queryId) {
+    logger.warn('Cannot update custom filter: no active query');
+    return;
+  }
+
+  const trimmedName = newName.trim();
+  if (!trimmedName) {
+    logger.warn('Cannot update custom filter: name is empty');
+    return;
+  }
+
+  // Update in jql store
+  updateQueryCustomFilter(queryId, id, trimmedName, icon);
+
+  // Update local UI state
+  filtersState.customFilters = filtersState.customFilters.map((f) =>
+    f.id === id ? { ...f, name: trimmedName, icon } : f
+  );
+}
+
+/**
+ * Apply a custom filter (activate all its saved filters)
+ */
+export function applyCustomFilter(id: string): void {
+  const queryId = routerState.activeQueryId;
+  const customFilter = filtersState.customFilters.find((f) => f.id === id);
+  if (!customFilter) {
+    logger.warn('Custom filter not found', { id });
+    return;
+  }
+
+  // If already active, deactivate it (toggle off)
+  if (filtersState.activeCustomFilterId === id) {
+    resetFilters();
+    if (queryId) {
+      setQueryActiveCustomFilter(queryId, null);
+    }
+    return;
+  }
+
+  // Clear all current filters first
+  filtersState.filters = filtersState.filters.map((f) => ({ ...f, isActive: false }));
+  clearAllDynamicFilters();
+
+  // Apply saved filter IDs
+  const savedIds = new Set(customFilter.filterIds);
+
+  // Activate static filters
+  filtersState.filters = filtersState.filters.map((f) => ({
+    ...f,
+    isActive: savedIds.has(f.id)
+  }));
+
+  // Activate dynamic filters
+  setActiveStateByIds(savedIds);
+
+  // Apply recency filter
+  filtersState.recencyFilter = customFilter.recencyFilter;
+
+  // Apply search text
+  filtersState.searchText = customFilter.searchText;
+
+  // Mark this custom filter as active
+  filtersState.activeCustomFilterId = id;
+
+  // Persist active custom filter to query
+  if (queryId) {
+    setQueryActiveCustomFilter(queryId, id);
+  }
+
+  logger.store('filters', 'Applied custom filter', {
+    name: customFilter.name,
+    filterCount: customFilter.filterIds.length
+  });
+
+  notifyFiltersChange();
+}
+
+// ============================================
+// Filter ID to JQL Conversion (for auto-refresh)
+// ============================================
+
+// Mapping from category to filter ID prefix (handles naming inconsistencies)
+const CATEGORY_PREFIX: Record<DynamicFilterCategory, string> = {
+  project: 'project',
+  status: 'status',
+  type: 'type',
+  assignee: 'assignee',
+  priority: 'priority',
+  resolution: 'resolution',
+  component: 'component',
+  fixVersion: 'fixversion' // prefix is lowercase
+};
+
+/**
+ * Convert a filter ID back to a JQL value (best effort)
+ * Handles special cases for project (uppercase key) and assignee (raw value)
+ */
+function filterIdToJqlValue(id: string, prefix: string, category: DynamicFilterCategory): string {
+  const valuePart = id.slice(prefix.length + 1); // +1 for the hyphen
+
+  if (category === 'project') {
+    return `"${valuePart.toUpperCase()}"`;
+  }
+  if (category === 'assignee') {
+    return `"${valuePart}"`;
+  }
+
+  // Convert kebab-case back to Title Case for other categories
+  const name = valuePart
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  return `"${name}"`;
+}
+
+/**
+ * Convert saved filter IDs to JQL conditions
+ * Used by auto-refresh to get counts with filters applied
+ */
+export function filterIdsToJqlConditions(filterIds: string[]): string[] {
+  const conditions: string[] = [];
+  const categoryValues: Record<DynamicFilterCategory, string[]> = {
+    project: [],
+    status: [],
+    type: [],
+    assignee: [],
+    priority: [],
+    resolution: [],
+    component: [],
+    fixVersion: []
+  };
+
+  for (const id of filterIds) {
+    // Recency filters
+    if (id.startsWith('recency-')) {
+      const option = RECENCY_FILTER_OPTIONS.find((o) => o.id === id.slice(8));
+      if (option?.jqlCondition) conditions.push(option.jqlCondition);
+      continue;
+    }
+
+    // Static filters
+    const staticFilter = DEFAULT_QUICK_FILTERS.find((f) => f.id === id);
+    if (staticFilter) {
+      conditions.push(staticFilter.jqlCondition);
+      continue;
+    }
+
+    // Dynamic filters - find matching category
+    for (const category of DYNAMIC_FILTER_CATEGORIES) {
+      const prefix = CATEGORY_PREFIX[category];
+      if (id.startsWith(`${prefix}-`)) {
+        categoryValues[category].push(filterIdToJqlValue(id, prefix, category));
+        break;
+      }
+    }
+  }
+
+  // Build JQL for each category (uses DYNAMIC_FILTER_CONFIG for jqlField)
+  for (const category of DYNAMIC_FILTER_CATEGORIES) {
+    const values = categoryValues[category];
+    if (values.length === 0) continue;
+
+    const { jqlField } = DYNAMIC_FILTER_CONFIG[category];
+    conditions.push(
+      values.length === 1
+        ? `${jqlField} = ${values[0]}`
+        : `${jqlField} IN (${values.join(', ')})`
+    );
+  }
+
+  return conditions;
 }

@@ -87,6 +87,40 @@ export const QUERY_COLORS: { id: QueryColor; label: string; bg: string; border: 
 
 export type GroupByOption = 'none' | 'sprint' | 'assignee' | 'status' | 'project' | 'recency';
 
+/** Available icons for custom filters */
+export const CUSTOM_FILTER_ICONS = [
+  'filter',
+  'tag',
+  'folder',
+  'story',
+  'check-circle',
+  'sprint',
+  'layers',
+  'dashboard',
+  'star',
+  'warning',
+  'person'
+] as const;
+
+export type CustomFilterIcon = (typeof CUSTOM_FILTER_ICONS)[number];
+
+/**
+ * A saved filter combination (per-query)
+ */
+export interface CustomFilter {
+  id: string;
+  name: string;
+  /** Optional icon for the filter */
+  icon?: CustomFilterIcon;
+  /** Saved filter IDs (static + dynamic filters) */
+  filterIds: string[];
+  /** Saved recency filter option */
+  recencyFilter: RecencyFilterOption;
+  /** Saved search text */
+  searchText: string;
+  createdAt: string;
+}
+
 export interface SavedQuery {
   /** Discriminator for union type (optional for backward compatibility) */
   type?: 'query';
@@ -109,6 +143,10 @@ export interface SavedQuery {
   optionsExpanded?: boolean;
   /** Cached issue count from last query execution */
   cachedIssueCount?: number;
+  /** Saved filter combinations for this query */
+  customFilters?: CustomFilter[];
+  /** Currently active custom filter ID */
+  activeCustomFilterId?: string | null;
 }
 
 // ============================================
