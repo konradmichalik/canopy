@@ -1,6 +1,7 @@
 <script lang="ts">
   import { SvelteSet } from 'svelte/reactivity';
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import FlashMessage from '../common/FlashMessage.svelte';
   import TreeNode from './TreeNode.svelte';
   import IssueCardSkeleton from './IssueCardSkeleton.svelte';
   import QuickFilters from '../filters/QuickFilters.svelte';
@@ -31,6 +32,8 @@
   let treeContainerRef: HTMLDivElement | null = $state(null);
   // Tick counter to force re-render of relative time every 30 seconds
   let timeTick = $state(0);
+  // Flash message state
+  let flashMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
   // eslint-disable-next-line svelte/no-unnecessary-state-wrap -- variable is reassigned, not just mutated
   let expandedGroups: SvelteSet<string> = $state(new SvelteSet<string>());
   let entryNodeExpanded = $state(true);
@@ -57,6 +60,20 @@
       (filtersState.searchText ? 1 : 0) +
       (filtersState.recencyFilter ? 1 : 0)
   );
+
+  // Checkpoint data for display (directly from store - KISS)
+  const checkpoint = $derived(
+    routerState.activeQueryId && changeTrackingState.isEnabled
+      ? changeTrackingState.checkpoints[routerState.activeQueryId]
+      : null
+  );
+
+  function showFlashMessage(type: 'success' | 'error', text: string): void {
+    flashMessage = { type, text };
+    setTimeout(() => {
+      flashMessage = null;
+    }, 4000);
+  }
 
   async function handleRefresh(): Promise<void> {
     isRefreshing = true;
@@ -161,6 +178,7 @@
   function handleSaveCheckpoint(): void {
     if (routerState.activeQueryId) {
       saveCheckpoint(routerState.activeQueryId, issuesState.rawIssues);
+      showFlashMessage('success', 'Checkpoint saved');
     }
   }
 
@@ -232,6 +250,20 @@
               />
             </Button>
           </Tooltip>
+          {#if checkpoint}
+            {#key `${checkpoint.timestamp}-${timeTick}`}
+              <Tooltip
+                content="Checkpoint: {formatRelativeTime(new Date(checkpoint.timestamp))} ({formatDateTime(checkpoint.timestamp)})"
+                placement="bottom"
+              >
+                <span
+                  class="inline-flex items-center justify-center size-8 rounded-md text-muted-foreground cursor-default"
+                >
+                  <AtlaskitIcon name="status" size={16} />
+                </span>
+              </Tooltip>
+            {/key}
+          {/if}
         </div>
 
         <div class="w-px h-5 bg-border mx-1"></div>
@@ -474,3 +506,5 @@
     {/if}
   </div>
 </div>
+
+<FlashMessage message={flashMessage} />
