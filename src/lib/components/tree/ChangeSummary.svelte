@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { ChangeDetection } from '../../types/changeTracking';
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
+  import Tooltip from '../common/Tooltip.svelte';
   import { formatDateTime, formatDateTimeWithSetting } from '../../utils/formatDate';
   import { getIssueUrl } from '../../stores/issues.svelte';
   import { openExternalUrl } from '../../utils/external-link';
@@ -59,9 +60,13 @@
             >
           {/if}
           {#if checkpointTime}
-            <span class="text-muted-foreground ml-2" title={checkpointTimeAbsolute}
-              >(since {checkpointTime})</span
-            >
+            <Tooltip content={checkpointTimeAbsolute ?? ''} placement="bottom">
+              <span
+                class="inline-flex items-center justify-center h-5 px-2 text-[10px] font-medium rounded-full bg-muted text-muted-foreground whitespace-nowrap cursor-default ml-2"
+              >
+                since {checkpointTime}
+              </span>
+            </Tooltip>
           {/if}
         </span>
       </div>
