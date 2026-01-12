@@ -47,7 +47,7 @@
   <!-- Node Row -->
   <div
     bind:this={nodeRef}
-    class="flex items-center hover:bg-surface-hovered rounded px-2 group transition-colors {isFocused
+    class="flex items-center gap-1 hover:bg-surface-hovered rounded px-2 group transition-colors {isFocused
       ? 'bg-brand-subtlest ring-2 ring-brand ring-inset'
       : ''}"
     style="padding-left: {indent + 8}px"
@@ -68,7 +68,7 @@
         }}
       />
     {:else}
-      <div class="w-6 h-6 flex-shrink-0"></div>
+      <div class="w-6 flex-shrink-0"></div>
     {/if}
 
     <!-- Issue Card -->

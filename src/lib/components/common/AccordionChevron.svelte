@@ -9,16 +9,16 @@
 
   let { isExpanded, size = 'md', onClick }: Props = $props();
 
-  // Unified sizing
+  // Sizing
   const iconSize = $derived(size === 'sm' ? 16 : 18);
-  const containerSize = $derived(size === 'sm' ? 'w-5 h-5' : 'w-6 h-6');
+  const containerWidth = $derived(size === 'sm' ? 'w-5' : 'w-6');
 
   // If no onClick provided, make button non-interactive so clicks pass through to parent
   const isInteractive = $derived(!!onClick);
 </script>
 
 <div
-  class="{containerSize} flex items-center justify-center flex-shrink-0 {isInteractive
+  class="{containerWidth} flex items-center justify-center flex-shrink-0 {isInteractive
     ? ''
     : 'pointer-events-none'}"
 >
