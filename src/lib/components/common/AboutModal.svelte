@@ -67,9 +67,7 @@
       </p>
 
       <!-- Close Button -->
-      <Button variant="secondary" size="sm" onclick={onClose}>
-        Close
-      </Button>
+      <Button variant="secondary" size="sm" onclick={onClose}>Close</Button>
     </div>
   </Dialog.Content>
 </Dialog.Root>
