@@ -1,6 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from './AtlaskitIcon.svelte';
   import Tooltip from './Tooltip.svelte';
+  import AboutModal from './AboutModal.svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { downloadConfig, readConfigFile, importConfig } from '../../utils/storage';
   import { initializeQueries } from '../../stores/jql.svelte';
@@ -40,6 +41,7 @@
   let { minimal = false }: Props = $props();
 
   let open = $state(false);
+  let showAboutModal = $state(false);
   let fileInput: HTMLInputElement;
   let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -127,6 +129,11 @@
     setTimeout(() => {
       importMessage = null;
     }, 4000);
+  }
+
+  function handleAboutClick(): void {
+    showAboutModal = true;
+    open = false;
   }
 </script>
 
@@ -360,7 +367,17 @@
         <AtlaskitIcon name="download" size={16} />
         Export Configuration
       </DropdownMenu.Item>
+    {/if}
 
+    <DropdownMenu.Separator />
+
+    <!-- About -->
+    <DropdownMenu.Item onclick={handleAboutClick}>
+      <AtlaskitIcon name="question-circle" size={16} />
+      About Canopy
+    </DropdownMenu.Item>
+
+    {#if !minimal}
       <DropdownMenu.Separator />
 
       <!-- Logout -->
@@ -406,3 +423,6 @@
     <span>{importMessage.text}</span>
   </div>
 {/if}
+
+<!-- About Modal -->
+<AboutModal bind:open={showAboutModal} onClose={() => (showAboutModal = false)} />

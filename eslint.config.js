@@ -27,7 +27,11 @@ export default ts.config(
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.node
+        ...globals.node,
+        // Vite injected globals
+        __APP_VERSION__: 'readonly',
+        __APP_NAME__: 'readonly',
+        __BUILD_DATE__: 'readonly'
       }
     },
     rules: {
