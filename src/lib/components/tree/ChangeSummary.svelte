@@ -37,7 +37,11 @@
   <div class="bg-primary/10 border border-primary/30 rounded-lg mx-2 mb-2">
     <!-- Summary Header -->
     <div class="flex items-center justify-between px-3 py-2">
-      <div class="flex items-center gap-2 text-sm">
+      <button
+        type="button"
+        onclick={() => (isExpanded = !isExpanded)}
+        class="flex items-center gap-2 text-sm hover:bg-primary/20 rounded px-1 -ml-1 transition-colors"
+      >
         <AtlaskitIcon name="status" size={16} class="text-primary" />
         <span class="text-foreground">
           {#if changes.newIssues.length > 0}
@@ -69,7 +73,7 @@
             </Tooltip>
           {/if}
         </span>
-      </div>
+      </button>
 
       <div class="flex items-center gap-1">
         <button
