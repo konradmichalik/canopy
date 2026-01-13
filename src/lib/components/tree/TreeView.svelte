@@ -288,7 +288,7 @@
               <AtlaskitIcon
                 name="refresh"
                 size={16}
-                class={isRefreshing || issuesState.isLoading ? 'animate-spin' : ''}
+                class={isRefreshing || issuesState.isLoading ? 'animate-spin [animation-direction:reverse]' : ''}
               />
             </Button>
           </Tooltip>
