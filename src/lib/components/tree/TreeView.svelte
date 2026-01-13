@@ -253,7 +253,9 @@
           {#if checkpoint}
             {#key `${checkpoint.timestamp}-${timeTick}`}
               <Tooltip
-                content="Checkpoint: {formatRelativeTime(new Date(checkpoint.timestamp))} ({formatDateTime(checkpoint.timestamp)})"
+                content="Checkpoint: {formatRelativeTime(
+                  new Date(checkpoint.timestamp)
+                )} ({formatDateTime(checkpoint.timestamp)})"
                 placement="bottom"
               >
                 <span
