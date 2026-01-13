@@ -26,6 +26,7 @@
   import { formatRelativeTime, formatDateTime } from '../../utils/formatDate';
   import { autoRefreshState } from '../../stores/autoRefresh.svelte';
   import { openExternalUrl } from '../../utils/external-link';
+  import { setFaviconBadge } from '../../utils/favicon';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
@@ -189,6 +190,28 @@
     }, 30000);
 
     return () => clearInterval(interval);
+  });
+
+  // Update document title and favicon based on current query and change tracking status
+  $effect(() => {
+    const queryTitle = currentQuery?.title;
+    const hasChanges = changeTrackingState.currentChanges?.hasChanges ?? false;
+
+    // Update document title
+    if (queryTitle) {
+      document.title = `${queryTitle} - Canopy`;
+    } else {
+      document.title = 'Canopy';
+    }
+
+    // Update favicon badge
+    setFaviconBadge(hasChanges);
+
+    // Reset when component unmounts
+    return () => {
+      document.title = 'Canopy';
+      setFaviconBadge(false);
+    };
   });
 </script>
 
