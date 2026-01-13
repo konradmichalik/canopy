@@ -30,6 +30,10 @@ import { routerState } from './router.svelte';
 import { updateQueryIssueCount } from './jql.svelte';
 import { detectChanges, changeTrackingState } from './changeTracking.svelte';
 
+// Configuration constants for large result handling
+export const LARGE_RESULT_THRESHOLD = 1000; // Show warning above this count
+export const BATCH_SIZE = 500; // Issues per batch
+
 // State container object
 export const issuesState = $state({
   rawIssues: [] as JiraIssue[],
@@ -38,7 +42,15 @@ export const issuesState = $state({
   error: null as string | null,
   currentJql: '',
   isInitialLoad: true,
-  lastUpdated: null as Date | null
+  lastUpdated: null as Date | null,
+
+  // Pagination state for large result sets
+  totalCount: 0, // Total issues matching JQL (from count check)
+  loadedCount: 0, // Number of issues currently loaded
+  isPartialLoad: false, // Whether current view is partial (more available)
+  isLoadingMore: false, // Loading more issues (distinct from initial load)
+  nextPageToken: null as string | null, // Cloud pagination
+  nextStartAt: 0 // Server pagination
 });
 
 // Track if a reload is pending (triggered while loading)
@@ -75,10 +87,78 @@ setSortConfigChangeCallback(() => {
   }
 });
 
+// --- Helper functions (DRY) ---
+
+/**
+ * Build effective JQL with filters and sorting applied
+ */
+function getEffectiveJql(baseJql: string): { jql: string; filterConditions: string[] } {
+  const filterConditions = getActiveFilterConditions();
+  let jql = applyQuickFilters(baseJql, filterConditions);
+  if (!hasOrderByClause(baseJql)) {
+    const sortConfig = getSortConfig();
+    jql = setOrderBy(jql, sortConfig.field, sortConfig.direction);
+  }
+  return { jql, filterConditions };
+}
+
+/**
+ * Apply local filters and rebuild tree hierarchy
+ */
+async function applyLocalFiltersAndBuildTree(issues: JiraIssue[]): Promise<void> {
+  let filteredIssues = filterIssuesBySearchText(issues);
+  filteredIssues = filterIssuesByRecency(filteredIssues);
+  issuesState.rawIssues = filteredIssues;
+
+  const savedExpandedKeys = await getStorageItemAsync<string[]>(STORAGE_KEYS.EXPANDED_NODES);
+  const expandedKeys = savedExpandedKeys ? new Set(savedExpandedKeys) : new Set<string>();
+
+  issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
+    epicLinkFieldId: getEpicLinkFieldId() || undefined,
+    expandedKeys,
+    sortConfig: getSortConfig()
+  });
+}
+
+// --- Public API ---
+
+/**
+ * Pre-check issue count before loading
+ * Returns { total, needsWarning } to determine if warning modal should be shown
+ */
+export async function preCheckIssueCount(
+  jql: string
+): Promise<{ total: number; needsWarning: boolean }> {
+  const client = getClient();
+  if (!client) {
+    throw new Error('Not connected to Jira');
+  }
+
+  // Apply quick filters to get accurate count
+  const filterConditions = getActiveFilterConditions();
+  const effectiveJql = applyQuickFilters(jql, filterConditions);
+
+  const total = await client.getIssueCount(effectiveJql);
+
+  return {
+    total,
+    needsWarning: total > LARGE_RESULT_THRESHOLD
+  };
+}
+
+export interface LoadIssuesOptions {
+  loadAll?: boolean; // If true, loads all issues (ignores threshold)
+  maxResults?: number; // Maximum issues to load per batch
+}
+
 /**
  * Load issues for a JQL query
  */
-export async function loadIssues(jql: string): Promise<boolean> {
+export async function loadIssues(
+  jql: string,
+  options: LoadIssuesOptions = {}
+): Promise<boolean> {
+  const { loadAll = false, maxResults = BATCH_SIZE } = options;
   const client = getClient();
 
   if (!client) {
@@ -86,9 +166,11 @@ export async function loadIssues(jql: string): Promise<boolean> {
     return false;
   }
 
-  // If the JQL changed, this is a new initial load
+  // If the JQL changed, this is a new initial load - reset pagination state
   if (issuesState.currentJql !== jql) {
     issuesState.isInitialLoad = true;
+    issuesState.nextPageToken = null;
+    issuesState.nextStartAt = 0;
   }
 
   issuesState.isLoading = true;
@@ -99,39 +181,37 @@ export async function loadIssues(jql: string): Promise<boolean> {
   loadingQueryId = routerState.activeQueryId;
 
   try {
-    // Apply quick filters if active
-    const filterConditions = getActiveFilterConditions();
-    let effectiveJql = applyQuickFilters(jql, filterConditions);
+    const { jql: effectiveJql, filterConditions } = getEffectiveJql(jql);
+    logger.info('Loading issues', { jql: effectiveJql, filters: filterConditions, loadAll });
 
-    // Apply sort config via ORDER BY (only if base JQL doesn't have ORDER BY)
-    if (!hasOrderByClause(jql)) {
-      const sortConfig = getSortConfig();
-      effectiveJql = setOrderBy(effectiveJql, sortConfig.field, sortConfig.direction);
+    let fetchedIssues: JiraIssue[];
+
+    if (loadAll) {
+      // Load all issues (existing behavior)
+      fetchedIssues = await client.fetchAllIssues(effectiveJql);
+      issuesState.totalCount = fetchedIssues.length;
+      issuesState.loadedCount = fetchedIssues.length;
+      issuesState.isPartialLoad = false;
+      issuesState.nextPageToken = null;
+      issuesState.nextStartAt = 0;
+    } else {
+      // Load limited batch
+      const result = await client.fetchIssuesBatch(effectiveJql, { maxResults });
+      fetchedIssues = result.issues;
+      issuesState.totalCount = result.total;
+      issuesState.loadedCount = result.issues.length;
+      issuesState.isPartialLoad = result.hasMore;
+      issuesState.nextPageToken = result.nextPageToken ?? null;
+      issuesState.nextStartAt = result.nextStartAt ?? 0;
     }
-
-    logger.info('Loading issues', { jql: effectiveJql, filters: filterConditions });
-
-    const fetchedIssues = await client.fetchAllIssues(effectiveJql);
 
     // Update dynamic filters only on initial load (before any quick filters are applied)
     if (issuesState.isInitialLoad) {
       updateDynamicFilters(fetchedIssues);
     }
 
-    // Apply local filters (text search and recency for 'recently-commented')
-    let filteredIssues = filterIssuesBySearchText(fetchedIssues);
-    filteredIssues = filterIssuesByRecency(filteredIssues);
-    issuesState.rawIssues = filteredIssues;
-
-    // Build hierarchy
-    const savedExpandedKeys = await getStorageItemAsync<string[]>(STORAGE_KEYS.EXPANDED_NODES);
-    const expandedKeys = savedExpandedKeys ? new Set(savedExpandedKeys) : new Set<string>();
-
-    issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
-      epicLinkFieldId: getEpicLinkFieldId() || undefined,
-      expandedKeys,
-      sortConfig: getSortConfig()
-    });
+    // Apply local filters and build tree
+    await applyLocalFiltersAndBuildTree(fetchedIssues);
 
     const stats = getTreeStats(issuesState.treeNodes);
     logger.info('Issues loaded', stats);
@@ -140,16 +220,16 @@ export async function loadIssues(jql: string): Promise<boolean> {
     issuesState.lastUpdated = new Date();
 
     // Update cached issue count for the query that started this load
-    // (use loadingQueryId to avoid race conditions when switching queries quickly)
+    // Use totalCount (not loadedCount) for the badge to show actual query size
     if (loadingQueryId) {
-      updateQueryIssueCount(loadingQueryId, stats.totalIssues);
+      updateQueryIssueCount(loadingQueryId, issuesState.totalCount);
 
-      // Detect changes from checkpoint (only on initial load and when no filters are active)
-      // Filter changes would cause false positives (e.g., filtered-out issues appear as "removed")
+      // Detect changes from checkpoint (only on initial load, full load, and when no filters are active)
+      // Partial loads can't reliably detect changes since we don't have all issues
       const hasNoActiveFilters =
         filterConditions.length === 0 && !filtersState.searchText && !filtersState.recencyFilter;
 
-      if (issuesState.isInitialLoad && hasNoActiveFilters) {
+      if (issuesState.isInitialLoad && !issuesState.isPartialLoad && hasNoActiveFilters) {
         detectChanges(loadingQueryId, fetchedIssues);
       } else if (issuesState.isInitialLoad && !hasNoActiveFilters) {
         // Clear any stale change detection when filters are active
@@ -188,6 +268,61 @@ export async function refreshIssues(): Promise<boolean> {
     return false;
   }
   return loadIssues(issuesState.currentJql);
+}
+
+/**
+ * Load additional issues (append to existing)
+ * Called when user clicks "Load more" button
+ */
+export async function loadMoreIssues(batchSize: number = BATCH_SIZE): Promise<boolean> {
+  const client = getClient();
+
+  if (!client || !issuesState.isPartialLoad) {
+    return false;
+  }
+
+  issuesState.isLoadingMore = true;
+
+  try {
+    const { jql: effectiveJql } = getEffectiveJql(issuesState.currentJql);
+
+    const result = await client.fetchIssuesBatch(effectiveJql, {
+      maxResults: batchSize,
+      startAt: issuesState.nextStartAt,
+      nextPageToken: issuesState.nextPageToken ?? undefined
+    });
+
+    // Update pagination state
+    issuesState.loadedCount = issuesState.loadedCount + result.issues.length;
+    issuesState.isPartialLoad = result.hasMore;
+    issuesState.nextPageToken = result.nextPageToken ?? null;
+    issuesState.nextStartAt = result.nextStartAt ?? issuesState.loadedCount;
+
+    // Append new issues and rebuild tree
+    const allIssues = [...issuesState.rawIssues, ...result.issues];
+    await applyLocalFiltersAndBuildTree(allIssues);
+
+    logger.info(`Loaded ${result.issues.length} more issues, total: ${issuesState.loadedCount}`);
+
+    issuesState.isLoadingMore = false;
+    return true;
+  } catch (err) {
+    issuesState.error = err instanceof Error ? err.message : 'Failed to load more issues';
+    issuesState.isLoadingMore = false;
+    logger.error('Failed to load more issues', err);
+    return false;
+  }
+}
+
+/**
+ * Load all remaining issues
+ */
+export async function loadAllRemainingIssues(): Promise<boolean> {
+  while (issuesState.isPartialLoad) {
+    const success = await loadMoreIssues();
+    if (!success) return false;
+  }
+  return true;
 }
 
 /**

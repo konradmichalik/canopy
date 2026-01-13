@@ -10,7 +10,15 @@
   import ChangeSummary from './ChangeSummary.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import { Button } from '$lib/components/ui/button';
-  import { issuesState, expandAll, collapseAll, refreshIssues } from '../../stores/issues.svelte';
+  import {
+    issuesState,
+    expandAll,
+    collapseAll,
+    refreshIssues,
+    loadMoreIssues,
+    loadAllRemainingIssues,
+    BATCH_SIZE
+  } from '../../stores/issues.svelte';
   import { filtersState, getActiveFilters } from '../../stores/filters.svelte';
   import { routerState } from '../../stores/router.svelte';
   import { getQueryById, updateQueryOptionsExpanded } from '../../stores/jql.svelte';
@@ -224,9 +232,20 @@
         {#if !isEmpty}
           <div class="flex items-center gap-2">
             <span class="text-sm font-medium text-foreground">
-              {stats.totalIssues}
+              {#if issuesState.isPartialLoad}
+                {issuesState.loadedCount.toLocaleString()} of {issuesState.totalCount.toLocaleString()}
+              {:else}
+                {stats.totalIssues}
+              {/if}
             </span>
             <span class="text-sm text-muted-foreground">Issues</span>
+            {#if issuesState.isPartialLoad}
+              <span
+                class="text-xs text-[color:var(--ds-text-warning)] bg-[color:var(--ds-background-warning)] px-2 py-0.5 rounded-full"
+              >
+                Partial
+              </span>
+            {/if}
           </div>
         {/if}
         {#if keyboardNavState.isNavigating}
@@ -527,6 +546,42 @@
         {#each issuesState.treeNodes as node (node.issue.key)}
           <TreeNode {node} />
         {/each}
+      </div>
+    {/if}
+
+    <!-- Load More Section -->
+    {#if issuesState.isPartialLoad && !issuesState.isLoading}
+      <div class="flex flex-col items-center gap-3 py-6 border-t mt-4">
+        <p class="text-sm text-muted-foreground">
+          Showing {issuesState.loadedCount.toLocaleString()} of {issuesState.totalCount.toLocaleString()}
+          issues
+        </p>
+        <div class="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onclick={() => loadMoreIssues()}
+            disabled={issuesState.isLoadingMore}
+          >
+            {#if issuesState.isLoadingMore}
+              <AtlaskitIcon name="refresh" size={16} class="animate-spin mr-2" />
+              Loading...
+            {:else}
+              Load {Math.min(
+                BATCH_SIZE,
+                issuesState.totalCount - issuesState.loadedCount
+              ).toLocaleString()} more
+            {/if}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onclick={() => loadAllRemainingIssues()}
+            disabled={issuesState.isLoadingMore}
+          >
+            Load all remaining
+          </Button>
+        </div>
       </div>
     {/if}
   </div>

@@ -64,6 +64,14 @@ export interface SearchOptions {
   nextPageToken?: string; // For Cloud pagination
 }
 
+export interface FetchBatchResult {
+  issues: JiraIssue[];
+  total: number;
+  hasMore: boolean;
+  nextPageToken?: string; // Cloud pagination
+  nextStartAt?: number; // Server pagination
+}
+
 export abstract class JiraClient {
   protected config: JiraConnectionConfig;
   protected epicLinkFieldId?: string;
@@ -265,6 +273,61 @@ export abstract class JiraClient {
 
     logger.info(`Fetched ${allIssues.length} issues total`);
     return allIssues;
+  }
+
+  /**
+   * Get total issue count for a JQL query (without fetching issues)
+   * Uses maxResults: 0 to minimize API response size
+   */
+  async getIssueCount(jql: string): Promise<number> {
+    const response = await this.searchIssues({
+      jql,
+      maxResults: 0,
+      fields: ['key']
+    });
+    return response.total;
+  }
+
+  /**
+   * Fetch a batch of issues with pagination support
+   * Unlike fetchAllIssues, this returns after one batch with pagination info
+   */
+  async fetchIssuesBatch(
+    jql: string,
+    options: {
+      maxResults?: number;
+      startAt?: number;
+      nextPageToken?: string;
+      fields?: string[];
+    } = {}
+  ): Promise<FetchBatchResult> {
+    const { maxResults = 500, startAt = 0, nextPageToken, fields } = options;
+
+    const response = await this.searchIssues({
+      jql,
+      maxResults,
+      startAt,
+      nextPageToken,
+      fields
+    });
+
+    if (this.config.instanceType === 'cloud') {
+      return {
+        issues: response.issues,
+        total: response.total,
+        hasMore: !!response.nextPageToken,
+        nextPageToken: response.nextPageToken
+      };
+    } else {
+      // Server: calculate if more pages exist
+      const loadedSoFar = startAt + response.issues.length;
+      return {
+        issues: response.issues,
+        total: response.total,
+        hasMore: loadedSoFar < response.total,
+        nextStartAt: loadedSoFar
+      };
+    }
   }
 
   /**

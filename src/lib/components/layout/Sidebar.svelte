@@ -32,7 +32,8 @@
     getSlugFromUrl
   } from '../../stores/router.svelte';
   import { getQueryBySlug, getQuerySlug } from '../../stores/jql.svelte';
-  import { loadIssues, clearIssues } from '../../stores/issues.svelte';
+  import { loadIssues, clearIssues, preCheckIssueCount } from '../../stores/issues.svelte';
+  import LargeResultWarningModal from '../common/LargeResultWarningModal.svelte';
   import {
     loadFieldConfig,
     setFieldConfigChangeCallback,
@@ -69,8 +70,11 @@
   let importFileInput: HTMLInputElement;
   let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Load a query and its associated config
-  async function loadQuery(query: SavedQuery, updateUrl: boolean = true): Promise<void> {
+  // Large result warning state
+  let pendingLargeQuery = $state<{ query: SavedQuery; total: number } | null>(null);
+
+  // Set up query config (URL, filters, etc.) without loading issues
+  function setupQueryConfig(query: SavedQuery, updateUrl: boolean = true): void {
     const slug = getQuerySlug(query);
     setActiveQuery(query.id, slug, updateUrl);
     loadFieldConfig(query.id, query.displayFields);
@@ -78,7 +82,60 @@
     loadCustomFilters(query.customFilters, query.activeCustomFilterId);
     loadSortConfig(query.id, query.sortConfig);
     loadGroupConfig(query.id, query.groupBy);
-    await loadIssues(query.jql);
+  }
+
+  // Load a query and its associated config
+  async function loadQuery(
+    query: SavedQuery,
+    updateUrl: boolean = true,
+    options: { loadAll?: boolean } = {}
+  ): Promise<void> {
+    setupQueryConfig(query, updateUrl);
+
+    // If loadAll is explicitly set, skip pre-check
+    if (options.loadAll !== undefined) {
+      await loadIssues(query.jql, { loadAll: options.loadAll });
+      return;
+    }
+
+    // Pre-check count for large result warning
+    try {
+      const { total, needsWarning } = await preCheckIssueCount(query.jql);
+
+      if (needsWarning) {
+        // Show warning modal
+        pendingLargeQuery = { query, total };
+        return;
+      }
+
+      // Load all if under threshold
+      await loadIssues(query.jql, { loadAll: true });
+    } catch {
+      // On error, fall back to loading first batch
+      await loadIssues(query.jql, { loadAll: false });
+    }
+  }
+
+  // Handle warning modal callbacks
+  function handleLoadFirstBatch(): void {
+    if (pendingLargeQuery) {
+      loadIssues(pendingLargeQuery.query.jql, { loadAll: false });
+      pendingLargeQuery = null;
+    }
+  }
+
+  function handleLoadAll(): void {
+    if (pendingLargeQuery) {
+      loadIssues(pendingLargeQuery.query.jql, { loadAll: true });
+      pendingLargeQuery = null;
+    }
+  }
+
+  function handleCancelLargeQuery(): void {
+    pendingLargeQuery = null;
+    // Clear active query since we didn't load anything
+    setActiveQuery(null);
+    clearIssues();
   }
 
   // Handle slug from URL (initial load or browser navigation)
@@ -369,6 +426,16 @@
     <QueryForm query={editingQuery} onSave={handleSaveQuery} onCancel={handleCancelForm} />
   {/if}
 </aside>
+
+<!-- Large Result Warning Modal -->
+{#if pendingLargeQuery}
+  <LargeResultWarningModal
+    totalCount={pendingLargeQuery.total}
+    onLoadFirst={handleLoadFirstBatch}
+    onLoadAll={handleLoadAll}
+    onCancel={handleCancelLargeQuery}
+  />
+{/if}
 
 <!-- Import Notification Toast -->
 {#if importMessage}
