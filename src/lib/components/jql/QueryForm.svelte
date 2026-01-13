@@ -9,6 +9,7 @@
   import { validateJql, validateJqlExtended } from '../../utils/jql-helpers';
   import { isTitleUnique } from '../../stores/jql.svelte';
   import { generateSlug } from '../../utils/slug';
+  import { getClient, connectionState } from '../../stores/connection.svelte';
 
   interface Props {
     query?: SavedQuery | null;
@@ -28,6 +29,10 @@
   // svelte-ignore state_referenced_locally
   let showEntryNode = $state(query?.showEntryNode ?? true);
   let error = $state<string | null>(null);
+
+  // JQL validation state
+  let isCheckingJql = $state(false);
+  let jqlCheckResult = $state<{ valid: true; count: number } | { valid: false; error: string } | null>(null);
 
   // Real-time JQL validation
   const jqlValidation = $derived(validateJqlExtended(jql));
@@ -68,6 +73,23 @@
 
   function selectColor(c: QueryColor): void {
     color = color === c ? undefined : c;
+  }
+
+  async function checkJql(): Promise<void> {
+    const client = getClient();
+    if (!client) return;
+
+    isCheckingJql = true;
+    jqlCheckResult = null;
+
+    try {
+      const count = await client.getIssueCount(jql.trim());
+      jqlCheckResult = { valid: true, count };
+    } catch (e) {
+      jqlCheckResult = { valid: false, error: e instanceof Error ? e.message : 'Unknown error' };
+    } finally {
+      isCheckingJql = false;
+    }
   }
 
   const isEdit = $derived(!!query);
@@ -125,7 +147,27 @@
       </div>
 
       <div class="space-y-2">
-        <Label for="queryJql">JQL Query</Label>
+        <div class="flex items-center justify-between">
+          <Label for="queryJql">JQL Query</Label>
+          {#if connectionState.isConnected}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onclick={checkJql}
+              disabled={isCheckingJql || !jql.trim()}
+              class="h-7 text-xs"
+            >
+              {#if isCheckingJql}
+                <AtlaskitIcon name="refresh" size={14} class="animate-spin" />
+                Checking...
+              {:else}
+                <AtlaskitIcon name="check-circle" size={14} />
+                Check JQL
+              {/if}
+            </Button>
+          {/if}
+        </div>
         <textarea
           id="queryJql"
           bind:value={jql}
@@ -136,8 +178,21 @@
             {hasJqlWarning
             ? 'border-destructive focus-visible:ring-destructive/20'
             : 'border-input'}"
+          onchange={() => jqlCheckResult = null}
         ></textarea>
-        {#if hasJqlWarning}
+        {#if jqlCheckResult}
+          {#if jqlCheckResult.valid}
+            <div class="flex items-center gap-1.5 text-xs text-text-success">
+              <AtlaskitIcon name="check-circle" size={14} />
+              <span>Valid JQL - {jqlCheckResult.count} {jqlCheckResult.count === 1 ? 'result' : 'results'}</span>
+            </div>
+          {:else}
+            <div class="flex items-center gap-1.5 text-xs text-text-danger">
+              <AtlaskitIcon name="cross" size={14} />
+              <span>{jqlCheckResult.error}</span>
+            </div>
+          {/if}
+        {:else if hasJqlWarning}
           <div class="flex items-center gap-1.5 text-xs text-text-warning">
             <AtlaskitIcon name="warning" size={14} />
             <span>{jqlValidation.error}</span>
