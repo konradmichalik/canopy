@@ -171,6 +171,16 @@ export interface JiraComponent {
   description?: string;
 }
 
+export interface JiraVersion {
+  id: string;
+  name: string;
+  description?: string;
+  archived: boolean;
+  released: boolean;
+  releaseDate?: string;
+  startDate?: string;
+}
+
 export interface JiraComment {
   id: string;
   author: JiraUser;

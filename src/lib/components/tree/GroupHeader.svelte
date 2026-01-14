@@ -8,7 +8,8 @@
     AssigneeGroupMetadata,
     StatusGroupMetadata,
     ProjectGroupMetadata,
-    RecencyGroupMetadata
+    RecencyGroupMetadata,
+    ReleaseGroupMetadata
   } from '../../stores/grouping.svelte';
   import {
     calculateIssuesTimeProgress,
@@ -31,12 +32,14 @@
   const isStatus = $derived(group.metadata?.type === 'status');
   const isProject = $derived(group.metadata?.type === 'project');
   const isRecency = $derived(group.metadata?.type === 'recency');
+  const isRelease = $derived(group.metadata?.type === 'release');
 
   const sprintMeta = $derived(isSprint ? (group.metadata as SprintGroupMetadata) : null);
   const assigneeMeta = $derived(isAssignee ? (group.metadata as AssigneeGroupMetadata) : null);
   const statusMeta = $derived(isStatus ? (group.metadata as StatusGroupMetadata) : null);
   const projectMeta = $derived(isProject ? (group.metadata as ProjectGroupMetadata) : null);
   const recencyMeta = $derived(isRecency ? (group.metadata as RecencyGroupMetadata) : null);
+  const releaseMeta = $derived(isRelease ? (group.metadata as ReleaseGroupMetadata) : null);
 
   // Avatar colors (same as Avatar.svelte)
   const AVATAR_COLORS = [
@@ -172,6 +175,8 @@
     </div>
   {:else if isRecency && recencyMeta}
     <AtlaskitIcon name={recencyMeta.icon} size={18} class={recencyMeta.colorClass} />
+  {:else if isRelease}
+    <AtlaskitIcon name="release" size={18} class={releaseMeta?.version ? 'text-brand' : 'text-text-subtle'} />
   {:else}
     <AtlaskitIcon name="layers" size={18} class="text-text-subtle" />
   {/if}

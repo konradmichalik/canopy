@@ -85,7 +85,7 @@ export const QUERY_COLORS: { id: QueryColor; label: string; bg: string; border: 
   { id: 'teal', label: 'Teal', bg: 'bg-teal-500', border: 'border-teal-500' }
 ];
 
-export type GroupByOption = 'none' | 'sprint' | 'assignee' | 'status' | 'project' | 'recency';
+export type GroupByOption = 'none' | 'sprint' | 'assignee' | 'status' | 'project' | 'recency' | 'release';
 
 /** Available icons for custom filters */
 export const CUSTOM_FILTER_ICONS = [

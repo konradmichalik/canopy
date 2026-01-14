@@ -3,7 +3,7 @@
  * Manages issue grouping by sprint, assignee, status, etc.
  */
 
-import type { JiraIssue, JiraSprint, SprintState } from '../types/jira';
+import type { JiraIssue, JiraSprint, JiraVersion, SprintState } from '../types/jira';
 import type { TreeNode, SortConfig, GroupByOption } from '../types/tree';
 import { extractSprints, SPRINT_STATE_ORDER } from '../types/jira';
 import { buildFlatList } from '../utils/hierarchy-builder';
@@ -64,12 +64,24 @@ export interface RecencyGroupMetadata {
   colorClass: string;
 }
 
+export interface ReleaseGroupMetadata {
+  type: 'release';
+  version: JiraVersion | null;
+  releaseDate?: Date;
+  progress: {
+    done: number;
+    total: number;
+    percentage: number;
+  };
+}
+
 export type GroupMetadata =
   | SprintGroupMetadata
   | AssigneeGroupMetadata
   | StatusGroupMetadata
   | ProjectGroupMetadata
-  | RecencyGroupMetadata;
+  | RecencyGroupMetadata
+  | ReleaseGroupMetadata;
 
 // ============================================
 // Callbacks for grouping changes
@@ -160,6 +172,8 @@ export function groupIssues(
       return groupByProject(issues, sortConfig);
     case 'recency':
       return groupByRecency(issues, sortConfig);
+    case 'release':
+      return groupByRelease(issues, sortConfig);
     default:
       return [];
   }
@@ -487,6 +501,110 @@ function groupByRecency(issues: JiraIssue[], sortConfig?: SortConfig): IssueGrou
   });
 }
 
+const NO_RELEASE_GROUP_KEY = 'no-release';
+
+/**
+ * Extract fix versions from an issue's fields
+ */
+function extractFixVersions(issue: JiraIssue): JiraVersion[] {
+  const fields = issue.fields as Record<string, unknown>;
+  const fixVersions = fields.fixVersions as JiraVersion[] | undefined;
+  return fixVersions ?? [];
+}
+
+/**
+ * Group issues by release (fix version)
+ * Only shows unreleased versions, plus a "No Release" group for issues without a version.
+ */
+function groupByRelease(issues: JiraIssue[], sortConfig?: SortConfig): IssueGroup[] {
+  const releaseMap = new Map<string, { version: JiraVersion | null; issues: JiraIssue[] }>();
+
+  const addToGroup = (key: string, version: JiraVersion | null, issue: JiraIssue) => {
+    if (!releaseMap.has(key)) {
+      releaseMap.set(key, { version, issues: [] });
+    }
+    releaseMap.get(key)!.issues.push(issue);
+  };
+
+  for (const issue of issues) {
+    const fixVersions = extractFixVersions(issue);
+    // Filter to only unreleased versions
+    const unreleasedVersions = fixVersions.filter((v) => !v.released);
+
+    if (unreleasedVersions.length === 0) {
+      addToGroup(NO_RELEASE_GROUP_KEY, null, issue);
+    } else {
+      for (const version of unreleasedVersions) {
+        addToGroup(`release-${version.id}`, version, issue);
+      }
+    }
+  }
+
+  // Convert to IssueGroup array
+  const groups: IssueGroup[] = [];
+
+  for (const [id, { version, issues: groupIssues }] of releaseMap) {
+    // Calculate progress
+    const doneCount = groupIssues.filter(
+      (i) => i.fields.status.statusCategory.key === 'done'
+    ).length;
+    const totalCount = groupIssues.length;
+
+    // Build flat list within the group
+    const treeNodes = buildFlatList(groupIssues, { sortConfig });
+
+    // Format dates
+    let subtitle: string | undefined;
+    if (version?.releaseDate) {
+      const releaseDate = new Date(version.releaseDate);
+      subtitle = `Release: ${formatShortDate(releaseDate)}`;
+    } else if (version?.startDate) {
+      const startDate = new Date(version.startDate);
+      subtitle = `Start: ${formatShortDate(startDate)}`;
+    }
+
+    groups.push({
+      id,
+      label: version?.name ?? 'No Release',
+      subtitle,
+      issues: groupIssues,
+      treeNodes,
+      metadata: {
+        type: 'release',
+        version,
+        releaseDate: version?.releaseDate ? new Date(version.releaseDate) : undefined,
+        progress: {
+          done: doneCount,
+          total: totalCount,
+          percentage: totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0
+        }
+      } as ReleaseGroupMetadata
+    });
+  }
+
+  // Sort: By release date (earliest first), then alphabetically, No Release last
+  groups.sort((a, b) => {
+    const metaA = a.metadata as ReleaseGroupMetadata;
+    const metaB = b.metadata as ReleaseGroupMetadata;
+
+    // No Release always last
+    if (!metaA.version) return 1;
+    if (!metaB.version) return -1;
+
+    // Sort by release date if available
+    if (metaA.releaseDate && metaB.releaseDate) {
+      return metaA.releaseDate.getTime() - metaB.releaseDate.getTime();
+    }
+    if (metaA.releaseDate) return -1;
+    if (metaB.releaseDate) return 1;
+
+    // Fall back to alphabetical by name
+    return a.label.localeCompare(b.label);
+  });
+
+  return groups;
+}
+
 // ============================================
 // Group By Options
 // ============================================
@@ -494,6 +612,7 @@ function groupByRecency(issues: JiraIssue[], sortConfig?: SortConfig): IssueGrou
 export const GROUP_BY_OPTIONS: { id: GroupByOption; label: string; icon: string }[] = [
   { id: 'none', label: 'No Grouping', icon: 'list' },
   { id: 'sprint', label: 'Sprint', icon: 'sprint' },
+  { id: 'release', label: 'Release', icon: 'release' },
   { id: 'assignee', label: 'Assignee', icon: 'person' },
   { id: 'status', label: 'Status', icon: 'status' },
   { id: 'project', label: 'Project', icon: 'folder' },
