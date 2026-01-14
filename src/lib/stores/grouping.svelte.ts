@@ -165,45 +165,31 @@ export function groupIssues(
   }
 }
 
+const BACKLOG_GROUP_KEY = 'backlog';
+
 /**
  * Group issues by sprint
+ * Only shows active and future sprints, plus a "Backlog" group for issues without a sprint.
  */
 function groupBySprint(issues: JiraIssue[], sortConfig?: SortConfig): IssueGroup[] {
   const sprintMap = new Map<string, { sprint: JiraSprint | null; issues: JiraIssue[] }>();
 
-  // Debug: Log first issue to see sprint field structure
-  if (issues.length > 0) {
-    const firstIssue = issues[0];
-    const fields = firstIssue.fields as Record<string, unknown>;
-    const customFieldsWithValues = Object.entries(fields)
-      .filter(([k, v]) => k.startsWith('customfield_') && v !== null && v !== undefined)
-      .map(([k, v]) => ({ key: k, type: Array.isArray(v) ? 'array' : typeof v, value: v }));
-    console.debug('[Sprint Grouping] First issue fields:', {
-      key: firstIssue.key,
-      sprint: fields.sprint,
-      customFieldsWithValues
-    });
-  }
+  const addToGroup = (key: string, sprint: JiraSprint | null, issue: JiraIssue) => {
+    if (!sprintMap.has(key)) {
+      sprintMap.set(key, { sprint, issues: [] });
+    }
+    sprintMap.get(key)!.issues.push(issue);
+  };
 
-  // Group issues by sprint
   for (const issue of issues) {
     const sprints = extractSprints(issue);
+    const relevantSprints = sprints.filter((s) => s.state === 'active' || s.state === 'future');
 
-    if (sprints.length === 0) {
-      // No sprint - add to "No Sprint" group
-      const key = 'no-sprint';
-      if (!sprintMap.has(key)) {
-        sprintMap.set(key, { sprint: null, issues: [] });
-      }
-      sprintMap.get(key)!.issues.push(issue);
+    if (relevantSprints.length === 0) {
+      addToGroup(BACKLOG_GROUP_KEY, null, issue);
     } else {
-      // Add to each sprint (issue can be in multiple sprints)
-      for (const sprint of sprints) {
-        const key = `sprint-${sprint.id}`;
-        if (!sprintMap.has(key)) {
-          sprintMap.set(key, { sprint, issues: [] });
-        }
-        sprintMap.get(key)!.issues.push(issue);
+      for (const sprint of relevantSprints) {
+        addToGroup(`sprint-${sprint.id}`, sprint, issue);
       }
     }
   }
@@ -231,7 +217,7 @@ function groupBySprint(issues: JiraIssue[], sortConfig?: SortConfig): IssueGroup
 
     groups.push({
       id,
-      label: sprint?.name ?? 'No Sprint',
+      label: sprint?.name ?? 'Backlog',
       subtitle,
       issues: groupIssues,
       treeNodes,
@@ -250,12 +236,12 @@ function groupBySprint(issues: JiraIssue[], sortConfig?: SortConfig): IssueGroup
     });
   }
 
-  // Sort: Active > Future > Closed > No Sprint
+  // Sort: Active > Future > Backlog
   groups.sort((a, b) => {
     const metaA = a.metadata as SprintGroupMetadata;
     const metaB = b.metadata as SprintGroupMetadata;
 
-    // No Sprint always last
+    // Backlog always last
     if (metaA.state === 'none') return 1;
     if (metaB.state === 'none') return -1;
 
