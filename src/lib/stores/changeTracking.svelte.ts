@@ -9,11 +9,17 @@ import type {
   QueryCheckpoint,
   CheckpointStore,
   ChangeDetection,
+  IssueChangeInfo,
   StatusChange,
+  CommentChange,
+  AssigneeChange,
   RemovedIssueInfo,
   ActivityPeriod,
-  ChangeType
+  ChangeType,
+  ChangeTypes,
+  SingleChangeType
 } from '../types/changeTracking';
+import type { JiraComment } from '../types/jira';
 import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
@@ -94,14 +100,52 @@ export function setActivityPeriod(period: ActivityPeriod): void {
 }
 
 /**
+ * Extract comment field data from an issue
+ */
+function getCommentField(issue: JiraIssue): { total: number; comments: JiraComment[] } {
+  const field = (issue.fields as Record<string, unknown>).comment as
+    | { total?: number; comments?: JiraComment[] }
+    | undefined;
+  return {
+    total: field?.total ?? 0,
+    comments: field?.comments ?? []
+  };
+}
+
+/**
+ * Find the latest comment by numeric ID (higher ID = newer)
+ */
+function getLatestComment(comments: JiraComment[]): JiraComment | undefined {
+  if (comments.length === 0) return undefined;
+  return comments.reduce((latest, c) => (Number(c.id) > Number(latest.id) ? c : latest), comments[0]);
+}
+
+/**
+ * Get assignee ID (accountId for Cloud, name/key for Server)
+ */
+function getAssigneeId(issue: JiraIssue): string | undefined {
+  const assignee = issue.fields.assignee;
+  if (!assignee) return undefined;
+  return assignee.accountId || assignee.name || assignee.key;
+}
+
+/**
  * Create a snapshot from a JiraIssue
  */
 function createSnapshot(issue: JiraIssue): IssueSnapshot {
+  const { total, comments } = getCommentField(issue);
+  const latestComment = getLatestComment(comments);
+
   return {
     key: issue.key,
+    summary: issue.fields.summary,
     statusName: issue.fields.status.name,
     statusCategoryKey: issue.fields.status.statusCategory?.key || 'new',
-    updated: issue.fields.updated
+    updated: issue.fields.updated,
+    commentCount: total,
+    latestCommentId: latestComment?.id,
+    assigneeId: getAssigneeId(issue),
+    assigneeName: issue.fields.assignee?.displayName
   };
 }
 
@@ -156,6 +200,8 @@ export function detectChanges(queryId: string, currentIssues: JiraIssue[]): Chan
       newIssues: [],
       removedIssues: [],
       statusChanges: [],
+      commentChanges: [],
+      assigneeChanges: [],
       hasChanges: false,
       checkpointTimestamp: null
     };
@@ -170,6 +216,8 @@ export function detectChanges(queryId: string, currentIssues: JiraIssue[]): Chan
       newIssues: [],
       removedIssues: [],
       statusChanges: [],
+      commentChanges: [],
+      assigneeChanges: [],
       hasChanges: false,
       checkpointTimestamp: new Date().toISOString()
     };
@@ -179,10 +227,10 @@ export function detectChanges(queryId: string, currentIssues: JiraIssue[]): Chan
   const currentMap = new Map(currentIssues.map((i) => [i.key, i]));
 
   // Find new issues (in current but not in checkpoint)
-  const newIssues: string[] = [];
-  for (const key of currentMap.keys()) {
+  const newIssues: IssueChangeInfo[] = [];
+  for (const [key, issue] of currentMap) {
     if (!previousMap.has(key)) {
-      newIssues.push(key);
+      newIssues.push({ key, summary: issue.fields.summary });
     }
   }
 
@@ -192,22 +240,62 @@ export function detectChanges(queryId: string, currentIssues: JiraIssue[]): Chan
     if (!currentMap.has(key)) {
       removedIssues.push({
         key,
+        summary: snapshot.summary,
         lastStatus: snapshot.statusName
       });
     }
   }
 
-  // Find status changes
+  // Find status, comment, and assignee changes in a single pass
   const statusChanges: StatusChange[] = [];
+  const commentChanges: CommentChange[] = [];
+  const assigneeChanges: AssigneeChange[] = [];
+
   for (const [key, snapshot] of previousMap) {
     const currentIssue = currentMap.get(key);
-    if (currentIssue && currentIssue.fields.status.name !== snapshot.statusName) {
+    if (!currentIssue) continue; // Issue was removed, handled above
+
+    const summary = currentIssue.fields.summary;
+
+    // Status change?
+    if (currentIssue.fields.status.name !== snapshot.statusName) {
       statusChanges.push({
         key,
+        summary,
         previousStatus: snapshot.statusName,
         previousCategoryKey: snapshot.statusCategoryKey,
         currentStatus: currentIssue.fields.status.name,
         currentCategoryKey: currentIssue.fields.status.statusCategory?.key || 'new'
+      });
+    }
+
+    // Comment change?
+    const { total: currentCount, comments } = getCommentField(currentIssue);
+    const previousCount = snapshot.commentCount ?? 0;
+    const latestComment = getLatestComment(comments);
+    const hasNewComments =
+      currentCount > previousCount ||
+      (latestComment && snapshot.latestCommentId && latestComment.id !== snapshot.latestCommentId);
+
+    if (hasNewComments) {
+      commentChanges.push({
+        key,
+        summary,
+        previousCount,
+        currentCount,
+        newCommentCount: Math.max(0, currentCount - previousCount),
+        latestAuthor: latestComment?.author?.displayName
+      });
+    }
+
+    // Assignee change?
+    const currentAssigneeId = getAssigneeId(currentIssue);
+    if (currentAssigneeId !== snapshot.assigneeId) {
+      assigneeChanges.push({
+        key,
+        summary,
+        previousAssignee: snapshot.assigneeName,
+        currentAssignee: currentIssue.fields.assignee?.displayName
       });
     }
   }
@@ -216,7 +304,14 @@ export function detectChanges(queryId: string, currentIssues: JiraIssue[]): Chan
     newIssues,
     removedIssues,
     statusChanges,
-    hasChanges: newIssues.length > 0 || removedIssues.length > 0 || statusChanges.length > 0,
+    commentChanges,
+    assigneeChanges,
+    hasChanges:
+      newIssues.length > 0 ||
+      removedIssues.length > 0 ||
+      statusChanges.length > 0 ||
+      commentChanges.length > 0 ||
+      assigneeChanges.length > 0,
     checkpointTimestamp: checkpoint.timestamp
   };
 
@@ -258,6 +353,7 @@ export function isRecentlyUpdated(
 
 /**
  * Get change type for an issue (for visual highlighting)
+ * Returns only the first/primary change type
  */
 export function getIssueChangeType(issueKey: string): ChangeType {
   if (!changeTrackingState.isEnabled) return null;
@@ -265,9 +361,30 @@ export function getIssueChangeType(issueKey: string): ChangeType {
   const changes = changeTrackingState.currentChanges;
   if (!changes) return null;
 
-  if (changes.newIssues.includes(issueKey)) return 'new';
+  if (changes.newIssues.some((c) => c.key === issueKey)) return 'new';
   if (changes.statusChanges.some((c) => c.key === issueKey)) return 'status-changed';
+  if (changes.commentChanges.some((c) => c.key === issueKey)) return 'new-comments';
+  if (changes.assigneeChanges.some((c) => c.key === issueKey)) return 'assignee-changed';
   return null;
+}
+
+/**
+ * Get all change types for an issue (for displaying multiple indicators)
+ */
+export function getIssueChangeTypes(issueKey: string): ChangeTypes {
+  if (!changeTrackingState.isEnabled) return [];
+
+  const changes = changeTrackingState.currentChanges;
+  if (!changes) return [];
+
+  const types: SingleChangeType[] = [];
+
+  if (changes.newIssues.some((c) => c.key === issueKey)) types.push('new');
+  if (changes.statusChanges.some((c) => c.key === issueKey)) types.push('status-changed');
+  if (changes.commentChanges.some((c) => c.key === issueKey)) types.push('new-comments');
+  if (changes.assigneeChanges.some((c) => c.key === issueKey)) types.push('assignee-changed');
+
+  return types;
 }
 
 /**

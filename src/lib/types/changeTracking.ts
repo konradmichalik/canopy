@@ -5,13 +5,18 @@
 
 /**
  * Lightweight snapshot of an issue for comparison
- * Stores only essential data to minimize localStorage usage (~100 bytes per issue)
+ * Stores only essential data to minimize localStorage usage (~130 bytes per issue)
  */
 export interface IssueSnapshot {
   key: string; // e.g., "PROJ-123"
+  summary: string; // Issue title
   statusName: string; // e.g., "In Progress"
   statusCategoryKey: string; // 'new' | 'indeterminate' | 'done'
   updated: string; // ISO timestamp from issue.fields.updated
+  commentCount: number; // Total comment count at checkpoint
+  latestCommentId?: string; // ID of newest comment (for precise detection)
+  assigneeId?: string; // Account ID (Cloud) or username (Server)
+  assigneeName?: string; // Display name for UI
 }
 
 /**
@@ -31,10 +36,17 @@ export interface CheckpointStore {
 }
 
 /**
+ * Basic issue info for change display
+ */
+export interface IssueChangeInfo {
+  key: string;
+  summary: string;
+}
+
+/**
  * A status change detected between checkpoint and current state
  */
-export interface StatusChange {
-  key: string;
+export interface StatusChange extends IssueChangeInfo {
   previousStatus: string;
   previousCategoryKey: string;
   currentStatus: string;
@@ -42,10 +54,27 @@ export interface StatusChange {
 }
 
 /**
+ * A comment change detected between checkpoint and current state
+ */
+export interface CommentChange extends IssueChangeInfo {
+  previousCount: number;
+  currentCount: number;
+  newCommentCount: number;
+  latestAuthor?: string;
+}
+
+/**
+ * An assignee change detected between checkpoint and current state
+ */
+export interface AssigneeChange extends IssueChangeInfo {
+  previousAssignee?: string;
+  currentAssignee?: string;
+}
+
+/**
  * Information about a removed issue (for display in change summary)
  */
-export interface RemovedIssueInfo {
-  key: string;
+export interface RemovedIssueInfo extends IssueChangeInfo {
   lastStatus: string;
 }
 
@@ -53,9 +82,11 @@ export interface RemovedIssueInfo {
  * Detected changes between current state and checkpoint
  */
 export interface ChangeDetection {
-  newIssues: string[]; // Issue keys that are new
+  newIssues: IssueChangeInfo[]; // Issues that are new
   removedIssues: RemovedIssueInfo[]; // Issues that were removed (with last known status)
   statusChanges: StatusChange[]; // Issues with status changes
+  commentChanges: CommentChange[]; // Issues with new comments
+  assigneeChanges: AssigneeChange[]; // Issues with assignee changes
   hasChanges: boolean; // Convenience flag
   checkpointTimestamp: string | null; // When last checkpoint was taken
 }
@@ -66,9 +97,19 @@ export interface ChangeDetection {
 export type ActivityPeriod = '24h' | '7d' | 'off';
 
 /**
- * Change type for visual highlighting in UI
+ * Single change type for visual highlighting in UI
  */
-export type ChangeType = 'new' | 'status-changed' | null;
+export type SingleChangeType = 'new' | 'status-changed' | 'new-comments' | 'assignee-changed';
+
+/**
+ * Array of change types (or null for backwards compatibility)
+ */
+export type ChangeType = SingleChangeType | null;
+
+/**
+ * Multiple change types for an issue
+ */
+export type ChangeTypes = SingleChangeType[];
 
 /**
  * State structure for the change tracking store

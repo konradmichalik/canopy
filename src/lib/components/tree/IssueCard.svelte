@@ -25,7 +25,7 @@
   import { formatDate, formatDateTime, getDueDateStatus } from '../../utils/formatDate';
   import {
     changeTrackingState,
-    getIssueChangeType,
+    getIssueChangeTypes,
     isRecentlyUpdated
   } from '../../stores/changeTracking.svelte';
   import { openExternalUrl } from '../../utils/external-link';
@@ -93,10 +93,10 @@
   const isCompact = $derived(displayDensityState.density === 'compact');
 
   // Change tracking
-  const changeType = $derived(getIssueChangeType(issue.key));
+  const changeTypes = $derived(getIssueChangeTypes(issue.key));
   const recentlyUpdated = $derived(isRecentlyUpdated(issue));
   const showActivityBadge = $derived(
-    changeTrackingState.isEnabled && (changeType !== null || recentlyUpdated)
+    changeTrackingState.isEnabled && (changeTypes.length > 0 || recentlyUpdated)
   );
 </script>
 
@@ -114,7 +114,7 @@
   <!-- Issue Key (link) -->
   <div class="flex items-center gap-1.5 flex-shrink-0">
     {#if showActivityBadge}
-      <ActivityBadge {changeType} isRecentlyActive={recentlyUpdated && changeType === null} />
+      <ActivityBadge {changeTypes} isRecentlyActive={recentlyUpdated && changeTypes.length === 0} />
     {/if}
     {#if showBlockingIndicator}
       <IssueLinkIndicator issueLinks={issue.fields.issuelinks} />

@@ -1,5 +1,11 @@
 <script lang="ts">
-  import type { ChangeDetection } from '../../types/changeTracking';
+  import type {
+    ChangeDetection,
+    IssueChangeInfo,
+    StatusChange,
+    CommentChange,
+    AssigneeChange
+  } from '../../types/changeTracking';
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import { formatDateTime, formatDateTimeWithSetting } from '../../utils/formatDate';
@@ -14,6 +20,7 @@
   let { changes, onAcknowledge }: Props = $props();
 
   let isExpanded = $state(false);
+  let groupByIssue = $state(false);
 
   const checkpointTime = $derived(
     changes.checkpointTimestamp ? formatDateTimeWithSetting(changes.checkpointTimestamp) : null
@@ -22,6 +29,73 @@
   const checkpointTimeAbsolute = $derived(
     changes.checkpointTimestamp ? formatDateTime(changes.checkpointTimestamp) : null
   );
+
+  // Sort comparator: extracts numeric part from issue key for proper sorting (PROJ-9 < PROJ-10)
+  function compareByKey(a: { key: string }, b: { key: string }): number {
+    const [projA, numA] = a.key.split('-');
+    const [projB, numB] = b.key.split('-');
+    if (projA !== projB) return projA.localeCompare(projB);
+    return Number(numA) - Number(numB);
+  }
+
+  // Grouped by issue view: collect all changes per issue
+  interface IssueChangeSummary {
+    key: string;
+    summary: string;
+    isNew: boolean;
+    isRemoved: boolean;
+    removedStatus?: string;
+    statusChange?: StatusChange;
+    commentChange?: CommentChange;
+    assigneeChange?: AssigneeChange;
+  }
+
+  const issueGroups = $derived.by(() => {
+    const record: Record<string, IssueChangeSummary> = {};
+
+    const getOrCreate = (info: IssueChangeInfo): IssueChangeSummary => {
+      if (!record[info.key]) {
+        record[info.key] = { key: info.key, summary: info.summary, isNew: false, isRemoved: false };
+      }
+      return record[info.key];
+    };
+
+    for (const issue of changes.newIssues) {
+      getOrCreate(issue).isNew = true;
+    }
+    for (const issue of changes.removedIssues) {
+      const entry = getOrCreate(issue);
+      entry.isRemoved = true;
+      entry.removedStatus = issue.lastStatus;
+    }
+    for (const change of changes.statusChanges) {
+      getOrCreate(change).statusChange = change;
+    }
+    for (const change of changes.commentChanges) {
+      getOrCreate(change).commentChange = change;
+    }
+    for (const change of changes.assigneeChanges) {
+      getOrCreate(change).assigneeChange = change;
+    }
+
+    return Object.values(record).sort(compareByKey);
+  });
+
+  // Build summary items array for cleaner rendering
+  const summaryItems = $derived.by(() => {
+    const items: { text: string; colorClass: string }[] = [];
+    if (changes.newIssues.length > 0)
+      items.push({ text: `${changes.newIssues.length} new`, colorClass: 'text-green-700 dark:text-green-400' });
+    if (changes.removedIssues.length > 0)
+      items.push({ text: `${changes.removedIssues.length} removed`, colorClass: 'text-red-700 dark:text-red-400' });
+    if (changes.statusChanges.length > 0)
+      items.push({ text: `${changes.statusChanges.length} status changed`, colorClass: 'text-primary' });
+    if (changes.commentChanges.length > 0)
+      items.push({ text: `${changes.commentChanges.length} with new comments`, colorClass: 'text-purple-700 dark:text-purple-400' });
+    if (changes.assigneeChanges.length > 0)
+      items.push({ text: `${changes.assigneeChanges.length} reassigned`, colorClass: 'text-orange-700 dark:text-orange-400' });
+    return items;
+  });
 
   function openIssue(issueKey: string, e: Event): void {
     e.preventDefault();
@@ -44,25 +118,10 @@
       >
         <AtlaskitIcon name="status" size={16} class="text-primary" />
         <span class="text-foreground">
-          {#if changes.newIssues.length > 0}
-            <span class="font-medium text-green-700 dark:text-green-400"
-              >{changes.newIssues.length} new</span
-            >
-          {/if}
-          {#if changes.removedIssues.length > 0}
-            {#if changes.newIssues.length > 0}<span class="mx-1">&middot;</span>{/if}
-            <span class="font-medium text-red-700 dark:text-red-400"
-              >{changes.removedIssues.length} removed</span
-            >
-          {/if}
-          {#if changes.statusChanges.length > 0}
-            {#if changes.newIssues.length > 0 || changes.removedIssues.length > 0}<span class="mx-1"
-                >&middot;</span
-              >{/if}
-            <span class="font-medium text-primary"
-              >{changes.statusChanges.length} status changed</span
-            >
-          {/if}
+          {#each summaryItems as item, i (item.text)}
+            {#if i > 0}<span class="mx-1">&middot;</span>{/if}
+            <span class="font-medium {item.colorClass}">{item.text}</span>
+          {/each}
           {#if checkpointTime}
             <Tooltip content={checkpointTimeAbsolute ?? ''} placement="bottom">
               <span
@@ -102,56 +161,177 @@
 
     <!-- Expanded Details -->
     {#if isExpanded}
-      <div class="border-t border-primary/30 px-3 py-2 text-xs space-y-2">
-        {#if changes.newIssues.length > 0}
-          <div>
-            <div class="font-medium text-green-700 dark:text-green-400 mb-1">New Issues:</div>
-            <div class="flex flex-wrap gap-1">
-              {#each changes.newIssues as issueKey (issueKey)}
-                <button
-                  type="button"
-                  onclick={(e) => openIssue(issueKey, e)}
-                  class="px-1.5 py-0.5 bg-green-100 dark:bg-green-900 rounded text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 hover:underline cursor-pointer transition-colors"
-                >
-                  {issueKey}
-                </button>
-              {/each}
-            </div>
-          </div>
-        {/if}
+      <div class="border-t border-primary/30 px-3 py-2 text-xs space-y-3">
+        <!-- View Toggle -->
+        <div class="flex justify-end">
+          <button
+            type="button"
+            onclick={() => (groupByIssue = !groupByIssue)}
+            class="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded hover:bg-primary/10"
+            title={groupByIssue ? 'Group by change type' : 'Group by issue'}
+          >
+            <AtlaskitIcon name={groupByIssue ? 'layers' : 'list'} size={12} />
+            <span class="text-[10px]">{groupByIssue ? 'By Issue' : 'By Type'}</span>
+          </button>
+        </div>
 
-        {#if changes.removedIssues.length > 0}
-          <div>
-            <div class="font-medium text-red-700 dark:text-red-400 mb-1">Removed Issues:</div>
-            <div class="flex flex-wrap gap-1">
-              {#each changes.removedIssues as removed (removed.key)}
+        {#if groupByIssue}
+          <!-- Grouped by Issue View -->
+          <ul class="space-y-1.5">
+            {#each issueGroups as issue (issue.key)}
+              <li class="flex items-baseline gap-2">
                 <button
                   type="button"
-                  onclick={(e) => openIssue(removed.key, e)}
-                  class="px-1.5 py-0.5 bg-red-100 dark:bg-red-900 rounded text-red-800 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-800 hover:underline cursor-pointer transition-colors"
+                  onclick={(e) => openIssue(issue.key, e)}
+                  class="font-mono text-text-brand hover:underline shrink-0"
                 >
-                  {removed.key} <span class="opacity-70">(was: {removed.lastStatus})</span>
+                  {issue.key}
                 </button>
-              {/each}
+                <span class="text-foreground/80 truncate">{issue.summary}</span>
+                <span class="flex items-center gap-1.5 shrink-0">
+                  {#if issue.isNew}
+                    <span class="text-green-700 dark:text-green-400">New</span>
+                  {/if}
+                  {#if issue.isRemoved}
+                    <span class="text-red-700 dark:text-red-400">Removed</span>
+                  {/if}
+                  {#if issue.statusChange}
+                    <span class="text-primary"
+                      >{issue.statusChange.previousStatus} → {issue.statusChange.currentStatus}</span
+                    >
+                  {/if}
+                  {#if issue.commentChange}
+                    <span class="text-purple-700 dark:text-purple-400"
+                      >+{issue.commentChange.newCommentCount} comment{issue.commentChange
+                        .newCommentCount !== 1
+                        ? 's'
+                        : ''}</span
+                    >
+                  {/if}
+                  {#if issue.assigneeChange}
+                    <span class="text-orange-700 dark:text-orange-400"
+                      >{issue.assigneeChange.previousAssignee ?? 'Unassigned'} → {issue.assigneeChange
+                        .currentAssignee ?? 'Unassigned'}</span
+                    >
+                  {/if}
+                </span>
+              </li>
+            {/each}
+          </ul>
+        {:else}
+          <!-- Grouped by Type View -->
+          {#if changes.newIssues.length > 0}
+            <div>
+              <div class="font-medium text-green-700 dark:text-green-400 mb-1.5">New Issues:</div>
+              <ul class="space-y-1">
+                {#each changes.newIssues as issue (issue.key)}
+                  <li class="flex items-baseline gap-2">
+                    <button
+                      type="button"
+                      onclick={(e) => openIssue(issue.key, e)}
+                      class="font-mono text-green-700 dark:text-green-400 hover:underline shrink-0"
+                    >
+                      {issue.key}
+                    </button>
+                    <span class="text-foreground/80 truncate">{issue.summary}</span>
+                  </li>
+                {/each}
+              </ul>
             </div>
-          </div>
-        {/if}
+          {/if}
 
-        {#if changes.statusChanges.length > 0}
-          <div>
-            <div class="font-medium text-primary mb-1">Status Changes:</div>
-            <div class="flex flex-wrap gap-1">
-              {#each changes.statusChanges as change (change.key)}
-                <button
-                  type="button"
-                  onclick={(e) => openIssue(change.key, e)}
-                  class="px-1.5 py-0.5 bg-primary/20 rounded text-primary hover:bg-primary/30 hover:underline cursor-pointer transition-colors"
-                >
-                  {change.key}: {change.previousStatus} → {change.currentStatus}
-                </button>
-              {/each}
+          {#if changes.removedIssues.length > 0}
+            <div>
+              <div class="font-medium text-red-700 dark:text-red-400 mb-1.5">Removed Issues:</div>
+              <ul class="space-y-1">
+                {#each changes.removedIssues as issue (issue.key)}
+                  <li class="flex items-baseline gap-2">
+                    <button
+                      type="button"
+                      onclick={(e) => openIssue(issue.key, e)}
+                      class="font-mono text-red-700 dark:text-red-400 hover:underline shrink-0"
+                    >
+                      {issue.key}
+                    </button>
+                    <span class="text-foreground/80 truncate">{issue.summary}</span>
+                    <span class="text-foreground/50 shrink-0">(was: {issue.lastStatus})</span>
+                  </li>
+                {/each}
+              </ul>
             </div>
-          </div>
+          {/if}
+
+          {#if changes.statusChanges.length > 0}
+            <div>
+              <div class="font-medium text-primary mb-1.5">Status Changes:</div>
+              <ul class="space-y-1">
+                {#each changes.statusChanges as change (change.key)}
+                  <li class="flex items-baseline gap-2">
+                    <button
+                      type="button"
+                      onclick={(e) => openIssue(change.key, e)}
+                      class="font-mono text-primary hover:underline shrink-0"
+                    >
+                      {change.key}
+                    </button>
+                    <span class="text-foreground/80 truncate">{change.summary}</span>
+                    <span class="text-foreground/50 shrink-0"
+                      >{change.previousStatus} → {change.currentStatus}</span
+                    >
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          {/if}
+
+          {#if changes.commentChanges.length > 0}
+            <div>
+              <div class="font-medium text-purple-700 dark:text-purple-400 mb-1.5">New Comments:</div>
+              <ul class="space-y-1">
+                {#each changes.commentChanges as change (change.key)}
+                  <li class="flex items-baseline gap-2">
+                    <button
+                      type="button"
+                      onclick={(e) => openIssue(change.key, e)}
+                      class="font-mono text-purple-700 dark:text-purple-400 hover:underline shrink-0"
+                    >
+                      {change.key}
+                    </button>
+                    <span class="text-foreground/80 truncate">{change.summary}</span>
+                    <span class="text-foreground/50 shrink-0">
+                      +{change.newCommentCount}{change.newCommentCount === 1 && change.latestAuthor
+                        ? ` by ${change.latestAuthor}`
+                        : ''}
+                    </span>
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          {/if}
+
+          {#if changes.assigneeChanges.length > 0}
+            <div>
+              <div class="font-medium text-orange-700 dark:text-orange-400 mb-1.5">Reassigned:</div>
+              <ul class="space-y-1">
+                {#each changes.assigneeChanges as change (change.key)}
+                  <li class="flex items-baseline gap-2">
+                    <button
+                      type="button"
+                      onclick={(e) => openIssue(change.key, e)}
+                      class="font-mono text-orange-700 dark:text-orange-400 hover:underline shrink-0"
+                    >
+                      {change.key}
+                    </button>
+                    <span class="text-foreground/80 truncate">{change.summary}</span>
+                    <span class="text-foreground/50 shrink-0">
+                      {change.previousAssignee ?? 'Unassigned'} → {change.currentAssignee ??
+                        'Unassigned'}
+                    </span>
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          {/if}
         {/if}
       </div>
     {/if}
