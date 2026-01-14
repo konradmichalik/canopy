@@ -176,7 +176,11 @@
   {:else if isRecency && recencyMeta}
     <AtlaskitIcon name={recencyMeta.icon} size={18} class={recencyMeta.colorClass} />
   {:else if isRelease}
-    <AtlaskitIcon name="release" size={18} class={releaseMeta?.version ? 'text-brand' : 'text-text-subtle'} />
+    <AtlaskitIcon
+      name="release"
+      size={18}
+      class={releaseMeta?.version ? 'text-brand' : 'text-text-subtle'}
+    />
   {:else}
     <AtlaskitIcon name="layers" size={18} class="text-text-subtle" />
   {/if}

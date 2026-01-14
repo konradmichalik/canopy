@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { JiraIssueLink } from '../../types/jira';
-  import { getBlockingState, getIndicatorTooltip, type LinkedIssueInfo } from '../../utils/issue-links';
+  import {
+    getBlockingState,
+    getIndicatorTooltip,
+    type LinkedIssueInfo
+  } from '../../utils/issue-links';
   import StatusBadge from '../common/StatusBadge.svelte';
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import Tooltip from '../common/Tooltip.svelte';

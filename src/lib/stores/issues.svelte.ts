@@ -154,10 +154,7 @@ export interface LoadIssuesOptions {
 /**
  * Load issues for a JQL query
  */
-export async function loadIssues(
-  jql: string,
-  options: LoadIssuesOptions = {}
-): Promise<boolean> {
+export async function loadIssues(jql: string, options: LoadIssuesOptions = {}): Promise<boolean> {
   const { loadAll = false, maxResults = BATCH_SIZE } = options;
   const client = getClient();
 

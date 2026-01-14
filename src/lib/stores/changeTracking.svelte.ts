@@ -117,7 +117,10 @@ function getCommentField(issue: JiraIssue): { total: number; comments: JiraComme
  */
 function getLatestComment(comments: JiraComment[]): JiraComment | undefined {
   if (comments.length === 0) return undefined;
-  return comments.reduce((latest, c) => (Number(c.id) > Number(latest.id) ? c : latest), comments[0]);
+  return comments.reduce(
+    (latest, c) => (Number(c.id) > Number(latest.id) ? c : latest),
+    comments[0]
+  );
 }
 
 /**

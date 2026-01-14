@@ -26,9 +26,8 @@
       <h2 class="text-lg font-semibold">Large Result Set</h2>
 
       <p class="text-sm text-muted-foreground">
-        This query matches <strong class="text-foreground"
-          >{totalCount.toLocaleString()}</strong
-        > issues, which exceeds the recommended limit of {LARGE_RESULT_THRESHOLD.toLocaleString()}.
+        This query matches <strong class="text-foreground">{totalCount.toLocaleString()}</strong>
+        issues, which exceeds the recommended limit of {LARGE_RESULT_THRESHOLD.toLocaleString()}.
       </p>
 
       <p class="text-sm text-muted-foreground">

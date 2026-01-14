@@ -32,7 +32,9 @@
 
   // JQL validation state
   let isCheckingJql = $state(false);
-  let jqlCheckResult = $state<{ valid: true; count: number } | { valid: false; error: string } | null>(null);
+  let jqlCheckResult = $state<
+    { valid: true; count: number } | { valid: false; error: string } | null
+  >(null);
 
   // Real-time JQL validation
   const jqlValidation = $derived(validateJqlExtended(jql));
@@ -178,13 +180,16 @@
             {hasJqlWarning
             ? 'border-destructive focus-visible:ring-destructive/20'
             : 'border-input'}"
-          onchange={() => jqlCheckResult = null}
+          onchange={() => (jqlCheckResult = null)}
         ></textarea>
         {#if jqlCheckResult}
           {#if jqlCheckResult.valid}
             <div class="flex items-center gap-1.5 text-xs text-text-success">
               <AtlaskitIcon name="check-circle" size={14} />
-              <span>Valid JQL - {jqlCheckResult.count} {jqlCheckResult.count === 1 ? 'result' : 'results'}</span>
+              <span
+                >Valid JQL - {jqlCheckResult.count}
+                {jqlCheckResult.count === 1 ? 'result' : 'results'}</span
+              >
             </div>
           {:else}
             <div class="flex items-center gap-1.5 text-xs text-text-danger">

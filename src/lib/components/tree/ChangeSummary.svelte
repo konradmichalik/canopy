@@ -85,15 +85,30 @@
   const summaryItems = $derived.by(() => {
     const items: { text: string; colorClass: string }[] = [];
     if (changes.newIssues.length > 0)
-      items.push({ text: `${changes.newIssues.length} new`, colorClass: 'text-green-700 dark:text-green-400' });
+      items.push({
+        text: `${changes.newIssues.length} new`,
+        colorClass: 'text-green-700 dark:text-green-400'
+      });
     if (changes.removedIssues.length > 0)
-      items.push({ text: `${changes.removedIssues.length} removed`, colorClass: 'text-red-700 dark:text-red-400' });
+      items.push({
+        text: `${changes.removedIssues.length} removed`,
+        colorClass: 'text-red-700 dark:text-red-400'
+      });
     if (changes.statusChanges.length > 0)
-      items.push({ text: `${changes.statusChanges.length} status changed`, colorClass: 'text-primary' });
+      items.push({
+        text: `${changes.statusChanges.length} status changed`,
+        colorClass: 'text-primary'
+      });
     if (changes.commentChanges.length > 0)
-      items.push({ text: `${changes.commentChanges.length} with new comments`, colorClass: 'text-purple-700 dark:text-purple-400' });
+      items.push({
+        text: `${changes.commentChanges.length} with new comments`,
+        colorClass: 'text-purple-700 dark:text-purple-400'
+      });
     if (changes.assigneeChanges.length > 0)
-      items.push({ text: `${changes.assigneeChanges.length} reassigned`, colorClass: 'text-orange-700 dark:text-orange-400' });
+      items.push({
+        text: `${changes.assigneeChanges.length} reassigned`,
+        colorClass: 'text-orange-700 dark:text-orange-400'
+      });
     return items;
   });
 
@@ -197,7 +212,8 @@
                   {/if}
                   {#if issue.statusChange}
                     <span class="text-primary"
-                      >{issue.statusChange.previousStatus} → {issue.statusChange.currentStatus}</span
+                      >{issue.statusChange.previousStatus} → {issue.statusChange
+                        .currentStatus}</span
                     >
                   {/if}
                   {#if issue.commentChange}
@@ -210,8 +226,8 @@
                   {/if}
                   {#if issue.assigneeChange}
                     <span class="text-orange-700 dark:text-orange-400"
-                      >{issue.assigneeChange.previousAssignee ?? 'Unassigned'} → {issue.assigneeChange
-                        .currentAssignee ?? 'Unassigned'}</span
+                      >{issue.assigneeChange.previousAssignee ?? 'Unassigned'} → {issue
+                        .assigneeChange.currentAssignee ?? 'Unassigned'}</span
                     >
                   {/if}
                 </span>
@@ -286,7 +302,9 @@
 
           {#if changes.commentChanges.length > 0}
             <div>
-              <div class="font-medium text-purple-700 dark:text-purple-400 mb-1.5">New Comments:</div>
+              <div class="font-medium text-purple-700 dark:text-purple-400 mb-1.5">
+                New Comments:
+              </div>
               <ul class="space-y-1">
                 {#each changes.commentChanges as change (change.key)}
                   <li class="flex items-baseline gap-2">
