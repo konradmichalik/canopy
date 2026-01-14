@@ -10,6 +10,7 @@
   import ChangeSummary from './ChangeSummary.svelte';
   import Tooltip from '../common/Tooltip.svelte';
   import { Button } from '$lib/components/ui/button';
+  import { Skeleton } from '$lib/components/ui/skeleton';
   import {
     issuesState,
     expandAll,
@@ -229,7 +230,9 @@
     <!-- Actions row -->
     <div class="flex items-center justify-between gap-4 px-4 py-3">
       <div class="flex items-center gap-3">
-        {#if !isEmpty}
+        {#if issuesState.isLoading}
+          <Skeleton class="h-5 w-20" />
+        {:else if !isEmpty}
           <div class="flex items-center gap-2">
             <span class="text-sm font-medium text-foreground">
               {#if issuesState.isPartialLoad}
