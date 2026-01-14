@@ -1,6 +1,7 @@
 <script lang="ts">
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import ActivityBadge from '../common/ActivityBadge.svelte';
+  import IssueLinkIndicator from './IssueLinkIndicator.svelte';
   import type { TreeNode } from '../../types';
   import StatusBadge from '../common/StatusBadge.svelte';
   import IssueTypeIcon from '../common/IssueTypeIcon.svelte';
@@ -47,6 +48,7 @@
   }
 
   // Field visibility
+  const showBlockingIndicator = $derived(isFieldEnabled('blockingIndicator'));
   const showStatus = $derived(isFieldEnabled('status'));
   const showAssignee = $derived(isFieldEnabled('assignee'));
   const showPriority = $derived(isFieldEnabled('priority'));
@@ -113,6 +115,9 @@
   <div class="flex items-center gap-1.5 flex-shrink-0">
     {#if showActivityBadge}
       <ActivityBadge {changeType} isRecentlyActive={recentlyUpdated && changeType === null} />
+    {/if}
+    {#if showBlockingIndicator}
+      <IssueLinkIndicator issueLinks={issue.fields.issuelinks} />
     {/if}
     <Tooltip text="Open in Jira">
       <button

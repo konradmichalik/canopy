@@ -11,6 +11,7 @@ import { logger } from '../utils/logger';
 // ============================================
 
 export type DisplayFieldId =
+  | 'blockingIndicator'
   | 'aggregatedTimeProgress'
   | 'aggregatedResolutionProgress'
   | 'status'
@@ -49,6 +50,11 @@ export const DEFAULT_FIELD_IDS: DisplayFieldId[] = [
 ];
 
 const ALL_FIELDS: Omit<DisplayField, 'isEnabled'>[] = [
+  {
+    id: 'blockingIndicator',
+    label: 'Blocking Links',
+    labelDe: 'Blockierungen'
+  },
   {
     id: 'aggregatedTimeProgress',
     label: 'Time Progress',
