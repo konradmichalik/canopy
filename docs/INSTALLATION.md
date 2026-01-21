@@ -88,6 +88,38 @@ You can also use a browser extension to bypass CORS:
 
 For production, configure your web server (nginx, Apache) to proxy `/api/*` requests to your Jira instance, or deploy behind a corporate proxy that handles authentication.
 
+## 🖥️ Desktop App (macOS)
+
+Canopy is also available as a native macOS desktop application built with Tauri. The desktop app connects directly to Jira without requiring a CORS proxy.
+
+### Installation
+
+1. Download the `.dmg` file for your Mac:
+   - **Apple Silicon** (M1/M2/M3): `Canopy_x.x.x_aarch64.dmg`
+   - **Intel**: `Canopy_x.x.x_x64.dmg`
+2. Open the `.dmg` file
+3. Drag `Canopy.app` to your Applications folder
+
+### Gatekeeper Notice (Unsigned App)
+
+Since Canopy is not signed with an Apple Developer ID certificate, macOS Gatekeeper may block the app. You might see one of these messages:
+
+- *"Canopy" is damaged and can't be opened. You should move it to the Trash.*
+- *"Canopy" can't be opened because Apple cannot check it for malicious software.*
+
+**Solutions:**
+
+1. **Remove quarantine attribute** (recommended):
+   ```bash
+   xattr -cr /Applications/Canopy.app
+   ```
+
+2. **Right-click → Open**: Right-click the app in Finder, select "Open", then click "Open" in the dialog
+
+3. **System Settings**: Go to **System Settings → Privacy & Security**, scroll down, and click "Open Anyway" next to the blocked app message
+
+---
+
 ## 📜 Available Scripts
 
 | Command | Description |
