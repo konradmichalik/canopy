@@ -526,6 +526,28 @@ export function setQueryActiveCustomFilter(queryId: string, filterId: string | n
 }
 
 /**
+ * Reorder custom filters within a query
+ */
+export function reorderQueryCustomFilters(
+  queryId: string,
+  fromIndex: number,
+  toIndex: number
+): boolean {
+  const query = getQueryById(queryId);
+  if (!query || !query.customFilters) return false;
+  if (fromIndex < 0 || fromIndex >= query.customFilters.length) return false;
+  if (toIndex < 0 || toIndex >= query.customFilters.length) return false;
+
+  const newFilters = [...query.customFilters];
+  const [removed] = newFilters.splice(fromIndex, 1);
+  newFilters.splice(toIndex, 0, removed);
+
+  updateQuery(queryId, { customFilters: newFilters });
+  logger.store('jql', 'Reordered custom filters', { queryId, fromIndex, toIndex });
+  return true;
+}
+
+/**
  * Persist items to storage
  */
 function persistItems(): void {

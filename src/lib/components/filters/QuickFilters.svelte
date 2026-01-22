@@ -30,8 +30,10 @@
   } from '../../stores/filters.svelte';
   import { RECENCY_FILTER_OPTIONS, QUERY_COLORS, type QueryColor } from '../../types/tree';
   import { issuesState } from '../../stores/issues.svelte';
-  import { addQuery, isTitleUnique } from '../../stores/jql.svelte';
+  import { addQuery, isTitleUnique, reorderQueryCustomFilters } from '../../stores/jql.svelte';
+  import { routerState } from '../../stores/router.svelte';
   import { applyQuickFilters } from '../../utils/jql-helpers';
+  import { createDragDrop } from '../../utils/drag-drop.svelte';
   import { isFieldEnabled, type DisplayFieldId } from '../../stores/fieldConfig.svelte';
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
   import RecencyDropdown from './RecencyDropdown.svelte';
@@ -168,6 +170,13 @@
 
   // Delete confirmation modal state - single variable for KISS
   let filterToDelete = $state<CustomFilter | null>(null);
+
+  // Drag-and-drop for custom filters (using shared utility)
+  const filterDrag = createDragDrop((fromIndex, toIndex) => {
+    if (routerState.activeQueryId) {
+      reorderQueryCustomFilters(routerState.activeQueryId, fromIndex, toIndex);
+    }
+  });
 
   // "Save as Query" dialog state
   let saveAsQueryDialogOpen = $state(false);
@@ -315,19 +324,39 @@
 <!-- Saved Filters Row (always visible if there are saved filters) -->
 {#if hasCustomFilters}
   <div class="flex items-center gap-1.5 mb-3">
-    {#each filtersState.customFilters as customFilter (customFilter.id)}
+    {#each filtersState.customFilters as customFilter, index (customFilter.id)}
       {@const isActive = filtersState.activeCustomFilterId === customFilter.id}
+      {@const isDragging = filterDrag.isDragging(index)}
+      {@const isDragOver = filterDrag.isDragOver(index)}
       <Tooltip text={getSavedFilterTooltip(customFilter)}>
         <div
-          class="inline-flex items-center rounded-full border transition-colors
+          role="listitem"
+          class="group inline-flex items-center rounded-full border transition-all
           {isActive
             ? 'bg-primary/10 border-primary/30'
-            : 'bg-card border-border hover:border-primary/30'}"
+            : 'bg-card border-border hover:border-primary/30'}
+          {isDragging ? 'opacity-50 scale-95' : ''}
+          {isDragOver ? 'ring-2 ring-primary ring-offset-1' : ''}"
+          ondragover={(e) => filterDrag.handleDragOver(e, index)}
+          ondrop={() => filterDrag.handleDrop(index)}
         >
+          <!-- Drag handle (visible on hover) -->
+          <div
+            draggable="true"
+            ondragstart={() => filterDrag.handleDragStart(index)}
+            ondragend={filterDrag.handleDragEnd}
+            class="cursor-grab active:cursor-grabbing pl-1.5 pr-0.5 py-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+            role="button"
+            tabindex="-1"
+            onclick={(e: MouseEvent) => e.stopPropagation()}
+            onkeydown={(e: KeyboardEvent) => e.stopPropagation()}
+          >
+            <AtlaskitIcon name="drag-handle" size={10} />
+          </div>
           <!-- Main button - applies filter on click -->
           <button
             onclick={() => applyCustomFilter(customFilter.id)}
-            class="cursor-pointer inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 text-xs transition-colors
+            class="cursor-pointer inline-flex items-center gap-1.5 pr-1.5 py-1 text-xs transition-colors
             {isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}"
           >
             <AtlaskitIcon name={customFilter.icon || 'filter'} size={12} />

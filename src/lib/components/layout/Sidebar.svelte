@@ -50,6 +50,7 @@
   import type { SortConfig, GroupByOption } from '../../types/tree';
   import { updateQueryGroupBy } from '../../stores/jql.svelte';
   import { readSingleQueryFile, importSingleQuery } from '../../utils/storage';
+  import { createDragDrop } from '../../utils/drag-drop.svelte';
 
   interface Props {
     width: number;
@@ -62,9 +63,8 @@
   let editingQuery = $state<SavedQuery | null>(null);
   let initialized = false;
 
-  // Drag & Drop state
-  let draggedIndex = $state<number | null>(null);
-  let dragOverIndex = $state<number | null>(null);
+  // Drag & Drop for query list items (using shared utility)
+  const queryDrag = createDragDrop(reorderItems);
 
   // Import state
   let importFileInput: HTMLInputElement;
@@ -269,29 +269,6 @@
     editingQuery = null;
   }
 
-  // Drag & Drop handlers
-  function handleDragStart(index: number): void {
-    draggedIndex = index;
-  }
-
-  function handleDragOver(e: DragEvent, index: number): void {
-    e.preventDefault();
-    dragOverIndex = index;
-  }
-
-  function handleDrop(index: number): void {
-    if (draggedIndex !== null && draggedIndex !== index) {
-      reorderItems(draggedIndex, index);
-    }
-    draggedIndex = null;
-    dragOverIndex = null;
-  }
-
-  function handleDragEnd(): void {
-    draggedIndex = null;
-    dragOverIndex = null;
-  }
-
   // Import handlers
   function handleImportClick(): void {
     importFileInput?.click();
@@ -400,30 +377,30 @@
             <SeparatorListItem
               separator={item}
               {index}
-              isDragging={draggedIndex === index}
-              isDragOver={dragOverIndex === index && draggedIndex !== index}
+              isDragging={queryDrag.isDragging(index)}
+              isDragOver={queryDrag.isDragOver(index)}
               onEdit={handleEditSeparator}
               onDelete={handleDeleteSeparator}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onDragEnd={handleDragEnd}
+              onDragStart={queryDrag.handleDragStart}
+              onDragOver={queryDrag.handleDragOver}
+              onDrop={queryDrag.handleDrop}
+              onDragEnd={queryDrag.handleDragEnd}
             />
           {:else}
             <QueryListItem
               query={item}
               {index}
               isActive={routerState.activeQueryId === item.id}
-              isDragging={draggedIndex === index}
-              isDragOver={dragOverIndex === index && draggedIndex !== index}
+              isDragging={queryDrag.isDragging(index)}
+              isDragOver={queryDrag.isDragOver(index)}
               onSelect={handleSelectQuery}
               onEdit={handleEditQuery}
               onDelete={handleDeleteQuery}
               onDuplicate={handleDuplicateQuery}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onDragEnd={handleDragEnd}
+              onDragStart={queryDrag.handleDragStart}
+              onDragOver={queryDrag.handleDragOver}
+              onDrop={queryDrag.handleDrop}
+              onDragEnd={queryDrag.handleDragEnd}
             />
           {/if}
         {/each}
