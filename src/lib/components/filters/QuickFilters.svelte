@@ -396,8 +396,8 @@
 
 {#if expanded}
   <div class="space-y-3">
-    <!-- Row 1: Search (left) + View Controls (right) -->
-    <div class="flex items-center justify-between gap-3">
+    <!-- Row 1: Search (left) + View Controls (right) - wraps on narrow viewports -->
+    <div class="flex items-center justify-between gap-x-3 gap-y-2 flex-wrap">
       <!-- Left: Search input -->
       <div class="relative flex-shrink-0">
         <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
