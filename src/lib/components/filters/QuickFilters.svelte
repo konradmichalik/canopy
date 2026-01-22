@@ -26,12 +26,12 @@
     deleteCustomFilter,
     updateCustomFilter,
     applyCustomFilter,
-    getActiveFilterConditions
+    getActiveFilterConditions,
+    reorderCustomFilters
   } from '../../stores/filters.svelte';
   import { RECENCY_FILTER_OPTIONS, QUERY_COLORS, type QueryColor } from '../../types/tree';
   import { issuesState } from '../../stores/issues.svelte';
-  import { addQuery, isTitleUnique, reorderQueryCustomFilters } from '../../stores/jql.svelte';
-  import { routerState } from '../../stores/router.svelte';
+  import { addQuery, isTitleUnique } from '../../stores/jql.svelte';
   import { applyQuickFilters } from '../../utils/jql-helpers';
   import { createDragDrop } from '../../utils/drag-drop.svelte';
   import { isFieldEnabled, type DisplayFieldId } from '../../stores/fieldConfig.svelte';
@@ -172,11 +172,7 @@
   let filterToDelete = $state<CustomFilter | null>(null);
 
   // Drag-and-drop for custom filters (using shared utility)
-  const filterDrag = createDragDrop((fromIndex, toIndex) => {
-    if (routerState.activeQueryId) {
-      reorderQueryCustomFilters(routerState.activeQueryId, fromIndex, toIndex);
-    }
-  });
+  const filterDrag = createDragDrop(reorderCustomFilters);
 
   // "Save as Query" dialog state
   let saveAsQueryDialogOpen = $state(false);

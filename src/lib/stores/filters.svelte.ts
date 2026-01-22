@@ -986,7 +986,8 @@ import {
   addQueryCustomFilter,
   updateQueryCustomFilter,
   deleteQueryCustomFilter,
-  setQueryActiveCustomFilter
+  setQueryActiveCustomFilter,
+  reorderQueryCustomFilters
 } from './jql.svelte';
 import { routerState } from './router.svelte';
 
@@ -1099,6 +1100,31 @@ export function updateCustomFilter(id: string, newName: string, icon?: CustomFil
   filtersState.customFilters = filtersState.customFilters.map((f) =>
     f.id === id ? { ...f, name: trimmedName, icon } : f
   );
+}
+
+/**
+ * Reorder custom filters
+ */
+export function reorderCustomFilters(fromIndex: number, toIndex: number): void {
+  const queryId = routerState.activeQueryId;
+  if (!queryId) {
+    logger.warn('Cannot reorder custom filters: no active query');
+    return;
+  }
+
+  if (fromIndex < 0 || fromIndex >= filtersState.customFilters.length) return;
+  if (toIndex < 0 || toIndex >= filtersState.customFilters.length) return;
+
+  // Update in jql store (persists to storage)
+  reorderQueryCustomFilters(queryId, fromIndex, toIndex);
+
+  // Update local UI state
+  const newFilters = [...filtersState.customFilters];
+  const [removed] = newFilters.splice(fromIndex, 1);
+  newFilters.splice(toIndex, 0, removed);
+  filtersState.customFilters = newFilters;
+
+  logger.store('filters', 'Reordered custom filters', { fromIndex, toIndex });
 }
 
 /**
