@@ -94,7 +94,7 @@ Download the desktop app for Mac - no proxy required:
 
 ```bash
 git clone https://github.com/konradmichalik/canopy.git
-cd jira-hierarchy-viewer
+cd canopy
 npm install
 npm run dev
 ```

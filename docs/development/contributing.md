@@ -12,7 +12,7 @@ Guidelines for contributing to Canopy.
 ```bash
 # Clone the repository
 git clone https://github.com/konradmichalik/canopy.git
-cd jira-hierarchy-viewer
+cd canopy
 
 # Install dependencies
 npm install

@@ -4,16 +4,16 @@ export default defineConfig({
   title: 'Canopy',
   description: 'Hierarchical Jira Issue Viewer - Display tickets in a tree structure',
 
-  base: '/jira-hierarchy-viewer/',
+  base: '/canopy/',
   cleanUrls: true,
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/jira-hierarchy-viewer/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/canopy/logo.svg' }],
     ['meta', { name: 'theme-color', content: '#1868db' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:title', content: 'Canopy Documentation' }],
     ['meta', { property: 'og:description', content: 'Hierarchical Jira Issue Viewer' }],
-    ['meta', { property: 'og:image', content: '/jira-hierarchy-viewer/images/jira-hierarchy-tree-demo.jpg' }]
+    ['meta', { property: 'og:image', content: '/canopy/images/jira-hierarchy-tree-demo.jpg' }]
   ],
 
   markdown: {

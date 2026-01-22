@@ -10,7 +10,7 @@ Overview of the codebase organization.
 ## Root Directory
 
 ```
-jira-hierarchy-viewer/
+canopy/
 ├── src/                  # Application source code
 ├── src-tauri/            # Tauri desktop app (Rust)
 ├── proxy/                # CORS proxy server
