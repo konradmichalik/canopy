@@ -202,10 +202,10 @@ export async function loadIssues(jql: string, options: LoadIssuesOptions = {}): 
       issuesState.nextStartAt = result.nextStartAt ?? 0;
     }
 
-    // Update dynamic filters only on initial load (before any quick filters are applied)
-    if (issuesState.isInitialLoad) {
-      updateDynamicFilters(fetchedIssues);
-    }
+    // Update dynamic filters
+    // On initial load: replace all filters with fresh data
+    // On subsequent loads (with filters active): merge to preserve existing filter options
+    updateDynamicFilters(fetchedIssues, { replace: issuesState.isInitialLoad });
 
     // Apply local filters and build tree
     await applyLocalFiltersAndBuildTree(fetchedIssues);

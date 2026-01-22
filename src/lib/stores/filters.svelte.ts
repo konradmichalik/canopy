@@ -652,9 +652,13 @@ function getAvatarColor(identifier: string): string {
 
 /**
  * Update dynamic filters based on loaded issues
+ * Merges new filter values with existing ones to preserve filter options
+ * when filters are active (which would otherwise reduce the issue set)
  */
-export function updateDynamicFilters(issues: JiraIssue[]): void {
-  // Extract unique values
+export function updateDynamicFilters(issues: JiraIssue[], options?: { replace?: boolean }): void {
+  const shouldReplace = options?.replace ?? false;
+
+  // Extract unique values from new issues
   const projectMap = new Map<string, { key: string; name: string; avatarUrl?: string }>();
   const statusMap = new Map<string, { name: string; categoryKey: string; colorName: string }>();
   const typeMap = new Map<string, { id: string; name: string; iconUrl?: string }>();
@@ -764,35 +768,52 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
     }
   }
 
-  // Preserve active state of existing filters (collect all active IDs)
-  const activeIds = new Set(
-    getAllDynamicFiltersFlat()
-      .filter((f) => f.isActive)
-      .map((f) => f.id)
-  );
+  // Helper to merge filters: keep existing ones (unless replacing), add new ones
+  function mergeFilters<T>(
+    newEntries: [string, T][],
+    category: DynamicFilterCategory,
+    createFilter: (key: string, data: T) => ExtendedQuickFilter
+  ): ExtendedQuickFilter[] {
+    const existingMap = new Map(filtersState.dynamicFilters[category].map((f) => [f.id, f]));
+    const resultMap = new Map<string, ExtendedQuickFilter>();
 
-  // Create project filters sorted alphabetically
-  const sortedProjects = Array.from(projectMap.entries()).sort((a, b) =>
-    a[1].name.localeCompare(b[1].name)
-  );
-  filtersState.dynamicFilters.project = sortedProjects.map(([key, data]) => {
-    const id = makeFilterId('project', key);
-    return {
-      id,
+    // Keep existing filters if not replacing
+    if (!shouldReplace) {
+      for (const [id, filter] of existingMap) {
+        resultMap.set(id, filter);
+      }
+    }
+
+    // Add/update with new filters (preserve active state)
+    for (const [key, data] of newEntries) {
+      const filter = createFilter(key, data);
+      resultMap.set(filter.id, { ...filter, isActive: existingMap.get(filter.id)?.isActive ?? false });
+    }
+
+    return Array.from(resultMap.values()).sort((a, b) => a.label.localeCompare(b.label));
+  }
+
+  // Create project filters
+  filtersState.dynamicFilters.project = mergeFilters(
+    Array.from(projectMap.entries()),
+    'project',
+    (key, data) => ({
+      id: makeFilterId('project', key),
       label: data.name,
       jqlCondition: `project = "${key}"`,
       category: 'project' as FilterCategory,
       icon: 'folder',
       avatarUrl: data.avatarUrl,
-      isActive: activeIds.has(id)
-    };
-  });
+      isActive: false
+    })
+  );
 
   // Create status filters with colors
-  filtersState.dynamicFilters.status = Array.from(statusMap.entries()).map(([name, data]) => {
-    const id = makeFilterId('status', name);
-    return {
-      id,
+  filtersState.dynamicFilters.status = mergeFilters(
+    Array.from(statusMap.entries()),
+    'status',
+    (name, data) => ({
+      id: makeFilterId('status', name),
       label: name,
       jqlCondition: `status = "${name}"`,
       category: 'status' as FilterCategory,
@@ -801,107 +822,100 @@ export function updateDynamicFilters(issues: JiraIssue[]): void {
         STATUS_CATEGORY_COLORS[data.colorName] ||
         STATUS_CATEGORY_COLORS[data.categoryKey] ||
         '#6B778C',
-      isActive: activeIds.has(id)
-    };
-  });
+      isActive: false
+    })
+  );
 
   // Create type filters using iconUrl from JIRA API
-  filtersState.dynamicFilters.type = Array.from(typeMap.entries()).map(([name, data]) => {
-    const id = makeFilterId('type', name);
-    return {
-      id,
+  filtersState.dynamicFilters.type = mergeFilters(
+    Array.from(typeMap.entries()),
+    'type',
+    (name, data) => ({
+      id: makeFilterId('type', name),
       label: name,
       jqlCondition: `issuetype = ${data.id}`,
       category: 'type' as FilterCategory,
       iconUrl: data.iconUrl,
-      isActive: activeIds.has(id)
-    };
-  });
-
-  // Create assignee filters sorted by display name
-  const sortedAssignees = Array.from(assigneeMap.entries()).sort((a, b) =>
-    a[1].displayName.localeCompare(b[1].displayName)
+      isActive: false
+    })
   );
-  filtersState.dynamicFilters.assignee = sortedAssignees.map(([key, data]) => {
-    const id = `assignee-${key.replace(/[^a-zA-Z0-9]/g, '-')}`;
-    const jqlValue = data.accountId ? `"${data.accountId}"` : `"${data.name}"`;
-    const colorIdentifier = data.accountId || data.emailAddress || data.displayName;
-    return {
-      id,
-      label: data.displayName,
-      jqlCondition: `assignee = ${jqlValue}`,
-      category: 'assignee' as FilterCategory,
-      icon: 'person',
-      avatarUrl: data.avatarUrl,
-      color: getAvatarColor(colorIdentifier),
-      isActive: activeIds.has(id)
-    };
-  });
 
-  // Create priority filters sorted by name
-  const sortedPriorities = Array.from(priorityMap.entries()).sort((a, b) =>
-    a[0].localeCompare(b[0])
+  // Create assignee filters
+  filtersState.dynamicFilters.assignee = mergeFilters(
+    Array.from(assigneeMap.entries()),
+    'assignee',
+    (key, data) => {
+      const jqlValue = data.accountId ? `"${data.accountId}"` : `"${data.name}"`;
+      const colorIdentifier = data.accountId || data.emailAddress || data.displayName;
+      return {
+        id: `assignee-${key.replace(/[^a-zA-Z0-9]/g, '-')}`,
+        label: data.displayName,
+        jqlCondition: `assignee = ${jqlValue}`,
+        category: 'assignee' as FilterCategory,
+        icon: 'person',
+        avatarUrl: data.avatarUrl,
+        color: getAvatarColor(colorIdentifier),
+        isActive: false
+      };
+    }
   );
-  filtersState.dynamicFilters.priority = sortedPriorities.map(([name, data]) => {
-    const id = makeFilterId('priority', name);
-    return {
-      id,
+
+  // Create priority filters
+  filtersState.dynamicFilters.priority = mergeFilters(
+    Array.from(priorityMap.entries()),
+    'priority',
+    (name, data) => ({
+      id: makeFilterId('priority', name),
       label: name,
       jqlCondition: `priority = "${name}"`,
       category: 'priority' as FilterCategory,
       iconUrl: data.iconUrl,
-      isActive: activeIds.has(id)
-    };
-  });
-
-  // Create resolution filters sorted by name
-  const sortedResolutions = Array.from(resolutionMap.entries()).sort((a, b) =>
-    a[0].localeCompare(b[0])
+      isActive: false
+    })
   );
-  filtersState.dynamicFilters.resolution = sortedResolutions.map(([name, data]) => {
-    const id = makeFilterId('resolution', name);
-    return {
-      id,
+
+  // Create resolution filters
+  filtersState.dynamicFilters.resolution = mergeFilters(
+    Array.from(resolutionMap.entries()),
+    'resolution',
+    (name, data) => ({
+      id: makeFilterId('resolution', name),
       label: name,
       jqlCondition: `resolution = ${data.id}`,
       category: 'resolution' as FilterCategory,
       icon: 'check-circle',
       color: '#00875A',
-      isActive: activeIds.has(id)
-    };
-  });
-
-  // Create component filters sorted by name
-  const sortedComponents = Array.from(componentMap.entries()).sort((a, b) =>
-    a[0].localeCompare(b[0])
+      isActive: false
+    })
   );
-  filtersState.dynamicFilters.component = sortedComponents.map(([name]) => {
-    const id = makeFilterId('component', name);
-    return {
-      id,
+
+  // Create component filters
+  filtersState.dynamicFilters.component = mergeFilters(
+    Array.from(componentMap.entries()),
+    'component',
+    (name) => ({
+      id: makeFilterId('component', name),
       label: name,
       jqlCondition: `component = "${name}"`,
       category: 'component' as FilterCategory,
       icon: 'component',
-      isActive: activeIds.has(id)
-    };
-  });
-
-  // Create fix version filters sorted by name
-  const sortedFixVersions = Array.from(fixVersionMap.entries()).sort((a, b) =>
-    a[0].localeCompare(b[0])
+      isActive: false
+    })
   );
-  filtersState.dynamicFilters.fixVersion = sortedFixVersions.map(([name]) => {
-    const id = makeFilterId('fixversion', name);
-    return {
-      id,
+
+  // Create fix version filters
+  filtersState.dynamicFilters.fixVersion = mergeFilters(
+    Array.from(fixVersionMap.entries()),
+    'fixVersion',
+    (name) => ({
+      id: makeFilterId('fixversion', name),
       label: name,
       jqlCondition: `fixVersion = "${name}"`,
       category: 'fixVersion' as FilterCategory,
       icon: 'release',
-      isActive: activeIds.has(id)
-    };
-  });
+      isActive: false
+    })
+  );
 
   logger.store('filters', 'Updated dynamic filters', {
     projects: filtersState.dynamicFilters.project.length,
