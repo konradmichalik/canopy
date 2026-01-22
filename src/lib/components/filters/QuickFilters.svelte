@@ -25,9 +25,13 @@
     saveCustomFilter,
     deleteCustomFilter,
     updateCustomFilter,
-    applyCustomFilter
+    applyCustomFilter,
+    getActiveFilterConditions
   } from '../../stores/filters.svelte';
-  import { RECENCY_FILTER_OPTIONS } from '../../types/tree';
+  import { RECENCY_FILTER_OPTIONS, QUERY_COLORS, type QueryColor } from '../../types/tree';
+  import { issuesState } from '../../stores/issues.svelte';
+  import { addQuery, isTitleUnique } from '../../stores/jql.svelte';
+  import { applyQuickFilters } from '../../utils/jql-helpers';
   import { isFieldEnabled, type DisplayFieldId } from '../../stores/fieldConfig.svelte';
   import MultiSelectDropdown from './MultiSelectDropdown.svelte';
   import RecencyDropdown from './RecencyDropdown.svelte';
@@ -165,6 +169,12 @@
   // Delete confirmation modal state - single variable for KISS
   let filterToDelete = $state<CustomFilter | null>(null);
 
+  // "Save as Query" dialog state
+  let saveAsQueryDialogOpen = $state(false);
+  let queryTitle = $state('');
+  let queryColor = $state<QueryColor | undefined>(undefined);
+  let queryTitleInputRef: HTMLInputElement | null = $state(null);
+
   function confirmDeleteFilter() {
     if (filterToDelete) {
       deleteCustomFilter(filterToDelete.id);
@@ -224,13 +234,82 @@
     dialogFilterId = null;
   }
 
-  function handleDialogKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter' && dialogFilterName.trim()) {
-      handleDialogSubmit();
-    } else if (event.key === 'Escape') {
-      dialogOpen = false;
-    }
+  // Generic keydown handler for dialogs (DRY)
+  function createDialogKeydown(
+    canSubmit: () => boolean,
+    onSubmit: () => void,
+    onClose: () => void
+  ) {
+    return (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && canSubmit()) {
+        onSubmit();
+      } else if (event.key === 'Escape') {
+        onClose();
+      }
+    };
   }
+
+  const handleDialogKeydown = createDialogKeydown(
+    () => !!dialogFilterName.trim(),
+    handleDialogSubmit,
+    () => (dialogOpen = false)
+  );
+
+  // "Save as Query" functions
+  const canSaveAsQuery = $derived(hasActiveFiltersToSave() && issuesState.currentJql);
+
+  const generatedJql = $derived(() => {
+    if (!issuesState.currentJql) return '';
+    const conditions = getActiveFilterConditions();
+    if (conditions.length === 0) return issuesState.currentJql;
+    return applyQuickFilters(issuesState.currentJql, conditions);
+  });
+
+  const isQueryTitleDuplicate = $derived(
+    queryTitle.trim().length > 0 && !isTitleUnique(queryTitle.trim())
+  );
+
+  const hasLocalOnlyFilters = $derived(
+    filtersState.searchText || filtersState.recencyFilter === 'recently-commented'
+  );
+
+  function openSaveAsQueryDialog() {
+    queryTitle = '';
+    queryColor = undefined;
+    saveAsQueryDialogOpen = true;
+    setTimeout(() => queryTitleInputRef?.focus(), 50);
+  }
+
+  function toggleQueryColor(c: QueryColor): void {
+    queryColor = queryColor === c ? undefined : c;
+  }
+
+  function handleSaveAsQuery(): void {
+    const jql = generatedJql();
+    if (!jql || !queryTitle.trim() || isQueryTitleDuplicate) return;
+
+    const newQuery = addQuery(queryTitle.trim(), jql, queryColor);
+    saveAsQueryDialogOpen = false;
+    queryTitle = '';
+    queryColor = undefined;
+
+    // Dispatch event for navigation
+    document.dispatchEvent(
+      new CustomEvent('query-created', {
+        detail: { query: newQuery },
+        bubbles: true
+      })
+    );
+
+    // Reset filters (now baked into JQL)
+    resetFilters();
+  }
+
+  const handleSaveAsQueryKeydown = createDialogKeydown(
+    () => !!queryTitle.trim() && !isQueryTitleDuplicate,
+    handleSaveAsQuery,
+    () => (saveAsQueryDialogOpen = false)
+  );
 </script>
 
 <!-- Saved Filters Row (always visible if there are saved filters) -->
@@ -379,18 +458,32 @@
       <!-- Spacer -->
       <div class="flex-1"></div>
 
-      <!-- Save filter button -->
+      <!-- Save filter dropdown -->
       {#if canSaveFilter}
-        <Tooltip text="Save current filters as custom filter">
-          <button
-            onclick={openSaveDialog}
-            class="cursor-pointer inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded-full border border-dashed transition-colors
-            border-border text-muted-foreground hover:border-primary/30 hover:bg-accent hover:text-foreground"
-          >
-            <AtlaskitIcon name="add" size={12} />
-            Save
-          </button>
-        </Tooltip>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <button
+              class="cursor-pointer inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded-full border border-dashed transition-colors
+              border-border text-muted-foreground hover:border-primary/30 hover:bg-accent hover:text-foreground"
+            >
+              <AtlaskitIcon name="add" size={12} />
+              Save
+              <AtlaskitIcon name="chevron-down" size={10} />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content align="end" class="min-w-40">
+            <DropdownMenu.Item onclick={openSaveDialog}>
+              <AtlaskitIcon name="filter" size={14} class="mr-2" />
+              As Quickfilter
+            </DropdownMenu.Item>
+            {#if canSaveAsQuery}
+              <DropdownMenu.Item onclick={openSaveAsQueryDialog}>
+                <AtlaskitIcon name="layers" size={14} class="mr-2" />
+                As Query
+              </DropdownMenu.Item>
+            {/if}
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
       {/if}
 
       <!-- Reset button -->
@@ -456,3 +549,88 @@
   onConfirm={confirmDeleteFilter}
   onClose={() => (filterToDelete = null)}
 />
+
+<!-- Save as Query Dialog -->
+<Dialog.Root bind:open={saveAsQueryDialogOpen}>
+  <Dialog.Content class="sm:max-w-lg">
+    <div class="flex flex-col space-y-1.5 text-center sm:text-left">
+      <h2 class="text-lg font-semibold leading-none tracking-tight">Save as Query</h2>
+      <p class="text-sm text-muted-foreground">
+        Create a new query with the current filters baked into the JQL.
+      </p>
+    </div>
+    <div class="py-4 space-y-4">
+      <!-- Query Title -->
+      <div class="space-y-2">
+        <label for="queryTitle" class="text-sm font-medium">Title</label>
+        <Input
+          id="queryTitle"
+          bind:ref={queryTitleInputRef}
+          type="text"
+          placeholder="e.g., Active Sprint Tasks"
+          bind:value={queryTitle}
+          onkeydown={handleSaveAsQueryKeydown}
+          class={isQueryTitleDuplicate ? 'border-destructive focus-visible:ring-destructive' : ''}
+        />
+        {#if isQueryTitleDuplicate}
+          <div class="flex items-center gap-1.5 text-xs text-destructive">
+            <AtlaskitIcon name="warning" size={14} />
+            <span>A query with this title already exists</span>
+          </div>
+        {/if}
+      </div>
+
+      <!-- Color Selection -->
+      <div class="space-y-2">
+        <span class="text-sm font-medium">Color (optional)</span>
+        <div class="flex flex-wrap gap-2">
+          {#each QUERY_COLORS as c (c.id)}
+            <Tooltip text={c.label}>
+              <button
+                type="button"
+                onclick={() => toggleQueryColor(c.id)}
+                class="w-7 h-7 rounded-full {c.bg} transition-all cursor-pointer
+                  {queryColor === c.id
+                  ? 'ring-2 ring-offset-2 ring-offset-background ring-foreground scale-110'
+                  : 'hover:scale-110 opacity-70 hover:opacity-100'}"
+                aria-label={c.label}
+                aria-pressed={queryColor === c.id}
+              ></button>
+            </Tooltip>
+          {/each}
+        </div>
+      </div>
+
+      <!-- JQL Preview -->
+      <div class="space-y-2">
+        <span class="text-sm font-medium">Generated JQL</span>
+        <div class="p-3 bg-muted rounded-md font-mono text-xs text-muted-foreground max-h-24 overflow-y-auto">
+          {generatedJql()}
+        </div>
+      </div>
+
+      <!-- Warning for local-only filters -->
+      {#if hasLocalOnlyFilters}
+        <div class="flex items-start gap-2 p-3 bg-warning/10 border border-warning/30 rounded-md">
+          <AtlaskitIcon name="warning" size={16} class="text-warning mt-0.5 flex-shrink-0" />
+          <p class="text-xs text-warning">
+            {#if filtersState.searchText && filtersState.recencyFilter === 'recently-commented'}
+              Search text and "Recently Commented" filter are client-side only and will not be included in the query.
+            {:else if filtersState.searchText}
+              Search text is client-side only and will not be included in the query.
+            {:else}
+              "Recently Commented" filter is client-side only and will not be included in the query.
+            {/if}
+          </p>
+        </div>
+      {/if}
+    </div>
+    <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+      <Button variant="outline" onclick={() => (saveAsQueryDialogOpen = false)}>Cancel</Button>
+      <Button onclick={handleSaveAsQuery} disabled={!queryTitle.trim() || isQueryTitleDuplicate}>
+        <AtlaskitIcon name="layers" size={14} />
+        Create Query
+      </Button>
+    </div>
+  </Dialog.Content>
+</Dialog.Root>

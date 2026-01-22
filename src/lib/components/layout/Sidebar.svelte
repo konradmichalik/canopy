@@ -202,8 +202,18 @@
     // Load query from URL on initial page load
     handleUrlSlug(getSlugFromUrl());
 
+    // Listen for queries created from filters (via QuickFilters "Save as Query")
+    function handleQueryCreated(e: Event): void {
+      const customEvent = e as CustomEvent<{ query: SavedQuery }>;
+      if (customEvent.detail?.query) {
+        void loadQuery(customEvent.detail.query);
+      }
+    }
+    document.addEventListener('query-created', handleQueryCreated);
+
     return () => {
       unsubscribe();
+      document.removeEventListener('query-created', handleQueryCreated);
     };
   });
 
