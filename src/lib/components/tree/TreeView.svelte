@@ -449,8 +449,8 @@
     aria-label="Issue hierarchy tree"
     onclick={onTreeClick}
   >
-    <!-- Change Summary Banner -->
-    {#if changeTrackingState.isEnabled && changeTrackingState.currentChanges?.hasChanges}
+    <!-- Change Summary Banner (hidden during loading) -->
+    {#if !issuesState.isLoading && changeTrackingState.isEnabled && changeTrackingState.currentChanges?.hasChanges}
       <ChangeSummary
         changes={changeTrackingState.currentChanges}
         onAcknowledge={handleSaveCheckpoint}
