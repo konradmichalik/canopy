@@ -187,6 +187,24 @@ Search issues by key or summary with partial matching:
 Selecting "In Progress" + "In Review" (status) AND "High" (priority) shows issues that are:
 `(In Progress OR In Review) AND High priority`
 
+### Saved Quick Filters
+
+Save your current filter combination as a reusable preset:
+
+1. Apply desired filters (Quick Filters, Dynamic Filters, Recency, Search)
+2. Click **Save** → **As Quickfilter**
+3. Enter a name and optionally select an icon
+4. The saved filter appears as a pill above the filter bar
+
+| Action | Description |
+|--------|-------------|
+| **Click** | Toggle filter on/off |
+| **Drag** | Reorder saved filters via drag handle |
+| **Edit** | Rename or change icon via dropdown menu |
+| **Delete** | Remove with confirmation |
+
+**Note:** Saved Quick Filters are stored per query and persist across sessions.
+
 ### Filter Persistence
 
 Active filters are automatically saved per query and restored when switching between queries.
