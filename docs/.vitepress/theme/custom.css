@@ -1,0 +1,11 @@
+/* Larger logo in header */
+.VPNavBarTitle .logo {
+  height: 40px;
+  width: auto;
+}
+
+@media (min-width: 960px) {
+  .VPNavBarTitle .logo {
+    height: 48px;
+  }
+}

@@ -7,6 +7,10 @@ description: Learn what Canopy is and how it helps visualize Jira issues
 
 Canopy is a hierarchical Jira issue viewer that displays tickets in a tree structure, making it easy to understand project structure and track progress across your team.
 
+## Why "Canopy"?
+
+In forestry, the *canopy* is the uppermost layer of a forest, formed by the crowns of trees. Just as a forest canopy provides an overview of the trees below, Canopy gives you a bird's-eye view of your Jira project hierarchy - from Epics down to Subtasks.
+
 ## What is Canopy?
 
 Canopy transforms flat Jira query results into an interactive tree view that reflects parent-child relationships:

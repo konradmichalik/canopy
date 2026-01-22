@@ -50,9 +50,9 @@ features:
 
 <style>
 .app-preview {
-  margin: 2rem auto;
-  max-width: 1200px;
-  padding: 0 1.5rem;
+  margin: 2rem auto 3rem;
+  max-width: 1152px;
+  padding: 0 24px;
 }
 .app-preview img {
   width: 100%;

@@ -23,9 +23,7 @@
 
 ---
 
-![Canopy Demo](docs/images/jira-hierarchy-tree-demo.jpg)
-
-## 🌳 Overview
+![Canopy Demo](docs/images/screenshots/tree-view-wide.png)
 
 Canopy visualizes Jira issues in a hierarchical tree view (Epic → Story → Task → Subtask), making it easy to understand project structure and track progress across your team.
 

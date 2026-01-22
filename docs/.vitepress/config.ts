@@ -8,7 +8,7 @@ export default defineConfig({
   cleanUrls: true,
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/canopy/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/canopy/logo-icon.svg' }],
     ['meta', { name: 'theme-color', content: '#1868db' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:title', content: 'Canopy Documentation' }],
