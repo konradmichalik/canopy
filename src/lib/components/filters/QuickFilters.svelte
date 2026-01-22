@@ -362,11 +362,11 @@
             <AtlaskitIcon name={customFilter.icon || 'filter'} size={12} />
             {customFilter.name}
           </button>
-          <!-- Dropdown trigger for edit/delete -->
+          <!-- Dropdown trigger for edit/delete (visible on hover) -->
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <button
-                class="cursor-pointer inline-flex items-center justify-center w-5 h-5 mr-0.5 rounded-full transition-colors
+                class="cursor-pointer inline-flex items-center justify-center w-5 h-5 mr-0.5 rounded-full transition-all opacity-0 group-hover:opacity-100
                 {isActive
                   ? 'text-primary/60 hover:text-primary hover:bg-primary/10'
                   : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-accent'}"
