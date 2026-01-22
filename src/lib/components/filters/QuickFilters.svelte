@@ -629,7 +629,9 @@
       <!-- JQL Preview -->
       <div class="space-y-2">
         <span class="text-sm font-medium">Generated JQL</span>
-        <div class="p-3 bg-muted rounded-md font-mono text-xs text-muted-foreground max-h-24 overflow-y-auto">
+        <div
+          class="p-3 bg-muted rounded-md font-mono text-xs text-muted-foreground max-h-24 overflow-y-auto"
+        >
           {generatedJql()}
         </div>
       </div>
@@ -640,7 +642,8 @@
           <AtlaskitIcon name="warning" size={16} class="text-warning mt-0.5 flex-shrink-0" />
           <p class="text-xs text-warning">
             {#if filtersState.searchText && filtersState.recencyFilter === 'recently-commented'}
-              Search text and "Recently Commented" filter are client-side only and will not be included in the query.
+              Search text and "Recently Commented" filter are client-side only and will not be
+              included in the query.
             {:else if filtersState.searchText}
               Search text is client-side only and will not be included in the query.
             {:else}

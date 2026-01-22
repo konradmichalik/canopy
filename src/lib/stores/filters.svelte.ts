@@ -787,7 +787,10 @@ export function updateDynamicFilters(issues: JiraIssue[], options?: { replace?: 
     // Add/update with new filters (preserve active state)
     for (const [key, data] of newEntries) {
       const filter = createFilter(key, data);
-      resultMap.set(filter.id, { ...filter, isActive: existingMap.get(filter.id)?.isActive ?? false });
+      resultMap.set(filter.id, {
+        ...filter,
+        isActive: existingMap.get(filter.id)?.isActive ?? false
+      });
     }
 
     return Array.from(resultMap.values()).sort((a, b) => a.label.localeCompare(b.label));
