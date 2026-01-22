@@ -16,11 +16,9 @@
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> •
-  <a href="docs/INSTALLATION.md">Installation</a> •
-  <a href="docs/CONFIGURATION.md">Configuration</a> •
-  <a href="docs/FEATURES.md">Documentation</a> •
-  <a href="docs/DEVELOPMENT.md">Development</a>
+  <a href="https://canopy.vercel.app">Try Online</a> •
+  <a href="https://konradmichalik.github.io/canopy/">Documentation</a> •
+  <a href="https://konradmichalik.github.io/canopy/desktop/">macOS App</a>
 </p>
 
 ---
@@ -33,30 +31,31 @@ Canopy visualizes Jira issues in a hierarchical tree view (Epic → Story → Ta
 
 ## ✨ Features
 
-| Category | Highlights |
-|----------|------------|
-| **Tree View** | Hierarchical display with expand/collapse, keyboard navigation (vim-style), and progress aggregation |
-| **Grouping** | Group by Sprint, Assignee, Status, Project, or Recency for flexible organization |
-| **Filtering** | Quick filters, dynamic filters (status, assignee, priority), text search, and recency filters |
-| **Change Tracking** | Checkpoint-based change detection with visual indicators for new issues and status changes (Beta) |
-| **Auto-Refresh** | Automatic data refresh at configurable intervals (5min, 30min, 1h) |
-| **Theming** | Light/dark mode, system theme detection, and 6 customizable accent colors |
-| **Data Management** | Multiple saved JQL queries with colors, separators, duplication, and issue counts |
-| **Jira Support** | Both Jira Cloud and Server/Data Center instances |
+- **Tree View** - Hierarchical display with expand/collapse, progress aggregation, vim-style keyboard navigation
+- **Filtering** - Quick filters, dynamic filters, saved presets, text search
+- **Grouping** - By Sprint, Assignee, Status, Project, or Recency
+- **Change Tracking** - Checkpoint-based change detection (Beta)
+- **Theming** - Light/dark mode with 6 accent colors
+- **macOS Desktop App** - Native Tauri app without CORS proxy
 
-> **[View all features →](docs/FEATURES.md)**
+## 🚀 Three Ways to Use Canopy
 
-## 🚀 Quick Start
+| Option | Description | CORS Proxy |
+|--------|-------------|------------|
+| **[Online](https://jira-canopy.vercel.app)** | Use directly in browser | Required |
+| **[macOS App](https://konradmichalik.github.io/canopy/desktop/)** | Native desktop app | Not needed |
+| **Local** | Run from source | Required |
+
+### Quick Start (Local)
 
 ```bash
-# Install dependencies
+git clone https://github.com/konradmichalik/canopy.git
+cd canopy
 npm install
-
-# Start development server
 npm run dev
 ```
 
-> **Note:** A CORS proxy is required for local development. See [Installation Guide](docs/INSTALLATION.md#cors-proxy) for details.
+> **Note:** A [CORS proxy](https://konradmichalik.github.io/canopy/getting-started/installation#cors-proxy) is required for browser access.
 
 ## 📋 Requirements
 
@@ -66,20 +65,14 @@ npm run dev
 
 ## 📖 Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Installation](docs/INSTALLATION.md) | Setup guide, CORS proxy configuration |
-| [Configuration](docs/CONFIGURATION.md) | Jira authentication, connection settings |
-| [Features](docs/FEATURES.md) | Complete feature documentation |
-| [Development](docs/DEVELOPMENT.md) | Architecture, project structure, contributing |
+Full documentation available at **[konradmichalik.github.io/canopy](https://konradmichalik.github.io/canopy/)**
 
 ## 🛠️ Tech Stack
 
 - **[Svelte 5](https://svelte.dev/)** with TypeScript and Runes
 - **[Tailwind CSS v4](https://tailwindcss.com/)** for styling
 - **[shadcn-svelte](https://www.shadcn-svelte.com/)** UI components
-- **[Atlaskit Tokens](https://atlassian.design/components/tokens/)** for Jira-consistent theming
-- **[Vite](https://vite.dev/)** as build tool
+- **[Tauri](https://tauri.app/)** for macOS desktop app
 
 ## 📄 License
 

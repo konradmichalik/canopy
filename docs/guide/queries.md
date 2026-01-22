@@ -1,0 +1,134 @@
+---
+title: Query Management
+description: Save and organize multiple JQL queries
+---
+
+# Query Management
+
+Save and organize multiple JQL queries for quick access.
+
+## Creating Queries
+
+1. Click **Add Query** in the sidebar
+2. Enter a **Title** for the query
+3. Write your **JQL query**
+4. Optionally select a **Color** for visual distinction
+5. Click **Save**
+
+![New Query Dialog](/images/screenshots/new-query-dialog.png)
+
+## Query Features
+
+| Feature | Description |
+|---------|-------------|
+| **Custom Title** | Descriptive name for the query |
+| **Color Coding** | Visual identification in the sidebar |
+| **Issue Count** | Cached count displayed next to query name |
+| **URL Slugs** | Shareable URLs based on query title |
+| **Active Query** | Currently selected query is highlighted |
+| **Dynamic Page Title** | Browser tab shows current query name |
+
+## Query Actions
+
+Right-click or use the dropdown menu on a query:
+
+![Query Context Menu](/images/screenshots/query-context-menu.png)
+
+| Action | Description |
+|--------|-------------|
+| **Edit** | Modify title, JQL, or color |
+| **Duplicate** | Create a copy with unique title |
+| **Delete** | Remove with confirmation dialog |
+| **Reorder** | Drag to reorder in sidebar |
+
+![Edit Query Dialog](/images/screenshots/edit-query-dialog.png)
+
+## JQL Examples
+
+### Sprint-based Queries
+
+```sql
+-- Current sprint issues
+project = "MYPROJECT" AND sprint in openSprints()
+
+-- Specific sprint
+project = "MYPROJECT" AND sprint = "Sprint 42"
+
+-- Backlog (no sprint assigned)
+project = "MYPROJECT" AND sprint is EMPTY
+```
+
+### Team Queries
+
+```sql
+-- My open issues
+assignee = currentUser() AND resolution is EMPTY
+
+-- Team's in-progress work
+project = "MYPROJECT" AND status = "In Progress"
+
+-- Unassigned issues
+project = "MYPROJECT" AND assignee is EMPTY
+```
+
+### Time-based Queries
+
+```sql
+-- Updated this week
+project = "MYPROJECT" AND updated >= -7d
+
+-- Created today
+project = "MYPROJECT" AND created >= startOfDay()
+
+-- Overdue issues
+project = "MYPROJECT" AND duedate < now() AND resolution is EMPTY
+```
+
+## Query Separators
+
+Organize your queries with visual separators:
+
+### Adding Separators
+
+1. Click **Add Separator** in the sidebar
+2. Optionally enter a title (e.g., "Sprint Queries", "Team Queries")
+3. The separator appears in the list
+
+### Managing Separators
+
+- Drag to reorder separators like queries
+- Edit to change or add a title
+- Delete to remove
+
+**Example organization:**
+
+```
+📁 Sprint Queries
+   Current Sprint
+   Sprint Backlog
+
+📁 Team Queries
+   My Issues
+   Team Overview
+   Unassigned
+```
+
+## URL-based Query Selection
+
+Queries generate URL slugs from their titles:
+
+- Query "Current Sprint" → `/current-sprint`
+- Query "My Open Issues" → `/my-open-issues`
+
+Share these URLs with team members (they'll need their own Jira credentials).
+
+## Query Persistence
+
+All queries are stored in localStorage and persist across sessions:
+
+- Query titles and JQL
+- Colors and order
+- Separators and their positions
+- Issue counts (cached)
+
+Use [Import/Export](/guide/#import-export) to backup or share your query configuration.

@@ -1,7 +1,7 @@
 <svg width="200" height="48" viewBox="0 0 200 48" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Tree icon -->
   <g transform="translate(8, 8)">
-    <path d="M8,7L8,26M8,10L12,10M8,18L12,18M8,26L12,26" style="fill:none;stroke:#64748b;stroke-width:2px;stroke-linecap:round;stroke-linejoin:round;"/>
+    <path d="M8,7L8,26M8,10L12,10M8,18L12,18M8,26L12,26" style="fill:none;stroke:#64748b;stroke-width:2px;"/>
     <g transform="matrix(0.5,0,0,0.833333,3,0.333333)">
       <path d="M16,3.8L16,6.2C16,7.193 14.656,8 13,8L7,8C5.344,8 4,7.193 4,6.2L4,3.8C4,2.807 5.344,2 7,2L13,2C14.656,2 16,2.807 16,3.8Z" style="fill:#64748b;"/>
     </g>
