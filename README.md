@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://canopy.vercel.app">Try Online</a> •
+  <a href="https://jira-canopy.vercel.app">Try Online</a> •
   <a href="https://konradmichalik.github.io/canopy/">Documentation</a> •
   <a href="https://konradmichalik.github.io/canopy/desktop/">macOS App</a>
 </p>
