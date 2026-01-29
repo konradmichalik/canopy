@@ -11,14 +11,17 @@
   import { initializeDisplayDensity } from './lib/stores/displayDensity.svelte';
   import { initializeDateFormat } from './lib/stores/dateFormat.svelte';
   import { initializeDebugMode } from './lib/stores/debugMode.svelte';
-  import { initializeQueries } from './lib/stores/jql.svelte';
+  import { initializeQueries, getQueries } from './lib/stores/jql.svelte';
   import { initializeHelpModal } from './lib/stores/helpModal.svelte';
   import { initializeAutoRefresh, cleanupAutoRefresh } from './lib/stores/autoRefresh.svelte';
   import {
     initializeKeyboardNavigation,
     cleanupKeyboardNavigation
   } from './lib/stores/keyboardNavigation.svelte';
-  import { initializeChangeTracking } from './lib/stores/changeTracking.svelte';
+  import {
+    initializeChangeTracking,
+    runCheckpointCleanup
+  } from './lib/stores/changeTracking.svelte';
   import { onMount } from 'svelte';
 
   let isInitializing = $state(true);
@@ -45,6 +48,10 @@
         // These are still sync
         initializeFieldConfig();
         initializeKeyboardNavigation();
+
+        // Clean up orphaned/stale checkpoints after stores are initialized
+        const validQueryIds = new Set(getQueries().map((q) => q.id));
+        runCheckpointCleanup(validQueryIds);
 
         // Try to restore connection from storage
         await initializeConnection();

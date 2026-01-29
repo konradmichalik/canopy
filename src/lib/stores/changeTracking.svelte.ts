@@ -32,6 +32,61 @@ export const changeTrackingState = $state({
   queriesWithPendingChanges: {} as Record<string, boolean>
 });
 
+// Cached change lookup map for O(1) access (pattern from keyboardNavigation.svelte.ts)
+let cachedChangeLookup: Map<string, ChangeTypes> | null = null;
+let cachedChangesRef: ChangeDetection | null = null;
+
+/**
+ * Invalidate the change lookup cache
+ * Called when currentChanges is updated
+ */
+function invalidateChangeLookupCache(): void {
+  cachedChangeLookup = null;
+  cachedChangesRef = null;
+}
+
+/**
+ * Build or return cached change type lookup map
+ * Avoids O(n*m) lookups by pre-computing a Map in O(c) time
+ */
+function getChangeLookupMap(): Map<string, ChangeTypes> {
+  const changes = changeTrackingState.currentChanges;
+
+  // Return cached map if changes reference hasn't changed
+  if (cachedChangesRef === changes && cachedChangeLookup !== null) {
+    return cachedChangeLookup;
+  }
+
+  // Build new lookup map
+  const lookup = new Map<string, ChangeTypes>();
+
+  if (changes) {
+    const sources: [IssueChangeInfo[], SingleChangeType][] = [
+      [changes.newIssues, 'new'],
+      [changes.statusChanges, 'status-changed'],
+      [changes.commentChanges, 'new-comments'],
+      [changes.assigneeChanges, 'assignee-changed']
+    ];
+
+    for (const [items, changeType] of sources) {
+      for (const c of items) {
+        const existing = lookup.get(c.key);
+        if (existing) {
+          existing.push(changeType);
+        } else {
+          lookup.set(c.key, [changeType]);
+        }
+      }
+    }
+  }
+
+  // Cache the map and reference
+  cachedChangeLookup = lookup;
+  cachedChangesRef = changes;
+
+  return lookup;
+}
+
 /**
  * Activity period options for UI
  */
@@ -85,6 +140,7 @@ export function setChangeTrackingEnabled(enabled: boolean): void {
   if (!enabled) {
     // Clear current changes display when disabled
     changeTrackingState.currentChanges = null;
+    invalidateChangeLookupCache();
   }
 
   logger.store('changeTracking', 'Enabled changed', { enabled });
@@ -173,6 +229,7 @@ export function saveCheckpoint(queryId: string, issues: JiraIssue[]): void {
 
   // Clear current changes after saving checkpoint (user acknowledged changes)
   changeTrackingState.currentChanges = null;
+  invalidateChangeLookupCache();
 
   // Clear pending changes indicator for this query
   const { [queryId]: _pending, ...restPending } = changeTrackingState.queriesWithPendingChanges;
@@ -319,6 +376,7 @@ export function detectChanges(queryId: string, currentIssues: JiraIssue[]): Chan
   };
 
   changeTrackingState.currentChanges = changes;
+  invalidateChangeLookupCache();
 
   // Track pending changes for query list indicator
   if (changes.hasChanges) {
@@ -355,39 +413,21 @@ export function isRecentlyUpdated(
 }
 
 /**
+ * Get all change types for an issue (for displaying multiple indicators)
+ * Uses cached Map for O(1) lookup instead of O(4c) array iterations
+ */
+export function getIssueChangeTypes(issueKey: string): ChangeTypes {
+  if (!changeTrackingState.isEnabled || !changeTrackingState.currentChanges) return [];
+  return getChangeLookupMap().get(issueKey) || [];
+}
+
+/**
  * Get change type for an issue (for visual highlighting)
  * Returns only the first/primary change type
  */
 export function getIssueChangeType(issueKey: string): ChangeType {
-  if (!changeTrackingState.isEnabled) return null;
-
-  const changes = changeTrackingState.currentChanges;
-  if (!changes) return null;
-
-  if (changes.newIssues.some((c) => c.key === issueKey)) return 'new';
-  if (changes.statusChanges.some((c) => c.key === issueKey)) return 'status-changed';
-  if (changes.commentChanges.some((c) => c.key === issueKey)) return 'new-comments';
-  if (changes.assigneeChanges.some((c) => c.key === issueKey)) return 'assignee-changed';
-  return null;
-}
-
-/**
- * Get all change types for an issue (for displaying multiple indicators)
- */
-export function getIssueChangeTypes(issueKey: string): ChangeTypes {
-  if (!changeTrackingState.isEnabled) return [];
-
-  const changes = changeTrackingState.currentChanges;
-  if (!changes) return [];
-
-  const types: SingleChangeType[] = [];
-
-  if (changes.newIssues.some((c) => c.key === issueKey)) types.push('new');
-  if (changes.statusChanges.some((c) => c.key === issueKey)) types.push('status-changed');
-  if (changes.commentChanges.some((c) => c.key === issueKey)) types.push('new-comments');
-  if (changes.assigneeChanges.some((c) => c.key === issueKey)) types.push('assignee-changed');
-
-  return types;
+  const types = getIssueChangeTypes(issueKey);
+  return types.length > 0 ? types[0] : null;
 }
 
 /**
@@ -410,6 +450,7 @@ export function clearAllCheckpoints(): void {
   changeTrackingState.checkpoints = {};
   changeTrackingState.queriesWithPendingChanges = {};
   changeTrackingState.currentChanges = null;
+  invalidateChangeLookupCache();
   persistCheckpoints();
   persistPendingChanges();
   logger.store('changeTracking', 'All checkpoints cleared');
@@ -466,4 +507,94 @@ export function getTimeSinceCheckpoint(queryId: string): string | null {
  */
 export function getCheckpointTimestamp(queryId: string): string | null {
   return changeTrackingState.checkpoints[queryId]?.timestamp || null;
+}
+
+/**
+ * Clean up orphaned checkpoints (checkpoints for queries that no longer exist)
+ * @param validQueryIds - Set of valid query IDs (from jql store)
+ * @returns Number of orphaned checkpoints removed
+ */
+export function cleanupOrphanedCheckpoints(validQueryIds: Set<string>): number {
+  const checkpointQueryIds = Object.keys(changeTrackingState.checkpoints);
+
+  let removed = 0;
+  const cleanedCheckpoints: CheckpointStore = {};
+
+  for (const queryId of checkpointQueryIds) {
+    if (validQueryIds.has(queryId)) {
+      cleanedCheckpoints[queryId] = changeTrackingState.checkpoints[queryId];
+    } else {
+      removed++;
+      logger.store('changeTracking', 'Removed orphaned checkpoint', { queryId });
+    }
+  }
+
+  if (removed > 0) {
+    changeTrackingState.checkpoints = cleanedCheckpoints;
+
+    // Also clean pending changes
+    const cleanedPending: Record<string, boolean> = {};
+    for (const queryId of Object.keys(changeTrackingState.queriesWithPendingChanges)) {
+      if (validQueryIds.has(queryId)) {
+        cleanedPending[queryId] = changeTrackingState.queriesWithPendingChanges[queryId];
+      }
+    }
+    changeTrackingState.queriesWithPendingChanges = cleanedPending;
+
+    persistCheckpoints();
+    persistPendingChanges();
+  }
+
+  return removed;
+}
+
+/**
+ * Clean up stale checkpoints older than specified days
+ * @param maxAgeDays - Maximum age in days (default: 30)
+ * @returns Number of stale checkpoints removed
+ */
+export function cleanupStaleCheckpoints(maxAgeDays: number = 30): number {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
+  const cutoffMs = cutoffDate.getTime();
+
+  let removed = 0;
+  const cleanedCheckpoints: CheckpointStore = {};
+
+  for (const [queryId, checkpoint] of Object.entries(changeTrackingState.checkpoints)) {
+    const checkpointTime = new Date(checkpoint.timestamp).getTime();
+    if (checkpointTime >= cutoffMs) {
+      cleanedCheckpoints[queryId] = checkpoint;
+    } else {
+      removed++;
+      const ageDays = Math.round((Date.now() - checkpointTime) / (1000 * 60 * 60 * 24));
+      logger.store('changeTracking', 'Removed stale checkpoint', { queryId, ageDays });
+    }
+  }
+
+  if (removed > 0) {
+    changeTrackingState.checkpoints = cleanedCheckpoints;
+    persistCheckpoints();
+  }
+
+  return removed;
+}
+
+/**
+ * Run all cleanup routines
+ * @param validQueryIds - Set of valid query IDs (from jql store)
+ * @returns Summary of cleanup actions
+ */
+export function runCheckpointCleanup(validQueryIds: Set<string>): {
+  orphaned: number;
+  stale: number;
+} {
+  const orphaned = cleanupOrphanedCheckpoints(validQueryIds);
+  const stale = cleanupStaleCheckpoints();
+
+  if (orphaned > 0 || stale > 0) {
+    logger.store('changeTracking', 'Cleanup completed', { orphaned, stale });
+  }
+
+  return { orphaned, stale };
 }
