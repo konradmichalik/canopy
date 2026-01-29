@@ -3,6 +3,7 @@
   import Tooltip from './Tooltip.svelte';
   import AboutModal from './AboutModal.svelte';
   import FlashMessage from './FlashMessage.svelte';
+  import ConfirmModal from './ConfirmModal.svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { downloadConfig, readConfigFile, importConfig } from '../../utils/storage';
   import { initializeQueries } from '../../stores/jql.svelte';
@@ -43,6 +44,7 @@
 
   let open = $state(false);
   let showAboutModal = $state(false);
+  let showDisconnectModal = $state(false);
   let fileInput: HTMLInputElement;
   let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -81,11 +83,13 @@
     open = false;
   }
 
-  function handleDisconnect(): void {
-    if (confirm('Disconnect from Jira?')) {
-      disconnect();
-      open = false;
-    }
+  function handleDisconnectClick(): void {
+    open = false;
+    showDisconnectModal = true;
+  }
+
+  async function handleDisconnectConfirm(): Promise<void> {
+    await disconnect();
   }
 
   async function handleFileSelect(event: Event): Promise<void> {
@@ -382,7 +386,7 @@
       <DropdownMenu.Separator />
 
       <!-- Logout -->
-      <DropdownMenu.Item onclick={handleDisconnect} variant="destructive">
+      <DropdownMenu.Item onclick={handleDisconnectClick} variant="destructive">
         <AtlaskitIcon name="log-out" size={16} />
         Disconnect
       </DropdownMenu.Item>
@@ -403,3 +407,14 @@
 
 <!-- About Modal -->
 <AboutModal bind:open={showAboutModal} onClose={() => (showAboutModal = false)} />
+
+<!-- Disconnect Confirmation Modal -->
+<ConfirmModal
+  bind:open={showDisconnectModal}
+  title="Disconnect from Jira?"
+  description="You will need to enter your credentials again to reconnect."
+  confirmLabel="Disconnect"
+  variant="destructive"
+  icon="log-out"
+  onConfirm={handleDisconnectConfirm}
+/>
