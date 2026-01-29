@@ -4,6 +4,7 @@
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
+  import { Switch } from '$lib/components/ui/switch';
   import type { SavedQuery, QueryColor } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { validateJql, validateJqlExtended } from '../../utils/jql-helpers';
@@ -241,12 +242,7 @@
 
       <!-- Entry Node Option -->
       <div class="flex items-center gap-3">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" bind:checked={showEntryNode} class="sr-only peer" />
-          <div
-            class="w-9 h-5 bg-neutral rounded-full peer peer-checked:bg-brand peer-focus:ring-2 peer-focus:ring-border-focused transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"
-          ></div>
-        </label>
+        <Switch bind:checked={showEntryNode} />
         <div class="flex items-center gap-1.5">
           <span class="text-sm text-text">Show summary header</span>
           <Tooltip
