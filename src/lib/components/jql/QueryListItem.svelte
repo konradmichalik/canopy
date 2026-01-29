@@ -11,6 +11,7 @@
   interface Props {
     query: SavedQuery;
     isActive: boolean;
+    isKeyboardFocused?: boolean;
     index: number;
     isDragging: boolean;
     isDragOver: boolean;
@@ -27,6 +28,7 @@
   let {
     query,
     isActive,
+    isKeyboardFocused = false,
     index,
     isDragging,
     isDragOver,
@@ -101,9 +103,19 @@
 
   // Dropdown state
   let dropdownOpen = $state(false);
+
+  // Auto-scroll when keyboard focused
+  let itemElement: HTMLDivElement;
+
+  $effect(() => {
+    if (isKeyboardFocused && itemElement) {
+      itemElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  });
 </script>
 
 <div
+  bind:this={itemElement}
   role="button"
   tabindex="0"
   class="group w-full text-left py-2 pr-2 rounded-lg transition-all flex items-center justify-between gap-2 cursor-pointer relative overflow-hidden
@@ -111,7 +123,8 @@
     ? 'bg-accent text-accent-foreground'
     : 'hover:bg-accent/50 text-muted-foreground hover:text-foreground'}
     {isDragging ? 'opacity-50 scale-95' : ''}
-    {isDragOver ? 'ring-2 ring-primary ring-offset-1' : ''}"
+    {isDragOver ? 'ring-2 ring-primary ring-offset-1' : ''}
+    {isKeyboardFocused ? 'ring-2 ring-ring ring-offset-1' : ''}"
   onclick={handleClick}
   onkeydown={handleKeydown}
   ondragover={handleDragOver}

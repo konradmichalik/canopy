@@ -51,6 +51,10 @@
   import { updateQueryGroupBy } from '../../stores/jql.svelte';
   import { readSingleQueryFile, importSingleQuery } from '../../utils/storage';
   import { createDragDrop } from '../../utils/drag-drop.svelte';
+  import {
+    onQuerySelect,
+    getFocusedQuery
+  } from '../../stores/keyboardNavigation.svelte';
 
   interface Props {
     width: number;
@@ -196,6 +200,11 @@
       }
     });
 
+    // Register callback for keyboard navigation query selection
+    const unsubscribeKeyboard = onQuerySelect((query: SavedQuery) => {
+      void loadQuery(query);
+    });
+
     // Register callback for browser navigation (back/forward)
     const unsubscribe = onUrlSlugChange(handleUrlSlug);
 
@@ -213,9 +222,13 @@
 
     return () => {
       unsubscribe();
+      unsubscribeKeyboard();
       document.removeEventListener('query-created', handleQueryCreated);
     };
   });
+
+  // Get keyboard-focused query for visual highlight
+  const keyboardFocusedQuery = $derived(getFocusedQuery());
 
   function handleNewQuery(): void {
     editingQuery = null;
@@ -397,6 +410,7 @@
               query={item}
               {index}
               isActive={routerState.activeQueryId === item.id}
+              isKeyboardFocused={keyboardFocusedQuery?.id === item.id}
               isDragging={queryDrag.isDragging(index)}
               isDragOver={queryDrag.isDragOver(index)}
               onSelect={handleSelectQuery}

@@ -1,21 +1,45 @@
 /**
  * Keyboard Navigation Store
- * Manages focus state for tree keyboard navigation
- * Provides global keyboard shortcuts when TreeView is active
+ * Manages focus state for tree and sidebar keyboard navigation
+ * Provides global keyboard shortcuts when TreeView or Sidebar is active
  */
 
-import type { TreeNode } from '../types';
+import type { TreeNode, SavedQuery } from '../types';
 import { flattenTree, findNode } from '../utils/hierarchy-builder';
 import { issuesState, toggleNode } from './issues.svelte';
 import { getIssueUrl } from './issues.svelte';
 import { routerState } from './router.svelte';
 import { openExternalUrl } from '../utils/external-link';
+import { jqlState } from './jql.svelte';
+import { isQuery } from '../types/tree';
 
 // State container for keyboard navigation
 export const keyboardNavState = $state({
   focusedKey: null as string | null,
-  isNavigating: false
+  isNavigating: false,
+  // Sidebar navigation: -1 = tree focused, >= 0 = sidebar query index
+  focusedQueryIndex: -1
 });
+
+/**
+ * Check if keyboard event should be ignored (input fields, modals)
+ */
+function shouldIgnoreKeyEvent(event: KeyboardEvent): boolean {
+  const target = event.target as HTMLElement;
+  return (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable ||
+    !!document.querySelector('[role="dialog"]')
+  );
+}
+
+/**
+ * Get navigable queries (excluding separators)
+ */
+function getNavigableQueries(): SavedQuery[] {
+  return jqlState.items.filter(isQuery) as SavedQuery[];
+}
 
 // Track the previous query ID to detect changes
 let previousQueryId: string | null = null;
@@ -150,6 +174,7 @@ export function expandOrDescend(): void {
 
 /**
  * Collapse focused node or move to parent
+ * If at root level with no parent and already collapsed, switch to sidebar
  */
 export function collapseOrAscend(): void {
   if (!keyboardNavState.focusedKey) return;
@@ -163,6 +188,9 @@ export function collapseOrAscend(): void {
   } else if (node.parentKey) {
     // Move to parent
     setFocusedKey(node.parentKey);
+  } else {
+    // At root level with no parent and collapsed - switch to sidebar
+    focusSidebar();
   }
 }
 
@@ -190,20 +218,133 @@ export function openFocusedIssue(): void {
   }
 }
 
+// ============================================
+// Sidebar Navigation
+// ============================================
+
+/**
+ * Switch focus to sidebar query list
+ */
+export function focusSidebar(): void {
+  const queries = getNavigableQueries();
+  if (queries.length === 0) return;
+
+  // Start at active query or first query
+  let startIndex = 0;
+  if (routerState.activeQueryId) {
+    const activeIdx = queries.findIndex((q) => q.id === routerState.activeQueryId);
+    if (activeIdx !== -1) startIndex = activeIdx;
+  }
+
+  keyboardNavState.focusedQueryIndex = startIndex;
+}
+
+/**
+ * Clear sidebar focus (return to tree)
+ */
+export function clearSidebarFocus(): void {
+  keyboardNavState.focusedQueryIndex = -1;
+}
+
+/**
+ * Get currently focused query (for visual highlight)
+ */
+export function getFocusedQuery(): SavedQuery | null {
+  if (keyboardNavState.focusedQueryIndex < 0) return null;
+  const queries = getNavigableQueries();
+  return queries[keyboardNavState.focusedQueryIndex] ?? null;
+}
+
+/**
+ * Handle sidebar keyboard navigation
+ * Returns the selected query if Enter/Right was pressed, null otherwise
+ */
+function handleSidebarKeydown(event: KeyboardEvent): SavedQuery | null | 'handled' {
+  if (keyboardNavState.focusedQueryIndex < 0) return null;
+  if (shouldIgnoreKeyEvent(event)) return null;
+
+  const queries = getNavigableQueries();
+  if (queries.length === 0) return null;
+
+  switch (event.key) {
+    case 'ArrowDown':
+    case 'j':
+      event.preventDefault();
+      keyboardNavState.focusedQueryIndex =
+        keyboardNavState.focusedQueryIndex < queries.length - 1
+          ? keyboardNavState.focusedQueryIndex + 1
+          : 0;
+      return 'handled';
+
+    case 'ArrowUp':
+    case 'k':
+      event.preventDefault();
+      keyboardNavState.focusedQueryIndex =
+        keyboardNavState.focusedQueryIndex > 0
+          ? keyboardNavState.focusedQueryIndex - 1
+          : queries.length - 1;
+      return 'handled';
+
+    case 'ArrowRight':
+    case 'l':
+    case 'Enter':
+      event.preventDefault();
+      const selectedQuery = queries[keyboardNavState.focusedQueryIndex];
+      keyboardNavState.focusedQueryIndex = -1;
+      keyboardNavState.focusedKey = null;
+      return selectedQuery ?? null;
+
+    case 'Escape':
+      event.preventDefault();
+      keyboardNavState.focusedQueryIndex = -1;
+      return 'handled';
+  }
+
+  return null;
+}
+
+// Callback for query selection (set by Sidebar)
+let onQuerySelectCallback: ((query: SavedQuery) => void) | null = null;
+
+/**
+ * Register callback for query selection
+ */
+export function onQuerySelect(callback: (query: SavedQuery) => void): () => void {
+  onQuerySelectCallback = callback;
+  return () => {
+    onQuerySelectCallback = null;
+  };
+}
+
 /**
  * Handle keyboard events for tree navigation
  */
 function handleTreeKeydown(event: KeyboardEvent): void {
-  // Ignore if not on TreeView, typing in input, modal open, or no issues
-  if (
-    !routerState.activeQueryId ||
-    (event.target as HTMLElement).tagName === 'INPUT' ||
-    (event.target as HTMLElement).tagName === 'TEXTAREA' ||
-    (event.target as HTMLElement).isContentEditable ||
-    document.querySelector('[role="dialog"]') ||
-    issuesState.treeNodes.length === 0 ||
-    issuesState.isLoading
-  ) {
+  // Check sidebar navigation first
+  const sidebarResult = handleSidebarKeydown(event);
+  if (sidebarResult === 'handled') return;
+  if (sidebarResult && onQuerySelectCallback) {
+    onQuerySelectCallback(sidebarResult);
+    return;
+  }
+
+  if (shouldIgnoreKeyEvent(event)) return;
+
+  // No active query - nav keys switch to sidebar
+  if (!routerState.activeQueryId) {
+    if (['ArrowDown', 'ArrowUp', 'j', 'k', 'ArrowLeft', 'h'].includes(event.key)) {
+      event.preventDefault();
+      focusSidebar();
+    }
+    return;
+  }
+
+  // No issues or loading - only left arrow switches to sidebar
+  if (issuesState.treeNodes.length === 0 || issuesState.isLoading) {
+    if (['ArrowLeft', 'h'].includes(event.key)) {
+      event.preventDefault();
+      focusSidebar();
+    }
     return;
   }
 
