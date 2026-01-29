@@ -61,7 +61,32 @@
       .slice(0, 2);
   }
 
-  const avatarUrl = $derived(user?.avatarUrls?.[avatarSize[size]] || user?.avatarUrls?.['24x24']);
+  /**
+   * Check if the avatar URL is a Jira default/anonymous avatar
+   * These often look broken or generic, so we prefer showing initials instead
+   */
+  function isDefaultAvatar(url: string | undefined | null): boolean {
+    if (!url) return true;
+
+    const lowerUrl = url.toLowerCase();
+
+    // Jira's built-in default avatars
+    if (lowerUrl.includes('universal_avatar')) return true;
+    if (lowerUrl.includes('isdefault=true')) return true;
+    if (lowerUrl.includes('avatartype=issuetype')) return false; // Issue type avatars are fine
+    if (lowerUrl.includes('/avatar/') && lowerUrl.includes('default')) return true;
+
+    // Gravatar default images (mystery person, identicon, etc.)
+    if (lowerUrl.includes('gravatar.com') && lowerUrl.includes('d=')) return true;
+    if (lowerUrl.includes('secsgravatar.com')) return true;
+
+    return false;
+  }
+
+  const rawAvatarUrl = $derived(
+    user?.avatarUrls?.[avatarSize[size]] || user?.avatarUrls?.['24x24']
+  );
+  const avatarUrl = $derived(isDefaultAvatar(rawAvatarUrl) ? null : rawAvatarUrl);
   const initials = $derived(user?.displayName ? getInitials(user.displayName) : '?');
   const borderColor = $derived(user ? getUserColor(user) : 'transparent');
 </script>
