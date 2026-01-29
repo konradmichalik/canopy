@@ -89,7 +89,10 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-hidden p-4">
+    <main
+      class="flex-1 overflow-hidden p-4"
+      style="background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px); background-size: 16px 16px;"
+    >
       {#if routerState.activeQueryId}
         <div class="h-full bg-background rounded-xl border shadow-sm overflow-hidden">
           <TreeView />
