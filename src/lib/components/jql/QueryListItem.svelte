@@ -127,8 +127,8 @@
   tabindex="0"
   class="group w-full text-left py-2 pr-2 rounded-lg transition-all flex items-center justify-between gap-2 cursor-pointer relative overflow-hidden
     {isActive
-    ? 'bg-accent text-accent-foreground'
-    : 'hover:bg-accent/50 text-muted-foreground hover:text-foreground'}
+    ? 'bg-background text-accent-foreground'
+    : 'hover:bg-background/80 text-muted-foreground hover:text-foreground'}
     {isDragging ? 'opacity-50 scale-95' : ''}
     {isDragOver ? 'ring-2 ring-primary ring-offset-1' : ''}
     {isKeyboardFocused ? 'ring-2 ring-ring ring-offset-1' : ''}"

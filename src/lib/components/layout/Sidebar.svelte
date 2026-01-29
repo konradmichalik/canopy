@@ -334,7 +334,7 @@
 
 <aside class="h-full bg-background border-r flex flex-col" style="width: {width}px;">
   <!-- Sidebar Header -->
-  <div class="h-14 flex items-center justify-between px-4 border-b flex-shrink-0">
+  <div class="h-14 flex items-center justify-between px-4 border-b flex-shrink-0 bg-background">
     <span class="text-sm font-semibold text-foreground">Queries</span>
     <div class="flex items-center gap-1">
       <Tooltip text="Import Query">
@@ -374,7 +374,7 @@
   />
 
   <!-- Query List -->
-  <div class="flex-1 overflow-y-auto p-2">
+  <div class="flex-1 overflow-y-auto p-2 bg-accent/30">
     {#if jqlState.items.length === 0}
       <div class="text-center py-12 px-4">
         <div
