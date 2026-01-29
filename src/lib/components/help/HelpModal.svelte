@@ -112,8 +112,9 @@
     }
   ];
 
-  function handleClose(markAsSeen = false) {
-    if (markAsSeen) {
+  function handleClose() {
+    // Always mark as seen when closing (regardless of how)
+    if (!helpModalState.hasSeenIntro) {
       markIntroAsSeen();
     }
     closeHelpModal();
@@ -121,7 +122,7 @@
 
   function handleNext() {
     if (isLastSlide) {
-      handleClose(true);
+      handleClose();
     } else {
       nextSlide(slides.length);
     }

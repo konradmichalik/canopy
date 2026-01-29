@@ -58,6 +58,7 @@ export const STORAGE_KEYS = {
   CHANGE_TRACKING_ACTIVITY_PERIOD: 'change-tracking-activity-period',
   CHANGE_TRACKING_CHECKPOINTS: 'change-tracking-checkpoints',
   CHANGE_TRACKING_PENDING_CHANGES: 'change-tracking-pending-changes',
+  CHANGE_TRACKING_SHOW_INDICATORS: 'change-tracking-show-indicators',
   CUSTOM_FILTERS: 'custom-filters'
 } as const;
 
@@ -285,18 +286,23 @@ export function getStorageInfo(): { used: number; keys: string[] } {
 
 const EXPORT_VERSION = 1;
 
+export interface ExportOptions {
+  includeCredentials?: boolean;
+}
+
 /**
  * Export current configuration as JSON
  * Note: displayFields are stored per query, not globally
  */
-export function exportConfig(): ExportedConfig {
+export function exportConfig(options: ExportOptions = {}): ExportedConfig {
+  const { includeCredentials = true } = options;
   const connection = getStorageItem<StoredConnection>(STORAGE_KEYS.CONNECTION);
   const queries = getStorageItem<SavedQuery[]>(STORAGE_KEYS.QUERIES) || [];
 
   const config: ExportedConfig = {
     version: EXPORT_VERSION,
     exportedAt: new Date().toISOString(),
-    connection: connection
+    connection: connection && includeCredentials
       ? {
           instanceType: connection.instanceType,
           baseUrl: connection.baseUrl,
@@ -308,7 +314,7 @@ export function exportConfig(): ExportedConfig {
   };
 
   logger.info('📦 Config exported', {
-    hasConnection: !!connection,
+    hasConnection: !!connection && includeCredentials,
     queryCount: queries.length
   });
 
@@ -318,13 +324,14 @@ export function exportConfig(): ExportedConfig {
 /**
  * Download configuration as JSON file
  */
-export function downloadConfig(): void {
-  const config = exportConfig();
+export function downloadConfig(options: ExportOptions = {}): void {
+  const config = exportConfig(options);
   const json = JSON.stringify(config, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
 
-  const filename = `jira-hierarchy-config-${new Date().toISOString().split('T')[0]}.json`;
+  const suffix = options.includeCredentials === false ? '-queries-only' : '';
+  const filename = `canopy-config${suffix}-${new Date().toISOString().split('T')[0]}.json`;
 
   const a = document.createElement('a');
   a.href = url;

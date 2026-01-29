@@ -6,7 +6,11 @@
   import type { SavedQuery } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { downloadSingleQuery } from '../../utils/storage';
-  import { hasUnacknowledgedChanges } from '../../stores/changeTracking.svelte';
+  import {
+    changeTrackingState,
+    hasUnacknowledgedChanges,
+    getQueryChangeTypes
+  } from '../../stores/changeTracking.svelte';
 
   interface Props {
     query: SavedQuery;
@@ -98,8 +102,11 @@
     query.color ? QUERY_COLORS.find((c) => c.id === query.color)?.bg : null
   );
 
-  // Check for unacknowledged changes
-  const hasPendingChanges = $derived(hasUnacknowledgedChanges(query.id));
+  // Check for unacknowledged changes and their types
+  const hasPendingChanges = $derived(
+    changeTrackingState.showIndicators && hasUnacknowledgedChanges(query.id)
+  );
+  const changeTypes = $derived(getQueryChangeTypes(query.id));
 
   // Dropdown state
   let dropdownOpen = $state(false);
@@ -139,11 +146,35 @@
   ></div>
 
   <div class="flex items-center min-w-0 pl-3 gap-2">
-    <!-- Pending changes indicator -->
-    {#if hasPendingChanges}
-      <Tooltip text="Changes since last checkpoint">
-        <span class="inline-block w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
-      </Tooltip>
+    <!-- Pending changes indicators (colored badges) -->
+    {#if hasPendingChanges && changeTypes}
+      <div class="flex items-center gap-0.5 flex-shrink-0">
+        {#if changeTypes.hasNew}
+          <Tooltip text="New issues">
+            <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+          </Tooltip>
+        {/if}
+        {#if changeTypes.hasRemoved}
+          <Tooltip text="Removed issues">
+            <span class="inline-block w-2 h-2 rounded-full bg-red-500"></span>
+          </Tooltip>
+        {/if}
+        {#if changeTypes.hasStatusChanges}
+          <Tooltip text="Status changes">
+            <span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
+          </Tooltip>
+        {/if}
+        {#if changeTypes.hasCommentChanges}
+          <Tooltip text="New comments">
+            <span class="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
+          </Tooltip>
+        {/if}
+        {#if changeTypes.hasAssigneeChanges}
+          <Tooltip text="Assignee changes">
+            <span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
+          </Tooltip>
+        {/if}
+      </div>
     {/if}
     <!-- Text -->
     <span class="truncate text-sm font-medium">{query.title}</span>

@@ -96,7 +96,9 @@
   const changeTypes = $derived(getIssueChangeTypes(issue.key));
   const recentlyUpdated = $derived(isRecentlyUpdated(issue));
   const showActivityBadge = $derived(
-    changeTrackingState.isEnabled && (changeTypes.length > 0 || recentlyUpdated)
+    changeTrackingState.isEnabled &&
+      changeTrackingState.showIndicators &&
+      (changeTypes.length > 0 || recentlyUpdated)
   );
 </script>
 

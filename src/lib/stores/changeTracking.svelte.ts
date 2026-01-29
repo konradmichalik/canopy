@@ -17,7 +17,8 @@ import type {
   ActivityPeriod,
   ChangeType,
   ChangeTypes,
-  SingleChangeType
+  SingleChangeType,
+  QueryChangeTypes
 } from '../types/changeTracking';
 import type { JiraComment } from '../types/jira';
 import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
@@ -27,9 +28,10 @@ import { logger } from '../utils/logger';
 export const changeTrackingState = $state({
   isEnabled: false,
   activityPeriod: '24h' as ActivityPeriod,
+  showIndicators: true,
   checkpoints: {} as CheckpointStore,
   currentChanges: null as ChangeDetection | null,
-  queriesWithPendingChanges: {} as Record<string, boolean>
+  queriesWithPendingChanges: {} as Record<string, QueryChangeTypes>
 });
 
 // Cached change lookup map for O(1) access (pattern from keyboardNavigation.svelte.ts)
@@ -100,12 +102,17 @@ export const ACTIVITY_PERIOD_OPTIONS: { value: ActivityPeriod; label: string }[]
  * Initialize change tracking from storage
  */
 export async function initializeChangeTracking(): Promise<void> {
-  const [storedEnabled, storedPeriod, storedCheckpoints, storedPendingChanges] = await Promise.all([
-    getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_ENABLED),
-    getStorageItemAsync<ActivityPeriod>(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD),
-    getStorageItemAsync<CheckpointStore>(STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS),
-    getStorageItemAsync<Record<string, boolean>>(STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES)
-  ]);
+  const [storedEnabled, storedPeriod, storedCheckpoints, storedPendingChanges, storedShowIndicators] =
+    await Promise.all([
+      getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_ENABLED),
+      getStorageItemAsync<ActivityPeriod>(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD),
+      getStorageItemAsync<CheckpointStore>(STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS),
+      // Handle both old (boolean) and new (QueryChangeTypes) formats
+      getStorageItemAsync<Record<string, boolean | QueryChangeTypes>>(
+        STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES
+      ),
+      getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_SHOW_INDICATORS)
+    ]);
 
   if (storedEnabled !== null) {
     changeTrackingState.isEnabled = storedEnabled;
@@ -115,17 +122,39 @@ export async function initializeChangeTracking(): Promise<void> {
     changeTrackingState.activityPeriod = storedPeriod;
   }
 
+  if (storedShowIndicators !== null) {
+    changeTrackingState.showIndicators = storedShowIndicators;
+  }
+
   if (storedCheckpoints) {
     changeTrackingState.checkpoints = storedCheckpoints;
   }
 
   if (storedPendingChanges) {
-    changeTrackingState.queriesWithPendingChanges = storedPendingChanges;
+    // Migrate old boolean format to new QueryChangeTypes format
+    const migrated: Record<string, QueryChangeTypes> = {};
+    for (const [queryId, value] of Object.entries(storedPendingChanges)) {
+      if (typeof value === 'boolean') {
+        // Old format: convert boolean to generic "has changes" indicator
+        migrated[queryId] = {
+          hasNew: true, // Assume changes exist but type unknown
+          hasRemoved: false,
+          hasStatusChanges: false,
+          hasCommentChanges: false,
+          hasAssigneeChanges: false
+        };
+      } else {
+        // New format: use as-is
+        migrated[queryId] = value;
+      }
+    }
+    changeTrackingState.queriesWithPendingChanges = migrated;
   }
 
   logger.store('changeTracking', 'Initialized', {
     isEnabled: changeTrackingState.isEnabled,
     activityPeriod: changeTrackingState.activityPeriod,
+    showIndicators: changeTrackingState.showIndicators,
     checkpointCount: Object.keys(changeTrackingState.checkpoints).length
   });
 }
@@ -153,6 +182,15 @@ export function setActivityPeriod(period: ActivityPeriod): void {
   changeTrackingState.activityPeriod = period;
   saveStorage(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD, period);
   logger.store('changeTracking', 'Activity period changed', { period });
+}
+
+/**
+ * Set whether to show change indicators (queries and issues)
+ */
+export function setShowIndicators(show: boolean): void {
+  changeTrackingState.showIndicators = show;
+  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_SHOW_INDICATORS, show);
+  logger.store('changeTracking', 'Show indicators changed', { show });
 }
 
 /**
@@ -378,11 +416,18 @@ export function detectChanges(queryId: string, currentIssues: JiraIssue[]): Chan
   changeTrackingState.currentChanges = changes;
   invalidateChangeLookupCache();
 
-  // Track pending changes for query list indicator
+  // Track pending changes for query list indicator (with change types)
   if (changes.hasChanges) {
+    const queryChangeTypes: QueryChangeTypes = {
+      hasNew: changes.newIssues.length > 0,
+      hasRemoved: changes.removedIssues.length > 0,
+      hasStatusChanges: changes.statusChanges.length > 0,
+      hasCommentChanges: changes.commentChanges.length > 0,
+      hasAssigneeChanges: changes.assigneeChanges.length > 0
+    };
     changeTrackingState.queriesWithPendingChanges = {
       ...changeTrackingState.queriesWithPendingChanges,
-      [queryId]: true
+      [queryId]: queryChangeTypes
     };
     persistPendingChanges();
   }
@@ -478,7 +523,15 @@ function persistPendingChanges(): void {
  */
 export function hasUnacknowledgedChanges(queryId: string): boolean {
   if (!changeTrackingState.isEnabled) return false;
-  return changeTrackingState.queriesWithPendingChanges[queryId] === true;
+  return queryId in changeTrackingState.queriesWithPendingChanges;
+}
+
+/**
+ * Get the change types for a query (for colored indicators in sidebar)
+ */
+export function getQueryChangeTypes(queryId: string): QueryChangeTypes | null {
+  if (!changeTrackingState.isEnabled) return null;
+  return changeTrackingState.queriesWithPendingChanges[queryId] ?? null;
 }
 
 /**
@@ -533,7 +586,7 @@ export function cleanupOrphanedCheckpoints(validQueryIds: Set<string>): number {
     changeTrackingState.checkpoints = cleanedCheckpoints;
 
     // Also clean pending changes
-    const cleanedPending: Record<string, boolean> = {};
+    const cleanedPending: Record<string, QueryChangeTypes> = {};
     for (const queryId of Object.keys(changeTrackingState.queriesWithPendingChanges)) {
       if (validQueryIds.has(queryId)) {
         cleanedPending[queryId] = changeTrackingState.queriesWithPendingChanges[queryId];

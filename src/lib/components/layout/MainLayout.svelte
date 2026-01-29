@@ -12,7 +12,6 @@
   import { routerState, toggleSidebar, setSidebarWidth } from '../../stores/router.svelte';
   import { connectionState } from '../../stores/connection.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
-  import { openHelpModal } from '../../stores/helpModal.svelte';
   import { QUERY_COLORS } from '../../types/tree';
 
   const activeQuery = $derived(
@@ -84,30 +83,6 @@
             </div>
             <div class="h-4 w-px bg-border"></div>
           {/if}
-          <Tooltip
-            content="<div class='text-left space-y-1'>
-              <div class='font-semibold mb-2'>Keyboard Shortcuts</div>
-              <div><kbd class='kbd'>↑</kbd> <kbd class='kbd'>↓</kbd> Navigate</div>
-              <div><kbd class='kbd'>←</kbd> Collapse / Parent</div>
-              <div><kbd class='kbd'>→</kbd> Expand / Child</div>
-              <div><kbd class='kbd'>Space</kbd> Toggle expand</div>
-              <div><kbd class='kbd'>Enter</kbd> Open in Jira</div>
-              <div><kbd class='kbd'>Home</kbd> <kbd class='kbd'>End</kbd> First / Last</div>
-              <div><kbd class='kbd'>Esc</kbd> Clear selection</div>
-              <div class='text-muted-foreground mt-2 text-xs'>Also: j/k/h/l (vim)</div>
-            </div>"
-            placement="bottom-end"
-            html
-          >
-            <Button variant="ghost" size="icon" class="h-8 w-8">
-              <AtlaskitIcon name="keyboard" size={18} />
-            </Button>
-          </Tooltip>
-          <Tooltip text="Help">
-            <Button variant="ghost" size="icon" onclick={openHelpModal} class="h-8 w-8">
-              <AtlaskitIcon name="question-circle" size={18} />
-            </Button>
-          </Tooltip>
           <SettingsModal />
         </div>
       </div>

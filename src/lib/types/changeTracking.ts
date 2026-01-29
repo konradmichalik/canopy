@@ -112,6 +112,17 @@ export type ChangeType = SingleChangeType | null;
 export type ChangeTypes = SingleChangeType[];
 
 /**
+ * Change types for a query (for sidebar indicators)
+ */
+export interface QueryChangeTypes {
+  hasNew: boolean;
+  hasRemoved: boolean;
+  hasStatusChanges: boolean;
+  hasCommentChanges: boolean;
+  hasAssigneeChanges: boolean;
+}
+
+/**
  * State structure for the change tracking store
  */
 export interface ChangeTrackingState {
