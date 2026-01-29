@@ -1,6 +1,6 @@
 <script lang="ts">
   import ConnectionForm from '../connection/ConnectionForm.svelte';
-  import SettingsDropdown from '../common/SettingsDropdown.svelte';
+  import SettingsModal from '../common/SettingsModal.svelte';
   import Logo from '../common/Logo.svelte';
   import HelpModal from '../help/HelpModal.svelte';
   import { Button } from '$lib/components/ui/button';
@@ -20,7 +20,7 @@
             <AtlaskitIcon name="question-circle" size={18} />
           </Button>
         </Tooltip>
-        <SettingsDropdown minimal />
+        <SettingsModal minimal />
       </div>
     </div>
   </header>

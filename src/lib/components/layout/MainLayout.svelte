@@ -4,7 +4,7 @@
   import Sidebar from './Sidebar.svelte';
   import SidebarResizer from './SidebarResizer.svelte';
   import TreeView from '../tree/TreeView.svelte';
-  import SettingsDropdown from '../common/SettingsDropdown.svelte';
+  import SettingsModal from '../common/SettingsModal.svelte';
   import Avatar from '../common/Avatar.svelte';
   import Logo from '../common/Logo.svelte';
   import HelpModal from '../help/HelpModal.svelte';
@@ -108,7 +108,7 @@
               <AtlaskitIcon name="question-circle" size={18} />
             </Button>
           </Tooltip>
-          <SettingsDropdown />
+          <SettingsModal />
         </div>
       </div>
     </header>
