@@ -227,14 +227,20 @@
     showQueryForm = true;
   }
 
-  function handleSaveQuery(
+  async function handleSaveQuery(
     title: string,
     jql: string,
     color?: QueryColor,
     showEntryNode?: boolean
-  ): void {
+  ): Promise<void> {
     if (editingQuery) {
+      const isActiveQuery = routerState.activeQueryId === editingQuery.id;
       updateQuery(editingQuery.id, { title, jql, color, showEntryNode });
+
+      // Reload issues if the edited query is currently active
+      if (isActiveQuery) {
+        await loadIssues(jql, { loadAll: true });
+      }
     } else {
       const query = addQuery(title, jql, color);
       if (query && showEntryNode) {
