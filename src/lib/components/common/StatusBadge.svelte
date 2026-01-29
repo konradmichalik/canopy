@@ -9,16 +9,16 @@
 
   let { status }: Props = $props();
 
-  // Get color based on status category using Atlassian semantic colors
+  // Get color based on status category using outline style
   function getStatusClass(categoryKey: string): string {
     switch (categoryKey) {
       case 'done':
-        return 'bg-success text-text-inverse border-transparent hover:bg-success/90';
+        return 'bg-transparent text-success border-success hover:bg-success/10';
       case 'indeterminate':
-        return 'bg-information text-text-inverse border-transparent hover:bg-information/90';
+        return 'bg-transparent text-information border-information hover:bg-information/10';
       case 'new':
       default:
-        return 'bg-neutral text-text border-transparent hover:bg-neutral/90';
+        return 'bg-transparent text-muted-foreground border-border hover:bg-muted';
     }
   }
 

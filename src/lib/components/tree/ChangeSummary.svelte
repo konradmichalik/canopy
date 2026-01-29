@@ -165,7 +165,7 @@
         <button
           type="button"
           onclick={onAcknowledge}
-          class="px-3 py-1.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-md shadow-sm transition-colors flex items-center gap-1.5"
+          class="px-3 py-1.5 text-xs font-semibold border border-primary text-primary bg-transparent hover:bg-primary/10 rounded-md shadow-sm transition-colors flex items-center gap-1.5"
           title="Acknowledge changes and save new checkpoint"
         >
           <AtlaskitIcon name="check" size={14} />
