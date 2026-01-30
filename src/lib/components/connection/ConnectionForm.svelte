@@ -6,12 +6,16 @@
   import type { ConnectionFormData } from '../../types';
   import { connect, connectionState } from '../../stores/connection.svelte';
   import { detectInstanceType } from '../../api';
+  import { isTauri } from '../../utils/storage';
 
   interface Props {
     onConnected?: () => void;
   }
 
   let { onConnected }: Props = $props();
+
+  // Pre-fill proxy URL based on environment (empty for Tauri desktop)
+  const defaultProxyUrl = isTauri() ? '' : __DEFAULT_PROXY_URL__;
 
   // Form state
   let formData = $state<ConnectionFormData>({
@@ -23,10 +27,10 @@
     password: '',
     personalAccessToken: '',
     authMethod: 'pat',
-    proxyUrl: ''
+    proxyUrl: defaultProxyUrl
   });
 
-  let showProxyInput = $state(false);
+  let showProxyInput = $state(!!defaultProxyUrl);
   let isSubmitting = $state(false);
   let formError = $state<string | null>(null);
 

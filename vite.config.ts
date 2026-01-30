@@ -32,5 +32,8 @@ export default defineConfig({
     __APP_NAME__: JSON.stringify(pkg.description || 'Canopy'),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
     __GIT_TAG__: JSON.stringify(getGitTag()),
+    __DEFAULT_PROXY_URL__: JSON.stringify(
+      process.env.VERCEL ? '/api/jira' : 'http://localhost:3001/jira'
+    ),
   },
 })
