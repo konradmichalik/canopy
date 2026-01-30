@@ -12,15 +12,11 @@
   import { routerState, toggleSidebar, setSidebarWidth } from '../../stores/router.svelte';
   import { connectionState } from '../../stores/connection.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
-  import { QUERY_COLORS } from '../../types/tree';
 
   const activeQuery = $derived(
     routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : null
   );
   const queryTitle = $derived(activeQuery?.title || null);
-  const colorClass = $derived(
-    activeQuery?.color ? QUERY_COLORS.find((c) => c.id === activeQuery.color)?.bg : null
-  );
 </script>
 
 <svelte:head>
@@ -51,14 +47,9 @@
 
         {#if queryTitle}
           <AtlaskitIcon name="chevron-right" size={14} class="text-muted-foreground" />
-          <div class="flex items-center gap-2">
-            {#if colorClass}
-              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 {colorClass}"></span>
-            {/if}
-            <span class="text-sm font-medium text-foreground truncate max-w-[200px]">
-              {queryTitle}
-            </span>
-          </div>
+          <span class="text-sm font-medium text-foreground truncate max-w-[200px]">
+            {queryTitle}
+          </span>
         {/if}
       </div>
 
