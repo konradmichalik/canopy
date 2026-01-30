@@ -8,10 +8,10 @@
 
 {#if message}
   <div
-    class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-up
+    class="fixed bottom-4 right-4 px-4 py-3 rounded-md shadow-sm z-50 flex items-center gap-2 animate-slide-up border bg-background
       {message.type === 'success'
-      ? 'bg-chart-2 text-primary-foreground'
-      : 'bg-destructive text-primary-foreground'}"
+      ? 'border-chart-2 text-chart-2'
+      : 'border-destructive text-destructive'}"
   >
     {#if message.type === 'success'}
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
