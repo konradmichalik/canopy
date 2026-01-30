@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { JiraUser } from '../../types';
+  import { getUserColor } from '../../utils/avatar-colors';
   import AuthImage from './AuthImage.svelte';
   import Tooltip from './Tooltip.svelte';
 
@@ -21,36 +22,6 @@
     md: '24x24',
     lg: '32x32'
   } as const;
-
-  // Color palette for avatar borders
-  const AVATAR_COLORS = [
-    '#0052CC', // Blue
-    '#00875A', // Green
-    '#FF5630', // Red
-    '#6554C0', // Purple
-    '#FF991F', // Orange
-    '#00B8D9', // Cyan
-    '#36B37E', // Teal
-    '#E91E63', // Pink
-    '#8777D9', // Violet
-    '#FFAB00' // Yellow
-  ];
-
-  function hashString(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash;
-    }
-    return Math.abs(hash);
-  }
-
-  function getUserColor(user: JiraUser): string {
-    const identifier = user.accountId || user.emailAddress || user.displayName || '';
-    const hash = hashString(identifier);
-    return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-  }
 
   function getInitials(name: string): string {
     return name

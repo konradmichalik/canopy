@@ -14,6 +14,7 @@ import {
   type CustomFilterIcon,
   CUSTOM_FILTER_ICONS
 } from '../types/tree';
+import { getAvatarColor } from '../utils/avatar-colors';
 import { logger } from '../utils/logger';
 
 // Re-export for convenience
@@ -621,34 +622,6 @@ const STATUS_CATEGORY_COLORS: Record<string, string> = {
   done: '#00875A'
 };
 
-// Avatar color palette (same as Avatar.svelte)
-const AVATAR_COLORS = [
-  '#0052CC', // Blue
-  '#00875A', // Green
-  '#FF5630', // Red
-  '#6554C0', // Purple
-  '#FF991F', // Orange
-  '#00B8D9', // Cyan
-  '#36B37E', // Teal
-  '#E91E63', // Pink
-  '#8777D9', // Violet
-  '#FFAB00' // Yellow
-];
-
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
-}
-
-function getAvatarColor(identifier: string): string {
-  const hash = hashString(identifier);
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-}
 
 /**
  * Update dynamic filters based on loaded issues

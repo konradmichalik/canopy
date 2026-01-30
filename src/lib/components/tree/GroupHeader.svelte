@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { getAvatarColor } from '../../utils/avatar-colors';
   import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
   import AccordionChevron from '../common/AccordionChevron.svelte';
   import Tooltip from '../common/Tooltip.svelte';
@@ -40,35 +41,6 @@
   const projectMeta = $derived(isProject ? (group.metadata as ProjectGroupMetadata) : null);
   const recencyMeta = $derived(isRecency ? (group.metadata as RecencyGroupMetadata) : null);
   const releaseMeta = $derived(isRelease ? (group.metadata as ReleaseGroupMetadata) : null);
-
-  // Avatar colors (same as Avatar.svelte)
-  const AVATAR_COLORS = [
-    '#0052CC', // Blue
-    '#00875A', // Green
-    '#FF5630', // Red
-    '#6554C0', // Purple
-    '#FF991F', // Orange
-    '#00B8D9', // Cyan
-    '#36B37E', // Teal
-    '#E91E63', // Pink
-    '#8777D9', // Violet
-    '#FFAB00' // Yellow
-  ];
-
-  function hashString(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash;
-    }
-    return Math.abs(hash);
-  }
-
-  function getAvatarColor(identifier: string): string {
-    const hash = hashString(identifier);
-    return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-  }
 
   // Use same identifier fallback as Avatar.svelte for consistent colors
   const assigneeBorderColor = $derived(
