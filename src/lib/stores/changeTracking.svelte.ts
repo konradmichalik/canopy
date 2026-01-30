@@ -102,17 +102,22 @@ export const ACTIVITY_PERIOD_OPTIONS: { value: ActivityPeriod; label: string }[]
  * Initialize change tracking from storage
  */
 export async function initializeChangeTracking(): Promise<void> {
-  const [storedEnabled, storedPeriod, storedCheckpoints, storedPendingChanges, storedShowIndicators] =
-    await Promise.all([
-      getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_ENABLED),
-      getStorageItemAsync<ActivityPeriod>(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD),
-      getStorageItemAsync<CheckpointStore>(STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS),
-      // Handle both old (boolean) and new (QueryChangeTypes) formats
-      getStorageItemAsync<Record<string, boolean | QueryChangeTypes>>(
-        STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES
-      ),
-      getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_SHOW_INDICATORS)
-    ]);
+  const [
+    storedEnabled,
+    storedPeriod,
+    storedCheckpoints,
+    storedPendingChanges,
+    storedShowIndicators
+  ] = await Promise.all([
+    getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_ENABLED),
+    getStorageItemAsync<ActivityPeriod>(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD),
+    getStorageItemAsync<CheckpointStore>(STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS),
+    // Handle both old (boolean) and new (QueryChangeTypes) formats
+    getStorageItemAsync<Record<string, boolean | QueryChangeTypes>>(
+      STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES
+    ),
+    getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_SHOW_INDICATORS)
+  ]);
 
   if (storedEnabled !== null) {
     changeTrackingState.isEnabled = storedEnabled;

@@ -307,14 +307,15 @@ export function exportConfig(options: ExportOptions = {}): ExportedConfig {
   const config: ExportedConfig = {
     version: EXPORT_VERSION,
     exportedAt: new Date().toISOString(),
-    connection: connection && includeCredentials
-      ? {
-          instanceType: connection.instanceType,
-          baseUrl: connection.baseUrl,
-          credentials: connection.credentials,
-          proxyUrl: connection.proxyUrl
-        }
-      : null,
+    connection:
+      connection && includeCredentials
+        ? {
+            instanceType: connection.instanceType,
+            baseUrl: connection.baseUrl,
+            credentials: connection.credentials,
+            proxyUrl: connection.proxyUrl
+          }
+        : null,
     queries
   };
 

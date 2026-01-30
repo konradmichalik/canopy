@@ -457,7 +457,6 @@
     aria-label="Issue hierarchy tree"
     onclick={onTreeClick}
   >
-
     {#if issuesState.isLoading}
       <div class="tree-container space-y-1">
         {#each Array(8) as _, i (i)}

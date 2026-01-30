@@ -11,7 +11,11 @@
   import { downloadConfig, readConfigFile, importConfig } from '../../utils/storage';
   import { initializeQueries, getQueries } from '../../stores/jql.svelte';
   import { Checkbox } from '$lib/components/ui/checkbox';
-  import { initializeConnection, disconnect, connectionState } from '../../stores/connection.svelte';
+  import {
+    initializeConnection,
+    disconnect,
+    connectionState
+  } from '../../stores/connection.svelte';
   import Avatar from './Avatar.svelte';
   import { themeState, setTheme, type Theme } from '../../stores/theme.svelte';
   import {
@@ -27,10 +31,7 @@
   } from '../../stores/displayDensity.svelte';
   import { dateFormatState, setDateFormat, type DateFormat } from '../../stores/dateFormat.svelte';
   import { debugModeState, setDebugMode } from '../../stores/debugMode.svelte';
-  import {
-    toggleDefaultField,
-    isDefaultField
-  } from '../../stores/defaultFields.svelte';
+  import { toggleDefaultField, isDefaultField } from '../../stores/defaultFields.svelte';
   import {
     defaultSortState,
     setDefaultSortField,
@@ -307,7 +308,9 @@
         <!-- Color Theme -->
         <div class="space-y-2">
           <span class="text-sm font-medium">Accent Color</span>
-          <p class="text-xs text-muted-foreground">Primary color for highlights and active elements</p>
+          <p class="text-xs text-muted-foreground">
+            Primary color for highlights and active elements
+          </p>
           <div class="flex gap-2">
             {#each COLOR_THEMES as theme (theme.id)}
               <Tooltip text={theme.label}>
@@ -425,7 +428,9 @@
             <div class="space-y-2">
               <span class="text-sm font-medium">Debug Mode</span>
               <div class="flex items-center justify-between">
-                <span class="text-xs text-muted-foreground">Log API calls and store changes to console</span>
+                <span class="text-xs text-muted-foreground"
+                  >Log API calls and store changes to console</span
+                >
                 <Switch
                   checked={debugModeState.enabled}
                   onCheckedChange={(checked) => setDebugMode(checked)}
@@ -467,7 +472,9 @@
           <!-- Auto-Expand Depth -->
           <div class="space-y-2">
             <span class="text-sm font-medium">Auto-Expand Depth</span>
-            <p class="text-xs text-muted-foreground">Automatically expand tree nodes on first load</p>
+            <p class="text-xs text-muted-foreground">
+              Automatically expand tree nodes on first load
+            </p>
             <div class="flex gap-1">
               {#each AUTO_EXPAND_OPTIONS as option (option.value)}
                 <button
@@ -509,8 +516,8 @@
           <div class="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
             <p>
               <strong class="text-foreground">Change Tracking</strong> allows you to track changes to
-              issues. Create checkpoints to save the current state and easily see which issues have
-              changed later.
+              issues. Create checkpoints to save the current state and easily see which issues have changed
+              later.
             </p>
           </div>
 
@@ -669,7 +676,10 @@
               <div class="flex-1 min-w-0">
                 <p class="font-medium truncate">{connectionState.currentUser.displayName}</p>
                 <p class="text-sm text-muted-foreground truncate">
-                  {connectionState.currentUser.emailAddress || (connectionState.config?.credentials.type === 'cloud' ? connectionState.config.credentials.email : '')}
+                  {connectionState.currentUser.emailAddress ||
+                    (connectionState.config?.credentials.type === 'cloud'
+                      ? connectionState.config.credentials.email
+                      : '')}
                 </p>
               </div>
             </div>
@@ -682,13 +692,17 @@
               </div>
               <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">Instance Type</p>
-                <p class="text-sm">{connectionState.config?.instanceType === 'cloud' ? 'Cloud' : 'Server / DC'}</p>
+                <p class="text-sm">
+                  {connectionState.config?.instanceType === 'cloud' ? 'Cloud' : 'Server / DC'}
+                </p>
               </div>
             </div>
 
             {#if connectionState.lastConnected}
               <Tooltip text={`Connected: ${formatDateTime(connectionState.lastConnected)}`}>
-                <span class="inline-flex px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs">
+                <span
+                  class="inline-flex px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs"
+                >
                   Connected {formatDateTimeWithSetting(connectionState.lastConnected)}
                 </span>
               </Tooltip>
