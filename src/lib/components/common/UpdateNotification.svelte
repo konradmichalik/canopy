@@ -34,7 +34,7 @@
   >
     <div class="flex-1 min-w-0">
       <p class="text-sm font-medium">New version available</p>
-      <p class="text-xs text-muted-foreground mt-0.5 truncate">{update!.tagName}</p>
+      <p class="text-xs text-muted-foreground mt-0.5 truncate">{update?.tagName}</p>
     </div>
 
     <button
