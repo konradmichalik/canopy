@@ -622,7 +622,6 @@ const STATUS_CATEGORY_COLORS: Record<string, string> = {
   done: '#00875A'
 };
 
-
 /**
  * Update dynamic filters based on loaded issues
  * Merges new filter values with existing ones to preserve filter options
