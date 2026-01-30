@@ -334,7 +334,7 @@
   }
 </script>
 
-<aside class="h-full bg-background border-r flex flex-col" style="width: {width}px;">
+<aside class="h-full bg-accent border-r flex flex-col" style="width: {width}px;">
   <!-- Hidden File Input for Import -->
   <input
     bind:this={importFileInput}
@@ -345,7 +345,7 @@
   />
 
   <!-- Query List -->
-  <div class="flex-1 overflow-y-auto p-2 bg-accent/30">
+  <div class="flex-1 overflow-y-auto p-2">
     {#if jqlState.items.length === 0}
       <div class="text-center py-12 px-4">
         <div
@@ -400,7 +400,7 @@
   </div>
 
   <!-- Sidebar Footer -->
-  <div class="h-14 flex items-center justify-between px-4 border-t flex-shrink-0 bg-background">
+  <div class="h-14 flex items-center justify-between px-4 border-t flex-shrink-0 bg-accent">
     <div class="flex items-center gap-2">
       <span class="text-sm font-medium text-foreground"
         >{jqlState.items.filter((i) => !isSeparator(i)).length}</span
@@ -415,7 +415,7 @@
       </Tooltip>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
-          class="inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3"
+          class="inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-7 px-2"
         >
           <AtlaskitIcon name="add" size={14} />
           New

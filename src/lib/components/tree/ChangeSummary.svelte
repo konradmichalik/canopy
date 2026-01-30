@@ -87,27 +87,27 @@
     if (changes.newIssues.length > 0)
       items.push({
         text: `${changes.newIssues.length} new`,
-        colorClass: 'text-green-700 dark:text-green-400'
+        colorClass: 'text-change-new-text'
       });
     if (changes.removedIssues.length > 0)
       items.push({
         text: `${changes.removedIssues.length} removed`,
-        colorClass: 'text-red-700 dark:text-red-400'
+        colorClass: 'text-change-removed-text'
       });
     if (changes.statusChanges.length > 0)
       items.push({
         text: `${changes.statusChanges.length} status changed`,
-        colorClass: 'text-primary'
+        colorClass: 'text-change-status-text'
       });
     if (changes.commentChanges.length > 0)
       items.push({
         text: `${changes.commentChanges.length} with new comments`,
-        colorClass: 'text-purple-700 dark:text-purple-400'
+        colorClass: 'text-change-comments-text'
       });
     if (changes.assigneeChanges.length > 0)
       items.push({
         text: `${changes.assigneeChanges.length} reassigned`,
-        colorClass: 'text-orange-700 dark:text-orange-400'
+        colorClass: 'text-change-assignee-text'
       });
     return items;
   });
@@ -206,10 +206,10 @@
                 <span class="text-foreground/80 truncate">{issue.summary}</span>
                 <span class="flex items-center gap-1.5 shrink-0">
                   {#if issue.isNew}
-                    <span class="text-green-700 dark:text-green-400">New</span>
+                    <span class="text-change-new-text">New</span>
                   {/if}
                   {#if issue.isRemoved}
-                    <span class="text-red-700 dark:text-red-400">Removed</span>
+                    <span class="text-change-removed-text">Removed</span>
                   {/if}
                   {#if issue.statusChange}
                     <span class="text-primary"
@@ -218,7 +218,7 @@
                     >
                   {/if}
                   {#if issue.commentChange}
-                    <span class="text-purple-700 dark:text-purple-400"
+                    <span class="text-change-comments-text"
                       >+{issue.commentChange.newCommentCount} comment{issue.commentChange
                         .newCommentCount !== 1
                         ? 's'
@@ -226,7 +226,7 @@
                     >
                   {/if}
                   {#if issue.assigneeChange}
-                    <span class="text-orange-700 dark:text-orange-400"
+                    <span class="text-change-assignee-text"
                       >{issue.assigneeChange.previousAssignee ?? 'Unassigned'} → {issue
                         .assigneeChange.currentAssignee ?? 'Unassigned'}</span
                     >
@@ -239,14 +239,14 @@
           <!-- Grouped by Type View -->
           {#if changes.newIssues.length > 0}
             <div>
-              <div class="font-medium text-green-700 dark:text-green-400 mb-1.5">New Issues:</div>
+              <div class="font-medium text-change-new-text mb-1.5">New Issues:</div>
               <ul class="space-y-1">
                 {#each changes.newIssues as issue (issue.key)}
                   <li class="flex items-baseline gap-2">
                     <button
                       type="button"
                       onclick={(e) => openIssue(issue.key, e)}
-                      class="font-mono text-green-700 dark:text-green-400 hover:underline shrink-0"
+                      class="font-mono text-change-new-text hover:underline shrink-0"
                     >
                       {issue.key}
                     </button>
@@ -259,14 +259,14 @@
 
           {#if changes.removedIssues.length > 0}
             <div>
-              <div class="font-medium text-red-700 dark:text-red-400 mb-1.5">Removed Issues:</div>
+              <div class="font-medium text-change-removed-text mb-1.5">Removed Issues:</div>
               <ul class="space-y-1">
                 {#each changes.removedIssues as issue (issue.key)}
                   <li class="flex items-baseline gap-2">
                     <button
                       type="button"
                       onclick={(e) => openIssue(issue.key, e)}
-                      class="font-mono text-red-700 dark:text-red-400 hover:underline shrink-0"
+                      class="font-mono text-change-removed-text hover:underline shrink-0"
                     >
                       {issue.key}
                     </button>
@@ -303,7 +303,7 @@
 
           {#if changes.commentChanges.length > 0}
             <div>
-              <div class="font-medium text-purple-700 dark:text-purple-400 mb-1.5">
+              <div class="font-medium text-change-comments-text mb-1.5">
                 New Comments:
               </div>
               <ul class="space-y-1">
@@ -312,7 +312,7 @@
                     <button
                       type="button"
                       onclick={(e) => openIssue(change.key, e)}
-                      class="font-mono text-purple-700 dark:text-purple-400 hover:underline shrink-0"
+                      class="font-mono text-change-comments-text hover:underline shrink-0"
                     >
                       {change.key}
                     </button>
@@ -330,14 +330,14 @@
 
           {#if changes.assigneeChanges.length > 0}
             <div>
-              <div class="font-medium text-orange-700 dark:text-orange-400 mb-1.5">Reassigned:</div>
+              <div class="font-medium text-change-assignee-text mb-1.5">Reassigned:</div>
               <ul class="space-y-1">
                 {#each changes.assigneeChanges as change (change.key)}
                   <li class="flex items-baseline gap-2">
                     <button
                       type="button"
                       onclick={(e) => openIssue(change.key, e)}
-                      class="font-mono text-orange-700 dark:text-orange-400 hover:underline shrink-0"
+                      class="font-mono text-change-assignee-text hover:underline shrink-0"
                     >
                       {change.key}
                     </button>

@@ -6,11 +6,7 @@
   import type { SavedQuery } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { downloadSingleQuery } from '../../utils/storage';
-  import {
-    changeTrackingState,
-    hasUnacknowledgedChanges,
-    getQueryChangeTypes
-  } from '../../stores/changeTracking.svelte';
+  import { changeTrackingState } from '../../stores/changeTracking.svelte';
 
   interface Props {
     query: SavedQuery;
@@ -103,10 +99,14 @@
   );
 
   // Check for unacknowledged changes and their types
+  // NOTE: Inline access to queriesWithPendingChanges required for Svelte 5 $derived reactivity —
+  // helper functions hide the dependency and prevent re-evaluation on state change.
   const hasPendingChanges = $derived(
-    changeTrackingState.showIndicators && hasUnacknowledgedChanges(query.id)
+    changeTrackingState.showIndicators &&
+      changeTrackingState.isEnabled &&
+      query.id in changeTrackingState.queriesWithPendingChanges
   );
-  const changeTypes = $derived(getQueryChangeTypes(query.id));
+  const changeTypes = $derived(changeTrackingState.queriesWithPendingChanges[query.id] ?? null);
 
   // Dropdown state
   let dropdownOpen = $state(false);
@@ -151,27 +151,27 @@
       <div class="flex items-center gap-0.5 flex-shrink-0">
         {#if changeTypes.hasNew}
           <Tooltip text="New issues">
-            <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+            <span class="inline-block w-2 h-2 rounded-full bg-change-new"></span>
           </Tooltip>
         {/if}
         {#if changeTypes.hasRemoved}
           <Tooltip text="Removed issues">
-            <span class="inline-block w-2 h-2 rounded-full bg-red-500"></span>
+            <span class="inline-block w-2 h-2 rounded-full bg-change-removed"></span>
           </Tooltip>
         {/if}
         {#if changeTypes.hasStatusChanges}
           <Tooltip text="Status changes">
-            <span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
+            <span class="inline-block w-2 h-2 rounded-full bg-change-status"></span>
           </Tooltip>
         {/if}
         {#if changeTypes.hasCommentChanges}
           <Tooltip text="New comments">
-            <span class="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
+            <span class="inline-block w-2 h-2 rounded-full bg-change-comments"></span>
           </Tooltip>
         {/if}
         {#if changeTypes.hasAssigneeChanges}
           <Tooltip text="Assignee changes">
-            <span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
+            <span class="inline-block w-2 h-2 rounded-full bg-change-assignee"></span>
           </Tooltip>
         {/if}
       </div>

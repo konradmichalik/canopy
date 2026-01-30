@@ -410,7 +410,7 @@
           value={storeSearchText}
           oninput={handleSearchInput}
           onkeydown={handleSearchKeydown}
-          class="w-48 h-8 pl-8 pr-8 text-xs"
+          class="w-48 h-8 pl-8 pr-8 text-xs bg-card"
         />
         {#if storeSearchText || inputElement?.value}
           <button

@@ -25,7 +25,7 @@
 
 <div class="h-screen flex flex-col bg-muted/40">
   <!-- Full-Width Header -->
-  <header class="h-14 border-b bg-background flex-shrink-0 sticky top-0 z-10">
+  <header class="h-14 border-b bg-card flex-shrink-0 sticky top-0 z-10">
     <div class="h-full px-4 flex items-center gap-2">
       <!-- Left: Toggle + Breadcrumb -->
       <div class="flex items-center gap-2 flex-shrink-0">
@@ -85,13 +85,13 @@
       style="background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px); background-size: 16px 16px;"
     >
       {#if routerState.activeQueryId}
-        <div class="h-full bg-background rounded-xl border shadow-sm overflow-hidden">
+        <div class="h-full bg-card rounded-xl border shadow-sm overflow-hidden">
           <TreeView />
         </div>
       {:else}
         <!-- Empty State -->
         <div
-          class="h-full bg-background rounded-xl border shadow-sm flex items-center justify-center"
+          class="h-full bg-card rounded-xl border shadow-sm flex items-center justify-center"
         >
           <div class="text-center max-w-md px-4">
             <div

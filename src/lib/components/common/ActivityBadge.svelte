@@ -18,13 +18,13 @@
   function getBadgeConfig(type: SingleChangeType): BadgeConfig {
     switch (type) {
       case 'new':
-        return { colorClass: 'bg-green-500', tooltip: 'New since last checkpoint', animate: true };
+        return { colorClass: 'bg-change-new', tooltip: 'New since last checkpoint', animate: true };
       case 'status-changed':
-        return { colorClass: 'bg-blue-500', tooltip: 'Status changed', animate: false };
+        return { colorClass: 'bg-change-status', tooltip: 'Status changed', animate: false };
       case 'new-comments':
-        return { colorClass: 'bg-purple-500', tooltip: 'New comments', animate: false };
+        return { colorClass: 'bg-change-comments', tooltip: 'New comments', animate: false };
       case 'assignee-changed':
-        return { colorClass: 'bg-orange-500', tooltip: 'Assignee changed', animate: false };
+        return { colorClass: 'bg-change-assignee', tooltip: 'Assignee changed', animate: false };
     }
   }
 
@@ -33,7 +33,7 @@
 
     // Add recently active badge if no change types but recently updated
     if (result.length === 0 && isRecentlyActive) {
-      result.push({ colorClass: 'bg-amber-500', tooltip: 'Recently updated', animate: false });
+      result.push({ colorClass: 'bg-change-recent', tooltip: 'Recently updated', animate: false });
     }
 
     return result;

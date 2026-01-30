@@ -15,12 +15,12 @@ export interface ColorThemeOption {
 }
 
 export const COLOR_THEMES: ColorThemeOption[] = [
-  { id: 'blue', label: 'Blue', color: '#1868db' },
-  { id: 'teal', label: 'Teal', color: '#0891b2' },
-  { id: 'green', label: 'Green', color: '#16a34a' },
-  { id: 'purple', label: 'Purple', color: '#9333ea' },
-  { id: 'orange', label: 'Orange', color: '#ea580c' },
-  { id: 'rose', label: 'Rose', color: '#e11d48' }
+  { id: 'blue', label: 'Frost', color: '#5e81ac' },
+  { id: 'teal', label: 'Ice', color: '#8fbcbb' },
+  { id: 'green', label: 'Aurora', color: '#a3be8c' },
+  { id: 'purple', label: 'Lavender', color: '#b48ead' },
+  { id: 'orange', label: 'Sand', color: '#d08770' },
+  { id: 'rose', label: 'Rose', color: '#bf616a' }
 ];
 
 // State container object (mutable properties, not reassignable)
