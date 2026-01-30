@@ -26,7 +26,12 @@
 <div class="h-screen flex flex-col bg-muted/40">
   <!-- Full-Width Header -->
   <header class="h-14 border-b bg-card flex-shrink-0 sticky top-0 z-10">
-    <div class="h-full px-4 flex items-center gap-2">
+    <div class="h-full px-4 flex items-center gap-2 relative">
+      <!-- Center: Logo Icon -->
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <Logo size="sm" showText={false} />
+      </div>
+
       <!-- Left: Toggle + Breadcrumb -->
       <div class="flex items-center gap-2 flex-shrink-0">
         <Tooltip text={routerState.sidebarOpen ? 'Close sidebar' : 'Open sidebar'}>
