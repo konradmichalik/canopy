@@ -51,10 +51,7 @@
   import { updateQueryGroupBy } from '../../stores/jql.svelte';
   import { readSingleQueryFile, importSingleQuery } from '../../utils/storage';
   import { createDragDrop } from '../../utils/drag-drop.svelte';
-  import {
-    onQuerySelect,
-    getFocusedQuery
-  } from '../../stores/keyboardNavigation.svelte';
+  import { onQuerySelect, getFocusedQuery } from '../../stores/keyboardNavigation.svelte';
 
   interface Props {
     width: number;
@@ -333,37 +330,6 @@
 </script>
 
 <aside class="h-full bg-background border-r flex flex-col" style="width: {width}px;">
-  <!-- Sidebar Header -->
-  <div class="h-14 flex items-center justify-between px-4 border-b flex-shrink-0 bg-background">
-    <span class="text-sm font-semibold text-foreground">Queries</span>
-    <div class="flex items-center gap-1">
-      <Tooltip text="Import Query">
-        <Button variant="ghost" size="icon" class="h-8 w-8" onclick={handleImportClick}>
-          <AtlaskitIcon name="upload" size={16} />
-        </Button>
-      </Tooltip>
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger
-          class="inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3"
-        >
-          <AtlaskitIcon name="add" size={14} />
-          New
-          <AtlaskitIcon name="chevron-down" size={12} />
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content align="end" class="w-36">
-          <DropdownMenu.Item onclick={handleNewQuery}>
-            <AtlaskitIcon name="search" size={14} class="mr-2" />
-            Query
-          </DropdownMenu.Item>
-          <DropdownMenu.Item onclick={handleNewSeparator}>
-            <AtlaskitIcon name="priority-medium" size={14} class="mr-2" />
-            Separator
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
-    </div>
-  </div>
-
   <!-- Hidden File Input for Import -->
   <input
     bind:this={importFileInput}
@@ -426,6 +392,42 @@
         {/each}
       </div>
     {/if}
+  </div>
+
+  <!-- Sidebar Footer -->
+  <div class="h-14 flex items-center justify-between px-4 border-t flex-shrink-0 bg-background">
+    <div class="flex items-center gap-2">
+      <span class="text-sm font-medium text-foreground"
+        >{jqlState.items.filter((i) => !isSeparator(i)).length}</span
+      >
+      <span class="text-sm text-muted-foreground">Queries</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <Tooltip text="Import Query">
+        <Button variant="ghost" size="icon" class="h-8 w-8" onclick={handleImportClick}>
+          <AtlaskitIcon name="upload" size={16} />
+        </Button>
+      </Tooltip>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger
+          class="inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3"
+        >
+          <AtlaskitIcon name="add" size={14} />
+          New
+          <AtlaskitIcon name="chevron-down" size={12} />
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content align="end" class="w-36">
+          <DropdownMenu.Item onclick={handleNewQuery}>
+            <AtlaskitIcon name="search" size={14} class="mr-2" />
+            Query
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onclick={handleNewSeparator}>
+            <AtlaskitIcon name="priority-medium" size={14} class="mr-2" />
+            Separator
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </div>
   </div>
 
   <!-- Query Form Modal -->

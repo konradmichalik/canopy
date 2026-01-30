@@ -27,70 +27,70 @@
   <title>{queryTitle ? `${queryTitle} - Canopy` : 'Canopy'}</title>
 </svelte:head>
 
-<div class="h-screen flex bg-muted/40">
-  <!-- Sidebar (hidden via CSS to preserve state) -->
-  <div class:hidden={!routerState.sidebarOpen} class="contents">
-    <Sidebar width={routerState.sidebarWidth} onClose={toggleSidebar} />
-    <SidebarResizer currentWidth={routerState.sidebarWidth} onResize={setSidebarWidth} />
-  </div>
+<div class="h-screen flex flex-col bg-muted/40">
+  <!-- Full-Width Header -->
+  <header class="h-14 border-b bg-background flex-shrink-0 sticky top-0 z-10">
+    <div class="h-full px-4 flex items-center gap-2">
+      <!-- Left: Toggle + Breadcrumb -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <Tooltip text={routerState.sidebarOpen ? 'Close sidebar' : 'Open sidebar'}>
+          <Button variant="ghost" size="icon" onclick={toggleSidebar} class="h-8 w-8">
+            <AtlaskitIcon
+              name="panel-left"
+              size={18}
+              class="transition-transform duration-200 {routerState.sidebarOpen
+                ? ''
+                : '-scale-x-100'}"
+            />
+          </Button>
+        </Tooltip>
 
-  <!-- Main Content Area (Inset) -->
-  <div class="flex-1 flex flex-col min-w-0">
-    <!-- Header -->
-    <header class="h-14 border-b bg-background flex-shrink-0 sticky top-0 z-10">
-      <div class="h-full px-4 flex items-center gap-2">
-        <!-- Left: Toggle + Breadcrumb -->
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <Tooltip text={routerState.sidebarOpen ? 'Close sidebar' : 'Open sidebar'}>
-            <Button variant="ghost" size="icon" onclick={toggleSidebar} class="h-8 w-8">
-              <AtlaskitIcon
-                name="panel-left"
-                size={18}
-                class="transition-transform duration-200 {routerState.sidebarOpen
-                  ? ''
-                  : '-scale-x-100'}"
-              />
-            </Button>
-          </Tooltip>
+        <div class="h-4 w-px bg-border"></div>
 
-          <div class="h-4 w-px bg-border"></div>
+        <Logo size="sm" showText={true} />
 
-          <Logo size="sm" showText={true} />
-
-          {#if queryTitle}
-            <AtlaskitIcon name="chevron-right" size={14} class="text-muted-foreground" />
-            <div class="flex items-center gap-2">
-              {#if colorClass}
-                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 {colorClass}"></span>
-              {/if}
-              <span class="text-sm font-medium text-foreground truncate max-w-[200px]">
-                {queryTitle}
-              </span>
-            </div>
-          {/if}
-        </div>
-
-        <div class="flex-1"></div>
-
-        <!-- Right: User + Settings -->
-        <div class="flex items-center gap-2 flex-shrink-0">
-          {#if connectionState.currentUser}
-            <div class="flex items-center gap-2 px-2">
-              <Avatar user={connectionState.currentUser} size="sm" />
-              <span class="text-sm text-muted-foreground hidden sm:block">
-                {connectionState.currentUser.displayName}
-              </span>
-            </div>
-            <div class="h-4 w-px bg-border"></div>
-          {/if}
-          <SettingsModal />
-        </div>
+        {#if queryTitle}
+          <AtlaskitIcon name="chevron-right" size={14} class="text-muted-foreground" />
+          <div class="flex items-center gap-2">
+            {#if colorClass}
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 {colorClass}"></span>
+            {/if}
+            <span class="text-sm font-medium text-foreground truncate max-w-[200px]">
+              {queryTitle}
+            </span>
+          </div>
+        {/if}
       </div>
-    </header>
+
+      <div class="flex-1"></div>
+
+      <!-- Right: User + Settings -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        {#if connectionState.currentUser}
+          <div class="flex items-center gap-2 px-2">
+            <Avatar user={connectionState.currentUser} size="sm" />
+            <span class="text-sm text-muted-foreground hidden sm:block">
+              {connectionState.currentUser.displayName}
+            </span>
+          </div>
+          <div class="h-4 w-px bg-border"></div>
+        {/if}
+        <SettingsModal />
+      </div>
+    </div>
+  </header>
+
+  <!-- Content Area: Sidebar + Main -->
+  <div class="flex-1 flex min-h-0">
+    <!-- Sidebar (hidden via CSS to preserve state) -->
+    <div class:hidden={!routerState.sidebarOpen} class="contents">
+      <Sidebar width={routerState.sidebarWidth} onClose={toggleSidebar} />
+      <SidebarResizer currentWidth={routerState.sidebarWidth} onResize={setSidebarWidth} />
+    </div>
 
     <!-- Main Content -->
     <main
-      class="flex-1 overflow-hidden p-4"
+      class="flex-1 overflow-hidden p-4 min-w-0"
       style="background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px); background-size: 16px 16px;"
     >
       {#if routerState.activeQueryId}
