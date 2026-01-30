@@ -10,6 +10,7 @@ import {
   toggleNode as toggleNodeInTree,
   expandAll as expandAllNodes,
   collapseAll as collapseAllNodes,
+  expandToDepth,
   getExpandedKeys,
   getTreeStats
 } from '../utils/hierarchy-builder';
@@ -29,6 +30,7 @@ import { invalidateFlatTreeCache } from './keyboardNavigation.svelte';
 import { routerState } from './router.svelte';
 import { updateQueryIssueCount } from './jql.svelte';
 import { detectChanges, changeTrackingState } from './changeTracking.svelte';
+import { getAutoExpandDepth } from './autoExpandDepth.svelte';
 
 // Configuration constants for large result handling
 export const LARGE_RESULT_THRESHOLD = 1000; // Show warning above this count
@@ -111,13 +113,23 @@ async function applyLocalFiltersAndBuildTree(issues: JiraIssue[]): Promise<void>
   issuesState.rawIssues = filteredIssues;
 
   const savedExpandedKeys = await getStorageItemAsync<string[]>(STORAGE_KEYS.EXPANDED_NODES);
-  const expandedKeys = savedExpandedKeys ? new Set(savedExpandedKeys) : new Set<string>();
+  const hasSavedExpansion = savedExpandedKeys && savedExpandedKeys.length > 0;
+  const expandedKeys = hasSavedExpansion ? new Set(savedExpandedKeys) : new Set<string>();
 
   issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
     epicLinkFieldId: getEpicLinkFieldId() || undefined,
     expandedKeys,
     sortConfig: getSortConfig()
   });
+
+  // Apply auto-expand when no saved expansion state exists
+  if (!hasSavedExpansion) {
+    const depth = getAutoExpandDepth();
+    if (depth !== 0) {
+      issuesState.treeNodes = expandToDepth(issuesState.treeNodes, depth);
+      persistExpandedKeys();
+    }
+  }
 }
 
 // --- Public API ---

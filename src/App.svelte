@@ -12,6 +12,9 @@
   import { initializeDisplayDensity } from './lib/stores/displayDensity.svelte';
   import { initializeDateFormat } from './lib/stores/dateFormat.svelte';
   import { initializeDebugMode } from './lib/stores/debugMode.svelte';
+  import { initializeDefaultFields } from './lib/stores/defaultFields.svelte';
+  import { initializeDefaultSort } from './lib/stores/defaultSort.svelte';
+  import { initializeAutoExpandDepth } from './lib/stores/autoExpandDepth.svelte';
   import { initializeQueries, getQueries } from './lib/stores/jql.svelte';
   import { initializeHelpModal } from './lib/stores/helpModal.svelte';
   import { initializeAutoRefresh, cleanupAutoRefresh } from './lib/stores/autoRefresh.svelte';
@@ -42,6 +45,9 @@
           initializeDisplayDensity(),
           initializeDateFormat(),
           initializeDebugMode(),
+          initializeDefaultFields(),
+          initializeDefaultSort(),
+          initializeAutoExpandDepth(),
           initializeQueries(),
           initializeHelpModal(),
           initializeAutoRefresh(),

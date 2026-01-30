@@ -12,6 +12,7 @@ import {
   type SortField,
   type SortDirection
 } from '../types/tree';
+import { getDefaultSortConfig } from './defaultSort.svelte';
 
 // ============================================
 // Types
@@ -52,7 +53,7 @@ export const sortConfigState: SortConfigState = $state({
  * Load sort configuration for a query
  */
 export function loadSortConfig(queryId: string, sortConfig?: SortConfig): void {
-  sortConfigState.config = sortConfig || { ...DEFAULT_SORT_CONFIG };
+  sortConfigState.config = sortConfig || getDefaultSortConfig();
   sortConfigState.currentQueryId = queryId;
   logger.debug('Sort config loaded for query', { queryId, sortConfig: sortConfigState.config });
 }
@@ -61,7 +62,7 @@ export function loadSortConfig(queryId: string, sortConfig?: SortConfig): void {
  * Initialize sort configuration with defaults
  */
 export function initializeSortConfig(): void {
-  sortConfigState.config = { ...DEFAULT_SORT_CONFIG };
+  sortConfigState.config = getDefaultSortConfig();
   sortConfigState.currentQueryId = null;
   logger.debug('Sort config initialized with defaults');
 }
@@ -116,7 +117,7 @@ export function getSortConfig(): SortConfig {
  * Reset to default configuration
  */
 export function resetSortConfig(): void {
-  sortConfigState.config = { ...DEFAULT_SORT_CONFIG };
+  sortConfigState.config = getDefaultSortConfig();
   notifyChange();
   logger.info('Sort config reset to defaults');
 }

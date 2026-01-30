@@ -28,6 +28,24 @@
   import { dateFormatState, setDateFormat, type DateFormat } from '../../stores/dateFormat.svelte';
   import { debugModeState, setDebugMode } from '../../stores/debugMode.svelte';
   import {
+    toggleDefaultField,
+    isDefaultField
+  } from '../../stores/defaultFields.svelte';
+  import {
+    defaultSortState,
+    setDefaultSortField,
+    setDefaultSortDirection
+  } from '../../stores/defaultSort.svelte';
+  import {
+    autoExpandDepthState,
+    setAutoExpandDepth,
+    AUTO_EXPAND_OPTIONS,
+    type AutoExpandDepthValue
+  } from '../../stores/autoExpandDepth.svelte';
+  import { ALL_FIELDS, type DisplayFieldId } from '../../stores/fieldConfig.svelte';
+  import { SORT_FIELDS } from '../../types/tree';
+  import type { SortField } from '../../types/tree';
+  import {
     autoRefreshState,
     setAutoRefreshInterval,
     AUTO_REFRESH_OPTIONS,
@@ -78,6 +96,22 @@
 
   function handleAutoRefreshChange(interval: AutoRefreshInterval): void {
     setAutoRefreshInterval(interval);
+  }
+
+  function handleDefaultSortFieldChange(field: SortField): void {
+    setDefaultSortField(field);
+  }
+
+  function handleDefaultSortDirectionToggle(): void {
+    setDefaultSortDirection(defaultSortState.config.direction === 'asc' ? 'desc' : 'asc');
+  }
+
+  function handleAutoExpandChange(depth: AutoExpandDepthValue): void {
+    setAutoExpandDepth(depth);
+  }
+
+  function handleDefaultFieldToggle(fieldId: DisplayFieldId): void {
+    toggleDefaultField(fieldId);
   }
 
   function handleActivityPeriodChange(period: ActivityPeriod): void {
@@ -231,10 +265,11 @@
       </Tabs.List>
 
       <!-- Appearance Tab -->
-      <Tabs.Content value="appearance" class="mt-0 px-6 py-4 space-y-5">
+      <Tabs.Content value="appearance" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
         <!-- Theme -->
         <div class="space-y-2">
           <span class="text-sm font-medium">Theme</span>
+          <p class="text-xs text-muted-foreground">Light, dark, or follow your system preference</p>
           <div class="flex gap-1">
             <button
               onclick={() => handleThemeChange('light')}
@@ -272,6 +307,7 @@
         <!-- Color Theme -->
         <div class="space-y-2">
           <span class="text-sm font-medium">Accent Color</span>
+          <p class="text-xs text-muted-foreground">Primary color for highlights and active elements</p>
           <div class="flex gap-2">
             {#each COLOR_THEMES as theme (theme.id)}
               <Tooltip text={theme.label}>
@@ -310,6 +346,7 @@
             <!-- Display Density -->
             <div class="space-y-2">
               <span class="text-sm font-medium">Display Density</span>
+              <p class="text-xs text-muted-foreground">Spacing between tree items</p>
               <div class="flex gap-1">
                 <button
                   onclick={() => handleDensityChange('comfortable')}
@@ -335,6 +372,7 @@
             <!-- Date Format -->
             <div class="space-y-2">
               <span class="text-sm font-medium">Date Format</span>
+              <p class="text-xs text-muted-foreground">Exact timestamps or relative time</p>
               <div class="flex gap-1">
                 <button
                   onclick={() => handleDateFormatChange('absolute')}
@@ -362,11 +400,12 @@
 
       {#if !minimal}
         <!-- Behavior Tab -->
-        <Tabs.Content value="behavior" class="mt-0 px-6 py-4">
+        <Tabs.Content value="behavior" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <!-- Auto-Refresh -->
             <div class="space-y-2">
               <span class="text-sm font-medium">Auto-Refresh</span>
+              <p class="text-xs text-muted-foreground">Reload issues automatically</p>
               <div class="flex gap-1">
                 {#each AUTO_REFRESH_OPTIONS as option (option.value)}
                   <button
@@ -385,11 +424,8 @@
             <!-- Debug Mode -->
             <div class="space-y-2">
               <span class="text-sm font-medium">Debug Mode</span>
-              <div class="flex items-center justify-between h-[34px] px-3 rounded-md bg-muted/50">
-                <div class="flex items-center gap-2">
-                  <AtlaskitIcon name="flask" size={14} class="text-muted-foreground" />
-                  <span class="text-xs text-muted-foreground">Enable</span>
-                </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-muted-foreground">Log API calls and store changes to console</span>
                 <Switch
                   checked={debugModeState.enabled}
                   onCheckedChange={(checked) => setDebugMode(checked)}
@@ -397,10 +433,78 @@
               </div>
             </div>
           </div>
+
+          <!-- Default Sort Order -->
+          <div class="pt-3 border-t space-y-2">
+            <span class="text-sm font-medium">Default Sort Order</span>
+            <p class="text-xs text-muted-foreground">Applied to new queries without custom sort</p>
+            <div class="flex gap-1">
+              {#each SORT_FIELDS as field (field.id)}
+                <button
+                  onclick={() => handleDefaultSortFieldChange(field.id)}
+                  class="flex-1 flex items-center justify-center px-2 py-2 text-xs rounded-md transition-colors
+                    {defaultSortState.config.field === field.id
+                    ? 'bg-accent text-primary font-medium'
+                    : 'text-muted-foreground hover:bg-accent'}"
+                >
+                  {field.label}
+                </button>
+              {/each}
+              <button
+                onclick={handleDefaultSortDirectionToggle}
+                class="flex items-center justify-center px-2 py-2 text-xs rounded-md transition-colors hover:bg-accent text-muted-foreground"
+                title={defaultSortState.config.direction === 'asc' ? 'Ascending' : 'Descending'}
+              >
+                {#if defaultSortState.config.direction === 'asc'}
+                  <AtlaskitIcon name="arrow-up" size={14} />
+                {:else}
+                  <AtlaskitIcon name="arrow-down" size={14} />
+                {/if}
+              </button>
+            </div>
+          </div>
+
+          <!-- Auto-Expand Depth -->
+          <div class="space-y-2">
+            <span class="text-sm font-medium">Auto-Expand Depth</span>
+            <p class="text-xs text-muted-foreground">Automatically expand tree nodes on first load</p>
+            <div class="flex gap-1">
+              {#each AUTO_EXPAND_OPTIONS as option (option.value)}
+                <button
+                  onclick={() => handleAutoExpandChange(option.value)}
+                  class="flex-1 flex items-center justify-center px-2 py-2 text-xs rounded-md transition-colors
+                    {autoExpandDepthState.depth === option.value
+                    ? 'bg-accent text-primary font-medium'
+                    : 'text-muted-foreground hover:bg-accent'}"
+                >
+                  {option.label}
+                </button>
+              {/each}
+            </div>
+          </div>
+
+          <!-- Default Fields -->
+          <div class="space-y-2">
+            <span class="text-sm font-medium">Default Fields</span>
+            <p class="text-xs text-muted-foreground">Fields shown on issue cards for new queries</p>
+            <div class="flex flex-wrap gap-1.5">
+              {#each ALL_FIELDS as field (field.id)}
+                <button
+                  onclick={() => handleDefaultFieldToggle(field.id)}
+                  class="px-2.5 py-1 text-xs rounded-md transition-colors
+                    {isDefaultField(field.id)
+                    ? 'bg-accent text-primary font-medium'
+                    : 'text-muted-foreground hover:bg-accent'}"
+                >
+                  {field.label}
+                </button>
+              {/each}
+            </div>
+          </div>
         </Tabs.Content>
 
         <!-- Tracking Tab -->
-        <Tabs.Content value="tracking" class="mt-0 px-6 py-4 space-y-5">
+        <Tabs.Content value="tracking" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
           <!-- Feature Description -->
           <div class="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
             <p>
@@ -461,7 +565,7 @@
       {/if}
 
       <!-- Data Tab -->
-      <Tabs.Content value="data" class="mt-0 px-6 py-4 space-y-4">
+      <Tabs.Content value="data" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
         <!-- Current Data Info -->
         <div class="grid grid-cols-2 gap-3">
           <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
@@ -481,7 +585,7 @@
         </div>
 
         <!-- Import/Export -->
-        <div class="space-y-3">
+        <div class="pt-3 border-t space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <Button variant="outline" class="justify-start gap-2" onclick={handleImportClick}>
               <AtlaskitIcon name="upload" size={16} />
@@ -506,7 +610,7 @@
       </Tabs.Content>
 
       <!-- Help Tab -->
-      <Tabs.Content value="help" class="mt-0 px-6 py-4 space-y-4">
+      <Tabs.Content value="help" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
         <!-- Keyboard Shortcuts -->
         <div class="space-y-3">
           <span class="text-sm font-medium">Keyboard Shortcuts</span>
@@ -540,7 +644,7 @@
           <p class="text-xs text-muted-foreground">Also supports vim keys: j/k/h/l</p>
         </div>
 
-        <div class="pt-2 border-t">
+        <div class="pt-3 border-t">
           <div class="grid grid-cols-2 gap-3">
             <Button variant="outline" class="justify-start gap-2" onclick={handleHelpClick}>
               <AtlaskitIcon name="video-play" size={16} />
@@ -557,7 +661,7 @@
 
       <!-- Account Tab -->
       {#if !minimal}
-        <Tabs.Content value="account" class="mt-0 px-6 py-4 space-y-4">
+        <Tabs.Content value="account" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
           {#if connectionState.isConnected && connectionState.currentUser}
             <!-- User Info -->
             <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
@@ -591,7 +695,7 @@
             {/if}
 
             <!-- Disconnect -->
-            <div class="pt-2 border-t">
+            <div class="pt-3 border-t">
               <Button
                 variant="destructive"
                 class="w-full justify-start gap-2"

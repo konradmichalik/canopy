@@ -61,7 +61,10 @@ export const STORAGE_KEYS = {
   CHANGE_TRACKING_SHOW_INDICATORS: 'change-tracking-show-indicators',
   CUSTOM_FILTERS: 'custom-filters',
   UPDATE_LAST_CHECKED: 'update-last-checked',
-  UPDATE_DISMISSED_VERSION: 'update-dismissed-version'
+  UPDATE_DISMISSED_VERSION: 'update-dismissed-version',
+  DEFAULT_FIELDS: 'default-fields',
+  DEFAULT_SORT: 'default-sort',
+  AUTO_EXPAND_DEPTH: 'auto-expand-depth'
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

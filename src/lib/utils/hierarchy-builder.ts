@@ -316,6 +316,20 @@ export function collapseAll(nodes: TreeNode[]): TreeNode[] {
 }
 
 /**
+ * Expand nodes up to a specific depth
+ * depth -1 = expand all, 0 = collapse all
+ */
+export function expandToDepth(nodes: TreeNode[], maxDepth: number): TreeNode[] {
+  if (maxDepth === -1) return expandAll(nodes);
+  if (maxDepth === 0) return collapseAll(nodes);
+  return nodes.map((node) => ({
+    ...node,
+    isExpanded: node.children.length > 0 && node.depth < maxDepth,
+    children: node.children.length > 0 ? expandToDepth(node.children, maxDepth) : []
+  }));
+}
+
+/**
  * Get all expanded keys from tree
  */
 export function getExpandedKeys(nodes: TreeNode[]): Set<string> {

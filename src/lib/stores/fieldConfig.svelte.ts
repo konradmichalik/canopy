@@ -5,6 +5,7 @@
  */
 
 import { logger } from '../utils/logger';
+import { getDefaultFieldIds } from './defaultFields.svelte';
 
 // ============================================
 // Types
@@ -49,7 +50,7 @@ export const DEFAULT_FIELD_IDS: DisplayFieldId[] = [
   'updated'
 ];
 
-const ALL_FIELDS: Omit<DisplayField, 'isEnabled'>[] = [
+export const ALL_FIELDS: Omit<DisplayField, 'isEnabled'>[] = [
   {
     id: 'blockingIndicator',
     label: 'Blocking Links',
@@ -107,7 +108,7 @@ export const fieldConfigState: FieldConfigState = $state({
  * Load field configuration for a query
  */
 export function loadFieldConfig(queryId: string, displayFields?: string[]): void {
-  const enabledIds = displayFields || DEFAULT_FIELD_IDS;
+  const enabledIds = displayFields || getDefaultFieldIds();
 
   fieldConfigState.fields = ALL_FIELDS.map((f) => ({
     ...f,
@@ -122,9 +123,10 @@ export function loadFieldConfig(queryId: string, displayFields?: string[]): void
  * Initialize field configuration with defaults (for new queries or when no query is active)
  */
 export function initializeFieldConfig(): void {
+  const defaultIds = getDefaultFieldIds();
   fieldConfigState.fields = ALL_FIELDS.map((f) => ({
     ...f,
-    isEnabled: DEFAULT_FIELD_IDS.includes(f.id)
+    isEnabled: defaultIds.includes(f.id)
   }));
   fieldConfigState.currentQueryId = null;
   logger.debug('Field config initialized with defaults');
@@ -171,9 +173,10 @@ export function isFieldEnabled(fieldId: DisplayFieldId): boolean {
  * Reset to default configuration
  */
 export function resetFieldConfig(): void {
+  const defaultIds = getDefaultFieldIds();
   fieldConfigState.fields = ALL_FIELDS.map((f) => ({
     ...f,
-    isEnabled: DEFAULT_FIELD_IDS.includes(f.id)
+    isEnabled: defaultIds.includes(f.id)
   }));
   notifyChange();
   logger.info('Field config reset to defaults');
