@@ -31,7 +31,8 @@ export default ts.config(
         // Vite injected globals
         __APP_VERSION__: 'readonly',
         __APP_NAME__: 'readonly',
-        __BUILD_DATE__: 'readonly'
+        __BUILD_DATE__: 'readonly',
+        __DEFAULT_PROXY_URL__: 'readonly'
       }
     },
     rules: {
