@@ -123,7 +123,7 @@
 </script>
 
 {#if changes.hasChanges}
-  <div class="bg-primary/10 border border-primary/30 rounded-lg mx-2 mb-2">
+  <div class="bg-primary/10 border-b border-primary/30">
     <!-- Summary Header -->
     <div class="flex items-center justify-between px-3 py-2">
       <button
@@ -162,15 +162,16 @@
             class="text-primary"
           />
         </button>
-        <button
-          type="button"
-          onclick={onAcknowledge}
-          class="px-3 py-1.5 text-xs font-semibold border border-primary text-primary bg-transparent hover:bg-primary/10 rounded-md shadow-sm transition-colors flex items-center gap-1.5"
-          title="Acknowledge changes and save new checkpoint"
-        >
-          <AtlaskitIcon name="check" size={14} />
-          Acknowledge
-        </button>
+        <Tooltip content="Acknowledge changes and save new checkpoint" placement="bottom">
+          <button
+            type="button"
+            onclick={onAcknowledge}
+            class="px-2 py-1 text-xs text-primary hover:bg-primary/10 rounded-full transition-colors flex items-center gap-1"
+          >
+            <AtlaskitIcon name="check-circle" size={14} />
+            Check
+          </button>
+        </Tooltip>
       </div>
     </div>
 

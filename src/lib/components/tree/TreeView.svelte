@@ -378,7 +378,7 @@
     </div>
 
     <!-- Saved Filters (always visible) + Options panel (Filters, Grouping, Sorting) -->
-    <div class="px-4 pb-3">
+    <div class="px-4 {optionsExpanded ? 'pb-3' : ''}">
       <QuickFilters expanded={optionsExpanded} />
     </div>
 
@@ -439,6 +439,14 @@
     {/if}
   </div>
 
+  <!-- Change Summary Banner (hidden during loading) -->
+  {#if !issuesState.isLoading && changeTrackingState.isEnabled && changeTrackingState.currentChanges?.hasChanges}
+    <ChangeSummary
+      changes={changeTrackingState.currentChanges}
+      onAcknowledge={handleSaveCheckpoint}
+    />
+  {/if}
+
   <!-- Tree Content -->
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div
@@ -449,13 +457,6 @@
     aria-label="Issue hierarchy tree"
     onclick={onTreeClick}
   >
-    <!-- Change Summary Banner (hidden during loading) -->
-    {#if !issuesState.isLoading && changeTrackingState.isEnabled && changeTrackingState.currentChanges?.hasChanges}
-      <ChangeSummary
-        changes={changeTrackingState.currentChanges}
-        onAcknowledge={handleSaveCheckpoint}
-      />
-    {/if}
 
     {#if issuesState.isLoading}
       <div class="tree-container space-y-1">
