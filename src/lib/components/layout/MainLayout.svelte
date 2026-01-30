@@ -90,9 +90,7 @@
         </div>
       {:else}
         <!-- Empty State -->
-        <div
-          class="h-full bg-card rounded-xl border shadow-sm flex items-center justify-center"
-        >
+        <div class="h-full bg-card rounded-xl border shadow-sm flex items-center justify-center">
           <div class="text-center max-w-md px-4">
             <div
               class="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center"

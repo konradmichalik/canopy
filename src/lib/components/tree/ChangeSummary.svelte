@@ -303,9 +303,7 @@
 
           {#if changes.commentChanges.length > 0}
             <div>
-              <div class="font-medium text-change-comments-text mb-1.5">
-                New Comments:
-              </div>
+              <div class="font-medium text-change-comments-text mb-1.5">New Comments:</div>
               <ul class="space-y-1">
                 {#each changes.commentChanges as change (change.key)}
                   <li class="flex items-baseline gap-2">
