@@ -1,4 +1,6 @@
 <script lang="ts">
+  import AtlaskitIcon from './AtlaskitIcon.svelte';
+
   interface Props {
     message: { type: 'success' | 'error'; text: string } | null;
   }
@@ -14,18 +16,9 @@
       : 'border-destructive text-destructive'}"
   >
     {#if message.type === 'success'}
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-      </svg>
+      <AtlaskitIcon name="check" size={20} />
     {:else}
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
+      <AtlaskitIcon name="cross" size={20} />
     {/if}
     <span>{message.text}</span>
   </div>

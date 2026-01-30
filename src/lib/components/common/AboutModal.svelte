@@ -4,6 +4,7 @@
   import AtlaskitIcon from './AtlaskitIcon.svelte';
   import Logo from './Logo.svelte';
   import { openExternalUrl } from '../../utils/external-link';
+  import { getCachedUpdateStatus } from '../../utils/version-check';
 
   interface Props {
     open: boolean;
@@ -26,8 +27,16 @@
     }
   }
 
+  const updateStatus = $derived(getCachedUpdateStatus());
+
   async function handleGitHubClick() {
     await openExternalUrl('https://github.com/konradmichalik/canopy');
+  }
+
+  async function handleUpdateClick() {
+    if (updateStatus.update) {
+      await openExternalUrl(updateStatus.update.releaseUrl);
+    }
   }
 </script>
 
@@ -49,9 +58,25 @@
           <span class="text-muted-foreground">Version</span>
           <span class="font-mono font-medium">{version}</span>
         </div>
-        <div class="flex justify-between items-center text-sm">
+        <div class="flex justify-between items-center text-sm mb-2">
           <span class="text-muted-foreground">Build</span>
           <span class="text-muted-foreground">{buildDate}</span>
+        </div>
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-muted-foreground">Status</span>
+          {#if !updateStatus.checked}
+            <span class="text-muted-foreground">Checking...</span>
+          {:else if updateStatus.update}
+            <button
+              type="button"
+              onclick={handleUpdateClick}
+              class="text-primary hover:underline font-medium"
+            >
+              {updateStatus.update.tagName} available
+            </button>
+          {:else}
+            <span class="text-chart-2 font-medium">Up to date</span>
+          {/if}
         </div>
       </div>
 
@@ -63,7 +88,7 @@
 
       <!-- Copyright -->
       <p class="text-xs text-muted-foreground mb-4">
-        &copy; {currentYear} Canopy Contributors
+        &copy; {currentYear} Konrad Michalik
       </p>
 
       <!-- Close Button -->

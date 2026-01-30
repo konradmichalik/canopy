@@ -3,6 +3,7 @@
   import ConnectionScreen from './lib/components/screens/ConnectionScreen.svelte';
   import MainLayout from './lib/components/layout/MainLayout.svelte';
   import AppLoader from './lib/components/common/AppLoader.svelte';
+  import UpdateNotification from './lib/components/common/UpdateNotification.svelte';
   import { connectionState, initializeConnection } from './lib/stores/connection.svelte';
   import { initializeRouter, cleanupRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
@@ -22,9 +23,11 @@
     initializeChangeTracking,
     runCheckpointCleanup
   } from './lib/stores/changeTracking.svelte';
+  import { checkForUpdate, type UpdateInfo } from './lib/utils/version-check';
   import { onMount } from 'svelte';
 
   let isInitializing = $state(true);
+  let availableUpdate = $state<UpdateInfo | null>(null);
 
   onMount(() => {
     // Initialize all stores and connection
@@ -55,6 +58,11 @@
 
         // Try to restore connection from storage
         await initializeConnection();
+
+        // Check for app updates (non-blocking)
+        checkForUpdate().then((update) => {
+          availableUpdate = update;
+        });
       } finally {
         // Small delay to ensure smooth transition
         setTimeout(() => {
@@ -85,3 +93,5 @@
     <ConnectionScreen />
   </div>
 {/if}
+
+<UpdateNotification update={availableUpdate} />
