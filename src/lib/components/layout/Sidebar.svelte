@@ -69,7 +69,7 @@
 
   // Import state
   let importFileInput: HTMLInputElement;
-  let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
+  let flashMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Large result warning state
   let pendingLargeQuery = $state<{ query: SavedQuery; total: number } | null>(null);
@@ -251,27 +251,32 @@
       if (isActiveQuery) {
         await loadIssues(jql, { loadAll: true });
       }
+      showFlashMessage('success', `Query "${title}" updated`);
     } else {
       const query = addQuery(title, jql, color);
       if (query && showEntryNode) {
         updateQuery(query.id, { showEntryNode });
       }
+      showFlashMessage('success', `Query "${title}" created`);
     }
     showQueryForm = false;
     editingQuery = null;
   }
 
   function handleDeleteQuery(query: SavedQuery): void {
+    const title = query.title;
     deleteQuery(query.id);
     // Clear active query if the deleted one was active
     if (routerState.activeQueryId === query.id) {
       clearIssues();
     }
+    showFlashMessage('success', `Query "${title}" deleted`);
   }
 
   function handleDuplicateQuery(query: SavedQuery): void {
     const duplicated = duplicateQuery(query.id);
     if (duplicated) {
+      showFlashMessage('success', `Query "${query.title}" duplicated`);
       handleEditQuery(duplicated);
     }
   }
@@ -299,19 +304,19 @@
       const config = await readSingleQueryFile(file);
       const importedQuery = importSingleQuery(config);
       addImportedQuery(importedQuery);
-      showImportMessage('success', `Query "${importedQuery.title}" imported`);
+      showFlashMessage('success', `Query "${importedQuery.title}" imported`);
     } catch (error) {
-      showImportMessage('error', error instanceof Error ? error.message : 'Import failed');
+      showFlashMessage('error', error instanceof Error ? error.message : 'Import failed');
     }
 
     // Reset input
     input.value = '';
   }
 
-  function showImportMessage(type: 'success' | 'error', text: string): void {
-    importMessage = { type, text };
+  function showFlashMessage(type: 'success' | 'error', text: string): void {
+    flashMessage = { type, text };
     setTimeout(() => {
-      importMessage = null;
+      flashMessage = null;
     }, 4000);
   }
 
@@ -446,15 +451,15 @@
   />
 {/if}
 
-<!-- Import Notification Toast -->
-{#if importMessage}
+<!-- Notification Toast -->
+{#if flashMessage}
   <div
     class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-in slide-in-from-bottom-2
-      {importMessage.type === 'success'
+      {flashMessage.type === 'success'
       ? 'bg-chart-2 text-primary-foreground'
       : 'bg-destructive text-destructive-foreground'}"
   >
-    {#if importMessage.type === 'success'}
+    {#if flashMessage.type === 'success'}
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
       </svg>
@@ -468,6 +473,6 @@
         />
       </svg>
     {/if}
-    <span class="text-sm font-medium">{importMessage.text}</span>
+    <span class="text-sm font-medium">{flashMessage.text}</span>
   </div>
 {/if}
