@@ -2,7 +2,7 @@
   <img src="docs/images/canopy-logo.svg" alt="Canopy Logo" width="200" />
 </p>
 
-<h1 align="center">Canopy</h1>
+<h1 align="center">canopy</h1>
 
 <p align="center">
   <strong>A hierarchical Jira issue viewer that displays tickets in a tree structure</strong>
