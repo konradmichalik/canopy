@@ -15,7 +15,7 @@ Customize Canopy's appearance to match your preferences.
 | **Dark** | Dark background, light text |
 | **System** | Follows OS preference |
 
-Toggle via the theme button in the header or in **Settings**.
+Toggle via **Settings** > **Appearance**.
 
 ## Accent Colors
 
@@ -26,14 +26,14 @@ Customize the app's accent color used for:
 - Selected items
 - Buttons
 
-| Color | Hex | Preview |
-|-------|-----|---------|
-| Blue (default) | `#1868db` | Primary actions |
-| Teal | `#0891b2` | Calm, professional |
-| Green | `#16a34a` | Nature, growth |
-| Purple | `#9333ea` | Creative, unique |
-| Orange | `#ea580c` | Energetic, warm |
-| Rose | `#e11d48` | Bold, attention |
+| Color | Description |
+|-------|-------------|
+| **Frost** (default) | Cool blue-grey, professional |
+| **Ice** | Light teal, calm |
+| **Aurora** | Soft green, nature |
+| **Lavender** | Gentle purple, creative |
+| **Sand** | Warm orange, energetic |
+| **Rose** | Bold pink, attention |
 
 ![Settings Menu](/images/screenshots/settings-menu.png)
 
@@ -55,6 +55,8 @@ Theme settings are persisted to localStorage:
 |---------|-------------|
 | Color Mode | `canopy_theme` |
 | Accent Color | `canopy_color_theme` |
+| Display Density | `canopy_display_density` |
+| Date Format | `canopy_date_format` |
 
 Settings sync across browser tabs and persist after closing.
 
@@ -80,10 +82,11 @@ No keyboard shortcuts for theming. Use the settings menu.
 
 Theme preferences are included in the configuration export:
 
-1. Click **Settings** > **Export Configuration**
+1. Click **Settings** > **Data** > **Export Configuration**
 2. The JSON file includes:
-   - `theme` (light/dark/system)
-   - `colorTheme` (blue/teal/green/purple/orange/rose)
+   - `theme` (light/dark/auto)
+   - `colorTheme` (frost/ice/aurora/lavender/sand/rose)
    - `displayDensity` (comfortable/compact)
+   - `dateFormat` (absolute/relative)
 
 Import this file on another device to restore your preferences.

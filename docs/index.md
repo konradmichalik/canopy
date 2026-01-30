@@ -28,7 +28,7 @@ features:
     link: /guide/filtering
   - icon: 📂
     title: Flexible Grouping
-    details: Group by Sprint, Assignee, Status, Project, or Recency for better overview and sprint planning.
+    details: Group by Sprint, Release, Assignee, Status, Project, or Recency for better overview and sprint planning.
     link: /guide/grouping
   - icon: 🔄
     title: Change Tracking

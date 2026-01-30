@@ -31,7 +31,7 @@ Canopy visualizes Jira issues in a hierarchical tree view (Epic → Story → Ta
 
 - **Tree View** - Hierarchical display with expand/collapse, progress aggregation, vim-style keyboard navigation
 - **Filtering** - Quick filters, dynamic filters, saved presets, text search
-- **Grouping** - By Sprint, Assignee, Status, Project, or Recency
+- **Grouping** - By Sprint, Release, Assignee, Status, Project, or Recency
 - **Change Tracking** - Checkpoint-based change detection (Beta)
 - **Theming** - Light/dark mode with 6 accent colors
 - **macOS Desktop App** - Native Tauri app without CORS proxy

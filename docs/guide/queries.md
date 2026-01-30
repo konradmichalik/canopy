@@ -9,11 +9,12 @@ Save and organize multiple JQL queries for quick access.
 
 ## Creating Queries
 
-1. Click **Add Query** in the sidebar
+1. Click **Create query** or the **New** button in the sidebar
 2. Enter a **Title** for the query
 3. Write your **JQL query**
 4. Optionally select a **Color** for visual distinction
-5. Click **Save**
+5. Optionally toggle **Show summary header** for an issue count header
+6. Click **Create Query**
 
 ![New Query Dialog](/images/screenshots/new-query-dialog.png)
 
@@ -30,13 +31,14 @@ Save and organize multiple JQL queries for quick access.
 
 ## Query Actions
 
-Right-click or use the dropdown menu on a query:
+Use the context menu (three-dot icon) on a query:
 
 ![Query Context Menu](/images/screenshots/query-context-menu.png)
 
 | Action | Description |
 |--------|-------------|
-| **Edit** | Modify title, JQL, or color |
+| **Edit** | Modify title, JQL, color, or summary header |
+| **Export** | Export query configuration |
 | **Duplicate** | Create a copy with unique title |
 | **Delete** | Remove with confirmation dialog |
 | **Reorder** | Drag to reorder in sidebar |

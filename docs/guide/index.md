@@ -13,7 +13,7 @@ Canopy provides a comprehensive set of features for visualizing and managing Jir
 |---------|-------------|
 | [Tree View](/guide/tree-view) | Hierarchical display with expand/collapse and progress indicators |
 | [Filtering](/guide/filtering) | Quick filters, dynamic filters, saved presets, and text search |
-| [Grouping](/guide/grouping) | Organize by Sprint, Assignee, Status, Project, or Recency |
+| [Grouping](/guide/grouping) | Organize by Sprint, Release, Assignee, Status, Project, or Recency |
 | [Query Management](/guide/queries) | Save and organize multiple JQL queries with colors |
 | [Change Tracking](/guide/change-tracking) | Checkpoint-based change detection (Beta) |
 | [Theming](/guide/theming) | Light/dark mode with customizable accent colors |

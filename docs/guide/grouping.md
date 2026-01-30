@@ -13,6 +13,7 @@ Organize issues by different criteria for better overview and sprint planning.
 |--------|-------------|
 | **No Grouping** | Default hierarchical tree view |
 | **Sprint** | Group by sprint (Active > Future > Closed > No Sprint) |
+| **Release** | Group by fix version / release |
 | **Assignee** | Group by team member with avatars |
 | **Status** | Group by status (To Do > In Progress > Done) |
 | **Project** | Group by Jira project |
@@ -37,6 +38,14 @@ When grouping by Sprint, issues are organized by sprint state:
 - Sprint date range display
 - Active sprint highlighted
 - Sprint state badges (Active, Future, Closed)
+
+## Release Grouping
+
+Groups issues by Fix Version / Release:
+
+- Issues grouped by their assigned fix version
+- "No Release" group for items without a fix version
+- Useful for release planning and tracking
 
 ## Assignee Grouping
 
