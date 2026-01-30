@@ -11,12 +11,14 @@
   import { Button } from '$lib/components/ui/button';
   import { routerState, toggleSidebar, setSidebarWidth } from '../../stores/router.svelte';
   import { connectionState } from '../../stores/connection.svelte';
+  import { issuesState } from '../../stores/issues.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
 
   const activeQuery = $derived(
     routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : null
   );
   const queryTitle = $derived(activeQuery?.title || null);
+  const isLoading = $derived(connectionState.isConnecting || issuesState.isLoading);
 </script>
 
 <svelte:head>
@@ -29,7 +31,7 @@
     <div class="h-full px-4 flex items-center gap-2 relative">
       <!-- Center: Logo Icon -->
       <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <Logo size="sm" showText={false} />
+        <Logo size="sm" showText={false} animate={isLoading} />
       </div>
 
       <!-- Left: Toggle + Breadcrumb -->

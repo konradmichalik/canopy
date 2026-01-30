@@ -4,9 +4,10 @@
   interface Props {
     size?: 'sm' | 'md' | 'lg';
     showText?: boolean;
+    animate?: boolean;
   }
 
-  let { size = 'md', showText = true }: Props = $props();
+  let { size = 'md', showText = true, animate = false }: Props = $props();
 
   const iconSizeClasses = {
     sm: 'w-6 h-6',
@@ -69,14 +70,25 @@
       aria-label="Canopy"
       role="img"
     >
-      <g transform="matrix(1.000084,0,0,1.000084,-19.443348,13.581757)">
-        <g transform="matrix(80.122596,0,0,80.122596,-1082.405678,-995.890857)">
-          <circle cx="17.5" cy="18.5" r="2.5" style="fill:rgb(163,190,140);" />
-        </g>
-        <g transform="matrix(80.122596,0,0,80.122596,-683.086213,-995.890857)">
-          <circle cx="17.5" cy="18.5" r="2.5" style="fill:rgb(208,135,112);" />
-        </g>
+      <g class:logo-spin={animate} style="transform-origin: 500px 500px">
+        <circle cx="300" cy="500" r="200" style="fill:rgb(163,190,140);" />
+        <circle cx="700" cy="500" r="200" style="fill:rgb(208,135,112);" />
       </g>
     </svg>
   {/if}
 </div>
+
+<style>
+  .logo-spin {
+    animation: logo-swap 0.6s linear infinite;
+  }
+
+  @keyframes logo-swap {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
