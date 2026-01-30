@@ -4,7 +4,11 @@
   import AtlaskitIcon from './AtlaskitIcon.svelte';
   import Logo from './Logo.svelte';
   import { openExternalUrl } from '../../utils/external-link';
-  import { getCachedUpdateStatus } from '../../utils/version-check';
+  import {
+    checkForUpdate,
+    getCachedUpdateStatus,
+    type UpdateInfo
+  } from '../../utils/version-check';
 
   interface Props {
     open: boolean;
@@ -21,21 +25,40 @@
   });
   const currentYear = new Date().getFullYear();
 
+  let checking = $state(false);
+  let checked = $state(false);
+  let update = $state<UpdateInfo | null>(null);
+
+  // Seed from cache so we show something immediately if a prior check exists
+  const cached = getCachedUpdateStatus();
+  checked = cached.checked;
+  update = cached.update;
+
+  // Trigger a fresh check whenever the modal opens
+  $effect(() => {
+    if (open) {
+      checking = true;
+      checkForUpdate().then((result) => {
+        update = result;
+        checked = true;
+        checking = false;
+      });
+    }
+  });
+
   function handleOpenChange(isOpen: boolean) {
     if (!isOpen) {
       onClose();
     }
   }
 
-  const updateStatus = $derived(getCachedUpdateStatus());
-
   async function handleGitHubClick() {
     await openExternalUrl('https://github.com/konradmichalik/canopy');
   }
 
   async function handleUpdateClick() {
-    if (updateStatus.update) {
-      await openExternalUrl(updateStatus.update.releaseUrl);
+    if (update) {
+      await openExternalUrl(update.releaseUrl);
     }
   }
 </script>
@@ -64,15 +87,15 @@
         </div>
         <div class="flex justify-between items-center text-sm">
           <span class="text-muted-foreground">Status</span>
-          {#if !updateStatus.checked}
+          {#if checking || !checked}
             <span class="text-muted-foreground">Checking...</span>
-          {:else if updateStatus.update}
+          {:else if update}
             <button
               type="button"
               onclick={handleUpdateClick}
               class="text-primary hover:underline font-medium"
             >
-              {updateStatus.update.tagName} available
+              {update.tagName} available
             </button>
           {:else}
             <span class="text-chart-2 font-medium">Up to date</span>
