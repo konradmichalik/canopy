@@ -36,6 +36,8 @@
   import { autoRefreshState } from '../../stores/autoRefresh.svelte';
   import { openExternalUrl } from '../../utils/external-link';
   import { setFaviconBadge } from '../../utils/favicon';
+  import SelectionToolbar from './SelectionToolbar.svelte';
+  import { selectionState, clearSelection, toggleSelectionMode } from '../../stores/selection.svelte';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
@@ -101,6 +103,13 @@
       ? groupIssues(issuesState.rawIssues, groupingState.groupBy, sortConfigState.config)
       : []
   );
+
+  // Clear selection when issues start loading (query change, refresh)
+  $effect(() => {
+    if (issuesState.isLoading) {
+      clearSelection();
+    }
+  });
 
   // Reset initialization flag when grouping mode changes
   $effect(() => {
@@ -353,6 +362,18 @@
           </Button>
         </Tooltip>
 
+        <Tooltip content={selectionState.selectionMode ? 'Exit selection' : 'Select issues'} placement="bottom">
+          <Button
+            variant={selectionState.selectionMode ? 'secondary' : 'ghost'}
+            size="icon"
+            class="h-8 w-8"
+            onclick={toggleSelectionMode}
+            disabled={isEmpty || issuesState.isLoading}
+          >
+            <AtlaskitIcon name="checkbox-checked" size={16} />
+          </Button>
+        </Tooltip>
+
         <div class="w-px h-5 bg-border mx-1"></div>
 
         <!-- Options Toggle (Filters, Grouping, Sorting) -->
@@ -592,4 +613,5 @@
   </div>
 </div>
 
+<SelectionToolbar />
 <FlashMessage message={flashMessage} />
