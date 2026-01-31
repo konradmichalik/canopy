@@ -75,14 +75,14 @@ export type QueryColor =
   | 'teal';
 
 export const QUERY_COLORS: { id: QueryColor; label: string; bg: string; border: string }[] = [
-  { id: 'gray', label: 'Gray', bg: 'bg-neutral-500', border: 'border-neutral-500' },
-  { id: 'blue', label: 'Blue', bg: 'bg-blue-500', border: 'border-blue-500' },
-  { id: 'green', label: 'Green', bg: 'bg-green-500', border: 'border-green-500' },
-  { id: 'yellow', label: 'Yellow', bg: 'bg-yellow-500', border: 'border-yellow-500' },
-  { id: 'orange', label: 'Orange', bg: 'bg-orange-500', border: 'border-orange-500' },
-  { id: 'red', label: 'Red', bg: 'bg-red-500', border: 'border-red-500' },
-  { id: 'purple', label: 'Purple', bg: 'bg-purple-500', border: 'border-purple-500' },
-  { id: 'teal', label: 'Teal', bg: 'bg-teal-500', border: 'border-teal-500' }
+  { id: 'gray', label: 'Slate', bg: 'bg-query-gray', border: 'border-query-gray' },
+  { id: 'blue', label: 'Frost', bg: 'bg-query-blue', border: 'border-query-blue' },
+  { id: 'green', label: 'Aurora', bg: 'bg-query-green', border: 'border-query-green' },
+  { id: 'yellow', label: 'Sun', bg: 'bg-query-yellow', border: 'border-query-yellow' },
+  { id: 'orange', label: 'Sand', bg: 'bg-query-orange', border: 'border-query-orange' },
+  { id: 'red', label: 'Rose', bg: 'bg-query-red', border: 'border-query-red' },
+  { id: 'purple', label: 'Lavender', bg: 'bg-query-purple', border: 'border-query-purple' },
+  { id: 'teal', label: 'Ice', bg: 'bg-query-teal', border: 'border-query-teal' }
 ];
 
 export type GroupByOption =

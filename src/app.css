@@ -88,6 +88,16 @@ html[data-color-mode='light'] {
   --change-assignee-text: #a0644e;
   --change-recent: #ebcb8b;
   --skeleton: #e0e4ea;
+
+  /* Nord Query Colors */
+  --query-gray: #4c566a;
+  --query-blue: #5e81ac;
+  --query-green: #a3be8c;
+  --query-yellow: #ebcb8b;
+  --query-orange: #d08770;
+  --query-red: #bf616a;
+  --query-purple: #b48ead;
+  --query-teal: #8fbcbb;
 }
 
 /* Nord Design Tokens - Dark Theme (Polar Night bg, Snow Storm text, Frost accents) */
@@ -175,6 +185,16 @@ html[data-color-mode='dark'] {
   --change-assignee-text: #d08770;
   --change-recent: #ebcb8b;
   --skeleton: #4c566a;
+
+  /* Nord Query Colors */
+  --query-gray: #4c566a;
+  --query-blue: #81a1c1;
+  --query-green: #a3be8c;
+  --query-yellow: #ebcb8b;
+  --query-orange: #d08770;
+  --query-red: #bf616a;
+  --query-purple: #b48ead;
+  --query-teal: #8fbcbb;
 }
 
 /* Color Theme Overrides - Ice (nord7) */
@@ -493,6 +513,16 @@ html.color-theme-rose[data-color-mode='dark'] {
   --color-change-assignee: var(--change-assignee);
   --color-change-assignee-text: var(--change-assignee-text);
   --color-change-recent: var(--change-recent);
+
+  /* Nord Query Colors */
+  --color-query-gray: var(--query-gray);
+  --color-query-blue: var(--query-blue);
+  --color-query-green: var(--query-green);
+  --color-query-yellow: var(--query-yellow);
+  --color-query-orange: var(--query-orange);
+  --color-query-red: var(--query-red);
+  --color-query-purple: var(--query-purple);
+  --color-query-teal: var(--query-teal);
 
   /* Skeleton */
   --color-skeleton: var(--skeleton);
