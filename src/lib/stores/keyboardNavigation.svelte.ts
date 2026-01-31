@@ -12,6 +12,12 @@ import { routerState } from './router.svelte';
 import { openExternalUrl } from '../utils/external-link';
 import { jqlState } from './jql.svelte';
 import { isQuery } from '../types/tree';
+import {
+	toggleSelection,
+	selectAll,
+	clearSelection as clearIssueSelection,
+	hasSelection
+} from './selection.svelte';
 
 // State container for keyboard navigation
 export const keyboardNavState = $state({
@@ -385,9 +391,26 @@ function handleTreeKeydown(event: KeyboardEvent): void {
       event.preventDefault();
       toggleFocusedNode();
       break;
+    case 'x':
+      event.preventDefault();
+      if (keyboardNavState.focusedKey) {
+        toggleSelection(keyboardNavState.focusedKey);
+      }
+      break;
+    case 'a':
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+        const allKeys = getVisibleNodes().map((n) => n.issue.key);
+        selectAll(allKeys);
+      }
+      break;
     case 'Escape':
       event.preventDefault();
-      clearFocus();
+      if (hasSelection()) {
+        clearIssueSelection();
+      } else {
+        clearFocus();
+      }
       break;
   }
 }
