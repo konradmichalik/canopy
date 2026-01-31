@@ -11,6 +11,15 @@
   } from '../../stores/flags.svelte';
   import { getIssueUrl } from '../../stores/issues.svelte';
   import { openExternalUrl } from '../../utils/external-link';
+  import {
+    isSelected,
+    getSelectedKeys,
+    getSelectedCount,
+    clearSelection,
+    buildBulkEditUrl,
+    copySelectedKeys
+  } from '../../stores/selection.svelte';
+  import { connectionState } from '../../stores/connection.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -21,6 +30,9 @@
   let { node, children }: Props = $props();
 
   const currentFlag = $derived(flagsState.flags[node.issue.key] ?? null);
+  const isNodeSelected = $derived(isSelected(node.issue.key));
+  const selectedCount = $derived(getSelectedCount());
+  const showBulkActions = $derived(isNodeSelected && selectedCount > 1);
 
   function handleFlagSelect(color: FlagColor): void {
     toggleFlag(node.issue.key, color);
@@ -46,6 +58,20 @@
     if (url) {
       openExternalUrl(url);
     }
+  }
+
+  function handleBulkEdit(): void {
+    const baseUrl = connectionState.config?.baseUrl;
+    if (!baseUrl) return;
+    const keys = getSelectedKeys();
+    const { url } = buildBulkEditUrl(baseUrl, keys);
+    if (url.length > 8000) return;
+    openExternalUrl(url);
+  }
+
+  async function handleBulkCopyKeys(): Promise<void> {
+    const keys = getSelectedKeys();
+    await copySelectedKeys(keys);
   }
 </script>
 
@@ -75,24 +101,44 @@
     {#if currentFlag}
       <ContextMenu.Item onclick={handleRemoveFlag}>
         <AtlaskitIcon name="cross" size={14} class="mr-2" />
-        Flag entfernen
+        Remove flag
       </ContextMenu.Item>
     {/if}
 
     <ContextMenu.Separator />
 
+    <!-- Bulk Actions (when multiple issues selected) -->
+    {#if showBulkActions}
+      <ContextMenu.Label class="text-xs text-muted-foreground">
+        Bulk actions ({selectedCount})
+      </ContextMenu.Label>
+      <ContextMenu.Item onclick={handleBulkEdit}>
+        <AtlaskitIcon name="link-external" size={14} class="mr-2" />
+        Bulk edit in Jira ({selectedCount})
+      </ContextMenu.Item>
+      <ContextMenu.Item onclick={handleBulkCopyKeys}>
+        <AtlaskitIcon name="copy" size={14} class="mr-2" />
+        Copy keys ({selectedCount})
+      </ContextMenu.Item>
+      <ContextMenu.Item onclick={clearSelection}>
+        <AtlaskitIcon name="cross" size={14} class="mr-2" />
+        Clear selection
+      </ContextMenu.Item>
+      <ContextMenu.Separator />
+    {/if}
+
     <!-- Actions -->
     <ContextMenu.Item onclick={handleOpenInJira}>
       <AtlaskitIcon name="link-external" size={14} class="mr-2" />
-      In Jira öffnen
+      Open in Jira
     </ContextMenu.Item>
     <ContextMenu.Item onclick={handleCopyKey}>
       <AtlaskitIcon name="copy" size={14} class="mr-2" />
-      Key kopieren
+      Copy key
     </ContextMenu.Item>
     <ContextMenu.Item onclick={handleCopyUrl}>
       <AtlaskitIcon name="link" size={14} class="mr-2" />
-      URL kopieren
+      Copy URL
     </ContextMenu.Item>
   </ContextMenu.Content>
 </ContextMenu.Root>
