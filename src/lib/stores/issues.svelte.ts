@@ -23,8 +23,10 @@ import {
   updateDynamicFilters,
   filterIssuesBySearchText,
   filterIssuesByRecency,
+  filterIssuesByFlag,
   filtersState
 } from './filters.svelte';
+import { flagsState } from './flags.svelte';
 import { getSortConfig, setSortConfigChangeCallback } from './sortConfig.svelte';
 import { invalidateFlatTreeCache } from './keyboardNavigation.svelte';
 import { routerState } from './router.svelte';
@@ -110,6 +112,7 @@ function getEffectiveJql(baseJql: string): { jql: string; filterConditions: stri
 async function applyLocalFiltersAndBuildTree(issues: JiraIssue[]): Promise<void> {
   let filteredIssues = filterIssuesBySearchText(issues);
   filteredIssues = filterIssuesByRecency(filteredIssues);
+  filteredIssues = filterIssuesByFlag(filteredIssues, flagsState.flags);
   issuesState.rawIssues = filteredIssues;
 
   const savedExpandedKeys = await getStorageItemAsync<string[]>(STORAGE_KEYS.EXPANDED_NODES);

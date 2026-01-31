@@ -64,7 +64,8 @@ export const STORAGE_KEYS = {
   UPDATE_DISMISSED_VERSION: 'update-dismissed-version',
   DEFAULT_FIELDS: 'default-fields',
   DEFAULT_SORT: 'default-sort',
-  AUTO_EXPAND_DEPTH: 'auto-expand-depth'
+  AUTO_EXPAND_DEPTH: 'auto-expand-depth',
+  FLAGS: 'flags'
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

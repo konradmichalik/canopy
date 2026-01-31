@@ -15,6 +15,7 @@
     setSearchText,
     clearSearchText,
     setRecencyFilter,
+    toggleFlagFilter,
     DYNAMIC_FILTER_CATEGORIES,
     DYNAMIC_FILTER_CONFIG,
     type DynamicFilterCategory,
@@ -29,6 +30,7 @@
     getActiveFilterConditions,
     reorderCustomFilters
   } from '../../stores/filters.svelte';
+  import { FLAG_COLORS, getFlaggedCount } from '../../stores/flags.svelte';
   import { RECENCY_FILTER_OPTIONS, QUERY_COLORS, type QueryColor } from '../../types/tree';
   import { issuesState } from '../../stores/issues.svelte';
   import { addQuery, isTitleUnique } from '../../stores/jql.svelte';
@@ -87,12 +89,16 @@
     return parts.length > 0 ? parts.join(' · ') : 'No filters saved';
   }
 
-  // Active filter count (including search text and recency filter)
+  // Active filter count (including search text, recency filter, and flag filter)
   const activeCount = $derived(
     getActiveFilters().length +
       (filtersState.searchText ? 1 : 0) +
-      (filtersState.recencyFilter ? 1 : 0)
+      (filtersState.recencyFilter ? 1 : 0) +
+      (filtersState.flagFilter ? 1 : 0)
   );
+
+  // Flagged issues count
+  const flaggedCount = $derived(getFlaggedCount());
 
   // Check if there are any visible dynamic filters
   const hasVisibleDynamicFilters = $derived(
@@ -453,6 +459,51 @@
             </button>
           </Tooltip>
         {/each}
+
+        <!-- Flag Filter -->
+        {#if flaggedCount > 0}
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              <button
+                class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
+                {filtersState.flagFilter
+                  ? 'bg-primary/10 border-primary/30 text-primary font-medium'
+                  : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
+              >
+                <AtlaskitIcon name="flag" size={12} />
+                Flagged
+                <span class="text-[10px] opacity-70">({flaggedCount})</span>
+                <AtlaskitIcon name="chevron-down" size={10} />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content align="start" class="min-w-36">
+              <DropdownMenu.Item onclick={() => toggleFlagFilter('any')}>
+                <div class="flex items-center gap-2 w-full">
+                  <AtlaskitIcon name="flag" size={14} />
+                  <span>Alle Flags</span>
+                  {#if filtersState.flagFilter === 'any'}
+                    <AtlaskitIcon name="check" size={14} class="ml-auto" />
+                  {/if}
+                </div>
+              </DropdownMenu.Item>
+              <DropdownMenu.Separator />
+              {#each FLAG_COLORS as flagColor (flagColor.id)}
+                <DropdownMenu.Item onclick={() => toggleFlagFilter(flagColor.id)}>
+                  <div class="flex items-center gap-2 w-full">
+                    <div
+                      class="w-3.5 h-3.5 rounded-full flex-shrink-0"
+                      style="background-color: {flagColor.color}"
+                    ></div>
+                    <span>{flagColor.label}</span>
+                    {#if filtersState.flagFilter === flagColor.id}
+                      <AtlaskitIcon name="check" size={14} class="ml-auto" />
+                    {/if}
+                  </div>
+                </DropdownMenu.Item>
+              {/each}
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        {/if}
       </div>
 
       <!-- Divider -->

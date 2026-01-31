@@ -14,6 +14,7 @@ import {
   type CustomFilterIcon,
   CUSTOM_FILTER_ICONS
 } from '../types/tree';
+import type { FlagColor } from './flags.svelte';
 import { getAvatarColor } from '../utils/avatar-colors';
 import { logger } from '../utils/logger';
 
@@ -271,7 +272,9 @@ export const filtersState = $state({
   // Custom filters (user-saved filter combinations)
   customFilters: [] as CustomFilter[],
   // Currently active custom filter ID (null if none active)
-  activeCustomFilterId: null as string | null
+  activeCustomFilterId: null as string | null,
+  // Flag filter: null = off, 'any' = any flagged issue, or specific color
+  flagFilter: null as FlagColor | 'any' | null
 });
 
 // ============================================
@@ -425,6 +428,35 @@ export function clearRecencyFilter(): void {
 }
 
 /**
+ * Set flag filter
+ */
+export function setFlagFilter(filter: FlagColor | 'any' | null): void {
+  if (filtersState.flagFilter !== filter) {
+    filtersState.flagFilter = filter;
+    logger.store('filters', 'Set flag filter', { filter });
+    notifyFiltersChange();
+  }
+}
+
+/**
+ * Toggle flag filter: if same value, turn off; otherwise set
+ */
+export function toggleFlagFilter(filter: FlagColor | 'any'): void {
+  setFlagFilter(filtersState.flagFilter === filter ? null : filter);
+}
+
+/**
+ * Clear flag filter
+ */
+export function clearFlagFilter(): void {
+  if (filtersState.flagFilter !== null) {
+    filtersState.flagFilter = null;
+    logger.store('filters', 'Cleared flag filter');
+    notifyFiltersChange();
+  }
+}
+
+/**
  * Clear all filters (including dynamic ones) and persist the change
  */
 export function resetFilters(): void {
@@ -432,6 +464,7 @@ export function resetFilters(): void {
   clearAllDynamicFilters();
   filtersState.searchText = '';
   filtersState.recencyFilter = null;
+  filtersState.flagFilter = null;
   filtersState.activeCustomFilterId = null;
   logger.store('filters', 'Reset all filters');
   notifyFiltersChange();
@@ -601,6 +634,27 @@ export function filterIssuesByRecency(issues: JiraIssue[]): JiraIssue[] {
  */
 export function requiresLocalRecencyFilter(): boolean {
   return filtersState.recencyFilter === 'recently-commented';
+}
+
+/**
+ * Filter issues by flag (local filtering)
+ * Uses the flags store to check if issues are flagged
+ */
+export function filterIssuesByFlag(
+  issues: JiraIssue[],
+  flags: Record<string, FlagColor>
+): JiraIssue[] {
+  if (!filtersState.flagFilter) {
+    return issues;
+  }
+
+  return issues.filter((issue) => {
+    const issueFlag = flags[issue.key];
+    if (filtersState.flagFilter === 'any') {
+      return !!issueFlag;
+    }
+    return issueFlag === filtersState.flagFilter;
+  });
 }
 
 /**

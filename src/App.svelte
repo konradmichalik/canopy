@@ -26,6 +26,7 @@
     initializeChangeTracking,
     runCheckpointCleanup
   } from './lib/stores/changeTracking.svelte';
+  import { initializeFlags } from './lib/stores/flags.svelte';
   import { checkForUpdate, type UpdateInfo } from './lib/utils/version-check';
   import { onMount } from 'svelte';
 
@@ -51,7 +52,8 @@
           initializeQueries(),
           initializeHelpModal(),
           initializeAutoRefresh(),
-          initializeChangeTracking()
+          initializeChangeTracking(),
+          initializeFlags()
         ]);
 
         // These are still sync

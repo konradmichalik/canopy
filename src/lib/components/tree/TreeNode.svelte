@@ -2,8 +2,10 @@
   import AccordionChevron from '../common/AccordionChevron.svelte';
   import type { TreeNode as TreeNodeType } from '../../types';
   import IssueCard from './IssueCard.svelte';
+  import IssueContextMenu from './IssueContextMenu.svelte';
   import { toggleNode } from '../../stores/issues.svelte';
   import { keyboardNavState, setFocusedKey } from '../../stores/keyboardNavigation.svelte';
+  import { flagsState, getFlagHexColor } from '../../stores/flags.svelte';
   import TreeNode from './TreeNode.svelte';
 
   interface Props {
@@ -34,6 +36,10 @@
   const hasChildren = $derived(node.children.length > 0);
   const indent = $derived(node.depth * 24);
   const isFocused = $derived(keyboardNavState.focusedKey === node.issue.key);
+  const flagColor = $derived(flagsState.flags[node.issue.key] ?? null);
+  const flagBorderStyle = $derived(
+    flagColor ? `border-left: 3px solid ${getFlagHexColor(flagColor)}` : ''
+  );
 
   // Scroll into view when focused via keyboard
   $effect(() => {
@@ -45,35 +51,37 @@
 
 <div class="tree-node">
   <!-- Node Row -->
-  <div
-    bind:this={nodeRef}
-    class="flex items-center gap-1 hover:bg-surface-hovered rounded px-2 group transition-colors {isFocused
-      ? 'bg-brand-subtlest ring-2 ring-brand ring-inset'
-      : ''}"
-    style="padding-left: {indent + 8}px"
-    onclick={handleClick}
-    onkeydown={handleKeydown}
-    role="treeitem"
-    aria-expanded={hasChildren ? node.isExpanded : undefined}
-    aria-selected={isFocused}
-    tabindex={-1}
-  >
-    <!-- Expand/Collapse Toggle -->
-    {#if hasChildren}
-      <AccordionChevron
-        isExpanded={node.isExpanded}
-        onClick={(e) => {
-          e.stopPropagation();
-          handleToggle();
-        }}
-      />
-    {:else}
-      <div class="w-6 flex-shrink-0"></div>
-    {/if}
+  <IssueContextMenu {node}>
+    <div
+      bind:this={nodeRef}
+      class="flex items-center gap-1 hover:bg-surface-hovered rounded px-2 group transition-colors {isFocused
+        ? 'bg-brand-subtlest ring-2 ring-brand ring-inset'
+        : ''}"
+      style="padding-left: {indent + 8}px; {flagBorderStyle}"
+      onclick={handleClick}
+      onkeydown={handleKeydown}
+      role="treeitem"
+      aria-expanded={hasChildren ? node.isExpanded : undefined}
+      aria-selected={isFocused}
+      tabindex={-1}
+    >
+      <!-- Expand/Collapse Toggle -->
+      {#if hasChildren}
+        <AccordionChevron
+          isExpanded={node.isExpanded}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggle();
+          }}
+        />
+      {:else}
+        <div class="w-6 flex-shrink-0"></div>
+      {/if}
 
-    <!-- Issue Card -->
-    <IssueCard {node} />
-  </div>
+      <!-- Issue Card -->
+      <IssueCard {node} />
+    </div>
+  </IssueContextMenu>
 
   <!-- Children -->
   {#if node.isExpanded && hasChildren}
