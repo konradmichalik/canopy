@@ -41,7 +41,7 @@
 {#if tooltipContent}
   <TooltipPrimitive.Provider delayDuration={200}>
     <TooltipPrimitive.Root>
-      <TooltipPrimitive.Trigger class="inline-flex">
+      <TooltipPrimitive.Trigger class="inline-flex items-center">
         {@render children()}
       </TooltipPrimitive.Trigger>
       <TooltipPrimitive.Content
@@ -60,7 +60,7 @@
     </TooltipPrimitive.Root>
   </TooltipPrimitive.Provider>
 {:else}
-  <span class="inline-flex">
+  <span class="inline-flex items-center">
     {@render children()}
   </span>
 {/if}

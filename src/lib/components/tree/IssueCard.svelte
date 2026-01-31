@@ -106,7 +106,7 @@
   <!-- Issue Type Icon -->
   <button
     type="button"
-    class="cursor-pointer hover:bg-surface-hovered rounded p-0.5 -m-0.5 transition-colors flex-shrink-0"
+    class="cursor-pointer hover:bg-surface-hovered rounded p-0.5 -m-0.5 transition-colors flex-shrink-0 inline-flex items-center justify-center"
     onclick={(e) => handleFilterClick(e, makeFilterId('type', issue.fields.issuetype.name))}
     title={issue.fields.issuetype.name}
   >
@@ -129,7 +129,7 @@
           : 'text-base gap-1.5'}"
       >
         {issue.key}
-        <AtlaskitIcon name="link-external" size={isCompact ? 12 : 14} class="opacity-50" />
+        <AtlaskitIcon name="link-external" size={isCompact ? 12 : 14} class="opacity-0 group-hover:opacity-50 transition-opacity" />
       </button>
     </Tooltip>
   </div>
