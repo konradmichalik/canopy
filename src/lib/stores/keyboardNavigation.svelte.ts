@@ -13,10 +13,10 @@ import { openExternalUrl } from '../utils/external-link';
 import { jqlState } from './jql.svelte';
 import { isQuery } from '../types/tree';
 import {
-	toggleSelection,
-	selectAll,
-	clearSelection as clearIssueSelection,
-	hasSelection
+  toggleSelection,
+  selectAll,
+  clearSelection as clearIssueSelection,
+  hasSelection
 } from './selection.svelte';
 
 // State container for keyboard navigation

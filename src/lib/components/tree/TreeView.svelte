@@ -37,7 +37,11 @@
   import { openExternalUrl } from '../../utils/external-link';
   import { setFaviconBadge } from '../../utils/favicon';
   import SelectionToolbar from './SelectionToolbar.svelte';
-  import { selectionState, clearSelection, toggleSelectionMode } from '../../stores/selection.svelte';
+  import {
+    selectionState,
+    clearSelection,
+    toggleSelectionMode
+  } from '../../stores/selection.svelte';
 
   let isRefreshing = $state(false);
   let showJqlDebug = $state(false);
@@ -362,7 +366,10 @@
           </Button>
         </Tooltip>
 
-        <Tooltip content={selectionState.selectionMode ? 'Exit selection' : 'Select issues'} placement="bottom">
+        <Tooltip
+          content={selectionState.selectionMode ? 'Exit selection' : 'Select issues'}
+          placement="bottom"
+        >
           <Button
             variant={selectionState.selectionMode ? 'secondary' : 'ghost'}
             size="icon"

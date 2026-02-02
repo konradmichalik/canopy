@@ -129,7 +129,11 @@
           : 'text-base gap-1.5'}"
       >
         {issue.key}
-        <AtlaskitIcon name="link-external" size={isCompact ? 12 : 14} class="opacity-0 group-hover:opacity-50 transition-opacity" />
+        <AtlaskitIcon
+          name="link-external"
+          size={isCompact ? 12 : 14}
+          class="opacity-0 group-hover:opacity-50 transition-opacity"
+        />
       </button>
     </Tooltip>
   </div>
