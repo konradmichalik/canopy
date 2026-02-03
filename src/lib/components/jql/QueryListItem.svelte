@@ -7,6 +7,7 @@
   import { QUERY_COLORS } from '../../types/tree';
   import { downloadSingleQuery } from '../../utils/storage';
   import { changeTrackingState } from '../../stores/changeTracking.svelte';
+  import { toggleQueryChangeTrackingExclusion } from '../../stores/jql.svelte';
 
   interface Props {
     query: SavedQuery;
@@ -81,6 +82,11 @@
   function handleDuplicate(e: Event): void {
     e.stopPropagation();
     onDuplicate(query);
+  }
+
+  function handleToggleChangeTracking(e: Event): void {
+    e.stopPropagation();
+    toggleQueryChangeTrackingExclusion(query.id);
   }
 
   function handleClick(): void {
@@ -230,6 +236,16 @@
           <AtlaskitIcon name="copy" size={14} class="mr-2" />
           Duplicate
         </DropdownMenu.Item>
+        {#if changeTrackingState.isEnabled}
+          <DropdownMenu.Item onclick={handleToggleChangeTracking}>
+            <AtlaskitIcon
+              name={query.excludeFromChangeTracking ? 'check-circle' : 'cross'}
+              size={14}
+              class="mr-2"
+            />
+            {query.excludeFromChangeTracking ? 'Enable Change Tracking' : 'Disable Change Tracking'}
+          </DropdownMenu.Item>
+        {/if}
         <DropdownMenu.Separator />
         <DropdownMenu.Item onclick={handleDelete} class="text-destructive focus:text-destructive">
           <AtlaskitIcon name="delete" size={14} class="mr-2" />

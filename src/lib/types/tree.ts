@@ -154,6 +154,8 @@ export interface SavedQuery {
   customFilters?: CustomFilter[];
   /** Currently active custom filter ID */
   activeCustomFilterId?: string | null;
+  /** Exclude this query from change tracking */
+  excludeFromChangeTracking?: boolean;
 }
 
 // ============================================

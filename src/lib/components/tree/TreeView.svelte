@@ -199,7 +199,7 @@
 
   // Change tracking handlers
   function handleSaveCheckpoint(): void {
-    if (routerState.activeQueryId) {
+    if (routerState.activeQueryId && !currentQuery?.excludeFromChangeTracking) {
       saveCheckpoint(routerState.activeQueryId, issuesState.rawIssues);
       showFlashMessage('success', 'Checkpoint saved');
     }
