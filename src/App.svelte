@@ -7,7 +7,7 @@
   import { connectionState, initializeConnection } from './lib/stores/connection.svelte';
   import { initializeRouter, cleanupRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
-  import { initializeColorTheme } from './lib/stores/colorTheme.svelte';
+  import { initializeColorIntensity } from './lib/stores/colorIntensity.svelte';
   import { initializeFieldConfig } from './lib/stores/fieldConfig.svelte';
   import { initializeDisplayDensity } from './lib/stores/displayDensity.svelte';
   import { initializeDateFormat } from './lib/stores/dateFormat.svelte';
@@ -38,7 +38,7 @@
     async function initialize() {
       try {
         // Initialize theme first (affects appearance immediately)
-        await Promise.all([initializeTheme(), initializeColorTheme()]);
+        await Promise.all([initializeTheme(), initializeColorIntensity()]);
 
         // Initialize all other stores in parallel
         await Promise.all([

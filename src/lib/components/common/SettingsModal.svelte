@@ -19,11 +19,11 @@
   import Avatar from './Avatar.svelte';
   import { themeState, setTheme, type Theme } from '../../stores/theme.svelte';
   import {
-    colorThemeState,
-    setColorTheme,
-    COLOR_THEMES,
-    type ColorTheme
-  } from '../../stores/colorTheme.svelte';
+    colorIntensityState,
+    setColorIntensity,
+    COLOR_INTENSITY_OPTIONS,
+    type ColorIntensity
+  } from '../../stores/colorIntensity.svelte';
   import {
     displayDensityState,
     setDisplayDensity,
@@ -83,8 +83,8 @@
     setTheme(theme);
   }
 
-  function handleColorThemeChange(colorTheme: ColorTheme): void {
-    setColorTheme(colorTheme);
+  function handleColorIntensityChange(intensity: ColorIntensity): void {
+    setColorIntensity(intensity);
   }
 
   function handleDensityChange(density: DisplayDensity): void {
@@ -305,39 +305,23 @@
           </div>
         </div>
 
-        <!-- Color Theme -->
+        <!-- Color Intensity -->
         <div class="space-y-2">
-          <span class="text-sm font-medium">Accent Color</span>
+          <span class="text-sm font-medium">Color Palette</span>
           <p class="text-xs text-muted-foreground">
-            Primary color for highlights and active elements
+            Intensity of colors for status indicators and labels
           </p>
-          <div class="flex gap-2">
-            {#each COLOR_THEMES as theme (theme.id)}
-              <Tooltip text={theme.label}>
+          <div class="flex gap-1">
+            {#each COLOR_INTENSITY_OPTIONS as option (option.id)}
+              <Tooltip text={option.description}>
                 <button
-                  onclick={() => handleColorThemeChange(theme.id)}
-                  class="w-8 h-8 rounded-full transition-all flex items-center justify-center
-                    {colorThemeState.colorTheme === theme.id
-                    ? 'ring-2 ring-offset-2 ring-offset-background ring-foreground/50'
-                    : 'hover:scale-110'}"
-                  style="background-color: {theme.color}"
-                  aria-label={theme.label}
+                  onclick={() => handleColorIntensityChange(option.id)}
+                  class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-md transition-colors
+                    {colorIntensityState.intensity === option.id
+                    ? 'bg-accent text-primary font-medium'
+                    : 'text-muted-foreground hover:bg-accent'}"
                 >
-                  {#if colorThemeState.colorTheme === theme.id}
-                    <svg
-                      class="w-4 h-4 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="3"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  {/if}
+                  {option.label}
                 </button>
               </Tooltip>
             {/each}

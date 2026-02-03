@@ -42,7 +42,6 @@ export const STORAGE_KEYS = {
   CONNECTION: 'connection',
   QUERIES: 'queries',
   THEME: 'theme',
-  COLOR_THEME: 'color-theme',
   EXPANDED_NODES: 'expanded-nodes',
   LAST_QUERY_ID: 'last-query-id',
   SIDEBAR_OPEN: 'sidebar-open',
@@ -65,7 +64,8 @@ export const STORAGE_KEYS = {
   DEFAULT_FIELDS: 'default-fields',
   DEFAULT_SORT: 'default-sort',
   AUTO_EXPAND_DEPTH: 'auto-expand-depth',
-  FLAGS: 'flags'
+  FLAGS: 'flags',
+  COLOR_INTENSITY: 'color-intensity'
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

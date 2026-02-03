@@ -197,189 +197,56 @@ html[data-color-mode='dark'] {
   --query-teal: #8fbcbb;
 }
 
-/* Color Theme Overrides - Ice (nord7) */
-html.color-theme-teal[data-color-mode='light'] {
-  --ds-text-selected: #5e9b9a;
-  --ds-text-brand: #5e9b9a;
-  --ds-link: #5e9b9a;
-  --ds-link-pressed: #4d8685;
-  --ds-border-selected: #5e9b9a;
-  --ds-border-brand: #5e9b9a;
-  --ds-background-selected: #f0f6f6;
-  --ds-background-selected-hovered: #e5eeee;
-  --ds-background-brand-bold: #5e9b9a;
-  --ds-background-brand-bold-hovered: #4d8685;
-  --ds-background-brand-bold-pressed: #3d7170;
-  --ds-background-information: #f0f6f6;
-  --ds-background-information-hovered: #e5eeee;
-  --ds-background-information-bold: #5e9b9a;
-  --ds-background-information-bold-hovered: #4d8685;
+/* Color Intensity: Vivid - Light Theme */
+html.color-intensity-vivid[data-color-mode='light'] {
+  /* Change Tracking - More saturated */
+  --change-new: #22c55e;
+  --change-new-text: #16a34a;
+  --change-removed: #ef4444;
+  --change-removed-text: #dc2626;
+  --change-status: #3b82f6;
+  --change-status-text: #2563eb;
+  --change-comments: #a855f7;
+  --change-comments-text: #9333ea;
+  --change-assignee: #f97316;
+  --change-assignee-text: #ea580c;
+  --change-recent: #eab308;
+
+  /* Query Colors - More saturated */
+  --query-gray: #6b7280;
+  --query-blue: #3b82f6;
+  --query-green: #22c55e;
+  --query-yellow: #eab308;
+  --query-orange: #f97316;
+  --query-red: #ef4444;
+  --query-purple: #a855f7;
+  --query-teal: #14b8a6;
 }
 
-html.color-theme-teal[data-color-mode='dark'] {
-  --ds-text-selected: #8fbcbb;
-  --ds-text-brand: #8fbcbb;
-  --ds-link: #8fbcbb;
-  --ds-link-pressed: #7aaba9;
-  --ds-border-selected: #8fbcbb;
-  --ds-border-brand: #8fbcbb;
-  --ds-background-selected: #344a49;
-  --ds-background-selected-hovered: #3d5655;
-  --ds-background-brand-bold: #8fbcbb;
-  --ds-background-brand-bold-hovered: #a4cccb;
-  --ds-background-brand-bold-pressed: #7aaba9;
-  --ds-background-information: #344a49;
-  --ds-background-information-hovered: #3d5655;
-  --ds-background-information-bold: #8fbcbb;
-  --ds-background-information-bold-hovered: #a4cccb;
-}
+/* Color Intensity: Vivid - Dark Theme */
+html.color-intensity-vivid[data-color-mode='dark'] {
+  /* Change Tracking - More saturated */
+  --change-new: #4ade80;
+  --change-new-text: #4ade80;
+  --change-removed: #f87171;
+  --change-removed-text: #f87171;
+  --change-status: #60a5fa;
+  --change-status-text: #60a5fa;
+  --change-comments: #c084fc;
+  --change-comments-text: #c084fc;
+  --change-assignee: #fb923c;
+  --change-assignee-text: #fb923c;
+  --change-recent: #facc15;
 
-/* Color Theme Overrides - Aurora (nord14) */
-html.color-theme-green[data-color-mode='light'] {
-  --ds-text-selected: #7a9e64;
-  --ds-text-brand: #7a9e64;
-  --ds-link: #7a9e64;
-  --ds-link-pressed: #688a54;
-  --ds-border-selected: #7a9e64;
-  --ds-border-brand: #7a9e64;
-  --ds-background-selected: #f2f6ef;
-  --ds-background-selected-hovered: #e8efe3;
-  --ds-background-brand-bold: #7a9e64;
-  --ds-background-brand-bold-hovered: #688a54;
-  --ds-background-brand-bold-pressed: #587844;
-  --ds-background-information: #f2f6ef;
-  --ds-background-information-hovered: #e8efe3;
-  --ds-background-information-bold: #7a9e64;
-  --ds-background-information-bold-hovered: #688a54;
-}
-
-html.color-theme-green[data-color-mode='dark'] {
-  --ds-text-selected: #a3be8c;
-  --ds-text-brand: #a3be8c;
-  --ds-link: #a3be8c;
-  --ds-link-pressed: #8faa78;
-  --ds-border-selected: #a3be8c;
-  --ds-border-brand: #a3be8c;
-  --ds-background-selected: #3a4438;
-  --ds-background-selected-hovered: #434f40;
-  --ds-background-brand-bold: #a3be8c;
-  --ds-background-brand-bold-hovered: #b5cc9f;
-  --ds-background-brand-bold-pressed: #8faa78;
-  --ds-background-information: #3a4438;
-  --ds-background-information-hovered: #434f40;
-  --ds-background-information-bold: #a3be8c;
-  --ds-background-information-bold-hovered: #b5cc9f;
-}
-
-/* Color Theme Overrides - Lavender (nord15) */
-html.color-theme-purple[data-color-mode='light'] {
-  --ds-text-selected: #966089;
-  --ds-text-brand: #966089;
-  --ds-link: #966089;
-  --ds-link-pressed: #835477;
-  --ds-border-selected: #966089;
-  --ds-border-brand: #966089;
-  --ds-background-selected: #f5f0f4;
-  --ds-background-selected-hovered: #ede4eb;
-  --ds-background-brand-bold: #966089;
-  --ds-background-brand-bold-hovered: #835477;
-  --ds-background-brand-bold-pressed: #704866;
-  --ds-background-information: #f5f0f4;
-  --ds-background-information-hovered: #ede4eb;
-  --ds-background-information-bold: #966089;
-  --ds-background-information-bold-hovered: #835477;
-}
-
-html.color-theme-purple[data-color-mode='dark'] {
-  --ds-text-selected: #b48ead;
-  --ds-text-brand: #b48ead;
-  --ds-link: #b48ead;
-  --ds-link-pressed: #a07c99;
-  --ds-border-selected: #b48ead;
-  --ds-border-brand: #b48ead;
-  --ds-background-selected: #443548;
-  --ds-background-selected-hovered: #4f3d54;
-  --ds-background-brand-bold: #b48ead;
-  --ds-background-brand-bold-hovered: #c5a3bf;
-  --ds-background-brand-bold-pressed: #a07c99;
-  --ds-background-information: #443548;
-  --ds-background-information-hovered: #4f3d54;
-  --ds-background-information-bold: #b48ead;
-  --ds-background-information-bold-hovered: #c5a3bf;
-}
-
-/* Color Theme Overrides - Sand (nord12) */
-html.color-theme-orange[data-color-mode='light'] {
-  --ds-text-selected: #b06b54;
-  --ds-text-brand: #b06b54;
-  --ds-link: #b06b54;
-  --ds-link-pressed: #9c5e48;
-  --ds-border-selected: #b06b54;
-  --ds-border-brand: #b06b54;
-  --ds-background-selected: #f8f0ec;
-  --ds-background-selected-hovered: #f2e5df;
-  --ds-background-brand-bold: #b06b54;
-  --ds-background-brand-bold-hovered: #9c5e48;
-  --ds-background-brand-bold-pressed: #88523d;
-  --ds-background-information: #f8f0ec;
-  --ds-background-information-hovered: #f2e5df;
-  --ds-background-information-bold: #b06b54;
-  --ds-background-information-bold-hovered: #9c5e48;
-}
-
-html.color-theme-orange[data-color-mode='dark'] {
-  --ds-text-selected: #d08770;
-  --ds-text-brand: #d08770;
-  --ds-link: #d08770;
-  --ds-link-pressed: #bc755f;
-  --ds-border-selected: #d08770;
-  --ds-border-brand: #d08770;
-  --ds-background-selected: #4a3832;
-  --ds-background-selected-hovered: #56423b;
-  --ds-background-brand-bold: #d08770;
-  --ds-background-brand-bold-hovered: #dca08e;
-  --ds-background-brand-bold-pressed: #bc755f;
-  --ds-background-information: #4a3832;
-  --ds-background-information-hovered: #56423b;
-  --ds-background-information-bold: #d08770;
-  --ds-background-information-bold-hovered: #dca08e;
-}
-
-/* Color Theme Overrides - Rose (nord11) */
-html.color-theme-rose[data-color-mode='light'] {
-  --ds-text-selected: #b05861;
-  --ds-text-brand: #b05861;
-  --ds-link: #b05861;
-  --ds-link-pressed: #9c4d55;
-  --ds-border-selected: #b05861;
-  --ds-border-brand: #b05861;
-  --ds-background-selected: #f7edee;
-  --ds-background-selected-hovered: #f0dfe0;
-  --ds-background-brand-bold: #b05861;
-  --ds-background-brand-bold-hovered: #9c4d55;
-  --ds-background-brand-bold-pressed: #88424a;
-  --ds-background-information: #f7edee;
-  --ds-background-information-hovered: #f0dfe0;
-  --ds-background-information-bold: #b05861;
-  --ds-background-information-bold-hovered: #9c4d55;
-}
-
-html.color-theme-rose[data-color-mode='dark'] {
-  --ds-text-selected: #bf616a;
-  --ds-text-brand: #bf616a;
-  --ds-link: #bf616a;
-  --ds-link-pressed: #ab555e;
-  --ds-border-selected: #bf616a;
-  --ds-border-brand: #bf616a;
-  --ds-background-selected: #4a2f33;
-  --ds-background-selected-hovered: #56373b;
-  --ds-background-brand-bold: #bf616a;
-  --ds-background-brand-bold-hovered: #cc7b82;
-  --ds-background-brand-bold-pressed: #ab555e;
-  --ds-background-information: #4a2f33;
-  --ds-background-information-hovered: #56373b;
-  --ds-background-information-bold: #bf616a;
-  --ds-background-information-bold-hovered: #cc7b82;
+  /* Query Colors - More saturated */
+  --query-gray: #9ca3af;
+  --query-blue: #60a5fa;
+  --query-green: #4ade80;
+  --query-yellow: #facc15;
+  --query-orange: #fb923c;
+  --query-red: #f87171;
+  --query-purple: #c084fc;
+  --query-teal: #2dd4bf;
 }
 
 /* shadcn-svelte variables mapped to Atlassian tokens */
