@@ -59,7 +59,10 @@ jobs:
           releaseBody: |
             Download Canopy ${{ github.ref_name }}
 
-            **macOS**: Right-click the app → "Open" on first launch (app is unsigned)
+            **macOS** (app is unsigned): Right-click the app → "Open" on first launch, or run:
+            ```
+            xattr -cr /Applications/Canopy.app
+            ```
           releaseDraft: false
           prerelease: false
           args: --target ${{ matrix.target }}
