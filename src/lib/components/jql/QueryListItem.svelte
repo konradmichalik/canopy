@@ -110,6 +110,7 @@
   const hasPendingChanges = $derived(
     changeTrackingState.showIndicators &&
       changeTrackingState.isEnabled &&
+      !query.excludeFromChangeTracking &&
       query.id in changeTrackingState.queriesWithPendingChanges
   );
   const changeTypes = $derived(changeTrackingState.queriesWithPendingChanges[query.id] ?? null);
