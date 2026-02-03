@@ -159,6 +159,7 @@ export function updateQuery(
       | 'cachedIssueCount'
       | 'customFilters'
       | 'activeCustomFilterId'
+      | 'excludeFromChangeTracking'
     >
   >
 ): boolean {
@@ -229,6 +230,18 @@ export function updateQueryOptionsExpanded(id: string, optionsExpanded: boolean)
  */
 export function updateQueryIssueCount(id: string, cachedIssueCount: number): boolean {
   return updateQuery(id, { cachedIssueCount });
+}
+
+/**
+ * Toggle change tracking exclusion for a query
+ */
+export function toggleQueryChangeTrackingExclusion(id: string): boolean {
+  const query = getQueryById(id);
+  if (!query) {
+    logger.warn(`Query ${id} not found for change tracking toggle`);
+    return false;
+  }
+  return updateQuery(id, { excludeFromChangeTracking: !query.excludeFromChangeTracking });
 }
 
 /**

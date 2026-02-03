@@ -71,8 +71,9 @@
   const selected = $derived(isSelected(node.issue.key));
   const inSelectionMode = $derived(selectionState.selectionMode);
   const flagColor = $derived(flagsState.flags[node.issue.key] ?? null);
-  const flagBorderStyle = $derived(
-    flagColor ? `border-left: 3px solid ${getFlagHexColor(flagColor)}` : ''
+  const flagHexColor = $derived(flagColor ? getFlagHexColor(flagColor) : null);
+  const flagStyle = $derived(
+    flagHexColor ? `--flag-color: ${flagHexColor}; --flag-bg: ${flagHexColor}12;` : ''
   );
 
   // Scroll into view when focused via keyboard
@@ -88,11 +89,12 @@
   <IssueContextMenu {node}>
     <div
       bind:this={nodeRef}
-      class="flex items-center gap-1 hover:bg-surface-hovered rounded px-2 group transition-colors
+      class="tree-node-row flex items-center gap-1 hover:bg-surface-hovered rounded px-2 group transition-colors
         {isFocused ? 'ring-2 ring-brand ring-inset' : ''}
         {selected ? 'bg-brand-subtlest/50' : ''}
-        {isFocused && !selected ? 'bg-brand-subtlest' : ''}"
-      style="padding-left: {indent + 8}px; {flagBorderStyle}"
+        {isFocused && !selected ? 'bg-brand-subtlest' : ''}
+        {flagHexColor ? 'flagged' : ''}"
+      style="padding-left: {indent + 8}px; {flagStyle}"
       onclick={handleClick}
       onkeydown={handleKeydown}
       role="treeitem"
@@ -139,3 +141,14 @@
     </div>
   {/if}
 </div>
+
+<style>
+  .tree-node-row.flagged {
+    border-left: 3px solid var(--flag-color);
+    background-color: var(--flag-bg);
+  }
+
+  .tree-node-row.flagged:hover {
+    background-color: color-mix(in srgb, var(--flag-color) 18%, var(--ds-surface-hovered, #f4f5f7));
+  }
+</style>

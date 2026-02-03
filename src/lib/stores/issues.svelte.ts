@@ -30,7 +30,7 @@ import { flagsState } from './flags.svelte';
 import { getSortConfig, setSortConfigChangeCallback } from './sortConfig.svelte';
 import { invalidateFlatTreeCache } from './keyboardNavigation.svelte';
 import { routerState } from './router.svelte';
-import { updateQueryIssueCount } from './jql.svelte';
+import { updateQueryIssueCount, getQueryById } from './jql.svelte';
 import { detectChanges, changeTrackingState } from './changeTracking.svelte';
 import { getAutoExpandDepth } from './autoExpandDepth.svelte';
 
@@ -241,7 +241,16 @@ export async function loadIssues(jql: string, options: LoadIssuesOptions = {}): 
       const hasNoActiveFilters =
         filterConditions.length === 0 && !filtersState.searchText && !filtersState.recencyFilter;
 
-      if (issuesState.isInitialLoad && !issuesState.isPartialLoad && hasNoActiveFilters) {
+      // Check if query is excluded from change tracking
+      const query = getQueryById(loadingQueryId);
+      const isExcludedFromTracking = query?.excludeFromChangeTracking === true;
+
+      if (
+        issuesState.isInitialLoad &&
+        !issuesState.isPartialLoad &&
+        hasNoActiveFilters &&
+        !isExcludedFromTracking
+      ) {
         detectChanges(loadingQueryId, fetchedIssues);
       } else if (issuesState.isInitialLoad && !hasNoActiveFilters) {
         // Clear any stale change detection when filters are active
