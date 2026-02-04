@@ -25,7 +25,7 @@ let hasChecked = false;
  */
 export async function checkForUpdate(): Promise<UpdateInfo | null> {
   try {
-    if (!__GIT_TAG__) {
+    if (__APP_VERSION__ === 'dev') {
       logger.debug('Version check: skipped (dev build)');
       return null;
     }
@@ -52,7 +52,7 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
     // Record that we checked
     setStorageItem(STORAGE_KEYS.UPDATE_LAST_CHECKED, Date.now());
 
-    if (release.tag_name === __GIT_TAG__) {
+    if (release.tag_name === __APP_VERSION__) {
       logger.debug('Version check: app is up to date');
       cachedUpdate = null;
       hasChecked = true;
