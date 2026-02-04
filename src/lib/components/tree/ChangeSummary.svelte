@@ -358,7 +358,9 @@
           {@const debug = changeTrackingState.filteredOwnChangesDebug}
           <div class="mt-3 pt-3 border-t border-amber-500/30">
             <div class="flex items-center gap-2 mb-2">
-              <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-medium">
+              <span
+                class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-medium"
+              >
                 DEBUG
               </span>
               <span class="text-amber-600 dark:text-amber-400 font-medium">
@@ -387,7 +389,9 @@
                   {#each debug.filteredStatusChanges as change (change.key)}
                     <li class="flex items-baseline gap-2">
                       <span class="font-mono">{change.key}</span>
-                      <span class="opacity-70">{change.previousStatus} → {change.currentStatus}</span>
+                      <span class="opacity-70"
+                        >{change.previousStatus} → {change.currentStatus}</span
+                      >
                     </li>
                   {/each}
                 </ul>
@@ -401,7 +405,11 @@
                   {#each debug.filteredCommentChanges as change (change.key)}
                     <li class="flex items-baseline gap-2">
                       <span class="font-mono">{change.key}</span>
-                      <span class="opacity-70">+{change.newCommentCount} comment{change.newCommentCount !== 1 ? 's' : ''}</span>
+                      <span class="opacity-70"
+                        >+{change.newCommentCount} comment{change.newCommentCount !== 1
+                          ? 's'
+                          : ''}</span
+                      >
                     </li>
                   {/each}
                 </ul>
@@ -415,7 +423,10 @@
                   {#each debug.filteredAssigneeChanges as change (change.key)}
                     <li class="flex items-baseline gap-2">
                       <span class="font-mono">{change.key}</span>
-                      <span class="opacity-70">{change.previousAssignee ?? 'Unassigned'} → {change.currentAssignee ?? 'Unassigned'}</span>
+                      <span class="opacity-70"
+                        >{change.previousAssignee ?? 'Unassigned'} → {change.currentAssignee ??
+                          'Unassigned'}</span
+                      >
                     </li>
                   {/each}
                 </ul>

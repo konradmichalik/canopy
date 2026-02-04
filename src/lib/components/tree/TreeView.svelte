@@ -80,7 +80,9 @@
   // Checkpoint data for display (directly from store - KISS)
   // Hidden for queries excluded from change tracking
   const checkpoint = $derived(
-    routerState.activeQueryId && changeTrackingState.isEnabled && !currentQuery?.excludeFromChangeTracking
+    routerState.activeQueryId &&
+      changeTrackingState.isEnabled &&
+      !currentQuery?.excludeFromChangeTracking
       ? changeTrackingState.checkpoints[routerState.activeQueryId]
       : null
   );

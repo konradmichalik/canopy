@@ -9,11 +9,11 @@
   import { Switch } from '$lib/components/ui/switch';
   import { Button } from '$lib/components/ui/button';
   import {
-  downloadConfig,
-  readConfigFile,
-  importConfig,
-  clearTemporaryData
-} from '../../utils/storage';
+    downloadConfig,
+    readConfigFile,
+    importConfig,
+    clearTemporaryData
+  } from '../../utils/storage';
   import { initializeQueries, getQueries } from '../../stores/jql.svelte';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import {
@@ -581,9 +581,7 @@
                     Experimental
                   </span>
                 </div>
-                <p class="text-xs text-muted-foreground">
-                  Hide changes you made yourself
-                </p>
+                <p class="text-xs text-muted-foreground">Hide changes you made yourself</p>
               </div>
               <Switch
                 checked={changeTrackingState.excludeOwnChanges}
@@ -644,8 +642,8 @@
             <div class="space-y-1">
               <span class="text-sm font-medium">Clear Cache</span>
               <p class="text-xs text-muted-foreground">
-                Remove temporary data like expanded nodes, change tracking checkpoints, and UI state.
-                Your queries, connection, and settings will be preserved.
+                Remove temporary data like expanded nodes, change tracking checkpoints, and UI
+                state. Your queries, connection, and settings will be preserved.
               </p>
             </div>
             <Button

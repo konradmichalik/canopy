@@ -740,9 +740,13 @@ export async function filterOwnChanges(
         logger.info('🔍 Filtered own changes (debug):', {
           total: totalFiltered,
           newIssues: ownNewIssues.map((i) => i.key),
-          statusChanges: ownStatusChanges.map((i) => `${i.key}: ${i.previousStatus} → ${i.currentStatus}`),
+          statusChanges: ownStatusChanges.map(
+            (i) => `${i.key}: ${i.previousStatus} → ${i.currentStatus}`
+          ),
           commentChanges: ownCommentChanges.map((i) => i.key),
-          assigneeChanges: ownAssigneeChanges.map((i) => `${i.key}: ${i.previousAssignee ?? 'none'} → ${i.currentAssignee ?? 'none'}`)
+          assigneeChanges: ownAssigneeChanges.map(
+            (i) => `${i.key}: ${i.previousAssignee ?? 'none'} → ${i.currentAssignee ?? 'none'}`
+          )
         });
       } else {
         // Clear debug info when not in debug mode
