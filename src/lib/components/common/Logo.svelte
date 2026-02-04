@@ -43,10 +43,10 @@
               />
             </g>
             <g transform="matrix(26.936732,0,0,26.936732,169.382287,23.012293)">
-              <circle cx="17.5" cy="18.5" r="2.5" style="fill:rgb(163,190,140);" />
+              <circle cx="17.5" cy="18.5" r="2.5" style="fill:rgb(143,188,187);" />
             </g>
             <g transform="matrix(26.936732,0,0,26.936732,303.631073,23.012293)">
-              <circle cx="17.5" cy="18.5" r="2.5" style="fill:rgb(208,135,112);" />
+              <circle cx="17.5" cy="18.5" r="2.5" style="fill:rgb(94,129,172);" />
             </g>
             <g transform="matrix(1.126239,0,0,1.02934,-30.578067,29.991053)">
               <path
@@ -86,8 +86,8 @@
       role="img"
     >
       <g class:logo-spin={animate} style="transform-origin: 500px 500px">
-        <circle cx="300" cy="500" r="200" style="fill:rgb(163,190,140);" />
-        <circle cx="700" cy="500" r="200" style="fill:rgb(208,135,112);" />
+        <circle cx="300" cy="500" r="200" style="fill:rgb(143,188,187);" />
+        <circle cx="700" cy="500" r="200" style="fill:rgb(94,129,172);" />
       </g>
     </svg>
   {/if}
