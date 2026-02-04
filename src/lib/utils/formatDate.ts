@@ -29,7 +29,7 @@ function getRelativeTimeString(date: Date): string | null {
 
   const diffWeeks = Math.floor(diffDays / 7);
   if (diffWeeks === 1) return '1 week ago';
-  if (diffWeeks < 4) return `${diffWeeks} weeks ago`;
+  if (diffDays < 30) return `${diffWeeks} weeks ago`;
 
   const diffMonths = Math.floor(diffDays / 30);
   if (diffMonths === 1) return '1 month ago';
