@@ -47,8 +47,17 @@
   });
 </script>
 
-{#if loadedUrl}
-  <img src={loadedUrl} {alt} class={className} {style} />
+{#if loadedUrl && !_loadFailed}
+  <img
+    src={loadedUrl}
+    {alt}
+    class={className}
+    {style}
+    onerror={() => {
+      _loadFailed = true;
+      loadedUrl = null;
+    }}
+  />
 {:else if fallback}
   {@render fallback()}
 {/if}
