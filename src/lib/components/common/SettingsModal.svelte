@@ -8,7 +8,12 @@
   import { Tabs } from 'bits-ui';
   import { Switch } from '$lib/components/ui/switch';
   import { Button } from '$lib/components/ui/button';
-  import { downloadConfig, readConfigFile, importConfig } from '../../utils/storage';
+  import {
+  downloadConfig,
+  readConfigFile,
+  importConfig,
+  clearTemporaryData
+} from '../../utils/storage';
   import { initializeQueries, getQueries } from '../../stores/jql.svelte';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import {
@@ -74,6 +79,8 @@
   let activeTab = $state('appearance');
   let showAboutModal = $state(false);
   let showDisconnectModal = $state(false);
+  let showClearCacheModal = $state(false);
+  let keepFlagsOnClear = $state(true);
   let fileInput: HTMLInputElement;
   let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
   let includeCredentials = $state(true);
@@ -191,6 +198,16 @@
   function handleHelpClick(): void {
     open = false;
     openHelpModal();
+  }
+
+  function handleClearCacheClick(): void {
+    showClearCacheModal = true;
+  }
+
+  async function handleClearCacheConfirm(): Promise<void> {
+    const cleared = await clearTemporaryData({ keepFlags: keepFlagsOnClear });
+    showMessage('success', `Cache cleared (${cleared} items removed)`);
+    showClearCacheModal = false;
   }
 </script>
 
@@ -620,6 +637,27 @@
             </label>
           {/if}
         </div>
+
+        <!-- Clear Cache -->
+        {#if !minimal}
+          <div class="pt-3 border-t space-y-3">
+            <div class="space-y-1">
+              <span class="text-sm font-medium">Clear Cache</span>
+              <p class="text-xs text-muted-foreground">
+                Remove temporary data like expanded nodes, change tracking checkpoints, and UI state.
+                Your queries, connection, and settings will be preserved.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              class="justify-start gap-2 text-destructive hover:text-destructive"
+              onclick={handleClearCacheClick}
+            >
+              <AtlaskitIcon name="delete" size={16} />
+              Clear Cache
+            </Button>
+          </div>
+        {/if}
       </Tabs.Content>
 
       <!-- Help Tab -->
@@ -761,3 +799,30 @@
   icon="log-out"
   onConfirm={handleDisconnectConfirm}
 />
+
+<!-- Clear Cache Confirmation Modal -->
+<ConfirmModal
+  bind:open={showClearCacheModal}
+  title="Clear Cache?"
+  confirmLabel="Clear Cache"
+  variant="destructive"
+  icon="delete"
+  onConfirm={handleClearCacheConfirm}
+>
+  {#snippet description()}
+    <div class="space-y-3">
+      <p>This will remove:</p>
+      <ul class="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+        <li>Change tracking checkpoints and pending changes</li>
+        <li>Expanded/collapsed node states</li>
+        <li>Sidebar and UI state</li>
+        <li>Update check history</li>
+      </ul>
+      <p class="text-sm">Your queries, connection, and settings will be preserved.</p>
+      <label class="flex items-center gap-2 pt-2 border-t cursor-pointer">
+        <Checkbox bind:checked={keepFlagsOnClear} />
+        <span>Keep issue flags (color markers)</span>
+      </label>
+    </div>
+  {/snippet}
+</ConfirmModal>

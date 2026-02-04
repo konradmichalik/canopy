@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import * as Dialog from '$lib/components/ui/dialog';
   import { Button } from '$lib/components/ui/button';
   import AtlaskitIcon from './AtlaskitIcon.svelte';
@@ -7,7 +8,7 @@
   interface Props {
     open: boolean;
     title: string;
-    description: string;
+    description?: string | Snippet;
     confirmLabel?: string;
     cancelLabel?: string;
     variant?: 'destructive' | 'default';
@@ -27,6 +28,8 @@
     onConfirm,
     onClose
   }: Props = $props();
+
+  const isSnippet = $derived(typeof description === 'function');
 
   let isConfirming = $state(false);
 
@@ -59,9 +62,17 @@
       </div>
 
       <h2 class="text-lg font-semibold">{title}</h2>
-      <p class="text-sm text-muted-foreground">
-        {description}
-      </p>
+      {#if description}
+        {#if isSnippet}
+          <div class="text-sm text-muted-foreground text-left w-full">
+            {@render (description as Snippet)()}
+          </div>
+        {:else}
+          <p class="text-sm text-muted-foreground">
+            {description}
+          </p>
+        {/if}
+      {/if}
 
       <div class="flex items-center gap-3 w-full mt-2">
         <Button variant="outline" class="flex-1" onclick={handleClose} disabled={isConfirming}>

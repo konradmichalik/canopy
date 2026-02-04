@@ -254,6 +254,75 @@ export function clearStorage(): boolean {
 }
 
 /**
+ * Keys that are considered temporary/cache data
+ * These can be cleared without losing user configuration
+ */
+const TEMPORARY_STORAGE_KEYS: StorageKey[] = [
+  STORAGE_KEYS.EXPANDED_NODES,
+  STORAGE_KEYS.LAST_QUERY_ID,
+  STORAGE_KEYS.SIDEBAR_OPEN,
+  STORAGE_KEYS.SIDEBAR_WIDTH,
+  STORAGE_KEYS.GROUP_BY,
+  STORAGE_KEYS.HELP_MODAL_SEEN,
+  STORAGE_KEYS.CHANGE_TRACKING_CHECKPOINTS,
+  STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES,
+  STORAGE_KEYS.CHANGE_TRACKING_OWN_CACHE,
+  STORAGE_KEYS.UPDATE_LAST_CHECKED,
+  STORAGE_KEYS.UPDATE_DISMISSED_VERSION
+];
+
+export interface ClearCacheOptions {
+  keepFlags?: boolean;
+}
+
+/**
+ * Clear temporary/cache data while preserving user configuration
+ * Returns the number of items cleared
+ */
+export async function clearTemporaryData(options: ClearCacheOptions = {}): Promise<number> {
+  const { keepFlags = true } = options;
+
+  const keysToClear = [...TEMPORARY_STORAGE_KEYS];
+  if (!keepFlags) {
+    keysToClear.push(STORAGE_KEYS.FLAGS);
+  }
+
+  let cleared = 0;
+
+  for (const key of keysToClear) {
+    const success = await removeStorageItemAsync(key);
+    if (success) {
+      cleared++;
+    }
+  }
+
+  logger.info(`Cache cleared: ${cleared} items removed`, {
+    keepFlags,
+    keys: keysToClear
+  });
+
+  return cleared;
+}
+
+/**
+ * Get list of temporary storage keys that have data
+ */
+export async function getTemporaryDataInfo(): Promise<{ key: string; hasData: boolean }[]> {
+  const result: { key: string; hasData: boolean }[] = [];
+
+  for (const key of TEMPORARY_STORAGE_KEYS) {
+    const value = await getStorageItemAsync(key);
+    result.push({ key, hasData: value !== null });
+  }
+
+  // Check flags separately
+  const flags = await getStorageItemAsync(STORAGE_KEYS.FLAGS);
+  result.push({ key: STORAGE_KEYS.FLAGS, hasData: flags !== null });
+
+  return result;
+}
+
+/**
  * Check if localStorage is available
  */
 export function isStorageAvailable(): boolean {
