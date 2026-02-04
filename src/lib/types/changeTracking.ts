@@ -131,3 +131,20 @@ export interface ChangeTrackingState {
   checkpoints: CheckpointStore;
   currentChanges: ChangeDetection | null;
 }
+
+/**
+ * Cache entry for a checked own-change status
+ */
+export interface OwnChangeCacheEntry {
+  changelogId: string; // ID of the last checked changelog entry
+  isOwnChange: boolean; // Whether it was the current user's change
+  checkedAt: string; // ISO timestamp when checked
+}
+
+/**
+ * Cache for already-checked own changes (keyed by issue key)
+ * Used to avoid redundant API calls when "exclude own changes" is enabled
+ */
+export interface OwnChangeCache {
+  [issueKey: string]: OwnChangeCacheEntry;
+}

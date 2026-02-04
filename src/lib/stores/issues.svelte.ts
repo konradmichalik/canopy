@@ -4,7 +4,7 @@
  */
 
 import type { JiraIssue, TreeNode } from '../types';
-import { getClient, getEpicLinkFieldId } from './connection.svelte';
+import { getClient, getEpicLinkFieldId, connectionState } from './connection.svelte';
 import {
   buildHierarchy,
   toggleNode as toggleNodeInTree,
@@ -31,7 +31,12 @@ import { getSortConfig, setSortConfigChangeCallback } from './sortConfig.svelte'
 import { invalidateFlatTreeCache } from './keyboardNavigation.svelte';
 import { routerState } from './router.svelte';
 import { updateQueryIssueCount, getQueryById } from './jql.svelte';
-import { detectChanges, changeTrackingState } from './changeTracking.svelte';
+import {
+  detectChanges,
+  filterOwnChanges,
+  getUserIdentifier,
+  changeTrackingState
+} from './changeTracking.svelte';
 import { getAutoExpandDepth } from './autoExpandDepth.svelte';
 
 // Configuration constants for large result handling
@@ -251,7 +256,24 @@ export async function loadIssues(jql: string, options: LoadIssuesOptions = {}): 
         hasNoActiveFilters &&
         !isExcludedFromTracking
       ) {
-        detectChanges(loadingQueryId, fetchedIssues);
+        const changes = detectChanges(loadingQueryId, fetchedIssues);
+
+        // Beta: Filter out own changes if enabled
+        if (
+          changeTrackingState.excludeOwnChanges &&
+          changes.hasChanges &&
+          connectionState.currentUser
+        ) {
+          const currentUserId = getUserIdentifier(connectionState.currentUser);
+          if (currentUserId) {
+            const client = getClient();
+            if (client) {
+              // filterOwnChanges is async but we don't need to await it
+              // The UI will update reactively when state changes
+              void filterOwnChanges(changes, currentUserId, fetchedIssues, client);
+            }
+          }
+        }
       } else if (issuesState.isInitialLoad && !hasNoActiveFilters) {
         // Clear any stale change detection when filters are active
         changeTrackingState.currentChanges = null;

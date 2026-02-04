@@ -3,7 +3,7 @@
  * Manages checkpoints and change detection for queries
  */
 
-import type { JiraIssue } from '../types';
+import type { JiraIssue, JiraUser } from '../types';
 import type {
   IssueSnapshot,
   QueryCheckpoint,
@@ -18,11 +18,13 @@ import type {
   ChangeType,
   ChangeTypes,
   SingleChangeType,
-  QueryChangeTypes
+  QueryChangeTypes,
+  OwnChangeCache
 } from '../types/changeTracking';
 import type { JiraComment } from '../types/jira';
 import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
+import { debugModeState } from './debugMode.svelte';
 
 // State container
 export const changeTrackingState = $state({
@@ -31,8 +33,26 @@ export const changeTrackingState = $state({
   showIndicators: true,
   checkpoints: {} as CheckpointStore,
   currentChanges: null as ChangeDetection | null,
-  queriesWithPendingChanges: {} as Record<string, QueryChangeTypes>
+  queriesWithPendingChanges: {} as Record<string, QueryChangeTypes>,
+  // Beta: Exclude own changes feature
+  excludeOwnChanges: false,
+  ownChangeCache: {} as OwnChangeCache,
+  isFilteringOwnChanges: false,
+  // Debug: Filtered own changes (only populated when debug mode is enabled)
+  filteredOwnChangesDebug: null as FilteredOwnChangesDebug | null
 });
+
+/**
+ * Debug info for filtered own changes
+ */
+export interface FilteredOwnChangesDebug {
+  timestamp: string;
+  filteredNewIssues: IssueChangeInfo[];
+  filteredStatusChanges: StatusChange[];
+  filteredCommentChanges: CommentChange[];
+  filteredAssigneeChanges: AssigneeChange[];
+  totalFiltered: number;
+}
 
 // Cached change lookup map for O(1) access (pattern from keyboardNavigation.svelte.ts)
 let cachedChangeLookup: Map<string, ChangeTypes> | null = null;
@@ -107,7 +127,9 @@ export async function initializeChangeTracking(): Promise<void> {
     storedPeriod,
     storedCheckpoints,
     storedPendingChanges,
-    storedShowIndicators
+    storedShowIndicators,
+    storedExcludeOwn,
+    storedOwnCache
   ] = await Promise.all([
     getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_ENABLED),
     getStorageItemAsync<ActivityPeriod>(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD),
@@ -116,7 +138,9 @@ export async function initializeChangeTracking(): Promise<void> {
     getStorageItemAsync<Record<string, boolean | QueryChangeTypes>>(
       STORAGE_KEYS.CHANGE_TRACKING_PENDING_CHANGES
     ),
-    getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_SHOW_INDICATORS)
+    getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_SHOW_INDICATORS),
+    getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_EXCLUDE_OWN),
+    getStorageItemAsync<OwnChangeCache>(STORAGE_KEYS.CHANGE_TRACKING_OWN_CACHE)
   ]);
 
   if (storedEnabled !== null) {
@@ -156,10 +180,20 @@ export async function initializeChangeTracking(): Promise<void> {
     changeTrackingState.queriesWithPendingChanges = migrated;
   }
 
+  // Beta: Exclude own changes feature
+  if (storedExcludeOwn !== null) {
+    changeTrackingState.excludeOwnChanges = storedExcludeOwn;
+  }
+
+  if (storedOwnCache) {
+    changeTrackingState.ownChangeCache = storedOwnCache;
+  }
+
   logger.store('changeTracking', 'Initialized', {
     isEnabled: changeTrackingState.isEnabled,
     activityPeriod: changeTrackingState.activityPeriod,
     showIndicators: changeTrackingState.showIndicators,
+    excludeOwnChanges: changeTrackingState.excludeOwnChanges,
     checkpointCount: Object.keys(changeTrackingState.checkpoints).length
   });
 }
@@ -196,6 +230,46 @@ export function setShowIndicators(show: boolean): void {
   changeTrackingState.showIndicators = show;
   saveStorage(STORAGE_KEYS.CHANGE_TRACKING_SHOW_INDICATORS, show);
   logger.store('changeTracking', 'Show indicators changed', { show });
+}
+
+/**
+ * Set whether to exclude own changes (Beta feature)
+ */
+export function setExcludeOwnChanges(enabled: boolean): void {
+  changeTrackingState.excludeOwnChanges = enabled;
+  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_EXCLUDE_OWN, enabled);
+
+  if (!enabled) {
+    // Clear cache when disabled to free memory
+    changeTrackingState.ownChangeCache = {};
+    saveStorage(STORAGE_KEYS.CHANGE_TRACKING_OWN_CACHE, {});
+  }
+
+  logger.store('changeTracking', 'Exclude own changes changed', { enabled });
+}
+
+/**
+ * Get user identifier from JiraUser (accountId for Cloud, name/key for Server)
+ */
+export function getUserIdentifier(user: JiraUser | null | undefined): string | null {
+  if (!user) return null;
+  return user.accountId || user.name || user.key || null;
+}
+
+/**
+ * Clear the own change cache (e.g., on disconnect)
+ */
+export function clearOwnChangeCache(): void {
+  changeTrackingState.ownChangeCache = {};
+  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_OWN_CACHE, {});
+  logger.store('changeTracking', 'Own change cache cleared');
+}
+
+/**
+ * Persist own change cache to storage
+ */
+function persistOwnChangeCache(): void {
+  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_OWN_CACHE, changeTrackingState.ownChangeCache);
 }
 
 /**
@@ -278,6 +352,24 @@ export function saveCheckpoint(queryId: string, issues: JiraIssue[]): void {
   const { [queryId]: _pending, ...restPending } = changeTrackingState.queriesWithPendingChanges;
   changeTrackingState.queriesWithPendingChanges = restPending;
   persistPendingChanges();
+
+  // Clear own change cache for these issues (baseline has changed)
+  if (Object.keys(changeTrackingState.ownChangeCache).length > 0) {
+    const issueKeys = new Set(issues.map((i) => i.key));
+    let cacheCleared = 0;
+    const newCache = { ...changeTrackingState.ownChangeCache };
+    for (const key of Object.keys(newCache)) {
+      if (issueKeys.has(key)) {
+        delete newCache[key];
+        cacheCleared++;
+      }
+    }
+    if (cacheCleared > 0) {
+      changeTrackingState.ownChangeCache = newCache;
+      persistOwnChangeCache();
+      logger.store('changeTracking', 'Cleared own change cache entries', { count: cacheCleared });
+    }
+  }
 
   persistCheckpoints();
   logger.store('changeTracking', 'Checkpoint saved', {
@@ -438,6 +530,239 @@ export function detectChanges(queryId: string, currentIssues: JiraIssue[]): Chan
   }
 
   return changes;
+}
+
+/**
+ * Filter interface for getting issue changelog
+ */
+export interface ChangelogFetcher {
+  getIssueWithChangelog(issueKey: string): Promise<{
+    changelog?: {
+      histories: Array<{
+        id: string;
+        author: JiraUser;
+        created: string;
+        items: Array<{ field: string }>;
+      }>;
+    };
+  }>;
+}
+
+/**
+ * Filter own changes from detection result (Beta feature)
+ * Removes changes that were made by the current user
+ *
+ * @param changes - The detected changes from detectChanges()
+ * @param currentUserId - The current user's identifier (accountId or name/key)
+ * @param currentIssues - The current issues (for comment author lookup)
+ * @param fetcher - Object with getIssueWithChangelog method for status/assignee checks
+ * @returns Filtered ChangeDetection with own changes removed
+ */
+export async function filterOwnChanges(
+  changes: ChangeDetection,
+  currentUserId: string,
+  currentIssues: JiraIssue[],
+  fetcher: ChangelogFetcher
+): Promise<ChangeDetection> {
+  if (!changeTrackingState.excludeOwnChanges || !changes.hasChanges) {
+    return changes;
+  }
+
+  changeTrackingState.isFilteringOwnChanges = true;
+
+  try {
+    const issueMap = new Map(currentIssues.map((i) => [i.key, i]));
+
+    // Track filtered changes for debug mode
+    const ownCommentChanges: CommentChange[] = [];
+    const ownNewIssues: IssueChangeInfo[] = [];
+    const ownStatusChanges: StatusChange[] = [];
+    const ownAssigneeChanges: AssigneeChange[] = [];
+
+    // Filter comment changes (no API call needed - author is in the issue)
+    const filteredCommentChanges = changes.commentChanges.filter((change) => {
+      const issue = issueMap.get(change.key);
+      if (!issue) return true; // Keep if issue not found
+
+      const { comments } = getCommentField(issue);
+      const latestComment = getLatestComment(comments);
+      if (!latestComment) return true; // Keep if no comment found
+
+      const authorId = getUserIdentifier(latestComment.author);
+      const isOwn = authorId === currentUserId;
+
+      if (isOwn) {
+        ownCommentChanges.push(change);
+      }
+
+      return !isOwn;
+    });
+
+    // Filter new issues (check reporter)
+    const filteredNewIssues = changes.newIssues.filter((change) => {
+      const issue = issueMap.get(change.key);
+      if (!issue) return true;
+
+      const reporterId = getUserIdentifier(issue.fields.reporter);
+      const isOwn = reporterId === currentUserId;
+
+      if (isOwn) {
+        ownNewIssues.push(change);
+      }
+
+      return !isOwn;
+    });
+
+    // Filter status and assignee changes (need changelog API)
+    const filteredStatusChanges: StatusChange[] = [];
+    const filteredAssigneeChanges: AssigneeChange[] = [];
+
+    // Collect all keys that need changelog check
+    const keysNeedingChangelog = new Set<string>();
+    for (const change of changes.statusChanges) {
+      keysNeedingChangelog.add(change.key);
+    }
+    for (const change of changes.assigneeChanges) {
+      keysNeedingChangelog.add(change.key);
+    }
+
+    // Check each issue's changelog (sequentially to avoid rate limiting)
+    const changelogAuthors = new Map<string, string | null>();
+
+    for (const key of keysNeedingChangelog) {
+      // Check cache first
+      const cached = changeTrackingState.ownChangeCache[key];
+      if (cached) {
+        changelogAuthors.set(key, cached.isOwnChange ? currentUserId : 'other');
+        continue;
+      }
+
+      try {
+        // Small delay to avoid rate limiting
+        if (changelogAuthors.size > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+
+        const issueWithChangelog = await fetcher.getIssueWithChangelog(key);
+        const latestHistory = issueWithChangelog.changelog?.histories?.[0];
+
+        if (latestHistory) {
+          const authorId = getUserIdentifier(latestHistory.author);
+          changelogAuthors.set(key, authorId);
+
+          // Cache the result
+          changeTrackingState.ownChangeCache = {
+            ...changeTrackingState.ownChangeCache,
+            [key]: {
+              changelogId: latestHistory.id,
+              isOwnChange: authorId === currentUserId,
+              checkedAt: new Date().toISOString()
+            }
+          };
+        } else {
+          changelogAuthors.set(key, null);
+        }
+      } catch (error) {
+        // Fail-open: keep the change if we can't check
+        logger.warn(`Failed to fetch changelog for ${key}`, error);
+        changelogAuthors.set(key, null);
+      }
+    }
+
+    // Persist cache after all checks
+    if (keysNeedingChangelog.size > 0) {
+      persistOwnChangeCache();
+    }
+
+    // Filter status changes
+    for (const change of changes.statusChanges) {
+      const authorId = changelogAuthors.get(change.key);
+      const isOwn = authorId === currentUserId;
+
+      if (isOwn) {
+        ownStatusChanges.push(change);
+      } else {
+        filteredStatusChanges.push(change);
+      }
+    }
+
+    // Filter assignee changes
+    for (const change of changes.assigneeChanges) {
+      const authorId = changelogAuthors.get(change.key);
+      const isOwn = authorId === currentUserId;
+
+      if (isOwn) {
+        ownAssigneeChanges.push(change);
+      } else {
+        filteredAssigneeChanges.push(change);
+      }
+    }
+
+    // Build filtered result
+    const filteredChanges: ChangeDetection = {
+      newIssues: filteredNewIssues,
+      removedIssues: changes.removedIssues, // Can't filter - no author info
+      statusChanges: filteredStatusChanges,
+      commentChanges: filteredCommentChanges,
+      assigneeChanges: filteredAssigneeChanges,
+      hasChanges:
+        filteredNewIssues.length > 0 ||
+        changes.removedIssues.length > 0 ||
+        filteredStatusChanges.length > 0 ||
+        filteredCommentChanges.length > 0 ||
+        filteredAssigneeChanges.length > 0,
+      checkpointTimestamp: changes.checkpointTimestamp
+    };
+
+    // Update state with filtered changes
+    changeTrackingState.currentChanges = filteredChanges;
+    invalidateChangeLookupCache();
+
+    const totalFiltered =
+      ownNewIssues.length +
+      ownStatusChanges.length +
+      ownCommentChanges.length +
+      ownAssigneeChanges.length;
+
+    // Store debug info if debug mode is enabled
+    if (totalFiltered > 0) {
+      if (debugModeState.enabled) {
+        changeTrackingState.filteredOwnChangesDebug = {
+          timestamp: new Date().toISOString(),
+          filteredNewIssues: ownNewIssues,
+          filteredStatusChanges: ownStatusChanges,
+          filteredCommentChanges: ownCommentChanges,
+          filteredAssigneeChanges: ownAssigneeChanges,
+          totalFiltered
+        };
+
+        // Detailed logging in debug mode
+        logger.info('🔍 Filtered own changes (debug):', {
+          total: totalFiltered,
+          newIssues: ownNewIssues.map((i) => i.key),
+          statusChanges: ownStatusChanges.map((i) => `${i.key}: ${i.previousStatus} → ${i.currentStatus}`),
+          commentChanges: ownCommentChanges.map((i) => i.key),
+          assigneeChanges: ownAssigneeChanges.map((i) => `${i.key}: ${i.previousAssignee ?? 'none'} → ${i.currentAssignee ?? 'none'}`)
+        });
+      } else {
+        // Clear debug info when not in debug mode
+        changeTrackingState.filteredOwnChangesDebug = null;
+      }
+
+      logger.store('changeTracking', 'Filtered own changes', {
+        newIssues: ownNewIssues.length,
+        statusChanges: ownStatusChanges.length,
+        commentChanges: ownCommentChanges.length,
+        assigneeChanges: ownAssigneeChanges.length
+      });
+    } else {
+      changeTrackingState.filteredOwnChangesDebug = null;
+    }
+
+    return filteredChanges;
+  } finally {
+    changeTrackingState.isFilteringOwnChanges = false;
+  }
 }
 
 /**

@@ -57,6 +57,7 @@
     setChangeTrackingEnabled,
     setActivityPeriod,
     setShowIndicators,
+    setExcludeOwnChanges,
     ACTIVITY_PERIOD_OPTIONS
   } from '../../stores/changeTracking.svelte';
   import type { ActivityPeriod } from '../../types/changeTracking';
@@ -549,6 +550,27 @@
               <Switch
                 checked={changeTrackingState.showIndicators}
                 onCheckedChange={(checked) => setShowIndicators(checked)}
+              />
+            </div>
+
+            <!-- Exclude Own Changes (Experimental) -->
+            <div class="flex items-center justify-between pt-3 border-t">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium">Exclude Own Changes</span>
+                  <span
+                    class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-medium"
+                  >
+                    Experimental
+                  </span>
+                </div>
+                <p class="text-xs text-muted-foreground">
+                  Hide changes you made yourself
+                </p>
+              </div>
+              <Switch
+                checked={changeTrackingState.excludeOwnChanges}
+                onCheckedChange={(checked) => setExcludeOwnChanges(checked)}
               />
             </div>
           {/if}

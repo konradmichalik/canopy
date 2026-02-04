@@ -11,6 +11,8 @@
   import { formatDateTime, formatDateTimeWithSetting } from '../../utils/formatDate';
   import { getIssueUrl } from '../../stores/issues.svelte';
   import { openExternalUrl } from '../../utils/external-link';
+  import { changeTrackingState } from '../../stores/changeTracking.svelte';
+  import { debugModeState } from '../../stores/debugMode.svelte';
 
   interface Props {
     changes: ChangeDetection;
@@ -349,6 +351,77 @@
               </ul>
             </div>
           {/if}
+        {/if}
+
+        <!-- Debug: Filtered Own Changes -->
+        {#if debugModeState.enabled && changeTrackingState.filteredOwnChangesDebug}
+          {@const debug = changeTrackingState.filteredOwnChangesDebug}
+          <div class="mt-3 pt-3 border-t border-amber-500/30">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-medium">
+                DEBUG
+              </span>
+              <span class="text-amber-600 dark:text-amber-400 font-medium">
+                {debug.totalFiltered} own change{debug.totalFiltered !== 1 ? 's' : ''} hidden
+              </span>
+            </div>
+
+            {#if debug.filteredNewIssues.length > 0}
+              <div class="mb-2">
+                <div class="text-muted-foreground mb-1">Own new issues:</div>
+                <ul class="space-y-0.5 text-amber-600/70 dark:text-amber-400/70">
+                  {#each debug.filteredNewIssues as issue (issue.key)}
+                    <li class="flex items-baseline gap-2">
+                      <span class="font-mono">{issue.key}</span>
+                      <span class="truncate opacity-70">{issue.summary}</span>
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+
+            {#if debug.filteredStatusChanges.length > 0}
+              <div class="mb-2">
+                <div class="text-muted-foreground mb-1">Own status changes:</div>
+                <ul class="space-y-0.5 text-amber-600/70 dark:text-amber-400/70">
+                  {#each debug.filteredStatusChanges as change (change.key)}
+                    <li class="flex items-baseline gap-2">
+                      <span class="font-mono">{change.key}</span>
+                      <span class="opacity-70">{change.previousStatus} → {change.currentStatus}</span>
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+
+            {#if debug.filteredCommentChanges.length > 0}
+              <div class="mb-2">
+                <div class="text-muted-foreground mb-1">Own comments:</div>
+                <ul class="space-y-0.5 text-amber-600/70 dark:text-amber-400/70">
+                  {#each debug.filteredCommentChanges as change (change.key)}
+                    <li class="flex items-baseline gap-2">
+                      <span class="font-mono">{change.key}</span>
+                      <span class="opacity-70">+{change.newCommentCount} comment{change.newCommentCount !== 1 ? 's' : ''}</span>
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+
+            {#if debug.filteredAssigneeChanges.length > 0}
+              <div>
+                <div class="text-muted-foreground mb-1">Own reassignments:</div>
+                <ul class="space-y-0.5 text-amber-600/70 dark:text-amber-400/70">
+                  {#each debug.filteredAssigneeChanges as change (change.key)}
+                    <li class="flex items-baseline gap-2">
+                      <span class="font-mono">{change.key}</span>
+                      <span class="opacity-70">{change.previousAssignee ?? 'Unassigned'} → {change.currentAssignee ?? 'Unassigned'}</span>
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+          </div>
         {/if}
       </div>
     {/if}

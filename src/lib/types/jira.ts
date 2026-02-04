@@ -197,6 +197,37 @@ export interface JiraCommentField {
 }
 
 // ============================================
+// Changelog Types (for change tracking)
+// ============================================
+
+export interface JiraChangelogItem {
+  field: string;
+  fieldtype: string;
+  from: string | null;
+  fromString: string | null;
+  to: string | null;
+  toString: string | null;
+}
+
+export interface JiraChangelogEntry {
+  id: string;
+  author: JiraUser;
+  created: string;
+  items: JiraChangelogItem[];
+}
+
+export interface JiraChangelog {
+  startAt: number;
+  maxResults: number;
+  total: number;
+  histories: JiraChangelogEntry[];
+}
+
+export interface JiraIssueWithChangelog extends JiraIssue {
+  changelog?: JiraChangelog;
+}
+
+// ============================================
 // API Response Types
 // ============================================
 

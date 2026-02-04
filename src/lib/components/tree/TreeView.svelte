@@ -78,8 +78,9 @@
   );
 
   // Checkpoint data for display (directly from store - KISS)
+  // Hidden for queries excluded from change tracking
   const checkpoint = $derived(
-    routerState.activeQueryId && changeTrackingState.isEnabled
+    routerState.activeQueryId && changeTrackingState.isEnabled && !currentQuery?.excludeFromChangeTracking
       ? changeTrackingState.checkpoints[routerState.activeQueryId]
       : null
   );
@@ -467,8 +468,8 @@
     {/if}
   </div>
 
-  <!-- Change Summary Banner (hidden during loading) -->
-  {#if !issuesState.isLoading && changeTrackingState.isEnabled && changeTrackingState.currentChanges?.hasChanges}
+  <!-- Change Summary Banner (hidden during loading or for excluded queries) -->
+  {#if !issuesState.isLoading && changeTrackingState.isEnabled && changeTrackingState.currentChanges?.hasChanges && !currentQuery?.excludeFromChangeTracking}
     <ChangeSummary
       changes={changeTrackingState.currentChanges}
       onAcknowledge={handleSaveCheckpoint}

@@ -10,6 +10,7 @@ import type {
   JiraSearchResponse,
   JiraUser,
   JiraIssue,
+  JiraIssueWithChangelog,
   JiraFieldsResponse
 } from '../types';
 import { logger } from '../utils/logger';
@@ -383,6 +384,17 @@ export abstract class JiraClient {
     const allFields = fields || DEFAULT_FIELDS;
     const fieldsParam = allFields.join(',');
     return this.request<JiraIssue>('GET', `/issue/${issueKey}?fields=${fieldsParam}`);
+  }
+
+  /**
+   * Get a single issue with changelog (for change tracking author detection)
+   * Returns minimal fields plus the changelog for checking who made the last change
+   */
+  async getIssueWithChangelog(issueKey: string): Promise<JiraIssueWithChangelog> {
+    return this.request<JiraIssueWithChangelog>(
+      'GET',
+      `/issue/${issueKey}?expand=changelog&fields=key,summary`
+    );
   }
 
   /**
