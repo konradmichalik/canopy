@@ -635,7 +635,9 @@ export async function filterOwnChanges(
         if (matchingItem) {
           const authorId = getUserIdentifier(history.author);
           if (debugModeState.enabled) {
-            logger.info(`🔍 [${issueKey}] Found "${fieldName}" change by: ${history.author?.displayName} (${authorId})`);
+            logger.info(
+              `🔍 [${issueKey}] Found "${fieldName}" change by: ${history.author?.displayName} (${authorId})`
+            );
           }
           return authorId;
         }
@@ -643,7 +645,9 @@ export async function filterOwnChanges(
       if (debugModeState.enabled) {
         // Log what fields were found instead
         const allFields = histories.flatMap((h) => h.items.map((i) => i.field));
-        logger.info(`🔍 [${issueKey}] No "${fieldName}" found in changelog. Available fields: ${[...new Set(allFields)].join(', ')}`);
+        logger.info(
+          `🔍 [${issueKey}] No "${fieldName}" found in changelog. Available fields: ${[...new Set(allFields)].join(', ')}`
+        );
       }
       return null;
     }
@@ -658,7 +662,9 @@ export async function filterOwnChanges(
     }
 
     if (debugModeState.enabled && keysNeedingChangelog.size > 0) {
-      logger.info(`🔍 Fetching changelogs for ${keysNeedingChangelog.size} issues to check own changes...`);
+      logger.info(
+        `🔍 Fetching changelogs for ${keysNeedingChangelog.size} issues to check own changes...`
+      );
       logger.info(`🔍 Current user ID: ${currentUserId}`);
     }
 
@@ -703,7 +709,9 @@ export async function filterOwnChanges(
       const isOwn = authorId === currentUserId;
 
       if (debugModeState.enabled) {
-        logger.info(`🔍 [${change.key}] Status change author: ${authorId}, currentUser: ${currentUserId}, isOwn: ${isOwn}`);
+        logger.info(
+          `🔍 [${change.key}] Status change author: ${authorId}, currentUser: ${currentUserId}, isOwn: ${isOwn}`
+        );
       }
 
       if (isOwn) {
@@ -719,7 +727,9 @@ export async function filterOwnChanges(
       const isOwn = authorId === currentUserId;
 
       if (debugModeState.enabled) {
-        logger.info(`🔍 [${change.key}] Assignee change author: ${authorId}, currentUser: ${currentUserId}, isOwn: ${isOwn}`);
+        logger.info(
+          `🔍 [${change.key}] Assignee change author: ${authorId}, currentUser: ${currentUserId}, isOwn: ${isOwn}`
+        );
       }
 
       if (isOwn) {

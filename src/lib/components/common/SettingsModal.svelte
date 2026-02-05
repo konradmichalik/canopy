@@ -611,7 +611,11 @@
         <!-- Import/Export -->
         <div class="pt-3 border-t space-y-3">
           <div class="flex gap-3">
-            <Button variant="outline" class="flex-1 justify-start gap-2" onclick={handleImportClick}>
+            <Button
+              variant="outline"
+              class="flex-1 justify-start gap-2"
+              onclick={handleImportClick}
+            >
               <AtlaskitIcon name="upload" size={16} />
               Import
             </Button>
