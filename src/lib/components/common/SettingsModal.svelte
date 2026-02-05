@@ -347,57 +347,55 @@
         </div>
 
         {#if !minimal}
-          <div class="grid grid-cols-2 gap-4">
-            <!-- Display Density -->
-            <div class="space-y-2">
-              <span class="text-sm font-medium">Display Density</span>
-              <p class="text-xs text-muted-foreground">Spacing between tree items</p>
-              <div class="flex gap-1">
-                <button
-                  onclick={() => handleDensityChange('comfortable')}
-                  class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
-                    {displayDensityState.density === 'comfortable'
-                    ? 'bg-accent text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-accent'}"
-                >
-                  Comfortable
-                </button>
-                <button
-                  onclick={() => handleDensityChange('compact')}
-                  class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
-                    {displayDensityState.density === 'compact'
-                    ? 'bg-accent text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-accent'}"
-                >
-                  Compact
-                </button>
-              </div>
+          <!-- Display Density -->
+          <div class="space-y-2">
+            <span class="text-sm font-medium">Display Density</span>
+            <p class="text-xs text-muted-foreground">Spacing between tree items</p>
+            <div class="flex gap-1">
+              <button
+                onclick={() => handleDensityChange('comfortable')}
+                class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
+                  {displayDensityState.density === 'comfortable'
+                  ? 'bg-accent text-primary font-medium'
+                  : 'text-muted-foreground hover:bg-accent'}"
+              >
+                Comfortable
+              </button>
+              <button
+                onclick={() => handleDensityChange('compact')}
+                class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
+                  {displayDensityState.density === 'compact'
+                  ? 'bg-accent text-primary font-medium'
+                  : 'text-muted-foreground hover:bg-accent'}"
+              >
+                Compact
+              </button>
             </div>
+          </div>
 
-            <!-- Date Format -->
-            <div class="space-y-2">
-              <span class="text-sm font-medium">Date Format</span>
-              <p class="text-xs text-muted-foreground">Exact timestamps or relative time</p>
-              <div class="flex gap-1">
-                <button
-                  onclick={() => handleDateFormatChange('absolute')}
-                  class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
-                    {dateFormatState.format === 'absolute'
-                    ? 'bg-accent text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-accent'}"
-                >
-                  Absolute
-                </button>
-                <button
-                  onclick={() => handleDateFormatChange('relative')}
-                  class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
-                    {dateFormatState.format === 'relative'
-                    ? 'bg-accent text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-accent'}"
-                >
-                  Relative
-                </button>
-              </div>
+          <!-- Date Format -->
+          <div class="space-y-2">
+            <span class="text-sm font-medium">Date Format</span>
+            <p class="text-xs text-muted-foreground">Exact timestamps or relative time</p>
+            <div class="flex gap-1">
+              <button
+                onclick={() => handleDateFormatChange('absolute')}
+                class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
+                  {dateFormatState.format === 'absolute'
+                  ? 'bg-accent text-primary font-medium'
+                  : 'text-muted-foreground hover:bg-accent'}"
+              >
+                Absolute
+              </button>
+              <button
+                onclick={() => handleDateFormatChange('relative')}
+                class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
+                  {dateFormatState.format === 'relative'
+                  ? 'bg-accent text-primary font-medium'
+                  : 'text-muted-foreground hover:bg-accent'}"
+              >
+                Relative
+              </button>
             </div>
           </div>
         {/if}
@@ -406,38 +404,36 @@
       {#if !minimal}
         <!-- Behavior Tab -->
         <Tabs.Content value="behavior" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <!-- Auto-Refresh -->
-            <div class="space-y-2">
-              <span class="text-sm font-medium">Auto-Refresh</span>
-              <p class="text-xs text-muted-foreground">Reload issues automatically</p>
-              <div class="flex gap-1">
-                {#each AUTO_REFRESH_OPTIONS as option (option.value)}
-                  <button
-                    onclick={() => handleAutoRefreshChange(option.value)}
-                    class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
-                      {autoRefreshState.interval === option.value
-                      ? 'bg-accent text-primary font-medium'
-                      : 'text-muted-foreground hover:bg-accent'}"
-                  >
-                    {option.label}
-                  </button>
-                {/each}
-              </div>
-            </div>
-
-            <!-- Debug Mode -->
-            <div class="space-y-2">
-              <span class="text-sm font-medium">Debug Mode</span>
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-muted-foreground"
-                  >Log API calls and store changes to console</span
+          <!-- Auto-Refresh -->
+          <div class="space-y-2">
+            <span class="text-sm font-medium">Auto-Refresh</span>
+            <p class="text-xs text-muted-foreground">Reload issues automatically</p>
+            <div class="flex gap-1">
+              {#each AUTO_REFRESH_OPTIONS as option (option.value)}
+                <button
+                  onclick={() => handleAutoRefreshChange(option.value)}
+                  class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
+                    {autoRefreshState.interval === option.value
+                    ? 'bg-accent text-primary font-medium'
+                    : 'text-muted-foreground hover:bg-accent'}"
                 >
-                <Switch
-                  checked={debugModeState.enabled}
-                  onCheckedChange={(checked) => setDebugMode(checked)}
-                />
-              </div>
+                  {option.label}
+                </button>
+              {/each}
+            </div>
+          </div>
+
+          <!-- Debug Mode -->
+          <div class="space-y-2">
+            <span class="text-sm font-medium">Debug Mode</span>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-muted-foreground"
+                >Log API calls and store changes to console</span
+              >
+              <Switch
+                checked={debugModeState.enabled}
+                onCheckedChange={(checked) => setDebugMode(checked)}
+              />
             </div>
           </div>
 
@@ -595,15 +591,15 @@
       <!-- Data Tab -->
       <Tabs.Content value="data" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
         <!-- Current Data Info -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+        <div class="flex gap-3">
+          <div class="flex-1 flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <AtlaskitIcon name="search" size={18} class="text-muted-foreground" />
             <div>
               <p class="text-lg font-semibold">{queryCount}</p>
               <p class="text-xs text-muted-foreground">Saved Queries</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+          <div class="flex-1 flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <AtlaskitIcon name="person" size={18} class="text-muted-foreground" />
             <div>
               <p class="text-lg font-semibold">{connectionState.isConnected ? 1 : 0}</p>
@@ -614,14 +610,14 @@
 
         <!-- Import/Export -->
         <div class="pt-3 border-t space-y-3">
-          <div class="grid grid-cols-2 gap-3">
-            <Button variant="outline" class="justify-start gap-2" onclick={handleImportClick}>
+          <div class="flex gap-3">
+            <Button variant="outline" class="flex-1 justify-start gap-2" onclick={handleImportClick}>
               <AtlaskitIcon name="upload" size={16} />
               Import
             </Button>
 
             {#if !minimal}
-              <Button variant="outline" class="justify-start gap-2" onclick={handleExport}>
+              <Button variant="outline" class="flex-1 justify-start gap-2" onclick={handleExport}>
                 <AtlaskitIcon name="download" size={16} />
                 Export
               </Button>
@@ -694,13 +690,13 @@
         </div>
 
         <div class="pt-3 border-t">
-          <div class="grid grid-cols-2 gap-3">
-            <Button variant="outline" class="justify-start gap-2" onclick={handleHelpClick}>
+          <div class="flex gap-3">
+            <Button variant="outline" class="flex-1 justify-start gap-2" onclick={handleHelpClick}>
               <AtlaskitIcon name="video-play" size={16} />
               Feature Guide
             </Button>
 
-            <Button variant="outline" class="justify-start gap-2" onclick={handleAboutClick}>
+            <Button variant="outline" class="flex-1 justify-start gap-2" onclick={handleAboutClick}>
               <AtlaskitIcon name="status-information" size={16} />
               About Canopy
             </Button>
@@ -727,7 +723,7 @@
             </div>
 
             <!-- Connection Details -->
-            <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-3">
               <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">Jira URL</p>
                 <p class="text-sm truncate">{connectionState.config?.baseUrl}</p>
