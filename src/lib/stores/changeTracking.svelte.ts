@@ -284,10 +284,7 @@ export function setStaleCheckpointDays(days: StaleCheckpointDays): void {
  * Check if a checkpoint is stale (older than configured threshold)
  */
 export function isCheckpointStale(queryId: string): boolean {
-  if (
-    !changeTrackingState.isEnabled ||
-    changeTrackingState.staleCheckpointDays === 'off'
-  ) {
+  if (!changeTrackingState.isEnabled || changeTrackingState.staleCheckpointDays === 'off') {
     return false;
   }
 
@@ -742,9 +739,7 @@ export async function filterOwnChanges(
     }
 
     if (debugModeState.enabled) {
-      logger.info(
-        `🔍 Own change cache: ${cacheHits} hits, ${keysNeedingFetch.size} misses`
-      );
+      logger.info(`🔍 Own change cache: ${cacheHits} hits, ${keysNeedingFetch.size} misses`);
       if (keysNeedingFetch.size > 0) {
         logger.info(`🔍 Current user ID: ${currentUserId}`);
       }
