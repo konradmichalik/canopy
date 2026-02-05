@@ -975,6 +975,14 @@ export function clearCheckpoint(queryId: string): void {
 }
 
 /**
+ * Clear current changes (used when switching queries)
+ */
+export function clearCurrentChanges(): void {
+  changeTrackingState.currentChanges = null;
+  invalidateChangeLookupCache();
+}
+
+/**
  * Clear all checkpoints
  */
 export function clearAllCheckpoints(): void {

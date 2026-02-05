@@ -34,7 +34,8 @@
   import {
     changeTrackingState,
     saveCheckpoint,
-    getTotalChangeCount
+    getTotalChangeCount,
+    clearCurrentChanges
   } from '../../stores/changeTracking.svelte';
   import { formatRelativeTime, formatDateTime } from '../../utils/formatDate';
   import { autoRefreshState } from '../../stores/autoRefresh.svelte';
@@ -221,8 +222,18 @@
     return () => clearInterval(interval);
   });
 
+  // Clear current changes when switching queries
+  $effect(() => {
+    const queryId = routerState.activeQueryId;
+    // Clear changes immediately when query changes
+    clearCurrentChanges();
+    // Track queryId to trigger effect on change
+    void queryId;
+  });
+
   // Update document title and favicon based on current query and change tracking status
   $effect(() => {
+    const queryId = currentQuery?.id;
     const queryTitle = currentQuery?.title;
     const hasChanges = changeTrackingState.currentChanges?.hasChanges ?? false;
     const changeCount = getTotalChangeCount();
@@ -235,7 +246,12 @@
     }
 
     // Update favicon badge (and Tauri dock badge with count)
-    setFaviconBadge(hasChanges, changeCount);
+    // Only show badge if change tracking is enabled and this query has changes
+    const showBadge = changeTrackingState.isEnabled && hasChanges;
+    setFaviconBadge(showBadge, showBadge ? changeCount : 0);
+
+    // Track queryId to ensure effect re-runs on query change
+    void queryId;
 
     // Reset when component unmounts
     return () => {
