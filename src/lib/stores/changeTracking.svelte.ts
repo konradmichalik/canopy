@@ -617,7 +617,38 @@ export async function filterOwnChanges(
     const filteredStatusChanges: StatusChange[] = [];
     const filteredAssigneeChanges: AssigneeChange[] = [];
 
-    // Collect all keys that need changelog check
+    // Helper to find the most recent changelog entry that changed a specific field
+    function findChangeAuthor(
+      histories: Array<{
+        id: string;
+        author: JiraUser;
+        created: string;
+        items: Array<{ field: string }>;
+      }>,
+      fieldName: string,
+      issueKey: string
+    ): string | null {
+      for (const history of histories) {
+        const matchingItem = history.items.find(
+          (item) => item.field.toLowerCase() === fieldName.toLowerCase()
+        );
+        if (matchingItem) {
+          const authorId = getUserIdentifier(history.author);
+          if (debugModeState.enabled) {
+            logger.info(`🔍 [${issueKey}] Found "${fieldName}" change by: ${history.author?.displayName} (${authorId})`);
+          }
+          return authorId;
+        }
+      }
+      if (debugModeState.enabled) {
+        // Log what fields were found instead
+        const allFields = histories.flatMap((h) => h.items.map((i) => i.field));
+        logger.info(`🔍 [${issueKey}] No "${fieldName}" found in changelog. Available fields: ${[...new Set(allFields)].join(', ')}`);
+      }
+      return null;
+    }
+
+    // Collect all unique keys that need changelog check
     const keysNeedingChangelog = new Set<string>();
     for (const change of changes.statusChanges) {
       keysNeedingChangelog.add(change.key);
@@ -626,58 +657,54 @@ export async function filterOwnChanges(
       keysNeedingChangelog.add(change.key);
     }
 
-    // Check each issue's changelog (sequentially to avoid rate limiting)
-    const changelogAuthors = new Map<string, string | null>();
+    if (debugModeState.enabled && keysNeedingChangelog.size > 0) {
+      logger.info(`🔍 Fetching changelogs for ${keysNeedingChangelog.size} issues to check own changes...`);
+      logger.info(`🔍 Current user ID: ${currentUserId}`);
+    }
+
+    // Fetch changelogs and store authors per field type
+    const statusAuthors = new Map<string, string | null>();
+    const assigneeAuthors = new Map<string, string | null>();
 
     for (const key of keysNeedingChangelog) {
-      // Check cache first
-      const cached = changeTrackingState.ownChangeCache[key];
-      if (cached) {
-        changelogAuthors.set(key, cached.isOwnChange ? currentUserId : 'other');
-        continue;
-      }
-
       try {
         // Small delay to avoid rate limiting
-        if (changelogAuthors.size > 0) {
+        if (statusAuthors.size > 0 || assigneeAuthors.size > 0) {
           await new Promise((resolve) => setTimeout(resolve, 50));
         }
 
         const issueWithChangelog = await fetcher.getIssueWithChangelog(key);
-        const latestHistory = issueWithChangelog.changelog?.histories?.[0];
+        const histories = issueWithChangelog.changelog?.histories ?? [];
 
-        if (latestHistory) {
-          const authorId = getUserIdentifier(latestHistory.author);
-          changelogAuthors.set(key, authorId);
+        if (debugModeState.enabled) {
+          logger.info(`🔍 [${key}] Changelog has ${histories.length} entries`);
+        }
 
-          // Cache the result
-          changeTrackingState.ownChangeCache = {
-            ...changeTrackingState.ownChangeCache,
-            [key]: {
-              changelogId: latestHistory.id,
-              isOwnChange: authorId === currentUserId,
-              checkedAt: new Date().toISOString()
-            }
-          };
-        } else {
-          changelogAuthors.set(key, null);
+        // Find author of status change (if any)
+        if (changes.statusChanges.some((c) => c.key === key)) {
+          statusAuthors.set(key, findChangeAuthor(histories, 'status', key));
+        }
+
+        // Find author of assignee change (if any)
+        if (changes.assigneeChanges.some((c) => c.key === key)) {
+          assigneeAuthors.set(key, findChangeAuthor(histories, 'assignee', key));
         }
       } catch (error) {
         // Fail-open: keep the change if we can't check
         logger.warn(`Failed to fetch changelog for ${key}`, error);
-        changelogAuthors.set(key, null);
+        statusAuthors.set(key, null);
+        assigneeAuthors.set(key, null);
       }
     }
 
-    // Persist cache after all checks
-    if (keysNeedingChangelog.size > 0) {
-      persistOwnChangeCache();
-    }
-
-    // Filter status changes
+    // Filter status changes based on who made the status change
     for (const change of changes.statusChanges) {
-      const authorId = changelogAuthors.get(change.key);
+      const authorId = statusAuthors.get(change.key);
       const isOwn = authorId === currentUserId;
+
+      if (debugModeState.enabled) {
+        logger.info(`🔍 [${change.key}] Status change author: ${authorId}, currentUser: ${currentUserId}, isOwn: ${isOwn}`);
+      }
 
       if (isOwn) {
         ownStatusChanges.push(change);
@@ -686,10 +713,14 @@ export async function filterOwnChanges(
       }
     }
 
-    // Filter assignee changes
+    // Filter assignee changes based on who made the assignee change
     for (const change of changes.assigneeChanges) {
-      const authorId = changelogAuthors.get(change.key);
+      const authorId = assigneeAuthors.get(change.key);
       const isOwn = authorId === currentUserId;
+
+      if (debugModeState.enabled) {
+        logger.info(`🔍 [${change.key}] Assignee change author: ${authorId}, currentUser: ${currentUserId}, isOwn: ${isOwn}`);
+      }
 
       if (isOwn) {
         ownAssigneeChanges.push(change);

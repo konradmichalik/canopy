@@ -11,6 +11,7 @@ import type {
   JiraUser,
   JiraIssue,
   JiraIssueWithChangelog,
+  JiraChangelog,
   JiraFieldsResponse
 } from '../types';
 import { logger } from '../utils/logger';
@@ -391,10 +392,20 @@ export abstract class JiraClient {
    * Returns minimal fields plus the changelog for checking who made the last change
    */
   async getIssueWithChangelog(issueKey: string): Promise<JiraIssueWithChangelog> {
-    return this.request<JiraIssueWithChangelog>(
+    const result = await this.request<JiraIssueWithChangelog>(
       'GET',
       `/issue/${issueKey}?expand=changelog&fields=key,summary`
     );
+
+    // Debug: Log raw changelog data
+    logger.debug(`Changelog for ${issueKey}:`, {
+      hasChangelog: !!result.changelog,
+      maxResults: result.changelog?.maxResults,
+      total: result.changelog?.total,
+      historiesCount: result.changelog?.histories?.length
+    });
+
+    return result;
   }
 
   /**

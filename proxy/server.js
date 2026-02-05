@@ -108,7 +108,9 @@ app.get('/jira-image', async (req, res) => {
 // Proxy all /jira/* requests
 app.all('/jira/*', async (req, res) => {
   const path = req.path.replace('/jira', '');
-  const targetUrl = `${JIRA_BASE_URL}${path}`;
+  // Include query parameters in the target URL
+  const queryString = req.originalUrl.includes('?') ? req.originalUrl.substring(req.originalUrl.indexOf('?')) : '';
+  const targetUrl = `${JIRA_BASE_URL}${path}${queryString}`;
 
   console.log(`\n[Proxy] ${req.method} ${path}`);
   console.log(`[Proxy] → ${targetUrl}`);
