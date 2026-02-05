@@ -1,7 +1,6 @@
 <script lang="ts">
   import AtlaskitIcon from './AtlaskitIcon.svelte';
   import Tooltip from './Tooltip.svelte';
-  import AboutModal from './AboutModal.svelte';
   import FlashMessage from './FlashMessage.svelte';
   import ConfirmModal from './ConfirmModal.svelte';
   import * as Dialog from '$lib/components/ui/dialog';
@@ -81,7 +80,6 @@
 
   let open = $state(false);
   let activeTab = $state('appearance');
-  let showAboutModal = $state(false);
   let showDisconnectModal = $state(false);
   let showClearCacheModal = $state(false);
   let keepFlagsOnClear = $state(true);
@@ -206,11 +204,6 @@
     setTimeout(() => {
       importMessage = null;
     }, 4000);
-  }
-
-  function handleAboutClick(): void {
-    showAboutModal = true;
-    open = false;
   }
 
   function handleHelpClick(): void {
@@ -734,17 +727,10 @@
         </div>
 
         <div class="pt-3 border-t">
-          <div class="flex gap-3">
-            <Button variant="outline" class="flex-1 justify-start gap-2" onclick={handleHelpClick}>
-              <AtlaskitIcon name="video-play" size={16} />
-              Feature Guide
-            </Button>
-
-            <Button variant="outline" class="flex-1 justify-start gap-2" onclick={handleAboutClick}>
-              <AtlaskitIcon name="status-information" size={16} />
-              About Canopy
-            </Button>
-          </div>
+          <Button variant="outline" class="justify-start gap-2" onclick={handleHelpClick}>
+            <AtlaskitIcon name="video-play" size={16} />
+            Feature Guide
+          </Button>
         </div>
       </Tabs.Content>
 
@@ -823,9 +809,6 @@
 />
 
 <FlashMessage message={importMessage} />
-
-<!-- About Modal -->
-<AboutModal bind:open={showAboutModal} onClose={() => (showAboutModal = false)} />
 
 <!-- Disconnect Confirmation Modal -->
 <ConfirmModal

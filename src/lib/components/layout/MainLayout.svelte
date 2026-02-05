@@ -5,6 +5,7 @@
   import SidebarResizer from './SidebarResizer.svelte';
   import TreeView from '../tree/TreeView.svelte';
   import SettingsModal from '../common/SettingsModal.svelte';
+  import AboutModal from '../common/AboutModal.svelte';
   import Avatar from '../common/Avatar.svelte';
   import Logo from '../common/Logo.svelte';
   import HelpModal from '../help/HelpModal.svelte';
@@ -19,6 +20,8 @@
   );
   const queryTitle = $derived(activeQuery?.title || null);
   const isLoading = $derived(connectionState.isConnecting || issuesState.isLoading);
+
+  let showAboutModal = $state(false);
 </script>
 
 <svelte:head>
@@ -73,6 +76,14 @@
           </div>
           <div class="h-4 w-px bg-border"></div>
         {/if}
+        <Tooltip text="About">
+          <button
+            onclick={() => (showAboutModal = true)}
+            class="inline-flex items-center justify-center size-9 rounded-md hover:bg-accent text-muted-foreground"
+          >
+            <AtlaskitIcon name="question-circle" size={20} />
+          </button>
+        </Tooltip>
         <SettingsModal />
       </div>
     </div>
@@ -126,3 +137,4 @@
 </div>
 
 <HelpModal />
+<AboutModal bind:open={showAboutModal} onClose={() => (showAboutModal = false)} />
