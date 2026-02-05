@@ -12,7 +12,8 @@
     downloadConfig,
     readConfigFile,
     importConfig,
-    clearTemporaryData
+    clearTemporaryData,
+    getCacheSize
   } from '../../utils/storage';
   import { initializeQueries, getQueries } from '../../stores/jql.svelte';
   import { Checkbox } from '$lib/components/ui/checkbox';
@@ -87,8 +88,18 @@
   let fileInput: HTMLInputElement;
   let importMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
   let includeCredentials = $state(true);
+  let cacheSize = $state<string>('...');
 
   const queryCount = $derived(getQueries().length);
+
+  // Load cache size when modal opens
+  $effect(() => {
+    if (open && activeTab === 'data') {
+      getCacheSize().then(({ formatted }) => {
+        cacheSize = formatted;
+      });
+    }
+  });
 
   function handleThemeChange(theme: Theme): void {
     setTheme(theme);
@@ -215,6 +226,9 @@
     const cleared = await clearTemporaryData({ keepFlags: keepFlagsOnClear });
     showMessage('success', `Cache cleared (${cleared} items removed)`);
     showClearCacheModal = false;
+    // Update cache size display
+    const { formatted } = await getCacheSize();
+    cacheSize = formatted;
   }
 </script>
 
@@ -619,20 +633,11 @@
       <!-- Data Tab -->
       <Tabs.Content value="data" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
         <!-- Current Data Info -->
-        <div class="flex gap-3">
-          <div class="flex-1 flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <AtlaskitIcon name="search" size={18} class="text-muted-foreground" />
-            <div>
-              <p class="text-lg font-semibold">{queryCount}</p>
-              <p class="text-xs text-muted-foreground">Saved Queries</p>
-            </div>
-          </div>
-          <div class="flex-1 flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <AtlaskitIcon name="person" size={18} class="text-muted-foreground" />
-            <div>
-              <p class="text-lg font-semibold">{connectionState.isConnected ? 1 : 0}</p>
-              <p class="text-xs text-muted-foreground">Connection</p>
-            </div>
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+          <AtlaskitIcon name="search" size={18} class="text-muted-foreground" />
+          <div>
+            <p class="text-lg font-semibold">{queryCount}</p>
+            <p class="text-xs text-muted-foreground">Saved Queries</p>
           </div>
         </div>
 
@@ -667,6 +672,13 @@
         <!-- Clear Cache -->
         {#if !minimal}
           <div class="pt-3 border-t space-y-3">
+            <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+              <AtlaskitIcon name="folder" size={18} class="text-muted-foreground" />
+              <div>
+                <p class="text-lg font-semibold">{cacheSize}</p>
+                <p class="text-xs text-muted-foreground">Cache Size</p>
+              </div>
+            </div>
             <div class="space-y-1">
               <span class="text-sm font-medium">Clear Cache</span>
               <p class="text-xs text-muted-foreground">

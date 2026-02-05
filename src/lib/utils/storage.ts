@@ -324,6 +324,66 @@ export async function getTemporaryDataInfo(): Promise<{ key: string; hasData: bo
 }
 
 /**
+ * Calculate total size of cached/temporary data in bytes
+ * Returns size in bytes and formatted string
+ */
+export async function getCacheSize(): Promise<{ bytes: number; formatted: string }> {
+  let totalBytes = 0;
+
+  for (const key of TEMPORARY_STORAGE_KEYS) {
+    const fullKey = `${STORAGE_PREFIX}${key}`;
+
+    if (isTauri()) {
+      try {
+        const store = await getTauriStore();
+        const value = await store.get(fullKey);
+        if (value !== null && value !== undefined) {
+          totalBytes += JSON.stringify(value).length * 2; // UTF-16 = 2 bytes per char
+        }
+      } catch {
+        // Ignore errors
+      }
+    } else {
+      const item = localStorage.getItem(fullKey);
+      if (item) {
+        totalBytes += item.length * 2; // UTF-16 = 2 bytes per char
+      }
+    }
+  }
+
+  // Also count flags
+  const flagsKey = `${STORAGE_PREFIX}${STORAGE_KEYS.FLAGS}`;
+  if (isTauri()) {
+    try {
+      const store = await getTauriStore();
+      const value = await store.get(flagsKey);
+      if (value !== null && value !== undefined) {
+        totalBytes += JSON.stringify(value).length * 2;
+      }
+    } catch {
+      // Ignore errors
+    }
+  } else {
+    const item = localStorage.getItem(flagsKey);
+    if (item) {
+      totalBytes += item.length * 2;
+    }
+  }
+
+  // Format size
+  let formatted: string;
+  if (totalBytes < 1024) {
+    formatted = `${totalBytes} B`;
+  } else if (totalBytes < 1024 * 1024) {
+    formatted = `${(totalBytes / 1024).toFixed(1)} KB`;
+  } else {
+    formatted = `${(totalBytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  return { bytes: totalBytes, formatted };
+}
+
+/**
  * Check if localStorage is available
  */
 export function isStorageAvailable(): boolean {
