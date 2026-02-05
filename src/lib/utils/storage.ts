@@ -60,6 +60,7 @@ export const STORAGE_KEYS = {
   CHANGE_TRACKING_SHOW_INDICATORS: 'change-tracking-show-indicators',
   CHANGE_TRACKING_EXCLUDE_OWN: 'change-tracking-exclude-own',
   CHANGE_TRACKING_OWN_CACHE: 'change-tracking-own-cache',
+  CHANGE_TRACKING_STALE_DAYS: 'change-tracking-stale-days',
   CUSTOM_FILTERS: 'custom-filters',
   UPDATE_LAST_CHECKED: 'update-last-checked',
   UPDATE_DISMISSED_VERSION: 'update-dismissed-version',

@@ -467,6 +467,21 @@ html.color-intensity-vivid[data-color-mode='dark'] {
   animation: fade-in 0.3s ease-out;
 }
 
+/* Subtle pulse animation for stale checkpoint alert */
+@keyframes pulse-subtle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
 /* Focus ring using Atlassian tokens */
 .focus-ring:focus {
   outline: 2px solid var(--ds-border-focused);

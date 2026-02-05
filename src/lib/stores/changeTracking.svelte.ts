@@ -26,6 +26,9 @@ import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage
 import { logger } from '../utils/logger';
 import { debugModeState } from './debugMode.svelte';
 
+// Stale checkpoint alert threshold type
+export type StaleCheckpointDays = 'off' | 1 | 3 | 5 | 7;
+
 // State container
 export const changeTrackingState = $state({
   isEnabled: false,
@@ -39,7 +42,9 @@ export const changeTrackingState = $state({
   ownChangeCache: {} as OwnChangeCache,
   isFilteringOwnChanges: false,
   // Debug: Filtered own changes (only populated when debug mode is enabled)
-  filteredOwnChangesDebug: null as FilteredOwnChangesDebug | null
+  filteredOwnChangesDebug: null as FilteredOwnChangesDebug | null,
+  // Stale checkpoint alert: highlight Check button when checkpoint is older than X days
+  staleCheckpointDays: 3 as StaleCheckpointDays
 });
 
 /**
@@ -119,6 +124,17 @@ export const ACTIVITY_PERIOD_OPTIONS: { value: ActivityPeriod; label: string }[]
 ];
 
 /**
+ * Stale checkpoint days options for UI
+ */
+export const STALE_CHECKPOINT_OPTIONS: { value: StaleCheckpointDays; label: string }[] = [
+  { value: 'off', label: 'Off' },
+  { value: 1, label: '1 day' },
+  { value: 3, label: '3 days' },
+  { value: 5, label: '5 days' },
+  { value: 7, label: '7 days' }
+];
+
+/**
  * Initialize change tracking from storage
  */
 export async function initializeChangeTracking(): Promise<void> {
@@ -129,7 +145,8 @@ export async function initializeChangeTracking(): Promise<void> {
     storedPendingChanges,
     storedShowIndicators,
     storedExcludeOwn,
-    storedOwnCache
+    storedOwnCache,
+    storedStaleDays
   ] = await Promise.all([
     getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_ENABLED),
     getStorageItemAsync<ActivityPeriod>(STORAGE_KEYS.CHANGE_TRACKING_ACTIVITY_PERIOD),
@@ -140,7 +157,8 @@ export async function initializeChangeTracking(): Promise<void> {
     ),
     getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_SHOW_INDICATORS),
     getStorageItemAsync<boolean>(STORAGE_KEYS.CHANGE_TRACKING_EXCLUDE_OWN),
-    getStorageItemAsync<OwnChangeCache>(STORAGE_KEYS.CHANGE_TRACKING_OWN_CACHE)
+    getStorageItemAsync<OwnChangeCache>(STORAGE_KEYS.CHANGE_TRACKING_OWN_CACHE),
+    getStorageItemAsync<StaleCheckpointDays>(STORAGE_KEYS.CHANGE_TRACKING_STALE_DAYS)
   ]);
 
   if (storedEnabled !== null) {
@@ -189,11 +207,16 @@ export async function initializeChangeTracking(): Promise<void> {
     changeTrackingState.ownChangeCache = storedOwnCache;
   }
 
+  if (storedStaleDays !== null) {
+    changeTrackingState.staleCheckpointDays = storedStaleDays;
+  }
+
   logger.store('changeTracking', 'Initialized', {
     isEnabled: changeTrackingState.isEnabled,
     activityPeriod: changeTrackingState.activityPeriod,
     showIndicators: changeTrackingState.showIndicators,
     excludeOwnChanges: changeTrackingState.excludeOwnChanges,
+    staleCheckpointDays: changeTrackingState.staleCheckpointDays,
     checkpointCount: Object.keys(changeTrackingState.checkpoints).length
   });
 }
@@ -246,6 +269,37 @@ export function setExcludeOwnChanges(enabled: boolean): void {
   }
 
   logger.store('changeTracking', 'Exclude own changes changed', { enabled });
+}
+
+/**
+ * Set stale checkpoint alert threshold (days)
+ */
+export function setStaleCheckpointDays(days: StaleCheckpointDays): void {
+  changeTrackingState.staleCheckpointDays = days;
+  saveStorage(STORAGE_KEYS.CHANGE_TRACKING_STALE_DAYS, days);
+  logger.store('changeTracking', 'Stale checkpoint days changed', { days });
+}
+
+/**
+ * Check if a checkpoint is stale (older than configured threshold)
+ */
+export function isCheckpointStale(queryId: string): boolean {
+  if (
+    !changeTrackingState.isEnabled ||
+    changeTrackingState.staleCheckpointDays === 'off'
+  ) {
+    return false;
+  }
+
+  const checkpoint = changeTrackingState.checkpoints[queryId];
+  if (!checkpoint) return false;
+
+  const checkpointDate = new Date(checkpoint.timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - checkpointDate.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+  return diffDays >= changeTrackingState.staleCheckpointDays;
 }
 
 /**

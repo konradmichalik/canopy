@@ -11,8 +11,9 @@
   import { formatDateTime, formatDateTimeWithSetting } from '../../utils/formatDate';
   import { getIssueUrl } from '../../stores/issues.svelte';
   import { openExternalUrl } from '../../utils/external-link';
-  import { changeTrackingState } from '../../stores/changeTracking.svelte';
+  import { changeTrackingState, isCheckpointStale } from '../../stores/changeTracking.svelte';
   import { debugModeState } from '../../stores/debugMode.svelte';
+  import { routerState } from '../../stores/router.svelte';
 
   interface Props {
     changes: ChangeDetection;
@@ -20,6 +21,11 @@
   }
 
   let { changes, onAcknowledge }: Props = $props();
+
+  // Check if checkpoint is stale (older than configured threshold)
+  const isStale = $derived(
+    routerState.activeQueryId ? isCheckpointStale(routerState.activeQueryId) : false
+  );
 
   let isExpanded = $state(false);
   let groupByIssue = $state(false);
@@ -164,14 +170,25 @@
             class="text-primary"
           />
         </button>
-        <Tooltip content="Acknowledge changes and save new checkpoint" placement="bottom">
+        <Tooltip
+          content={isStale
+            ? 'Checkpoint is overdue - click to acknowledge changes'
+            : 'Acknowledge changes and save new checkpoint'}
+          placement="bottom"
+        >
           <button
             type="button"
             onclick={onAcknowledge}
-            class="px-2 py-1 text-xs text-primary hover:bg-primary/10 rounded-full transition-colors flex items-center gap-1"
+            class="px-2 py-1 text-xs rounded-full transition-colors flex items-center gap-1
+              {isStale
+              ? 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-900 animate-pulse-subtle'
+              : 'text-primary hover:bg-primary/10'}"
           >
             <AtlaskitIcon name="check-circle" size={14} />
             Check
+            {#if isStale}
+              <span class="ml-0.5 size-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+            {/if}
           </button>
         </Tooltip>
       </div>

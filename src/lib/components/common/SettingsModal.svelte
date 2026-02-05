@@ -63,7 +63,10 @@
     setActivityPeriod,
     setShowIndicators,
     setExcludeOwnChanges,
-    ACTIVITY_PERIOD_OPTIONS
+    setStaleCheckpointDays,
+    ACTIVITY_PERIOD_OPTIONS,
+    STALE_CHECKPOINT_OPTIONS,
+    type StaleCheckpointDays
   } from '../../stores/changeTracking.svelte';
   import type { ActivityPeriod } from '../../types/changeTracking';
   import { openHelpModal } from '../../stores/helpModal.svelte';
@@ -125,6 +128,10 @@
 
   function handleActivityPeriodChange(period: ActivityPeriod): void {
     setActivityPeriod(period);
+  }
+
+  function handleStaleCheckpointDaysChange(days: StaleCheckpointDays): void {
+    setStaleCheckpointDays(days);
   }
 
   function handleExport(): void {
@@ -564,6 +571,27 @@
                 checked={changeTrackingState.showIndicators}
                 onCheckedChange={(checked) => setShowIndicators(checked)}
               />
+            </div>
+
+            <!-- Stale Checkpoint Alert -->
+            <div class="space-y-2 pt-3 border-t">
+              <span class="text-sm font-medium">Stale Checkpoint Alert</span>
+              <p class="text-xs text-muted-foreground">
+                Highlight the Check button when checkpoint is older than this
+              </p>
+              <div class="flex gap-1">
+                {#each STALE_CHECKPOINT_OPTIONS as option (option.value)}
+                  <button
+                    onclick={() => handleStaleCheckpointDaysChange(option.value)}
+                    class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md transition-colors
+                      {changeTrackingState.staleCheckpointDays === option.value
+                      ? 'bg-accent text-primary font-medium'
+                      : 'text-muted-foreground hover:bg-accent'}"
+                  >
+                    {option.label}
+                  </button>
+                {/each}
+              </div>
             </div>
 
             <!-- Exclude Own Changes (Experimental) -->
