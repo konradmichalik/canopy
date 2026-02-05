@@ -905,6 +905,21 @@ export function getIssueChangeType(issueKey: string): ChangeType {
 }
 
 /**
+ * Get total count of all changes (for badge display)
+ */
+export function getTotalChangeCount(): number {
+  const changes = changeTrackingState.currentChanges;
+  if (!changes) return 0;
+
+  return (
+    changes.newIssues.length +
+    changes.statusChanges.length +
+    changes.commentChanges.length +
+    changes.assigneeChanges.length
+  );
+}
+
+/**
  * Clear checkpoint for a query
  */
 export function clearCheckpoint(queryId: string): void {

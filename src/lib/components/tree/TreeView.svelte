@@ -31,7 +31,11 @@
   import { groupingState, groupIssues, type IssueGroup } from '../../stores/grouping.svelte';
   import { sortConfigState } from '../../stores/sortConfig.svelte';
   import { connectionState } from '../../stores/connection.svelte';
-  import { changeTrackingState, saveCheckpoint } from '../../stores/changeTracking.svelte';
+  import {
+    changeTrackingState,
+    saveCheckpoint,
+    getTotalChangeCount
+  } from '../../stores/changeTracking.svelte';
   import { formatRelativeTime, formatDateTime } from '../../utils/formatDate';
   import { autoRefreshState } from '../../stores/autoRefresh.svelte';
   import { openExternalUrl } from '../../utils/external-link';
@@ -221,6 +225,7 @@
   $effect(() => {
     const queryTitle = currentQuery?.title;
     const hasChanges = changeTrackingState.currentChanges?.hasChanges ?? false;
+    const changeCount = getTotalChangeCount();
 
     // Update document title
     if (queryTitle) {
@@ -229,8 +234,8 @@
       document.title = 'Canopy';
     }
 
-    // Update favicon badge
-    setFaviconBadge(hasChanges);
+    // Update favicon badge (and Tauri dock badge with count)
+    setFaviconBadge(hasChanges, changeCount);
 
     // Reset when component unmounts
     return () => {
