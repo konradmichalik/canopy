@@ -667,7 +667,7 @@ export async function filterOwnChanges(
       return !isOwn;
     });
 
-    // Filter status and assignee changes (need changelog API)
+    // Filter status and assignee changes (need changelog API - use cache when possible)
     const filteredStatusChanges: StatusChange[] = [];
     const filteredAssigneeChanges: AssigneeChange[] = [];
 
@@ -707,47 +707,89 @@ export async function filterOwnChanges(
     }
 
     // Collect all unique keys that need changelog check
-    const keysNeedingChangelog = new Set<string>();
+    const allKeysNeedingCheck = new Set<string>();
     for (const change of changes.statusChanges) {
-      keysNeedingChangelog.add(change.key);
+      allKeysNeedingCheck.add(change.key);
     }
     for (const change of changes.assigneeChanges) {
-      keysNeedingChangelog.add(change.key);
+      allKeysNeedingCheck.add(change.key);
     }
 
-    if (debugModeState.enabled && keysNeedingChangelog.size > 0) {
-      logger.info(
-        `🔍 Fetching changelogs for ${keysNeedingChangelog.size} issues to check own changes...`
-      );
-      logger.info(`🔍 Current user ID: ${currentUserId}`);
-    }
-
-    // Fetch changelogs and store authors per field type
+    // Check cache and separate into cached vs needs-fetch
     const statusAuthors = new Map<string, string | null>();
     const assigneeAuthors = new Map<string, string | null>();
+    const keysNeedingFetch = new Set<string>();
+    let cacheHits = 0;
 
-    for (const key of keysNeedingChangelog) {
+    for (const key of allKeysNeedingCheck) {
+      const issue = issueMap.get(key);
+      const cached = changeTrackingState.ownChangeCache[key];
+
+      // Cache is valid if issue's updated timestamp matches
+      if (cached && issue && cached.issueUpdated === issue.fields.updated) {
+        // Use cached values
+        if (changes.statusChanges.some((c) => c.key === key)) {
+          statusAuthors.set(key, cached.statusAuthorId);
+        }
+        if (changes.assigneeChanges.some((c) => c.key === key)) {
+          assigneeAuthors.set(key, cached.assigneeAuthorId);
+        }
+        cacheHits++;
+      } else {
+        // Need to fetch
+        keysNeedingFetch.add(key);
+      }
+    }
+
+    if (debugModeState.enabled) {
+      logger.info(
+        `🔍 Own change cache: ${cacheHits} hits, ${keysNeedingFetch.size} misses`
+      );
+      if (keysNeedingFetch.size > 0) {
+        logger.info(`🔍 Current user ID: ${currentUserId}`);
+      }
+    }
+
+    // Fetch changelogs only for cache misses
+    let cacheUpdated = false;
+    for (const key of keysNeedingFetch) {
       try {
         // Small delay to avoid rate limiting
-        if (statusAuthors.size > 0 || assigneeAuthors.size > 0) {
+        if (statusAuthors.size > cacheHits || assigneeAuthors.size > cacheHits) {
           await new Promise((resolve) => setTimeout(resolve, 50));
         }
 
         const issueWithChangelog = await fetcher.getIssueWithChangelog(key);
         const histories = issueWithChangelog.changelog?.histories ?? [];
+        const issue = issueMap.get(key);
 
         if (debugModeState.enabled) {
           logger.info(`🔍 [${key}] Changelog has ${histories.length} entries`);
         }
 
-        // Find author of status change (if any)
+        // Find authors for both fields (cache both even if only one changed)
+        const statusAuthorId = findChangeAuthor(histories, 'status', key);
+        const assigneeAuthorId = findChangeAuthor(histories, 'assignee', key);
+
+        // Store in result maps
         if (changes.statusChanges.some((c) => c.key === key)) {
-          statusAuthors.set(key, findChangeAuthor(histories, 'status', key));
+          statusAuthors.set(key, statusAuthorId);
+        }
+        if (changes.assigneeChanges.some((c) => c.key === key)) {
+          assigneeAuthors.set(key, assigneeAuthorId);
         }
 
-        // Find author of assignee change (if any)
-        if (changes.assigneeChanges.some((c) => c.key === key)) {
-          assigneeAuthors.set(key, findChangeAuthor(histories, 'assignee', key));
+        // Update cache
+        if (issue) {
+          changeTrackingState.ownChangeCache = {
+            ...changeTrackingState.ownChangeCache,
+            [key]: {
+              issueUpdated: issue.fields.updated,
+              statusAuthorId,
+              assigneeAuthorId
+            }
+          };
+          cacheUpdated = true;
         }
       } catch (error) {
         // Fail-open: keep the change if we can't check
@@ -755,6 +797,11 @@ export async function filterOwnChanges(
         statusAuthors.set(key, null);
         assigneeAuthors.set(key, null);
       }
+    }
+
+    // Persist cache if updated
+    if (cacheUpdated) {
+      persistOwnChangeCache();
     }
 
     // Filter status changes based on who made the status change

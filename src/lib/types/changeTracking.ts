@@ -133,12 +133,16 @@ export interface ChangeTrackingState {
 }
 
 /**
- * Cache entry for a checked own-change status
+ * Cache entry for checked own-change authors per field
+ * Stores the author of the most recent change for each field type
  */
 export interface OwnChangeCacheEntry {
-  changelogId: string; // ID of the last checked changelog entry
-  isOwnChange: boolean; // Whether it was the current user's change
-  checkedAt: string; // ISO timestamp when checked
+  /** Issue's updated timestamp when cached (for cache invalidation) */
+  issueUpdated: string;
+  /** Author ID of the most recent status change (null if not found) */
+  statusAuthorId: string | null;
+  /** Author ID of the most recent assignee change (null if not found) */
+  assigneeAuthorId: string | null;
 }
 
 /**
