@@ -56,6 +56,10 @@
     await openExternalUrl('https://github.com/konradmichalik/canopy');
   }
 
+  async function handleDocsClick() {
+    await openExternalUrl('https://konradmichalik.github.io/canopy/');
+  }
+
   async function handleUpdateClick() {
     if (update) {
       await openExternalUrl(update.releaseUrl);
@@ -103,11 +107,17 @@
         </div>
       </div>
 
-      <!-- GitHub Link -->
-      <Button variant="outline" size="sm" class="mb-4" onclick={handleGitHubClick}>
-        <AtlaskitIcon name="link" size={14} />
-        View on GitHub
-      </Button>
+      <!-- Links -->
+      <div class="flex gap-2 mb-4">
+        <Button variant="outline" size="sm" onclick={handleDocsClick}>
+          <AtlaskitIcon name="link-external" size={14} />
+          Documentation
+        </Button>
+        <Button variant="outline" size="sm" onclick={handleGitHubClick}>
+          <AtlaskitIcon name="link" size={14} />
+          GitHub
+        </Button>
+      </div>
 
       <!-- Copyright -->
       <p class="text-xs text-muted-foreground mb-4">
