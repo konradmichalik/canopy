@@ -17,7 +17,7 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "sync-version": "node scripts/sync-version.js",
-    "version": "npm run sync-version && git add src-tauri/tauri.conf.json",
+    "version": "npm run sync-version && git add src-tauri/tauri.conf.json src-tauri/Cargo.toml",
     "release": "node scripts/release.js",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
