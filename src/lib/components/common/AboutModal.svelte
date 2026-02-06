@@ -72,11 +72,9 @@
     <div class="flex flex-col items-center text-center py-4">
       <!-- Logo -->
       <div class="mb-4">
-        <Logo size="lg" showText={false} />
+        <Logo size="lg" showText={true} />
       </div>
 
-      <!-- App Name -->
-      <h2 class="text-xl font-semibold mb-1">Canopy</h2>
       <p class="text-sm text-muted-foreground mb-4">Hierarchical Jira Issue Viewer</p>
 
       <!-- Version Info -->
