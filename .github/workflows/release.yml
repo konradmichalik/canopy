@@ -49,6 +49,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Set version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Setting version to: $VERSION"
+          node -e "
+            const fs = require('fs');
+            const config = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf-8'));
+            config.version = '$VERSION';
+            fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(config, null, 2) + '\n');
+          "
+          cat src-tauri/tauri.conf.json | grep version
+
       - name: Build and Release
         uses: tauri-apps/tauri-action@v0
         env:
@@ -58,6 +70,8 @@ jobs:
           releaseName: ${{ github.ref_name }}
           releaseBody: |
             Download Canopy ${{ github.ref_name }}
+
+            📖 **Documentation:** https://konradmichalik.github.io/canopy/desktop/installation
 
             **macOS** (app is unsigned): Right-click the app → "Open" on first launch, or run:
             ```
