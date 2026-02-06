@@ -5,7 +5,7 @@ description: Learn what Canopy is and how it helps visualize Jira issues
 
 # Introduction
 
-Canopy is a hierarchical Jira issue viewer that displays tickets in a tree structure, making it easy to understand project structure and track progress across your team.
+Canopy is your Jira companion – combining tree visualization, powerful filters, flexible grouping, and real-time change tracking to help you understand project structure and track progress across your team.
 
 ## Why "Canopy"?
 
@@ -52,7 +52,7 @@ The **Desktop App** provides the simplest setup - no CORS proxy configuration ne
 |---------|-------------|
 | **Tree View** | Expand/collapse hierarchy with vim-style keyboard navigation |
 | **Filtering** | Quick filters, dynamic filters, saved presets, text search |
-| **Grouping** | By Sprint, Assignee, Status, Project, or Recency |
+| **Grouping** | By Sprint, Release, Assignee, Status, Project, or Recency |
 | **Change Tracking** | Checkpoint-based detection of new issues and status changes |
 | **Theming** | Light/dark mode with 6 customizable accent colors |
 | **Desktop App** | Native Tauri app without CORS proxy requirements |

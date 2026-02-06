@@ -2,7 +2,7 @@
   "name": "canopy",
   "private": true,
   "version": "1.0.0",
-  "description": "Canopy - Hierarchical JIRA Issue Viewer",
+  "description": "Canopy – Your Jira companion with tree visualization, powerful filters, grouping, and change tracking",
   "type": "module",
   "scripts": {
     "dev": "vite",

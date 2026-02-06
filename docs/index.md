@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Canopy
-  text: Hierarchical Jira Viewer
-  tagline: Visualize your Jira tickets in a tree structure with powerful filtering and grouping
+  text: Your Jira Companion
+  tagline: Tree visualization, powerful filters, grouping, and real-time change tracking
   image:
     light: /logo-hero.svg
     dark: /logo-hero-dark.svg

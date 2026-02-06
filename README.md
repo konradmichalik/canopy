@@ -1,11 +1,8 @@
 <p align="center">
   <img src="docs/images/canopy-logo.svg" alt="Canopy Logo" width="200" />
 </p>
-
-<h1 align="center">canopy</h1>
-
 <p align="center">
-  <strong>A hierarchical Jira issue viewer that displays tickets in a tree structure</strong>
+  <strong>Your Jira companion – tree visualization, powerful filters, grouping, and real-time change tracking</strong>
 </p>
 
 <p align="center">
