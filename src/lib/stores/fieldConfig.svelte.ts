@@ -44,6 +44,7 @@ export interface FieldConfigState {
 // ============================================
 
 export const DEFAULT_FIELD_IDS: DisplayFieldId[] = [
+  'blockingIndicator',
   'aggregatedTimeProgress',
   'status',
   'assignee',

@@ -22,8 +22,20 @@
   const tooltipText = $derived(getIndicatorTooltip(blockingState));
   const hasLinks = $derived(blockingState.isBlocked || blockingState.isBlocking);
 
+  // Red for actively blocked, gray for resolved blockers only, yellow for blocking others
   const iconColor = $derived(
-    blockingState.isBlocked ? 'var(--ds-icon-danger)' : 'var(--ds-icon-warning)'
+    blockingState.isActivelyBlocked
+      ? 'var(--ds-text-danger)'
+      : blockingState.isBlocked
+        ? 'var(--ds-text-subtlest)'
+        : 'var(--ds-text-warning)'
+  );
+
+  // Resolved blockers (not active)
+  const resolvedBlockers = $derived(
+    blockingState.blockedByIssues.filter(
+      (i) => !blockingState.activeBlockedByIssues.some((a) => a.key === i.key)
+    )
   );
 
   function openLinkedIssue(key: string): void {
@@ -61,12 +73,24 @@
     </DropdownMenu.Trigger>
 
     <DropdownMenu.Content align="start" class="min-w-[280px] max-w-[400px]">
-      {#if blockingState.blockedByIssues.length > 0}
+      {#if blockingState.activeBlockedByIssues.length > 0}
         <DropdownMenu.Label class="flex items-center gap-1.5 text-[var(--ds-text-danger)]">
-          <AtlaskitIcon name="link" size={12} color="var(--ds-icon-danger)" />
-          Blocked by ({blockingState.blockedByIssues.length})
+          <AtlaskitIcon name="link" size={12} color="var(--ds-text-danger)" />
+          Blocked by ({blockingState.activeBlockedByIssues.length})
         </DropdownMenu.Label>
-        {@render issueList(blockingState.blockedByIssues)}
+        {@render issueList(blockingState.activeBlockedByIssues)}
+      {/if}
+
+      {#if blockingState.activeBlockedByIssues.length > 0 && resolvedBlockers.length > 0}
+        <DropdownMenu.Separator />
+      {/if}
+
+      {#if resolvedBlockers.length > 0}
+        <DropdownMenu.Label class="flex items-center gap-1.5 text-[var(--ds-text-subtlest)]">
+          <AtlaskitIcon name="check-circle" size={12} color="var(--ds-text-subtlest)" />
+          Resolved blockers ({resolvedBlockers.length})
+        </DropdownMenu.Label>
+        {@render issueList(resolvedBlockers)}
       {/if}
 
       {#if blockingState.blockedByIssues.length > 0 && blockingState.blockingIssues.length > 0}
@@ -74,8 +98,8 @@
       {/if}
 
       {#if blockingState.blockingIssues.length > 0}
-        <DropdownMenu.Label class="flex items-center gap-1.5 text-[var(--ds-text-warning-bold)]">
-          <AtlaskitIcon name="link" size={12} color="var(--ds-icon-warning)" />
+        <DropdownMenu.Label class="flex items-center gap-1.5 text-[var(--ds-text-warning)]">
+          <AtlaskitIcon name="link" size={12} color="var(--ds-text-warning)" />
           Blocks ({blockingState.blockingIssues.length})
         </DropdownMenu.Label>
         {@render issueList(blockingState.blockingIssues)}
