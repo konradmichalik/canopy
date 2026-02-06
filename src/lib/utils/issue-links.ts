@@ -131,9 +131,13 @@ export function getBlockingState(links: JiraIssueLink[] | undefined): BlockingSt
       if (!isDone(link.inwardIssue.fields.status)) {
         state.activeBlockedByIssues.push(linkedIssue);
         state.isActivelyBlocked = true;
-        logger.debug(`Active blocker found: ${link.inwardIssue.key} (status: ${link.inwardIssue.fields.status.name})`);
+        logger.debug(
+          `Active blocker found: ${link.inwardIssue.key} (status: ${link.inwardIssue.fields.status.name})`
+        );
       } else {
-        logger.debug(`Resolved blocker found: ${link.inwardIssue.key} (status: ${link.inwardIssue.fields.status.name})`);
+        logger.debug(
+          `Resolved blocker found: ${link.inwardIssue.key} (status: ${link.inwardIssue.fields.status.name})`
+        );
       }
     }
 
