@@ -41,7 +41,22 @@ Canopy visualizes Jira issues in a hierarchical tree view (Epic → Story → Ta
 | **[macOS App](https://konradmichalik.github.io/canopy/desktop/)** | Native desktop app | Not needed |
 | **Local** | Run from source | Required |
 
-### Quick Start (Local)
+### Homebrew (recommended for macOS)
+
+```bash
+brew tap konradmichalik/tap
+brew install --cask canopy
+```
+
+Updates via `brew upgrade --cask canopy`.
+
+### Manual Download
+
+Download the latest `.dmg` from [GitHub Releases](https://github.com/konradmichalik/canopy/releases).
+
+> The app is currently unsigned. On first launch: right-click the app and select "Open", or run `xattr -cr /Applications/Canopy.app`.
+
+### From Source
 
 ```bash
 git clone https://github.com/konradmichalik/canopy.git

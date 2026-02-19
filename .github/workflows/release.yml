@@ -74,10 +74,106 @@ jobs:
 
             📖 **Documentation:** https://konradmichalik.github.io/canopy/desktop/installation
 
-            **macOS** (app is unsigned): Right-click the app → "Open" on first launch, or run:
+            **macOS:** Right-click the app → "Open" on first launch, or install via Homebrew:
             ```
-            xattr -cr /Applications/Canopy.app
+            brew tap konradmichalik/tap
+            brew install --cask canopy
             ```
           releaseDraft: false
           prerelease: false
           args: --target ${{ matrix.target }}
+
+  update-homebrew:
+    needs: release
+    runs-on: macos-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for release assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          echo "Waiting for DMG assets on release ${TAG}..."
+          for i in $(seq 1 30); do
+            ASSETS=$(gh release view "$TAG" --json assets --jq '[.assets[].name | select(endswith(".dmg"))] | length')
+            if [ "$ASSETS" -ge 2 ]; then
+              echo "Both DMGs are available."
+              exit 0
+            fi
+            echo "Found ${ASSETS}/2 DMGs, waiting 30s... (attempt ${i}/30)"
+            sleep 30
+          done
+          echo "Timed out waiting for assets."
+          exit 1
+
+      - name: Download DMGs and compute SHA256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          gh release download "$TAG" --pattern "*_aarch64.dmg" --dir /tmp/dmg
+          gh release download "$TAG" --pattern "*_x64.dmg" --dir /tmp/dmg
+
+          SHA_ARM=$(shasum -a 256 /tmp/dmg/*_aarch64.dmg | awk '{print $1}')
+          SHA_INTEL=$(shasum -a 256 /tmp/dmg/*_x64.dmg | awk '{print $1}')
+
+          APP_VERSION=$(cat package.json | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
+
+          echo "SHA_ARM=${SHA_ARM}" >> "$GITHUB_ENV"
+          echo "SHA_INTEL=${SHA_INTEL}" >> "$GITHUB_ENV"
+          echo "APP_VERSION=${APP_VERSION}" >> "$GITHUB_ENV"
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
+
+          echo "ARM SHA256: ${SHA_ARM}"
+          echo "Intel SHA256: ${SHA_INTEL}"
+          echo "App version: ${APP_VERSION}"
+          echo "Tag: ${TAG}"
+
+      - name: Update Homebrew tap
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          CASK_CONTENT=$(cat <<RUBY
+          cask "canopy" do
+            version "${APP_VERSION},${TAG}"
+
+            on_arm do
+              url "https://github.com/konradmichalik/canopy/releases/download/#{version.after_comma}/Canopy_#{version.before_comma}_aarch64.dmg"
+              sha256 "${SHA_ARM}"
+            end
+
+            on_intel do
+              url "https://github.com/konradmichalik/canopy/releases/download/#{version.after_comma}/Canopy_#{version.before_comma}_x64.dmg"
+              sha256 "${SHA_INTEL}"
+            end
+
+            name "Canopy"
+            desc "Jira companion with tree visualization, powerful filters, grouping, and change tracking"
+            homepage "https://github.com/konradmichalik/canopy"
+
+            app "Canopy.app"
+
+            zap trash: [
+              "~/Library/Application Support/com.canopy.jira-viewer",
+              "~/Library/Caches/com.canopy.jira-viewer",
+            ]
+          end
+          RUBY
+          )
+
+          cd /tmp
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/konradmichalik/homebrew-tap.git"
+          cd homebrew-tap
+
+          echo "$CASK_CONTENT" > Casks/canopy.rb
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/canopy.rb
+          git commit -m "chore: update canopy to ${TAG}"
+          git push
