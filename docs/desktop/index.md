@@ -40,6 +40,15 @@ The desktop app is currently available for macOS only. Windows and Linux version
 
 ## Quick Install (macOS)
 
+### Homebrew (recommended)
+
+```bash
+brew tap konradmichalik/tap
+brew install --cask canopy
+```
+
+### Manual Download
+
 1. [Download the latest release](https://github.com/konradmichalik/canopy/releases/latest)
    - **Apple Silicon** (M1/M2/M3): `Canopy_x.x.x_aarch64.dmg`
    - **Intel**: `Canopy_x.x.x_x64.dmg`

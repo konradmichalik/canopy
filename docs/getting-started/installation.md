@@ -99,7 +99,14 @@ For production, configure your web server (nginx, Apache) to proxy `/api/*` requ
 
 ## Desktop App
 
-The desktop app connects directly to Jira without requiring a CORS proxy. See the [Desktop Installation](/desktop/installation) guide for setup instructions.
+The desktop app connects directly to Jira without requiring a CORS proxy.
+
+```bash
+brew tap konradmichalik/tap
+brew install --cask canopy
+```
+
+See the [Desktop Installation](/desktop/installation) guide for more options.
 
 ## Available Scripts
 

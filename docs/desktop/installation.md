@@ -5,7 +5,16 @@ description: Install the Canopy desktop app on macOS
 
 # macOS Installation
 
-## Download and Install
+## Homebrew (recommended)
+
+```bash
+brew tap konradmichalik/tap
+brew install --cask canopy
+```
+
+Update with `brew upgrade --cask canopy`.
+
+## Manual Download
 
 1. [Download the latest release from GitHub](https://github.com/konradmichalik/canopy/releases/latest)
    - **Apple Silicon** (M1/M2/M3): `Canopy_x.x.x_aarch64.dmg`
@@ -52,10 +61,13 @@ After installation:
 
 ## Updating
 
-To update Canopy:
+If installed via Homebrew:
 
-1. Download the new version
-2. Replace the existing app in Applications
+```bash
+brew upgrade --cask canopy
+```
+
+If installed manually: download the new version and replace the existing app in Applications.
 
 Your settings and queries are preserved during updates.
 
