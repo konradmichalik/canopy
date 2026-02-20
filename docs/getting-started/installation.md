@@ -106,6 +106,10 @@ brew tap konradmichalik/tap
 brew install --cask canopy
 ```
 
+::: tip
+Homebrew automatically removes the macOS quarantine attribute — no extra steps needed.
+:::
+
 See the [Desktop Installation](/desktop/installation) guide for more options.
 
 ## Available Scripts

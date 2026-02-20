@@ -14,6 +14,10 @@ brew install --cask canopy
 
 Update with `brew upgrade --cask canopy`.
 
+::: tip
+Homebrew automatically removes the macOS quarantine attribute — no extra steps needed.
+:::
+
 ## Manual Download
 
 1. [Download the latest release from GitHub](https://github.com/konradmichalik/canopy/releases/latest)
@@ -21,33 +25,20 @@ Update with `brew upgrade --cask canopy`.
    - **Intel** (x64): `Canopy_x.x.x_x64.dmg`
 2. Open the DMG file
 3. Drag `Canopy.app` to your Applications folder
-
-## Gatekeeper Notice
-
-::: warning Unsigned App
-Since Canopy is not signed with an Apple Developer ID certificate, macOS Gatekeeper may block the app.
-:::
-
-You might see one of these messages:
-- *"Canopy" is damaged and can't be opened. You should move it to the Trash.*
-- *"Canopy" can't be opened because Apple cannot check it for malicious software.*
-
-**Solutions:**
-
-1. **Remove quarantine attribute** (recommended):
+4. Remove the quarantine attribute so macOS allows the unsigned app:
    ```bash
    xattr -cr /Applications/Canopy.app
    ```
 
-2. **Right-click to Open**:
-   - Right-click on `Canopy.app` in Finder
-   - Select "Open"
-   - Click "Open" in the dialog
+## Gatekeeper Notice
 
-3. **System Settings**:
-   - Go to **System Settings > Privacy & Security**
-   - Scroll down to find the blocked app message
-   - Click "Open Anyway"
+::: warning Unsigned App
+Since Canopy is not signed with an Apple Developer ID certificate, macOS Gatekeeper blocks the app. When installing via Homebrew, this is handled automatically. For manual installs, you must remove the quarantine attribute with the command above.
+:::
+
+Without removing the quarantine attribute, you might see one of these messages:
+- *"Canopy" is damaged and can't be opened. You should move it to the Trash.*
+- *"Canopy" can't be opened because Apple cannot check it for malicious software.*
 
 ## First Launch
 

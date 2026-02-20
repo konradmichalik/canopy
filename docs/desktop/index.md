@@ -47,6 +47,8 @@ brew tap konradmichalik/tap
 brew install --cask canopy
 ```
 
+Homebrew automatically removes the macOS quarantine attribute — no extra steps needed.
+
 ### Manual Download
 
 1. [Download the latest release](https://github.com/konradmichalik/canopy/releases/latest)
@@ -54,7 +56,10 @@ brew install --cask canopy
    - **Intel**: `Canopy_x.x.x_x64.dmg`
 2. Open the DMG file
 3. Drag `Canopy.app` to Applications
-4. See [Gatekeeper Notice](/desktop/installation#gatekeeper-notice) if blocked
+4. Remove the quarantine attribute so macOS allows the unsigned app:
+   ```bash
+   xattr -cr /Applications/Canopy.app
+   ```
 
 ## Technical Details
 
