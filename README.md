@@ -48,7 +48,11 @@ brew tap konradmichalik/tap
 brew install --cask canopy
 ```
 
-Updates via `brew upgrade --cask canopy`.
+Update to the latest version:
+
+```bash
+brew update && brew upgrade --cask canopy
+```
 
 ### Manual Download
 

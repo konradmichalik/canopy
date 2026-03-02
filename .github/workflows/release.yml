@@ -79,6 +79,11 @@ jobs:
             brew tap konradmichalik/tap
             brew install --cask canopy
             ```
+
+            **Update existing installation:**
+            ```
+            brew update && brew upgrade --cask canopy
+            ```
           releaseDraft: false
           prerelease: false
           args: --target ${{ matrix.target }}
