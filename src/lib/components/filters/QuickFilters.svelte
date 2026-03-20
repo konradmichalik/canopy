@@ -107,12 +107,13 @@
     )
   );
 
-  // Global ⌘K shortcut to focus search
+  // Global ⌘K / Ctrl+K shortcut to focus search (only when input is available)
   $effect(() => {
     function handleGlobalKeydown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if (!expanded || !inputElement) return;
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        inputElement?.focus();
+        inputElement.focus();
       }
     }
     document.addEventListener('keydown', handleGlobalKeydown);
