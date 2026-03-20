@@ -124,17 +124,17 @@
     <Tooltip text="Open in Jira">
       <button
         onclick={openIssue}
-        class="inline-flex items-center gap-1 hover:text-text-brand hover:underline"
+        class="group/key inline-flex items-center gap-1 hover:text-text-brand hover:underline"
       >
         <span
-          class="font-data font-semibold text-xs text-text-subtlest bg-surface-sunken px-1.5 py-0.5 rounded group-hover:text-text-brand"
+          class="font-data font-semibold text-xs text-text-subtlest bg-surface-sunken px-1.5 py-0.5 rounded group-hover/key:text-text-brand"
         >
           {issue.key}
         </span>
         <AtlaskitIcon
           name="link-external"
           size={isCompact ? 10 : 12}
-          class="opacity-0 group-hover:opacity-50 transition-opacity flex-shrink-0"
+          class="opacity-0 group-hover/key:opacity-50 transition-opacity flex-shrink-0"
         />
       </button>
     </Tooltip>
