@@ -114,7 +114,7 @@
   </button>
 
   <!-- Issue Key (link) -->
-  <div class="flex items-center gap-1.5 flex-shrink-0">
+  <div class="flex items-center gap-1.5 flex-shrink-0 mr-[-6px]">
     {#if showActivityBadge}
       <ActivityBadge {changeTypes} isRecentlyActive={recentlyUpdated && changeTypes.length === 0} />
     {/if}
@@ -124,22 +124,22 @@
     <Tooltip text="Open in Jira">
       <button
         onclick={openIssue}
-        class="font-medium text-text-brand hover:underline flex items-center gap-1 {isCompact
-          ? 'text-sm'
-          : 'text-base gap-1.5'}"
+        class="inline-flex items-center gap-1 hover:text-text-brand hover:underline"
       >
-        {issue.key}
+        <span class="font-data font-semibold text-xs text-text-subtlest bg-surface-sunken px-1.5 py-0.5 rounded group-hover:text-text-brand">
+          {issue.key}
+        </span>
         <AtlaskitIcon
           name="link-external"
-          size={isCompact ? 12 : 14}
-          class="opacity-0 group-hover:opacity-50 transition-opacity"
+          size={isCompact ? 10 : 12}
+          class="opacity-0 group-hover:opacity-50 transition-opacity flex-shrink-0"
         />
       </button>
     </Tooltip>
   </div>
 
   <!-- Summary -->
-  <span class="text-text truncate min-w-0 flex-1 {isCompact ? 'text-sm' : 'text-base'}">
+  <span class="font-medium text-sm text-text truncate min-w-0 flex-1">
     {issue.fields.summary}
   </span>
 
@@ -160,9 +160,9 @@
   <!-- Created Date -->
   {#if showCreated && issue.fields.created}
     <Tooltip text={`Created: ${formatDateTime(issue.fields.created)}`}>
-      <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0">
+      <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0 w-24 justify-end">
         <AtlaskitIcon name="calendar" size={14} />
-        <span>{formatDate(issue.fields.created)}</span>
+        <span class="font-data text-text-subtlest">{formatDate(issue.fields.created)}</span>
       </div>
     </Tooltip>
   {/if}
@@ -170,9 +170,9 @@
   <!-- Updated Date -->
   {#if showUpdated && issue.fields.updated}
     <Tooltip text={`Updated: ${formatDateTime(issue.fields.updated)}`}>
-      <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0">
+      <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0 w-24 justify-end">
         <AtlaskitIcon name="clock" size={14} />
-        <span>{formatDate(issue.fields.updated)}</span>
+        <span class="font-data text-text-subtlest">{formatDate(issue.fields.updated)}</span>
       </div>
     </Tooltip>
   {/if}
@@ -181,9 +181,9 @@
   {#if showDueDate && issue.fields.duedate}
     {@const dueDateStatus = getDueDateStatus(issue.fields.duedate)}
     <Tooltip text={`${dueDateStatus.label}: ${formatDate(issue.fields.duedate)}`}>
-      <div class="flex items-center gap-1 text-xs {dueDateStatus.colorClass} flex-shrink-0">
+      <div class="flex items-center gap-1 text-xs {dueDateStatus.colorClass} flex-shrink-0 w-24 justify-end">
         <AtlaskitIcon name="calendar" size={14} color={dueDateStatus.iconColor} />
-        <span>{formatDate(issue.fields.duedate)}</span>
+        <span class="font-data">{formatDate(issue.fields.duedate)}</span>
       </div>
     </Tooltip>
   {/if}
@@ -193,7 +193,7 @@
     <Tooltip text={`${commentCount} Comment${commentCount !== 1 ? 's' : ''}`}>
       <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0">
         <AtlaskitIcon name="comment" size={14} />
-        <span>{commentCount}</span>
+        <span class="font-data text-text-subtlest">{commentCount}</span>
       </div>
     </Tooltip>
   {/if}
@@ -261,13 +261,13 @@
     >
       <div class="flex items-center gap-2 flex-shrink-0">
         <AtlaskitIcon name="clock" size={12} color="var(--color-text-subtle)" />
-        <div class="w-14 h-1.5 bg-progress-track rounded-full overflow-hidden">
+        <div class="w-16 h-1.5 bg-progress-track rounded-full overflow-hidden">
           <div
             class="h-full bg-success transition-all"
             style="width: {aggregatedTimeProgress.percent}%"
           ></div>
         </div>
-        <span class="text-xs text-text-subtle w-8 text-right">
+        <span class="text-xs font-data text-text-subtlest w-10 text-right">
           {aggregatedTimeProgress.percent}%
         </span>
       </div>
@@ -283,13 +283,13 @@
     >
       <div class="flex items-center gap-2 flex-shrink-0">
         <AtlaskitIcon name="subtasks" size={12} color="var(--color-text-subtle)" />
-        <div class="w-14 h-1.5 bg-progress-track rounded-full overflow-hidden">
+        <div class="w-16 h-1.5 bg-progress-track rounded-full overflow-hidden">
           <div
             class="h-full bg-brand-bold transition-all"
             style="width: {aggregatedResolutionProgress.percent}%"
           ></div>
         </div>
-        <span class="text-xs text-text-subtle w-8 text-right">
+        <span class="text-xs font-data text-text-subtlest w-12 text-right">
           {done}/{total}
         </span>
       </div>
@@ -300,7 +300,7 @@
   {#if showStatus}
     <button
       type="button"
-      class="cursor-pointer hover:bg-surface-hovered rounded px-0.5 -mx-0.5 transition-colors"
+      class="cursor-pointer hover:bg-surface-hovered rounded px-0.5 -mx-0.5 transition-colors flex-shrink-0 w-28 flex justify-end"
       onclick={(e) => handleFilterClick(e, makeFilterId('status', issue.fields.status.name))}
       title={issue.fields.status.name}
     >

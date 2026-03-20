@@ -198,7 +198,7 @@
               style="width: {timeProgress.percent}%"
             ></div>
           </div>
-          <span class="text-xs text-text-subtle w-8 text-right">
+          <span class="text-xs font-data text-text-subtlest w-10 text-right">
             {timeProgress.percent}%
           </span>
         </div>
@@ -218,7 +218,7 @@
               style="width: {resolutionProgress.percent}%"
             ></div>
           </div>
-          <span class="text-xs text-text-subtle whitespace-nowrap">
+          <span class="text-xs font-data text-text-subtlest whitespace-nowrap">
             {done}/{total}
           </span>
         </div>
@@ -226,7 +226,7 @@
     {/if}
 
     <!-- Issue count -->
-    <span class="text-xs text-text-subtle px-2 py-0.5 bg-neutral rounded-full">
+    <span class="text-xs font-data text-text-subtlest px-2 py-0.5 bg-neutral rounded-full">
       {group.issues.length} Issues
     </span>
   </div>
