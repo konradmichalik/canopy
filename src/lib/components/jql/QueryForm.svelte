@@ -162,12 +162,12 @@
             bind:value={jql}
             placeholder="project = MYPROJECT AND sprint in openSprints()"
             rows="4"
-            class="flex w-full min-w-0 rounded-md border bg-surface-sunken/50 shadow-inner px-3 py-2 text-sm transition-[color,box-shadow] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 font-data text-xs leading-relaxed resize-none
+            class="flex w-full min-w-0 rounded-md border bg-surface-sunken/50 shadow-inner px-3 pr-24 py-2 text-sm transition-[color,box-shadow] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 font-data text-xs leading-relaxed resize-none
               focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
               {hasJqlWarning
               ? 'border-destructive focus-visible:ring-destructive/20'
               : 'border-input'}"
-            onchange={() => (jqlCheckResult = null)}
+            oninput={() => (jqlCheckResult = null)}
           ></textarea>
           {#if connectionState.isConnected}
             <button
