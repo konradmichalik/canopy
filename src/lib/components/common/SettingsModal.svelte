@@ -303,10 +303,11 @@
         <div class="space-y-2">
           <span class="settings-label">Theme</span>
           <p class="settings-desc">Light, dark, or follow your system preference</p>
-          <div class="segmented-control">
+          <div class="segmented-control" role="group" aria-label="Theme">
             <button
               onclick={() => handleThemeChange('light')}
               class={themeState.theme === 'light' ? 'seg-active' : ''}
+              aria-pressed={themeState.theme === 'light'}
             >
               <AtlaskitIcon name="sun" size={14} />
               Light
@@ -314,6 +315,7 @@
             <button
               onclick={() => handleThemeChange('dark')}
               class={themeState.theme === 'dark' ? 'seg-active' : ''}
+              aria-pressed={themeState.theme === 'dark'}
             >
               <AtlaskitIcon name="moon" size={14} />
               Dark
@@ -321,6 +323,7 @@
             <button
               onclick={() => handleThemeChange('system')}
               class={themeState.theme === 'system' ? 'seg-active' : ''}
+              aria-pressed={themeState.theme === 'system'}
             >
               <AtlaskitIcon name="theme" size={14} />
               Auto
@@ -334,11 +337,12 @@
         <div class="space-y-2">
           <span class="settings-label">Color Palette</span>
           <p class="settings-desc">Intensity of colors for status indicators and labels</p>
-          <div class="segmented-control">
+          <div class="segmented-control" role="group" aria-label="Color Palette">
             {#each COLOR_INTENSITY_OPTIONS as option (option.id)}
               <button
                 onclick={() => handleColorIntensityChange(option.id)}
                 class={colorIntensityState.intensity === option.id ? 'seg-active' : ''}
+                aria-pressed={colorIntensityState.intensity === option.id}
                 title={option.description}
               >
                 {option.label}
@@ -354,16 +358,18 @@
           <div class="space-y-2">
             <span class="settings-label">Display Density</span>
             <p class="settings-desc">Spacing between tree items</p>
-            <div class="segmented-control">
+            <div class="segmented-control" role="group" aria-label="Display Density">
               <button
                 onclick={() => handleDensityChange('comfortable')}
                 class={displayDensityState.density === 'comfortable' ? 'seg-active' : ''}
+                aria-pressed={displayDensityState.density === 'comfortable'}
               >
                 Comfortable
               </button>
               <button
                 onclick={() => handleDensityChange('compact')}
                 class={displayDensityState.density === 'compact' ? 'seg-active' : ''}
+                aria-pressed={displayDensityState.density === 'compact'}
               >
                 Compact
               </button>
@@ -376,16 +382,18 @@
           <div class="space-y-2">
             <span class="settings-label">Date Format</span>
             <p class="settings-desc">Exact timestamps or relative time</p>
-            <div class="segmented-control">
+            <div class="segmented-control" role="group" aria-label="Date Format">
               <button
                 onclick={() => handleDateFormatChange('absolute')}
                 class={dateFormatState.format === 'absolute' ? 'seg-active' : ''}
+                aria-pressed={dateFormatState.format === 'absolute'}
               >
                 Absolute
               </button>
               <button
                 onclick={() => handleDateFormatChange('relative')}
                 class={dateFormatState.format === 'relative' ? 'seg-active' : ''}
+                aria-pressed={dateFormatState.format === 'relative'}
               >
                 Relative
               </button>
@@ -401,11 +409,12 @@
           <div class="space-y-2">
             <span class="settings-label">Auto-Refresh</span>
             <p class="settings-desc">Reload issues automatically</p>
-            <div class="segmented-control">
+            <div class="segmented-control" role="group" aria-label="Auto-Refresh">
               {#each AUTO_REFRESH_OPTIONS as option (option.value)}
                 <button
                   onclick={() => handleAutoRefreshChange(option.value)}
                   class={autoRefreshState.interval === option.value ? 'seg-active' : ''}
+                  aria-pressed={autoRefreshState.interval === option.value}
                 >
                   {option.label}
                 </button>
@@ -434,11 +443,12 @@
             <span class="settings-label">Default Sort Order</span>
             <p class="settings-desc">Applied to new queries without custom sort</p>
             <div class="flex items-center gap-2">
-              <div class="segmented-control flex-1">
+              <div class="segmented-control flex-1" role="group" aria-label="Default Sort">
                 {#each SORT_FIELDS as field (field.id)}
                   <button
                     onclick={() => handleDefaultSortFieldChange(field.id)}
                     class={defaultSortState.config.field === field.id ? 'seg-active' : ''}
+                    aria-pressed={defaultSortState.config.field === field.id}
                   >
                     {field.label}
                   </button>
@@ -464,11 +474,12 @@
           <div class="space-y-2">
             <span class="settings-label">Auto-Expand Depth</span>
             <p class="settings-desc">Automatically expand tree nodes on first load</p>
-            <div class="segmented-control">
+            <div class="segmented-control" role="group" aria-label="Auto-Expand Depth">
               {#each AUTO_EXPAND_OPTIONS as option (option.value)}
                 <button
                   onclick={() => handleAutoExpandChange(option.value)}
                   class={autoExpandDepthState.depth === option.value ? 'seg-active' : ''}
+                  aria-pressed={autoExpandDepthState.depth === option.value}
                 >
                   {option.label}
                 </button>
@@ -532,11 +543,12 @@
             <div class="space-y-2">
               <span class="settings-label">Activity Period</span>
               <p class="settings-desc">Issues older than this period are considered inactive</p>
-              <div class="segmented-control">
+              <div class="segmented-control" role="group" aria-label="Activity Period">
                 {#each ACTIVITY_PERIOD_OPTIONS as option (option.value)}
                   <button
                     onclick={() => handleActivityPeriodChange(option.value)}
                     class={changeTrackingState.activityPeriod === option.value ? 'seg-active' : ''}
+                    aria-pressed={changeTrackingState.activityPeriod === option.value}
                   >
                     {option.label}
                   </button>
@@ -563,13 +575,14 @@
               <p class="settings-desc">
                 Highlight the Check button when checkpoint is older than this
               </p>
-              <div class="segmented-control">
+              <div class="segmented-control" role="group" aria-label="Stale Checkpoint Alert">
                 {#each STALE_CHECKPOINT_OPTIONS as option (option.value)}
                   <button
                     onclick={() => handleStaleCheckpointDaysChange(option.value)}
                     class={changeTrackingState.staleCheckpointDays === option.value
                       ? 'seg-active'
                       : ''}
+                    aria-pressed={changeTrackingState.staleCheckpointDays === option.value}
                   >
                     {option.label}
                   </button>
