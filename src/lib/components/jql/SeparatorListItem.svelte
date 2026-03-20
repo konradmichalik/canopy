@@ -118,7 +118,7 @@
         <!-- Labeled Separator -->
         <div class="flex-1 flex items-center gap-2 min-w-0">
           <span
-            class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap"
+            class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider whitespace-nowrap"
           >
             {separator.title}
           </span>
