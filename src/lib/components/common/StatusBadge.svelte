@@ -9,16 +9,16 @@
 
   let { status }: Props = $props();
 
-  // Get color based on status category using outline style
+  // Get color based on status category using soft filled style
   function getStatusClass(categoryKey: string): string {
     switch (categoryKey) {
       case 'done':
-        return 'bg-transparent text-success border-success hover:bg-success/10';
+        return 'bg-success/15 text-success border-transparent hover:bg-success/25';
       case 'indeterminate':
-        return 'bg-transparent text-information border-information hover:bg-information/10';
+        return 'bg-information/15 text-information border-transparent hover:bg-information/25';
       case 'new':
       default:
-        return 'bg-transparent text-muted-foreground border-border hover:bg-muted';
+        return 'bg-muted text-muted-foreground border-transparent hover:bg-muted-foreground/15';
     }
   }
 

@@ -1,3 +1,4 @@
+@import 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap';
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -100,95 +101,102 @@ html[data-color-mode='light'] {
   --query-teal: #8fbcbb;
 }
 
-/* Nord Design Tokens - Dark Theme (Polar Night bg, Snow Storm text, Frost accents) */
+/* Nord Design Tokens - Dark Theme (Deep blacks, bright accents, high contrast) */
 html[data-color-mode='dark'] {
   color-scheme: dark;
-  --ds-text: #d8dee9;
-  --ds-text-disabled: #d8dee940;
-  --ds-text-inverse: #2e3440;
-  --ds-text-selected: #88c0d0;
-  --ds-text-brand: #88c0d0;
-  --ds-text-danger: #bf616a;
+  /* Text — brighter for high contrast on deep backgrounds */
+  --ds-text: #eceff4;
+  --ds-text-disabled: #eceff440;
+  --ds-text-inverse: #1a1e26;
+  --ds-text-selected: #8fbcbb;
+  --ds-text-brand: #8fbcbb;
+  --ds-text-danger: #d08787;
   --ds-text-warning: #ebcb8b;
-  --ds-text-warning-inverse: #2e3440;
+  --ds-text-warning-inverse: #1a1e26;
   --ds-text-success: #a3be8c;
-  --ds-text-discovery: #b48ead;
-  --ds-text-information: #88c0d0;
-  --ds-text-subtlest: #6e7a8d;
-  --ds-text-subtle: #8892a2;
-  --ds-link: #88c0d0;
-  --ds-link-pressed: #81a1c1;
-  --ds-border: #d8dee920;
-  --ds-border-disabled: #d8dee910;
+  --ds-text-discovery: #c2a0bb;
+  --ds-text-information: #8fbcbb;
+  --ds-text-subtlest: #5c6575;
+  --ds-text-subtle: #9aa3b4;
+  --ds-link: #8fbcbb;
+  --ds-link-pressed: #88c0d0;
+
+  /* Borders — fine, semi-transparent white */
+  --ds-border: #ffffff0d;
+  --ds-border-disabled: #ffffff08;
   --ds-border-focused: #88c0d0;
-  --ds-border-input: #4c566a;
-  --ds-border-inverse: #2e3440;
-  --ds-border-selected: #88c0d0;
-  --ds-border-brand: #88c0d0;
+  --ds-border-input: #ffffff18;
+  --ds-border-inverse: #1a1e26;
+  --ds-border-selected: #8fbcbb;
+  --ds-border-brand: #8fbcbb;
   --ds-border-danger: #bf616a;
   --ds-border-warning: #ebcb8b;
   --ds-border-success: #a3be8c;
-  --ds-border-bold: #4c566a;
-  --ds-background-disabled: #d8dee910;
-  --ds-background-input: #3b4252;
-  --ds-background-input-hovered: #434c5e;
-  --ds-background-input-pressed: #3b4252;
-  --ds-background-neutral: #d8dee914;
-  --ds-background-neutral-hovered: #d8dee920;
-  --ds-background-neutral-pressed: #d8dee930;
+  --ds-border-bold: #ffffff1a;
+
+  /* Backgrounds — deep, layered blacks */
+  --ds-background-disabled: #ffffff08;
+  --ds-background-input: #141820;
+  --ds-background-input-hovered: #1c2230;
+  --ds-background-input-pressed: #141820;
+  --ds-background-neutral: #ffffff0a;
+  --ds-background-neutral-hovered: #ffffff12;
+  --ds-background-neutral-pressed: #ffffff1a;
   --ds-background-neutral-subtle: #00000000;
-  --ds-background-neutral-subtle-hovered: #d8dee914;
-  --ds-background-neutral-subtle-pressed: #d8dee920;
+  --ds-background-neutral-subtle-hovered: #ffffff0a;
+  --ds-background-neutral-subtle-pressed: #ffffff12;
   --ds-background-neutral-bold: #8892a2;
   --ds-background-neutral-bold-hovered: #9da5b4;
-  --ds-background-selected: #364455;
-  --ds-background-selected-hovered: #3d4d60;
+  --ds-background-selected: #8fbcbb15;
+  --ds-background-selected-hovered: #8fbcbb22;
   --ds-background-brand-bold: #81a1c1;
   --ds-background-brand-bold-hovered: #88c0d0;
   --ds-background-brand-bold-pressed: #5e81ac;
-  --ds-background-danger: #4a2f33;
-  --ds-background-danger-hovered: #5a353a;
+  --ds-background-danger: #bf616a12;
+  --ds-background-danger-hovered: #bf616a20;
   --ds-background-danger-bold: #bf616a;
   --ds-background-danger-bold-hovered: #c97b82;
-  --ds-background-warning: #443d2c;
-  --ds-background-warning-hovered: #544a34;
+  --ds-background-warning: #ebcb8b12;
+  --ds-background-warning-hovered: #ebcb8b20;
   --ds-background-warning-bold: #ebcb8b;
-  --ds-background-success: #3a4438;
-  --ds-background-success-hovered: #434f40;
+  --ds-background-success: #a3be8c12;
+  --ds-background-success-hovered: #a3be8c20;
   --ds-background-success-bold: #a3be8c;
   --ds-background-success-bold-hovered: #b5cc9f;
-  --ds-background-discovery: #443548;
+  --ds-background-discovery: #b48ead12;
   --ds-background-discovery-bold: #b48ead;
-  --ds-background-information: #364455;
-  --ds-background-information-hovered: #3d4d60;
+  --ds-background-information: #8fbcbb15;
+  --ds-background-information-hovered: #8fbcbb22;
   --ds-background-information-bold: #81a1c1;
   --ds-background-information-bold-hovered: #88c0d0;
-  --ds-surface: #2e3440;
-  --ds-surface-hovered: #3b4252;
-  --ds-surface-pressed: #434c5e;
-  --ds-surface-overlay: #3b4252;
-  --ds-surface-raised: #3b4252;
-  --ds-surface-raised-hovered: #434c5e;
-  --ds-surface-sunken: #272c36;
-  --ds-blanket: #2e344080;
 
-  /* Nord Aurora - Change Tracking */
+  /* Surfaces — deep layered blacks */
+  --ds-surface: #0f1218;
+  --ds-surface-hovered: #ffffff06;
+  --ds-surface-pressed: #ffffff0d;
+  --ds-surface-overlay: #1a1f28;
+  --ds-surface-raised: #151a22;
+  --ds-surface-raised-hovered: #1c2230;
+  --ds-surface-sunken: #0a0d12;
+  --ds-blanket: #00000080;
+
+  /* Nord Aurora - Change Tracking (brighter on deep black) */
   --change-new: #a3be8c;
-  --change-new-text: #a3be8c;
+  --change-new-text: #b5cc9f;
   --change-removed: #bf616a;
-  --change-removed-text: #bf616a;
+  --change-removed-text: #d08787;
   --change-status: #88c0d0;
-  --change-status-text: #88c0d0;
+  --change-status-text: #9dd0de;
   --change-comments: #b48ead;
-  --change-comments-text: #b48ead;
+  --change-comments-text: #c8a5c2;
   --change-assignee: #d08770;
-  --change-assignee-text: #d08770;
+  --change-assignee-text: #dfa08c;
   --change-recent: #ebcb8b;
-  --skeleton: #4c566a;
+  --skeleton: #1c2230;
 
-  /* Nord Query Colors */
-  --query-gray: #4c566a;
-  --query-blue: #81a1c1;
+  /* Nord Query Colors (slightly brighter for deep bg) */
+  --query-gray: #5c6575;
+  --query-blue: #88c0d0;
   --query-green: #a3be8c;
   --query-yellow: #ebcb8b;
   --query-orange: #d08770;
@@ -225,17 +233,17 @@ html.color-intensity-vivid[data-color-mode='light'] {
 
 /* Color Intensity: Vivid - Dark Theme */
 html.color-intensity-vivid[data-color-mode='dark'] {
-  /* Change Tracking - More saturated */
+  /* Change Tracking - Bright glow on deep black */
   --change-new: #4ade80;
-  --change-new-text: #4ade80;
+  --change-new-text: #6ee7a0;
   --change-removed: #f87171;
-  --change-removed-text: #f87171;
+  --change-removed-text: #fca5a5;
   --change-status: #60a5fa;
-  --change-status-text: #60a5fa;
+  --change-status-text: #93c5fd;
   --change-comments: #c084fc;
-  --change-comments-text: #c084fc;
+  --change-comments-text: #d8b4fe;
   --change-assignee: #fb923c;
-  --change-assignee-text: #fb923c;
+  --change-assignee-text: #fdba74;
   --change-recent: #facc15;
 
   /* Query Colors - More saturated */
@@ -404,7 +412,15 @@ html.color-intensity-vivid[data-color-mode='dark'] {
   }
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    font-family:
+      Inter,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      Oxygen,
+      Ubuntu,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
@@ -414,26 +430,102 @@ html.color-intensity-vivid[data-color-mode='dark'] {
   }
 }
 
+/* Utility class for monospace data */
+.font-data {
+  font-family:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+/* Segmented Control */
+.segmented-control {
+  display: inline-flex;
+  background: var(--ds-background-neutral);
+  padding: 3px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+.segmented-control > button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  color: var(--ds-text-subtlest);
+  cursor: pointer;
+}
+
+.segmented-control > button:hover:not(.seg-active) {
+  color: var(--ds-text-subtle);
+}
+
+.segmented-control > button.seg-active {
+  background: var(--ds-surface-overlay);
+  color: var(--ds-text);
+  font-weight: 500;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* Settings row label */
+.settings-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ds-text);
+}
+
+.settings-desc {
+  font-size: 11px;
+  color: var(--ds-text-subtlest);
+  line-height: 1.5;
+}
+
 #app {
   min-height: 100vh;
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling — subtle, rounded */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--ds-surface-sunken);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--ds-border-bold);
-  border-radius: 4px;
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: var(--ds-text-subtlest);
+}
+
+/* Show scrollbar only on hover for sidebar and tree */
+.sidebar-scroll,
+.tree-scroll {
+  scrollbar-gutter: stable;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb,
+.tree-scroll::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-thumb,
+.tree-scroll:hover::-webkit-scrollbar-thumb {
+  background: var(--ds-border-bold);
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-thumb:hover,
+.tree-scroll:hover::-webkit-scrollbar-thumb:hover {
   background: var(--ds-text-subtlest);
 }
 

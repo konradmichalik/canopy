@@ -345,7 +345,7 @@
   />
 
   <!-- Query List -->
-  <div class="flex-1 overflow-y-auto p-2">
+  <div class="flex-1 overflow-y-auto p-2 sidebar-scroll">
     {#if jqlState.items.length === 0}
       <div class="text-center py-12 px-4">
         <div

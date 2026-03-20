@@ -12,12 +12,12 @@
 <DropdownMenu.Root bind:open>
   <Tooltip text="Configure visible fields">
     <DropdownMenu.Trigger
-      class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors bg-card border-border text-muted-foreground hover:border-border hover:bg-accent"
+      class="inline-flex items-center gap-1.5 px-2 h-8 text-xs rounded border transition-colors bg-card border-border/50 text-muted-foreground hover:bg-surface-hovered hover:border-border"
     >
       <AtlaskitIcon name="layout-three-columns" size={16} />
       <span class="hidden sm:inline">Fields</span>
       <span
-        class="inline-flex items-center justify-center min-w-[1rem] h-4 px-1 text-[10px] font-bold rounded bg-muted text-muted-foreground"
+        class="inline-flex items-center justify-center min-w-[1.25rem] h-[18px] px-1.5 py-0.5 text-[10px] font-bold font-data rounded-full bg-muted text-text-subtlest"
       >
         {enabledCount}
       </span>
