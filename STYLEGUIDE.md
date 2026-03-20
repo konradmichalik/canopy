@@ -124,6 +124,7 @@ import AtlaskitIcon from '../common/AtlaskitIcon.svelte';
 ```
 
 ### Buttons
+
 | Variant | Verwendung |
 |---------|------------|
 | `default` | Primäre Aktionen |
