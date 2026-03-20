@@ -93,15 +93,35 @@
   const summaryItems = $derived.by(() => {
     const items: { count: number; label: string; colorClass: string }[] = [];
     if (changes.newIssues.length > 0)
-      items.push({ count: changes.newIssues.length, label: 'new', colorClass: 'text-change-new-text' });
+      items.push({
+        count: changes.newIssues.length,
+        label: 'new',
+        colorClass: 'text-change-new-text'
+      });
     if (changes.removedIssues.length > 0)
-      items.push({ count: changes.removedIssues.length, label: 'removed', colorClass: 'text-change-removed-text' });
+      items.push({
+        count: changes.removedIssues.length,
+        label: 'removed',
+        colorClass: 'text-change-removed-text'
+      });
     if (changes.statusChanges.length > 0)
-      items.push({ count: changes.statusChanges.length, label: 'status changed', colorClass: 'text-change-status-text' });
+      items.push({
+        count: changes.statusChanges.length,
+        label: 'status changed',
+        colorClass: 'text-change-status-text'
+      });
     if (changes.commentChanges.length > 0)
-      items.push({ count: changes.commentChanges.length, label: 'with new comments', colorClass: 'text-change-comments-text' });
+      items.push({
+        count: changes.commentChanges.length,
+        label: 'with new comments',
+        colorClass: 'text-change-comments-text'
+      });
     if (changes.assigneeChanges.length > 0)
-      items.push({ count: changes.assigneeChanges.length, label: 'reassigned', colorClass: 'text-change-assignee-text' });
+      items.push({
+        count: changes.assigneeChanges.length,
+        label: 'reassigned',
+        colorClass: 'text-change-assignee-text'
+      });
     return items;
   });
 
@@ -128,7 +148,7 @@
         <span class="text-foreground flex items-center flex-wrap gap-x-1 gap-y-0.5">
           {#each summaryItems as item, i (item.label)}
             {#if i > 0}<span class="text-muted-foreground">&middot;</span>{/if}
-            <span class="{item.colorClass}">
+            <span class={item.colorClass}>
               <span class="font-data font-bold">{item.count}</span>
               <span class="font-medium">{item.label}</span>
             </span>
@@ -214,28 +234,55 @@
                   <span class="text-sm font-medium text-foreground/80">{issue.summary}</span>
                   <div class="flex items-center gap-2 mt-0.5 flex-wrap">
                     {#if issue.isNew}
-                      <span class="text-[10px] font-data font-bold text-change-new-text bg-change-new/15 px-1.5 py-0.5 rounded">New</span>
+                      <span
+                        class="text-[10px] font-data font-bold text-change-new-text bg-change-new/15 px-1.5 py-0.5 rounded"
+                        >New</span
+                      >
                     {/if}
                     {#if issue.isRemoved}
-                      <span class="text-[10px] font-data font-bold text-change-removed-text bg-change-removed/15 px-1.5 py-0.5 rounded">Removed</span>
+                      <span
+                        class="text-[10px] font-data font-bold text-change-removed-text bg-change-removed/15 px-1.5 py-0.5 rounded"
+                        >Removed</span
+                      >
                     {/if}
                     {#if issue.statusChange}
                       <span class="flex items-center gap-1 text-[10px] font-data">
-                        <span class="text-muted-foreground line-through">{issue.statusChange.previousStatus}</span>
-                        <AtlaskitIcon name="chevron-right" size={10} class="text-muted-foreground/50" />
-                        <span class="font-bold text-change-status-text bg-change-status/15 px-1.5 py-0.5 rounded">{issue.statusChange.currentStatus}</span>
+                        <span class="text-muted-foreground line-through"
+                          >{issue.statusChange.previousStatus}</span
+                        >
+                        <AtlaskitIcon
+                          name="chevron-right"
+                          size={10}
+                          class="text-muted-foreground/50"
+                        />
+                        <span
+                          class="font-bold text-change-status-text bg-change-status/15 px-1.5 py-0.5 rounded"
+                          >{issue.statusChange.currentStatus}</span
+                        >
                       </span>
                     {/if}
                     {#if issue.commentChange}
-                      <span class="text-[10px] font-data text-change-comments-text bg-change-comments/15 px-1.5 py-0.5 rounded"
-                        >+{issue.commentChange.newCommentCount} comment{issue.commentChange.newCommentCount !== 1 ? 's' : ''}</span
+                      <span
+                        class="text-[10px] font-data text-change-comments-text bg-change-comments/15 px-1.5 py-0.5 rounded"
+                        >+{issue.commentChange.newCommentCount} comment{issue.commentChange
+                          .newCommentCount !== 1
+                          ? 's'
+                          : ''}</span
                       >
                     {/if}
                     {#if issue.assigneeChange}
                       <span class="flex items-center gap-1 text-[10px] font-data">
-                        <span class="text-muted-foreground">{issue.assigneeChange.previousAssignee ?? 'Unassigned'}</span>
-                        <AtlaskitIcon name="chevron-right" size={10} class="text-muted-foreground/50" />
-                        <span class="text-change-assignee-text font-bold">{issue.assigneeChange.currentAssignee ?? 'Unassigned'}</span>
+                        <span class="text-muted-foreground"
+                          >{issue.assigneeChange.previousAssignee ?? 'Unassigned'}</span
+                        >
+                        <AtlaskitIcon
+                          name="chevron-right"
+                          size={10}
+                          class="text-muted-foreground/50"
+                        />
+                        <span class="text-change-assignee-text font-bold"
+                          >{issue.assigneeChange.currentAssignee ?? 'Unassigned'}</span
+                        >
                       </span>
                     {/if}
                   </div>
@@ -246,149 +293,203 @@
         {:else}
           <!-- Grouped by Type View -->
           <div class="space-y-4">
-          {#if changes.newIssues.length > 0}
-            <div>
-              <div class="flex items-center gap-2 text-change-new-text bg-change-new/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2">
-                <AtlaskitIcon name="add" size={12} />
-                New Issues
-                <span class="font-data">({changes.newIssues.length})</span>
-              </div>
-              <ul class="space-y-0.5">
-                {#each changes.newIssues as issue (issue.key)}
-                  <li class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2">
-                    <button
-                      type="button"
-                      onclick={(e) => openIssue(issue.key, e)}
-                      class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-new-text hover:underline text-left"
+            {#if changes.newIssues.length > 0}
+              <div>
+                <div
+                  class="flex items-center gap-2 text-change-new-text bg-change-new/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2"
+                >
+                  <AtlaskitIcon name="add" size={12} />
+                  New Issues
+                  <span class="font-data">({changes.newIssues.length})</span>
+                </div>
+                <ul class="space-y-0.5">
+                  {#each changes.newIssues as issue (issue.key)}
+                    <li
+                      class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2"
                     >
-                      {issue.key}
-                    </button>
-                    <span class="text-sm font-medium text-foreground/80 truncate">{issue.summary}</span>
-                  </li>
-                {/each}
-              </ul>
-            </div>
-          {/if}
+                      <button
+                        type="button"
+                        onclick={(e) => openIssue(issue.key, e)}
+                        class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-new-text hover:underline text-left"
+                      >
+                        {issue.key}
+                      </button>
+                      <span class="text-sm font-medium text-foreground/80 truncate"
+                        >{issue.summary}</span
+                      >
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
 
-          {#if changes.removedIssues.length > 0}
-            <div>
-              <div class="flex items-center gap-2 text-change-removed-text bg-change-removed/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2">
-                <AtlaskitIcon name="cross" size={12} />
-                Removed Issues
-                <span class="font-data">({changes.removedIssues.length})</span>
-              </div>
-              <ul class="space-y-0.5">
-                {#each changes.removedIssues as issue (issue.key)}
-                  <li class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2">
-                    <button
-                      type="button"
-                      onclick={(e) => openIssue(issue.key, e)}
-                      class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-removed-text hover:underline text-left"
+            {#if changes.removedIssues.length > 0}
+              <div>
+                <div
+                  class="flex items-center gap-2 text-change-removed-text bg-change-removed/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2"
+                >
+                  <AtlaskitIcon name="cross" size={12} />
+                  Removed Issues
+                  <span class="font-data">({changes.removedIssues.length})</span>
+                </div>
+                <ul class="space-y-0.5">
+                  {#each changes.removedIssues as issue (issue.key)}
+                    <li
+                      class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2"
                     >
-                      {issue.key}
-                    </button>
-                    <div class="min-w-0 flex-1">
-                      <span class="text-sm font-medium text-foreground/80 line-through">{issue.summary}</span>
-                      <span class="text-[10px] font-data text-muted-foreground ml-2">(was: {issue.lastStatus})</span>
-                    </div>
-                  </li>
-                {/each}
-              </ul>
-            </div>
-          {/if}
-
-          {#if changes.statusChanges.length > 0}
-            <div>
-              <div class="flex items-center gap-2 text-change-status-text bg-change-status/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2">
-                <AtlaskitIcon name="status" size={12} />
-                Status Changed
-                <span class="font-data">({changes.statusChanges.length})</span>
-              </div>
-              <ul class="space-y-0.5">
-                {#each changes.statusChanges as change (change.key)}
-                  <li class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2">
-                    <button
-                      type="button"
-                      onclick={(e) => openIssue(change.key, e)}
-                      class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-status-text hover:underline text-left"
-                    >
-                      {change.key}
-                    </button>
-                    <div class="min-w-0 flex-1">
-                      <span class="text-sm font-medium text-foreground/80 truncate">{change.summary}</span>
-                      <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="text-[10px] font-data text-muted-foreground line-through">{change.previousStatus}</span>
-                        <AtlaskitIcon name="chevron-right" size={10} class="text-muted-foreground/50" />
-                        <span class="text-[10px] font-data font-bold text-change-status-text bg-change-status/15 px-1.5 py-0.5 rounded">{change.currentStatus}</span>
+                      <button
+                        type="button"
+                        onclick={(e) => openIssue(issue.key, e)}
+                        class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-removed-text hover:underline text-left"
+                      >
+                        {issue.key}
+                      </button>
+                      <div class="min-w-0 flex-1">
+                        <span class="text-sm font-medium text-foreground/80 line-through"
+                          >{issue.summary}</span
+                        >
+                        <span class="text-[10px] font-data text-muted-foreground ml-2"
+                          >(was: {issue.lastStatus})</span
+                        >
                       </div>
-                    </div>
-                  </li>
-                {/each}
-              </ul>
-            </div>
-          {/if}
-
-          {#if changes.commentChanges.length > 0}
-            <div>
-              <div class="flex items-center gap-2 text-change-comments-text bg-change-comments/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2">
-                <AtlaskitIcon name="comment" size={12} />
-                New Comments
-                <span class="font-data">({changes.commentChanges.length})</span>
+                    </li>
+                  {/each}
+                </ul>
               </div>
-              <ul class="space-y-0.5">
-                {#each changes.commentChanges as change (change.key)}
-                  <li class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2">
-                    <button
-                      type="button"
-                      onclick={(e) => openIssue(change.key, e)}
-                      class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-comments-text hover:underline text-left"
-                    >
-                      {change.key}
-                    </button>
-                    <div class="min-w-0 flex-1">
-                      <span class="text-sm font-medium text-foreground/80 truncate">{change.summary}</span>
-                      <div class="mt-0.5">
-                        <span class="text-[10px] font-data text-change-comments-text bg-change-comments/15 px-1.5 py-0.5 rounded">
-                          +{change.newCommentCount}{change.newCommentCount === 1 && change.latestAuthor ? ` by ${change.latestAuthor}` : ''}
-                        </span>
-                      </div>
-                    </div>
-                  </li>
-                {/each}
-              </ul>
-            </div>
-          {/if}
+            {/if}
 
-          {#if changes.assigneeChanges.length > 0}
-            <div>
-              <div class="flex items-center gap-2 text-change-assignee-text bg-change-assignee/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2">
-                <AtlaskitIcon name="person" size={12} />
-                Reassigned
-                <span class="font-data">({changes.assigneeChanges.length})</span>
-              </div>
-              <ul class="space-y-0.5">
-                {#each changes.assigneeChanges as change (change.key)}
-                  <li class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2">
-                    <button
-                      type="button"
-                      onclick={(e) => openIssue(change.key, e)}
-                      class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-assignee-text hover:underline text-left"
+            {#if changes.statusChanges.length > 0}
+              <div>
+                <div
+                  class="flex items-center gap-2 text-change-status-text bg-change-status/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2"
+                >
+                  <AtlaskitIcon name="status" size={12} />
+                  Status Changed
+                  <span class="font-data">({changes.statusChanges.length})</span>
+                </div>
+                <ul class="space-y-0.5">
+                  {#each changes.statusChanges as change (change.key)}
+                    <li
+                      class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2"
                     >
-                      {change.key}
-                    </button>
-                    <div class="min-w-0 flex-1">
-                      <span class="text-sm font-medium text-foreground/80 truncate">{change.summary}</span>
-                      <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="text-[10px] font-data text-muted-foreground">{change.previousAssignee ?? 'Unassigned'}</span>
-                        <AtlaskitIcon name="chevron-right" size={10} class="text-muted-foreground/50" />
-                        <span class="text-[10px] font-data font-bold text-change-assignee-text">{change.currentAssignee ?? 'Unassigned'}</span>
+                      <button
+                        type="button"
+                        onclick={(e) => openIssue(change.key, e)}
+                        class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-status-text hover:underline text-left"
+                      >
+                        {change.key}
+                      </button>
+                      <div class="min-w-0 flex-1">
+                        <span class="text-sm font-medium text-foreground/80 truncate"
+                          >{change.summary}</span
+                        >
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                          <span class="text-[10px] font-data text-muted-foreground line-through"
+                            >{change.previousStatus}</span
+                          >
+                          <AtlaskitIcon
+                            name="chevron-right"
+                            size={10}
+                            class="text-muted-foreground/50"
+                          />
+                          <span
+                            class="text-[10px] font-data font-bold text-change-status-text bg-change-status/15 px-1.5 py-0.5 rounded"
+                            >{change.currentStatus}</span
+                          >
+                        </div>
                       </div>
-                    </div>
-                  </li>
-                {/each}
-              </ul>
-            </div>
-          {/if}
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+
+            {#if changes.commentChanges.length > 0}
+              <div>
+                <div
+                  class="flex items-center gap-2 text-change-comments-text bg-change-comments/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2"
+                >
+                  <AtlaskitIcon name="comment" size={12} />
+                  New Comments
+                  <span class="font-data">({changes.commentChanges.length})</span>
+                </div>
+                <ul class="space-y-0.5">
+                  {#each changes.commentChanges as change (change.key)}
+                    <li
+                      class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2"
+                    >
+                      <button
+                        type="button"
+                        onclick={(e) => openIssue(change.key, e)}
+                        class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-comments-text hover:underline text-left"
+                      >
+                        {change.key}
+                      </button>
+                      <div class="min-w-0 flex-1">
+                        <span class="text-sm font-medium text-foreground/80 truncate"
+                          >{change.summary}</span
+                        >
+                        <div class="mt-0.5">
+                          <span
+                            class="text-[10px] font-data text-change-comments-text bg-change-comments/15 px-1.5 py-0.5 rounded"
+                          >
+                            +{change.newCommentCount}{change.newCommentCount === 1 &&
+                            change.latestAuthor
+                              ? ` by ${change.latestAuthor}`
+                              : ''}
+                          </span>
+                        </div>
+                      </div>
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+
+            {#if changes.assigneeChanges.length > 0}
+              <div>
+                <div
+                  class="flex items-center gap-2 text-change-assignee-text bg-change-assignee/10 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2"
+                >
+                  <AtlaskitIcon name="person" size={12} />
+                  Reassigned
+                  <span class="font-data">({changes.assigneeChanges.length})</span>
+                </div>
+                <ul class="space-y-0.5">
+                  {#each changes.assigneeChanges as change (change.key)}
+                    <li
+                      class="flex items-start gap-3 py-1.5 hover:bg-background/30 rounded px-2 -mx-2"
+                    >
+                      <button
+                        type="button"
+                        onclick={(e) => openIssue(change.key, e)}
+                        class="w-24 shrink-0 font-data text-xs font-semibold text-text-subtlest hover:text-change-assignee-text hover:underline text-left"
+                      >
+                        {change.key}
+                      </button>
+                      <div class="min-w-0 flex-1">
+                        <span class="text-sm font-medium text-foreground/80 truncate"
+                          >{change.summary}</span
+                        >
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                          <span class="text-[10px] font-data text-muted-foreground"
+                            >{change.previousAssignee ?? 'Unassigned'}</span
+                          >
+                          <AtlaskitIcon
+                            name="chevron-right"
+                            size={10}
+                            class="text-muted-foreground/50"
+                          />
+                          <span class="text-[10px] font-data font-bold text-change-assignee-text"
+                            >{change.currentAssignee ?? 'Unassigned'}</span
+                          >
+                        </div>
+                      </div>
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
           </div>
         {/if}
 

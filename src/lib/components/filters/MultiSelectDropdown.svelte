@@ -27,7 +27,11 @@
       : 'bg-transparent border-border/50 text-muted-foreground hover:bg-surface-hovered hover:border-border'}"
   >
     {#if icon}
-      <AtlaskitIcon name={getIconName(icon)} size={12} class={activeCount > 0 ? '' : 'opacity-50'} />
+      <AtlaskitIcon
+        name={getIconName(icon)}
+        size={12}
+        class={activeCount > 0 ? '' : 'opacity-50'}
+      />
     {/if}
     <span>{label}</span>
     {#if activeCount > 0}

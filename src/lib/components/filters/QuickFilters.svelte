@@ -371,7 +371,9 @@
           <button
             onclick={() => applyCustomFilter(customFilter.id)}
             class="cursor-pointer inline-flex items-center gap-1.5 pr-1.5 py-1 text-xs transition-colors
-            {isActive ? 'text-information font-medium' : 'text-muted-foreground hover:text-foreground'}"
+            {isActive
+              ? 'text-information font-medium'
+              : 'text-muted-foreground hover:text-foreground'}"
           >
             <AtlaskitIcon name={customFilter.icon || 'filter'} size={12} />
             {customFilter.name}
@@ -459,7 +461,9 @@
     <div class="flex items-center gap-3 pt-2 border-t border-border/50">
       <!-- Quick Filters (Static) -->
       <div class="flex items-center gap-1.5">
-        <span class="text-[10px] font-bold text-text-subtlest uppercase tracking-wider mr-1">Quick:</span>
+        <span class="text-[10px] font-bold text-text-subtlest uppercase tracking-wider mr-1"
+          >Quick:</span
+        >
         <RecencyDropdown selectedOption={filtersState.recencyFilter} onSelect={setRecencyFilter} />
         {#each filtersState.filters as filter (filter.id)}
           <Tooltip text={filter.jqlCondition}>
@@ -470,7 +474,11 @@
                 ? 'bg-information/15 border-transparent text-information font-medium'
                 : 'bg-transparent border-border/50 text-muted-foreground hover:bg-surface-hovered hover:border-border'}"
             >
-              <AtlaskitIcon name={getIconName(filter.icon)} size={12} class={filter.isActive ? '' : 'opacity-50'} />
+              <AtlaskitIcon
+                name={getIconName(filter.icon)}
+                size={12}
+                class={filter.isActive ? '' : 'opacity-50'}
+              />
               {filter.label}
             </button>
           </Tooltip>
@@ -530,7 +538,9 @@
       <!-- Data Filters (Dynamic dropdowns) -->
       {#if hasVisibleDynamicFilters}
         <div class="flex items-center gap-1.5">
-          <span class="text-[10px] font-bold text-text-subtlest uppercase tracking-wider mr-1">By:</span>
+          <span class="text-[10px] font-bold text-text-subtlest uppercase tracking-wider mr-1"
+            >By:</span
+          >
           {#each DYNAMIC_FILTER_CATEGORIES as category (category)}
             {@const filters = filtersState.dynamicFilters[category]}
             {@const config = DYNAMIC_FILTER_CONFIG[category]}

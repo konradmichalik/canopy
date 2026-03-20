@@ -126,7 +126,9 @@
         onclick={openIssue}
         class="inline-flex items-center gap-1 hover:text-text-brand hover:underline"
       >
-        <span class="font-data font-semibold text-xs text-text-subtlest bg-surface-sunken px-1.5 py-0.5 rounded group-hover:text-text-brand">
+        <span
+          class="font-data font-semibold text-xs text-text-subtlest bg-surface-sunken px-1.5 py-0.5 rounded group-hover:text-text-brand"
+        >
           {issue.key}
         </span>
         <AtlaskitIcon
@@ -181,7 +183,9 @@
   {#if showDueDate && issue.fields.duedate}
     {@const dueDateStatus = getDueDateStatus(issue.fields.duedate)}
     <Tooltip text={`${dueDateStatus.label}: ${formatDate(issue.fields.duedate)}`}>
-      <div class="flex items-center gap-1 text-xs {dueDateStatus.colorClass} flex-shrink-0 w-24 justify-end">
+      <div
+        class="flex items-center gap-1 text-xs {dueDateStatus.colorClass} flex-shrink-0 w-24 justify-end"
+      >
         <AtlaskitIcon name="calendar" size={14} color={dueDateStatus.iconColor} />
         <span class="font-data">{formatDate(issue.fields.duedate)}</span>
       </div>

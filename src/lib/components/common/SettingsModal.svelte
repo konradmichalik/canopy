@@ -304,15 +304,24 @@
           <span class="settings-label">Theme</span>
           <p class="settings-desc">Light, dark, or follow your system preference</p>
           <div class="segmented-control">
-            <button onclick={() => handleThemeChange('light')} class={themeState.theme === 'light' ? 'seg-active' : ''}>
+            <button
+              onclick={() => handleThemeChange('light')}
+              class={themeState.theme === 'light' ? 'seg-active' : ''}
+            >
               <AtlaskitIcon name="sun" size={14} />
               Light
             </button>
-            <button onclick={() => handleThemeChange('dark')} class={themeState.theme === 'dark' ? 'seg-active' : ''}>
+            <button
+              onclick={() => handleThemeChange('dark')}
+              class={themeState.theme === 'dark' ? 'seg-active' : ''}
+            >
               <AtlaskitIcon name="moon" size={14} />
               Dark
             </button>
-            <button onclick={() => handleThemeChange('system')} class={themeState.theme === 'system' ? 'seg-active' : ''}>
+            <button
+              onclick={() => handleThemeChange('system')}
+              class={themeState.theme === 'system' ? 'seg-active' : ''}
+            >
               <AtlaskitIcon name="theme" size={14} />
               Auto
             </button>
@@ -327,7 +336,11 @@
           <p class="settings-desc">Intensity of colors for status indicators and labels</p>
           <div class="segmented-control">
             {#each COLOR_INTENSITY_OPTIONS as option (option.id)}
-              <button onclick={() => handleColorIntensityChange(option.id)} class={colorIntensityState.intensity === option.id ? 'seg-active' : ''} title={option.description}>
+              <button
+                onclick={() => handleColorIntensityChange(option.id)}
+                class={colorIntensityState.intensity === option.id ? 'seg-active' : ''}
+                title={option.description}
+              >
                 {option.label}
               </button>
             {/each}
@@ -342,10 +355,16 @@
             <span class="settings-label">Display Density</span>
             <p class="settings-desc">Spacing between tree items</p>
             <div class="segmented-control">
-              <button onclick={() => handleDensityChange('comfortable')} class={displayDensityState.density === 'comfortable' ? 'seg-active' : ''}>
+              <button
+                onclick={() => handleDensityChange('comfortable')}
+                class={displayDensityState.density === 'comfortable' ? 'seg-active' : ''}
+              >
                 Comfortable
               </button>
-              <button onclick={() => handleDensityChange('compact')} class={displayDensityState.density === 'compact' ? 'seg-active' : ''}>
+              <button
+                onclick={() => handleDensityChange('compact')}
+                class={displayDensityState.density === 'compact' ? 'seg-active' : ''}
+              >
                 Compact
               </button>
             </div>
@@ -358,10 +377,16 @@
             <span class="settings-label">Date Format</span>
             <p class="settings-desc">Exact timestamps or relative time</p>
             <div class="segmented-control">
-              <button onclick={() => handleDateFormatChange('absolute')} class={dateFormatState.format === 'absolute' ? 'seg-active' : ''}>
+              <button
+                onclick={() => handleDateFormatChange('absolute')}
+                class={dateFormatState.format === 'absolute' ? 'seg-active' : ''}
+              >
                 Absolute
               </button>
-              <button onclick={() => handleDateFormatChange('relative')} class={dateFormatState.format === 'relative' ? 'seg-active' : ''}>
+              <button
+                onclick={() => handleDateFormatChange('relative')}
+                class={dateFormatState.format === 'relative' ? 'seg-active' : ''}
+              >
                 Relative
               </button>
             </div>
@@ -535,12 +560,16 @@
             <!-- Stale Checkpoint Alert -->
             <div class="space-y-2">
               <span class="settings-label">Stale Checkpoint Alert</span>
-              <p class="settings-desc">Highlight the Check button when checkpoint is older than this</p>
+              <p class="settings-desc">
+                Highlight the Check button when checkpoint is older than this
+              </p>
               <div class="segmented-control">
                 {#each STALE_CHECKPOINT_OPTIONS as option (option.value)}
                   <button
                     onclick={() => handleStaleCheckpointDaysChange(option.value)}
-                    class={changeTrackingState.staleCheckpointDays === option.value ? 'seg-active' : ''}
+                    class={changeTrackingState.staleCheckpointDays === option.value
+                      ? 'seg-active'
+                      : ''}
                   >
                     {option.label}
                   </button>

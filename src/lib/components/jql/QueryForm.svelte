@@ -128,7 +128,10 @@
     <!-- Form -->
     <form onsubmit={handleSubmit} class="p-4 space-y-4">
       <div class="space-y-1.5">
-        <label for="queryTitle" class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider">Title</label>
+        <label
+          for="queryTitle"
+          class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider">Title</label
+        >
         <Input
           id="queryTitle"
           type="text"
@@ -149,7 +152,10 @@
       </div>
 
       <div class="space-y-1.5">
-        <label for="queryJql" class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider">JQL Query</label>
+        <label
+          for="queryJql"
+          class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider">JQL Query</label
+        >
         <div class="relative">
           <textarea
             id="queryJql"
@@ -218,7 +224,9 @@
 
       <!-- Color Selection -->
       <fieldset>
-        <legend class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider mb-2">Color (optional)</legend>
+        <legend class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider mb-2"
+          >Color (optional)</legend
+        >
         <div class="flex flex-wrap gap-2.5">
           {#each QUERY_COLORS as c (c.id)}
             <Tooltip text={c.label}>
@@ -245,7 +253,11 @@
           <Tooltip
             text="Wraps all issues in a collapsible header showing aggregated time and completion stats"
           >
-            <AtlaskitIcon name="status-information" size={14} class="text-text-subtlest/50 hover:text-text-subtlest cursor-help transition-colors" />
+            <AtlaskitIcon
+              name="status-information"
+              size={14}
+              class="text-text-subtlest/50 hover:text-text-subtlest cursor-help transition-colors"
+            />
           </Tooltip>
         </div>
       </div>
