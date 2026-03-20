@@ -3,7 +3,6 @@
   import Tooltip from '../common/Tooltip.svelte';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
-  import { Label } from '$lib/components/ui/label';
   import { Switch } from '$lib/components/ui/switch';
   import type { SavedQuery, QueryColor } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
@@ -128,8 +127,8 @@
 
     <!-- Form -->
     <form onsubmit={handleSubmit} class="p-4 space-y-4">
-      <div class="space-y-2">
-        <Label for="queryTitle">Title</Label>
+      <div class="space-y-1.5">
+        <label for="queryTitle" class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider">Title</label>
         <Input
           id="queryTitle"
           type="text"
@@ -144,51 +143,49 @@
           </div>
         {:else if titleSlug}
           <p class="text-xs text-muted-foreground">
-            URL: /query/<span class="font-mono">{titleSlug}</span>
+            URL: <span class="font-data text-text-subtlest">/query/{titleSlug}</span>
           </p>
         {/if}
       </div>
 
-      <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <Label for="queryJql">JQL Query</Label>
+      <div class="space-y-1.5">
+        <label for="queryJql" class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider">JQL Query</label>
+        <div class="relative">
+          <textarea
+            id="queryJql"
+            bind:value={jql}
+            placeholder="project = MYPROJECT AND sprint in openSprints()"
+            rows="4"
+            class="flex w-full min-w-0 rounded-md border bg-surface-sunken/50 shadow-inner px-3 py-2 text-sm transition-[color,box-shadow] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 font-data text-xs leading-relaxed resize-none
+              focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+              {hasJqlWarning
+              ? 'border-destructive focus-visible:ring-destructive/20'
+              : 'border-input'}"
+            onchange={() => (jqlCheckResult = null)}
+          ></textarea>
           {#if connectionState.isConnected}
-            <Button
+            <button
               type="button"
-              variant="outline"
-              size="sm"
               onclick={checkJql}
               disabled={isCheckingJql || !jql.trim()}
-              class="h-7 text-xs"
+              class="absolute top-2 right-2 inline-flex items-center gap-1.5 text-xs font-semibold bg-background border border-border/50 shadow-sm hover:bg-surface-hovered px-2.5 py-1 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {#if isCheckingJql}
-                <AtlaskitIcon name="refresh" size={14} class="animate-spin" />
+                <AtlaskitIcon name="refresh" size={12} class="animate-spin" />
                 Checking...
               {:else}
-                <AtlaskitIcon name="check-circle" size={14} />
+                <AtlaskitIcon name="check-circle" size={12} />
                 Check JQL
               {/if}
-            </Button>
+            </button>
           {/if}
         </div>
-        <textarea
-          id="queryJql"
-          bind:value={jql}
-          placeholder="project = MYPROJECT AND sprint in openSprints()"
-          rows="4"
-          class="flex w-full min-w-0 rounded-md border bg-background px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 font-mono resize-none
-            focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
-            {hasJqlWarning
-            ? 'border-destructive focus-visible:ring-destructive/20'
-            : 'border-input'}"
-          onchange={() => (jqlCheckResult = null)}
-        ></textarea>
         {#if jqlCheckResult}
           {#if jqlCheckResult.valid}
             <div class="flex items-center gap-1.5 text-xs text-text-success">
               <AtlaskitIcon name="check-circle" size={14} />
               <span
-                >Valid JQL - {jqlCheckResult.count}
+                >Valid JQL — <span class="font-data font-bold">{jqlCheckResult.count}</span>
                 {jqlCheckResult.count === 1 ? 'result' : 'results'}</span
               >
             </div>
@@ -204,7 +201,7 @@
             <span>{jqlValidation.error}</span>
           </div>
         {:else}
-          <p class="text-xs text-muted-foreground">
+          <p class="text-[11px] text-text-subtlest">
             Enter a valid JQL query. The app will automatically build the hierarchy from the
             results.
             <a
@@ -221,17 +218,17 @@
 
       <!-- Color Selection -->
       <fieldset>
-        <legend class="block text-sm font-medium text-text mb-2"> Color (optional) </legend>
-        <div class="flex flex-wrap gap-2">
+        <legend class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider mb-2">Color (optional)</legend>
+        <div class="flex flex-wrap gap-2.5">
           {#each QUERY_COLORS as c (c.id)}
             <Tooltip text={c.label}>
               <button
                 type="button"
                 onclick={() => selectColor(c.id)}
-                class="w-8 h-8 rounded-full {c.bg} transition-all
+                class="w-7 h-7 rounded-full {c.bg} transition-all duration-200 cursor-pointer
                   {color === c.id
-                  ? 'ring-2 ring-offset-2 ring-offset-surface ring-text scale-110'
-                  : 'hover:scale-110 opacity-70 hover:opacity-100'}"
+                  ? 'ring-2 ring-offset-2 ring-offset-surface ring-muted-foreground scale-110'
+                  : 'hover:scale-110 opacity-60 hover:opacity-100'}"
                 aria-label={c.label}
                 aria-pressed={color === c.id}
               ></button>
@@ -248,7 +245,7 @@
           <Tooltip
             text="Wraps all issues in a collapsible header showing aggregated time and completion stats"
           >
-            <AtlaskitIcon name="status-information" size={14} class="text-text-subtlest" />
+            <AtlaskitIcon name="status-information" size={14} class="text-text-subtlest/50 hover:text-text-subtlest cursor-help transition-colors" />
           </Tooltip>
         </div>
       </div>
@@ -260,12 +257,20 @@
       {/if}
 
       <!-- Actions -->
-      <div class="flex justify-end gap-3 pt-2">
-        <Button type="button" variant="ghost" onclick={onCancel}>Cancel</Button>
-        <Button type="submit">
-          <AtlaskitIcon name="save" size={16} />
+      <div class="flex justify-end gap-3 pt-3 border-t border-border/50">
+        <button
+          type="button"
+          onclick={onCancel}
+          class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-surface-hovered transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 rounded-lg text-sm font-semibold text-primary-foreground bg-primary hover:bg-brand-hovered shadow-sm transition-colors"
+        >
           {isEdit ? 'Save Changes' : 'Create Query'}
-        </Button>
+        </button>
       </div>
     </form>
   </div>
