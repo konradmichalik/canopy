@@ -271,7 +271,7 @@
           <Skeleton class="h-5 w-20" />
         {:else if !isEmpty}
           <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-foreground">
+            <span class="text-lg font-bold font-data text-foreground">
               {#if issuesState.isPartialLoad}
                 {issuesState.loadedCount.toLocaleString()} of {issuesState.totalCount.toLocaleString()}
               {:else}
@@ -352,7 +352,7 @@
           {/if}
         </div>
 
-        <div class="w-px h-5 bg-border mx-1"></div>
+        <div class="w-px h-4 bg-border/50 mx-1"></div>
 
         <Tooltip content="Expand all" placement="bottom">
           <Button
@@ -405,7 +405,7 @@
           </Button>
         </Tooltip>
 
-        <div class="w-px h-5 bg-border mx-1"></div>
+        <div class="w-px h-4 bg-border/50 mx-1"></div>
 
         <!-- Options Toggle (Filters, Grouping, Sorting) -->
         <button
@@ -503,7 +503,7 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div
     bind:this={treeContainerRef}
-    class="flex-1 overflow-auto p-3 outline-none"
+    class="flex-1 overflow-auto p-3 outline-none tree-scroll"
     tabindex="0"
     role="tree"
     aria-label="Issue hierarchy tree"

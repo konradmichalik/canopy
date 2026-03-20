@@ -44,10 +44,10 @@
   <Tooltip text={isDisabled ? 'Sorting disabled - JQL contains ORDER BY clause' : 'Sort issues'}>
     <DropdownMenu.Trigger
       disabled={isDisabled}
-      class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors
+      class="inline-flex items-center gap-1.5 px-2 h-8 text-xs rounded border transition-colors
         {isDisabled
-        ? 'bg-muted border-border text-muted-foreground cursor-not-allowed opacity-50'
-        : 'bg-card border-border text-muted-foreground hover:border-border hover:bg-accent'}"
+        ? 'bg-muted border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
+        : 'bg-card border-border/50 text-muted-foreground hover:bg-surface-hovered hover:border-border'}"
     >
       <AtlaskitIcon name="sort" size={16} />
       <span class="hidden sm:inline">Sort: {selectedLabel}</span>

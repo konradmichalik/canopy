@@ -107,6 +107,18 @@
     )
   );
 
+  // Global ⌘K shortcut to focus search
+  $effect(() => {
+    function handleGlobalKeydown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        inputElement?.focus();
+      }
+    }
+    document.addEventListener('keydown', handleGlobalKeydown);
+    return () => document.removeEventListener('keydown', handleGlobalKeydown);
+  });
+
   // Debounce timer for search input
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
   // Local search text that tracks store but can be edited independently
@@ -335,8 +347,8 @@
           role="listitem"
           class="group inline-flex items-center rounded-full border transition-all
           {isActive
-            ? 'bg-primary/10 border-primary/30'
-            : 'bg-card border-border hover:border-primary/30'}
+            ? 'bg-information/15 border-transparent'
+            : 'bg-transparent border-border/50 hover:bg-surface-hovered hover:border-border'}
           {isDragging ? 'opacity-50 scale-95' : ''}
           {isDragOver ? 'ring-2 ring-primary ring-offset-1' : ''}"
           ondragover={(e) => filterDrag.handleDragOver(e, index)}
@@ -359,7 +371,7 @@
           <button
             onclick={() => applyCustomFilter(customFilter.id)}
             class="cursor-pointer inline-flex items-center gap-1.5 pr-1.5 py-1 text-xs transition-colors
-            {isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}"
+            {isActive ? 'text-information font-medium' : 'text-muted-foreground hover:text-foreground'}"
           >
             <AtlaskitIcon name={customFilter.icon || 'filter'} size={12} />
             {customFilter.name}
@@ -416,7 +428,7 @@
           value={storeSearchText}
           oninput={handleSearchInput}
           onkeydown={handleSearchKeydown}
-          class="w-48 h-8 pl-8 pr-8 text-xs bg-card"
+          class="w-48 !h-8 pl-8 pr-8 text-xs bg-card"
         />
         {#if storeSearchText || inputElement?.value}
           <button
@@ -425,12 +437,16 @@
           >
             <AtlaskitIcon name="cross" size={12} />
           </button>
+        {:else}
+          <span class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none">
+            <kbd class="kbd text-[10px] px-1.5 py-0">⌘K</kbd>
+          </span>
         {/if}
       </div>
 
       <!-- Right: View Controls (Grouping, Fields, Sorting) -->
       <div class="flex items-center gap-3 flex-shrink-0">
-        <span class="text-xs text-muted-foreground font-medium">View:</span>
+        <span class="text-[10px] font-bold text-text-subtlest uppercase tracking-wider">View:</span>
         <div class="flex items-center gap-1.5">
           <GroupByDropdown />
           <FieldSelector />
@@ -443,7 +459,7 @@
     <div class="flex items-center gap-3 pt-2 border-t border-border/50">
       <!-- Quick Filters (Static) -->
       <div class="flex items-center gap-1.5">
-        <span class="text-xs text-muted-foreground font-medium mr-1">Quick:</span>
+        <span class="text-[10px] font-bold text-text-subtlest uppercase tracking-wider mr-1">Quick:</span>
         <RecencyDropdown selectedOption={filtersState.recencyFilter} onSelect={setRecencyFilter} />
         {#each filtersState.filters as filter (filter.id)}
           <Tooltip text={filter.jqlCondition}>
@@ -451,10 +467,10 @@
               onclick={() => toggleFilter(filter.id)}
               class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
               {filter.isActive
-                ? 'bg-primary/10 border-primary/30 text-primary font-medium'
-                : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
+                ? 'bg-information/15 border-transparent text-information font-medium'
+                : 'bg-transparent border-border/50 text-muted-foreground hover:bg-surface-hovered hover:border-border'}"
             >
-              <AtlaskitIcon name={getIconName(filter.icon)} size={12} />
+              <AtlaskitIcon name={getIconName(filter.icon)} size={12} class={filter.isActive ? '' : 'opacity-50'} />
               {filter.label}
             </button>
           </Tooltip>
@@ -467,8 +483,8 @@
               <button
                 class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
                 {filtersState.flagFilter
-                  ? 'bg-primary/10 border-primary/30 text-primary font-medium'
-                  : 'bg-card border-border text-muted-foreground hover:border-primary/30 hover:bg-accent'}"
+                  ? 'bg-information/15 border-transparent text-information font-medium'
+                  : 'bg-transparent border-border/50 text-muted-foreground hover:bg-surface-hovered hover:border-border'}"
               >
                 <AtlaskitIcon name="flag" size={12} />
                 Flagged
@@ -508,13 +524,13 @@
 
       <!-- Divider -->
       {#if hasVisibleDynamicFilters}
-        <div class="h-5 w-px bg-border"></div>
+        <div class="h-4 w-px bg-border/50"></div>
       {/if}
 
       <!-- Data Filters (Dynamic dropdowns) -->
       {#if hasVisibleDynamicFilters}
         <div class="flex items-center gap-1.5">
-          <span class="text-xs text-muted-foreground font-medium mr-1">By:</span>
+          <span class="text-[10px] font-bold text-text-subtlest uppercase tracking-wider mr-1">By:</span>
           {#each DYNAMIC_FILTER_CATEGORIES as category (category)}
             {@const filters = filtersState.dynamicFilters[category]}
             {@const config = DYNAMIC_FILTER_CONFIG[category]}

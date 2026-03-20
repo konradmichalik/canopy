@@ -48,8 +48,8 @@
   <DropdownMenu.Trigger
     class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full border transition-colors
       {hasSelection
-      ? 'bg-accent border-primary text-primary font-medium'
-      : 'bg-card border-border text-muted-foreground hover:border-border hover:bg-accent'}"
+      ? 'bg-information/15 border-transparent text-information font-medium'
+      : 'bg-transparent border-border/50 text-muted-foreground hover:bg-surface-hovered hover:border-border'}"
   >
     <AtlaskitIcon name="clock" size={12} />
     <span>{selectedLabel}</span>

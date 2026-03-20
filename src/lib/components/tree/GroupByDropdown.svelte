@@ -25,7 +25,7 @@
 <DropdownMenu.Root bind:open>
   <Tooltip text="Group by">
     <DropdownMenu.Trigger
-      class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs rounded border transition-colors bg-card border-border text-muted-foreground hover:border-border hover:bg-accent"
+      class="inline-flex items-center gap-1.5 px-2 h-8 text-xs rounded border transition-colors bg-card border-border/50 text-muted-foreground hover:bg-surface-hovered hover:border-border"
     >
       <AtlaskitIcon name="layers" size={16} />
       <span class="hidden sm:inline">Group: {selectedOption.label}</span>
