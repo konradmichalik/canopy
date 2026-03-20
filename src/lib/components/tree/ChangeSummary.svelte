@@ -143,6 +143,8 @@
         type="button"
         onclick={() => (isExpanded = !isExpanded)}
         class="flex items-center gap-2 text-sm hover:bg-primary/20 rounded px-1.5 py-0.5 -ml-1 transition-colors"
+        aria-expanded={isExpanded}
+        aria-controls="change-summary-details"
       >
         <AtlaskitIcon name="status" size={16} class="text-primary" />
         <span class="text-foreground flex items-center flex-wrap gap-x-1 gap-y-0.5">
@@ -171,6 +173,8 @@
           onclick={() => (isExpanded = !isExpanded)}
           class="p-1 hover:bg-primary/20 rounded transition-colors"
           title={isExpanded ? 'Collapse details' : 'Show details'}
+          aria-expanded={isExpanded}
+          aria-controls="change-summary-details"
         >
           <AtlaskitIcon
             name={isExpanded ? 'chevron-up' : 'chevron-down'}
@@ -204,7 +208,7 @@
 
     <!-- Expanded Details -->
     {#if isExpanded}
-      <div class="border-t border-primary/30 px-3 py-3 text-xs">
+      <div id="change-summary-details" class="border-t border-primary/30 px-3 py-3 text-xs">
         <!-- View Toggle -->
         <div class="flex justify-end mb-3">
           <button
