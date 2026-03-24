@@ -162,7 +162,9 @@
   <!-- Created Date -->
   {#if showCreated && issue.fields.created}
     <Tooltip text={`Created: ${formatDateTime(issue.fields.created)}`}>
-      <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0 w-24 justify-end">
+      <div
+        class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0 whitespace-nowrap justify-end"
+      >
         <AtlaskitIcon name="calendar" size={14} />
         <span class="font-data text-text-subtlest">{formatDate(issue.fields.created)}</span>
       </div>
@@ -172,7 +174,9 @@
   <!-- Updated Date -->
   {#if showUpdated && issue.fields.updated}
     <Tooltip text={`Updated: ${formatDateTime(issue.fields.updated)}`}>
-      <div class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0 w-24 justify-end">
+      <div
+        class="flex items-center gap-1 text-xs text-text-subtle flex-shrink-0 whitespace-nowrap justify-end"
+      >
         <AtlaskitIcon name="clock" size={14} />
         <span class="font-data text-text-subtlest">{formatDate(issue.fields.updated)}</span>
       </div>
@@ -184,7 +188,7 @@
     {@const dueDateStatus = getDueDateStatus(issue.fields.duedate)}
     <Tooltip text={`${dueDateStatus.label}: ${formatDate(issue.fields.duedate)}`}>
       <div
-        class="flex items-center gap-1 text-xs {dueDateStatus.colorClass} flex-shrink-0 w-24 justify-end"
+        class="flex items-center gap-1 text-xs {dueDateStatus.colorClass} flex-shrink-0 whitespace-nowrap justify-end"
       >
         <AtlaskitIcon name="calendar" size={14} color={dueDateStatus.iconColor} />
         <span class="font-data">{formatDate(issue.fields.duedate)}</span>
