@@ -147,12 +147,17 @@ export abstract class JiraClient {
       }
 
       if (!response.ok) {
-        const errorMessage =
-          typeof data === 'object' && data !== null
-            ? (data as Record<string, unknown>).errorMessages
-              ? ((data as Record<string, unknown>).errorMessages as string[]).join(', ')
-              : ((data as Record<string, unknown>).rawResponse as string) || 'API request failed'
-            : 'API request failed';
+        let errorMessage = 'API request failed';
+
+        if (typeof data === 'object' && data !== null) {
+          const record = data as Record<string, unknown>;
+          if (record.errorMessages) {
+            errorMessage = (record.errorMessages as string[]).join(', ');
+          } else if (typeof record.rawResponse === 'string') {
+            // Response is not JSON (e.g. HTML error page) — use a friendly status message
+            errorMessage = getHttpErrorMessage(response.status);
+          }
+        }
 
         logger.apiError(method, endpoint, { status: response.status, data });
         throw new JiraApiError(errorMessage, response.status, data);
@@ -471,6 +476,16 @@ export abstract class JiraClient {
       return null;
     }
   }
+}
+
+function getHttpErrorMessage(status: number): string {
+  if (status === 401 || status === 403) {
+    return 'Authentication failed. Please check your credentials and VPN connection.';
+  }
+  if (status >= 500) {
+    return 'The Jira server is currently unavailable. Please try again later.';
+  }
+  return `Request failed with status ${status}. Please check your connection and try again.`;
 }
 
 /**
