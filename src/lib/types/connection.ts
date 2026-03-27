@@ -3,6 +3,7 @@
  */
 
 import type { JiraUser } from './jira';
+import type { QueryColor } from './tree';
 
 // ============================================
 // Instance Types
@@ -59,11 +60,30 @@ export interface ConnectionState {
 // ============================================
 
 export interface StoredConnection {
+  id: string;
+  label: string;
   instanceType: JiraInstanceType;
   baseUrl: string;
   credentials: JiraCredentials;
   proxyUrl?: string;
+  color?: QueryColor;
   lastConnected?: string;
+}
+
+// ============================================
+// Connection Instance (runtime state per connection)
+// ============================================
+
+export type ConnectionStatus = 'connected' | 'connecting' | 'error' | 'disconnected';
+
+export interface ConnectionInstance {
+  id: string;
+  config: StoredConnection;
+  status: ConnectionStatus;
+  error: string | null;
+  currentUser: JiraUser | null;
+  epicLinkFieldId: string | null;
+  sprintFieldId: string | null;
 }
 
 // ============================================
@@ -73,6 +93,7 @@ export interface StoredConnection {
 export interface ConnectionFormData {
   instanceType: JiraInstanceType;
   baseUrl: string;
+  label: string;
   email: string;
   apiToken: string;
   username: string;
@@ -80,6 +101,7 @@ export interface ConnectionFormData {
   personalAccessToken: string;
   authMethod: 'basic' | 'pat';
   proxyUrl: string;
+  color?: QueryColor;
 }
 
 // ============================================

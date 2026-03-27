@@ -135,6 +135,8 @@ export interface SavedQuery {
   title: string;
   jql: string;
   color?: QueryColor;
+  /** Reference to StoredConnection.id */
+  connectionId?: string;
   createdAt: string;
   updatedAt: string;
   isDefault?: boolean;
@@ -167,6 +169,8 @@ export interface QuerySeparator {
   id: string;
   /** Optional title - empty means just a line divider */
   title?: string;
+  /** Reference to StoredConnection.id */
+  connectionId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -458,16 +462,22 @@ export function generateQueryId(): string {
 export interface ExportedConfig {
   version: number;
   exportedAt: string;
-  connection: ExportedConnection | null;
+  /** @deprecated Use `connections` instead. Kept for backward-compatible import. */
+  connection?: ExportedConnection | null;
+  /** Multi-connection export (v2+) */
+  connections?: ExportedConnection[];
   queries: QueryListItem[];
   displayFields?: string[];
 }
 
 export interface ExportedConnection {
+  id?: string;
+  label?: string;
   instanceType: 'cloud' | 'server';
   baseUrl: string;
   credentials: ExportedCredentials;
   proxyUrl?: string;
+  color?: QueryColor;
 }
 
 export interface ExportedCredentials {
