@@ -10,7 +10,8 @@
     buildBulkEditUrl,
     copySelectedKeys
   } from '../../stores/selection.svelte';
-  import { connectionState } from '../../stores/connection.svelte';
+  import { getConnection } from '../../stores/connection.svelte';
+  import { issuesState } from '../../stores/issues.svelte';
   import { openExternalUrl } from '../../utils/external-link';
 
   let flashMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -28,7 +29,8 @@
   }
 
   function handleBulkEdit(): void {
-    const baseUrl = connectionState.config?.baseUrl;
+    const connId = issuesState.currentConnectionId;
+    const baseUrl = connId ? getConnection(connId)?.config.baseUrl : undefined;
     if (!baseUrl) return;
 
     const keys = getSelectedKeys();

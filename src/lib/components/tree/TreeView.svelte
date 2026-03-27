@@ -30,7 +30,7 @@
   import { keyboardNavState, clearFocus } from '../../stores/keyboardNavigation.svelte';
   import { groupingState, groupIssues, type IssueGroup } from '../../stores/grouping.svelte';
   import { sortConfigState } from '../../stores/sortConfig.svelte';
-  import { connectionState } from '../../stores/connection.svelte';
+  import { getConnection } from '../../stores/connection.svelte';
   import {
     changeTrackingState,
     saveCheckpoint,
@@ -185,9 +185,11 @@
 
   // Build JIRA URL for opening in browser
   const jiraSearchUrl = $derived.by(() => {
-    if (!connectionState.config?.baseUrl || !effectiveJql) return '';
+    const connId = issuesState.currentConnectionId;
+    const baseUrl = connId ? getConnection(connId)?.config.baseUrl : undefined;
+    if (!baseUrl || !effectiveJql) return '';
     const encodedJql = encodeURIComponent(effectiveJql);
-    return `${connectionState.config.baseUrl}/issues/?jql=${encodedJql}`;
+    return `${baseUrl}/issues/?jql=${encodedJql}`;
   });
 
   function openInJira(): void {

@@ -3,8 +3,9 @@
   import Tooltip from '../common/Tooltip.svelte';
   import { Button } from '$lib/components/ui/button';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import type { SavedQuery, QueryColor, QuerySeparator } from '../../types';
-  import { isSeparator } from '../../types/tree';
+  import type { SavedQuery, QueryColor, QuerySeparator, ConnectionInstance } from '../../types';
+  import { isSeparator, QUERY_COLORS } from '../../types/tree';
+  import { connectionRegistry, reconnectConnection } from '../../stores/connection.svelte';
   import QueryListItem from '../jql/QueryListItem.svelte';
   import SeparatorListItem from '../jql/SeparatorListItem.svelte';
   import QueryForm from '../jql/QueryForm.svelte';
@@ -93,15 +94,17 @@
   ): Promise<void> {
     setupQueryConfig(query, updateUrl);
 
+    const connId = query.connectionId;
+
     // If loadAll is explicitly set, skip pre-check
     if (options.loadAll !== undefined) {
-      await loadIssues(query.jql, { loadAll: options.loadAll });
+      await loadIssues(query.jql, connId, { loadAll: options.loadAll });
       return;
     }
 
     // Pre-check count for large result warning
     try {
-      const { total, needsWarning } = await preCheckIssueCount(query.jql);
+      const { total, needsWarning } = await preCheckIssueCount(query.jql, connId);
 
       if (needsWarning) {
         // Show warning modal
@@ -110,24 +113,28 @@
       }
 
       // Load all if under threshold
-      await loadIssues(query.jql, { loadAll: true });
+      await loadIssues(query.jql, connId, { loadAll: true });
     } catch {
       // On error, fall back to loading first batch
-      await loadIssues(query.jql, { loadAll: false });
+      await loadIssues(query.jql, connId, { loadAll: false });
     }
   }
 
   // Handle warning modal callbacks
   function handleLoadFirstBatch(): void {
     if (pendingLargeQuery) {
-      loadIssues(pendingLargeQuery.query.jql, { loadAll: false });
+      loadIssues(pendingLargeQuery.query.jql, pendingLargeQuery.query.connectionId, {
+        loadAll: false
+      });
       pendingLargeQuery = null;
     }
   }
 
   function handleLoadAll(): void {
     if (pendingLargeQuery) {
-      loadIssues(pendingLargeQuery.query.jql, { loadAll: true });
+      loadIssues(pendingLargeQuery.query.jql, pendingLargeQuery.query.connectionId, {
+        loadAll: true
+      });
       pendingLargeQuery = null;
     }
   }
@@ -227,8 +234,50 @@
   // Get keyboard-focused query for visual highlight
   const keyboardFocusedQuery = $derived(getFocusedQuery());
 
-  function handleNewQuery(): void {
+  // Group items by connectionId for rendering
+  interface ConnectionGroup {
+    connectionId: string;
+    connection: ConnectionInstance | undefined;
+    items: Array<{ item: (typeof jqlState.items)[number]; globalIndex: number }>;
+  }
+
+  const connectionGroups = $derived.by((): ConnectionGroup[] | null => {
+    const connections = connectionRegistry.connections;
+    if (connections.length <= 1) return null;
+
+    // Build groups in connection order
+    const groups: ConnectionGroup[] = connections.map((conn) => ({
+      connectionId: conn.id,
+      connection: conn,
+      items: []
+    }));
+
+    const groupIndex: Record<string, number> = {};
+    connections.forEach((conn, i) => {
+      groupIndex[conn.id] = i;
+    });
+
+    // Distribute items into groups
+    jqlState.items.forEach((item, index) => {
+      const connId = 'connectionId' in item ? (item.connectionId ?? '') : '';
+      const idx = groupIndex[connId] ?? 0; // Orphaned items go to first group
+      groups[idx]?.items.push({ item, globalIndex: index });
+    });
+
+    return groups;
+  });
+
+  function getConnectionColorClasses(color?: string): string {
+    const found = QUERY_COLORS.find((c) => c.id === color);
+    return found ? found.bg : 'bg-muted-foreground/30';
+  }
+
+  // Track which connection new queries should be created in
+  let newQueryConnectionId = $state<string | undefined>(undefined);
+
+  function handleNewQuery(connectionId?: string): void {
     editingQuery = null;
+    newQueryConnectionId = connectionId ?? connectionRegistry.connections[0]?.id;
     showQueryForm = true;
   }
 
@@ -249,11 +298,11 @@
 
       // Reload issues if the edited query is currently active
       if (isActiveQuery) {
-        await loadIssues(jql, { loadAll: true });
+        await loadIssues(jql, editingQuery.connectionId, { loadAll: true });
       }
       showFlashMessage('success', `Query "${title}" updated`);
     } else {
-      const query = addQuery(title, jql, color);
+      const query = addQuery(title, jql, color, newQueryConnectionId);
       if (query && showEntryNode) {
         updateQuery(query.id, { showEntryNode });
       }
@@ -355,12 +404,78 @@
         </div>
         <p class="text-sm font-medium text-foreground mb-1">No saved queries</p>
         <p class="text-xs text-muted-foreground mb-4">Create your first query to get started</p>
-        <Button variant="outline" size="sm" onclick={handleNewQuery}>
+        <Button variant="outline" size="sm" onclick={() => handleNewQuery()}>
           <AtlaskitIcon name="add" size={14} />
           Create query
         </Button>
       </div>
+    {:else if connectionGroups}
+      <!-- Multi-connection grouped view -->
+      {#each connectionGroups as group (group.connectionId)}
+        <div class="mb-2">
+          <!-- Connection Group Header -->
+          <div class="flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-muted-foreground">
+            <div class="w-2 h-2 rounded-full shrink-0 {getConnectionColorClasses(group.connection?.config.color)}"></div>
+            <span class="truncate flex-1">{group.connection?.config.label ?? 'Unknown'}</span>
+            {#if group.connection?.status === 'error'}
+              <Tooltip text="Connection error — click to reconnect">
+                <button
+                  class="text-text-warning hover:text-text-danger"
+                  onclick={() => group.connection && reconnectConnection(group.connection.id)}
+                >
+                  <AtlaskitIcon name="warning" size={12} />
+                </button>
+              </Tooltip>
+            {/if}
+            <Tooltip text="New query">
+              <button
+                class="text-muted-foreground hover:text-foreground"
+                onclick={() => handleNewQuery(group.connectionId)}
+              >
+                <AtlaskitIcon name="add" size={12} />
+              </button>
+            </Tooltip>
+          </div>
+          <!-- Items in this group -->
+          <div class="space-y-1 {group.connection?.status === 'error' ? 'opacity-50' : ''}">
+            {#each group.items as { item, globalIndex } (item.id)}
+              {#if isSeparator(item)}
+                <SeparatorListItem
+                  separator={item}
+                  index={globalIndex}
+                  isDragging={queryDrag.isDragging(globalIndex)}
+                  isDragOver={queryDrag.isDragOver(globalIndex)}
+                  onEdit={handleEditSeparator}
+                  onDelete={handleDeleteSeparator}
+                  onDragStart={queryDrag.handleDragStart}
+                  onDragOver={queryDrag.handleDragOver}
+                  onDrop={queryDrag.handleDrop}
+                  onDragEnd={queryDrag.handleDragEnd}
+                />
+              {:else}
+                <QueryListItem
+                  query={item}
+                  index={globalIndex}
+                  isActive={routerState.activeQueryId === item.id}
+                  isKeyboardFocused={keyboardFocusedQuery?.id === item.id}
+                  isDragging={queryDrag.isDragging(globalIndex)}
+                  isDragOver={queryDrag.isDragOver(globalIndex)}
+                  onSelect={handleSelectQuery}
+                  onEdit={handleEditQuery}
+                  onDelete={handleDeleteQuery}
+                  onDuplicate={handleDuplicateQuery}
+                  onDragStart={queryDrag.handleDragStart}
+                  onDragOver={queryDrag.handleDragOver}
+                  onDrop={queryDrag.handleDrop}
+                  onDragEnd={queryDrag.handleDragEnd}
+                />
+              {/if}
+            {/each}
+          </div>
+        </div>
+      {/each}
     {:else}
+      <!-- Single-connection flat view -->
       <div class="space-y-1">
         {#each jqlState.items as item, index (item.id)}
           {#if isSeparator(item)}
@@ -422,7 +537,7 @@
           <AtlaskitIcon name="chevron-down" size={12} />
         </DropdownMenu.Trigger>
         <DropdownMenu.Content align="end" class="w-36">
-          <DropdownMenu.Item onclick={handleNewQuery}>
+          <DropdownMenu.Item onclick={() => handleNewQuery()}>
             <AtlaskitIcon name="search" size={14} class="mr-2" />
             Query
           </DropdownMenu.Item>

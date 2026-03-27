@@ -11,15 +11,21 @@
   import HelpModal from '../help/HelpModal.svelte';
   import { Button } from '$lib/components/ui/button';
   import { routerState, toggleSidebar, setSidebarWidth } from '../../stores/router.svelte';
-  import { connectionState } from '../../stores/connection.svelte';
+  import { getConnectionState } from '../../stores/connection.svelte';
   import { issuesState } from '../../stores/issues.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
+
+  interface Props {
+    onManageConnections?: () => void;
+  }
+
+  let { onManageConnections }: Props = $props();
 
   const activeQuery = $derived(
     routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : null
   );
   const queryTitle = $derived(activeQuery?.title || null);
-  const isLoading = $derived(connectionState.isConnecting || issuesState.isLoading);
+  const isLoading = $derived(getConnectionState().isConnecting || issuesState.isLoading);
 
   let showAboutModal = $state(false);
 </script>
@@ -67,11 +73,11 @@
 
       <!-- Right: User + Settings -->
       <div class="flex items-center gap-2 flex-shrink-0">
-        {#if connectionState.currentUser}
+        {#if getConnectionState().currentUser}
           <div class="flex items-center gap-2 px-2">
-            <Avatar user={connectionState.currentUser} size="sm" />
+            <Avatar user={getConnectionState().currentUser} size="sm" />
             <span class="text-sm text-muted-foreground hidden sm:block">
-              {connectionState.currentUser.displayName}
+              {getConnectionState().currentUser.displayName}
             </span>
           </div>
           <div class="h-4 w-px bg-border"></div>
@@ -84,7 +90,7 @@
             <AtlaskitIcon name="question-circle" size={20} />
           </button>
         </Tooltip>
-        <SettingsModal />
+        <SettingsModal {onManageConnections} />
       </div>
     </div>
   </header>

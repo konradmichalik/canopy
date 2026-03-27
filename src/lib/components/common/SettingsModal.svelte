@@ -17,9 +17,9 @@
   import { initializeQueries, getQueries } from '../../stores/jql.svelte';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import {
-    initializeConnection,
-    disconnect,
-    connectionState
+    initializeConnections,
+    disconnectAll,
+    getConnectionState
   } from '../../stores/connection.svelte';
   import Avatar from './Avatar.svelte';
   import { themeState, setTheme, type Theme } from '../../stores/theme.svelte';
@@ -74,9 +74,10 @@
 
   interface Props {
     minimal?: boolean;
+    onManageConnections?: () => void;
   }
 
-  let { minimal = false }: Props = $props();
+  let { minimal = false, onManageConnections }: Props = $props();
 
   let open = $state(false);
   let activeTab = $state('appearance');
@@ -161,7 +162,7 @@
   }
 
   async function handleDisconnectConfirm(): Promise<void> {
-    await disconnect();
+    await disconnectAll();
   }
 
   async function handleFileSelect(event: Event): Promise<void> {
@@ -177,7 +178,7 @@
       });
 
       await initializeQueries();
-      await initializeConnection();
+      await initializeConnections();
 
       const messages: string[] = [];
       if (result.imported.connection) {
@@ -728,16 +729,16 @@
       <!-- Account Tab -->
       {#if !minimal}
         <Tabs.Content value="account" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
-          {#if connectionState.isConnected && connectionState.currentUser}
+          {#if getConnectionState().isConnected && getConnectionState().currentUser}
             <!-- User Info -->
             <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-              <Avatar user={connectionState.currentUser} size="md" />
+              <Avatar user={getConnectionState().currentUser} size="md" />
               <div class="flex-1 min-w-0">
-                <p class="font-medium truncate">{connectionState.currentUser.displayName}</p>
+                <p class="font-medium truncate">{getConnectionState().currentUser.displayName}</p>
                 <p class="text-sm text-muted-foreground truncate">
-                  {connectionState.currentUser.emailAddress ||
-                    (connectionState.config?.credentials.type === 'cloud'
-                      ? connectionState.config.credentials.email
+                  {getConnectionState().currentUser.emailAddress ||
+                    (getConnectionState().config?.credentials.type === 'cloud'
+                      ? getConnectionState().config.credentials.email
                       : '')}
                 </p>
               </div>
@@ -747,35 +748,45 @@
             <div class="space-y-3">
               <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">Jira URL</p>
-                <p class="text-sm truncate">{connectionState.config?.baseUrl}</p>
+                <p class="text-sm truncate">{getConnectionState().config?.baseUrl}</p>
               </div>
               <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">Instance Type</p>
                 <p class="text-sm">
-                  {connectionState.config?.instanceType === 'cloud' ? 'Cloud' : 'Server / DC'}
+                  {getConnectionState().config?.instanceType === 'cloud' ? 'Cloud' : 'Server / DC'}
                 </p>
               </div>
             </div>
 
-            {#if connectionState.lastConnected}
-              <Tooltip text={`Connected: ${formatDateTime(connectionState.lastConnected)}`}>
+            {#if getConnectionState().lastConnected}
+              <Tooltip text={`Connected: ${formatDateTime(getConnectionState().lastConnected)}`}>
                 <span
                   class="inline-flex px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs"
                 >
-                  Connected {formatDateTimeWithSetting(connectionState.lastConnected)}
+                  Connected {formatDateTimeWithSetting(getConnectionState().lastConnected)}
                 </span>
               </Tooltip>
             {/if}
 
-            <!-- Disconnect -->
-            <div class="pt-3 border-t">
+            <!-- Connection Management -->
+            <div class="pt-3 border-t space-y-2">
+              {#if onManageConnections}
+                <Button
+                  variant="outline"
+                  class="w-full justify-start gap-2"
+                  onclick={() => { open = false; onManageConnections?.(); }}
+                >
+                  <AtlaskitIcon name="settings" size={16} />
+                  Manage Connections
+                </Button>
+              {/if}
               <Button
                 variant="destructive"
                 class="w-full justify-start gap-2"
                 onclick={handleDisconnectClick}
               >
                 <AtlaskitIcon name="log-out" size={16} />
-                Disconnect
+                Disconnect All
               </Button>
             </div>
           {:else}
