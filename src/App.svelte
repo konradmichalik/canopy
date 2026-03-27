@@ -4,7 +4,7 @@
   import MainLayout from './lib/components/layout/MainLayout.svelte';
   import AppLoader from './lib/components/common/AppLoader.svelte';
   import UpdateNotification from './lib/components/common/UpdateNotification.svelte';
-  import { connectionState, initializeConnection } from './lib/stores/connection.svelte';
+  import { connectionRegistry, initializeConnections } from './lib/stores/connection.svelte';
   import { initializeRouter, cleanupRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
   import { initializeColorIntensity } from './lib/stores/colorIntensity.svelte';
@@ -32,6 +32,11 @@
 
   let isInitializing = $state(true);
   let availableUpdate = $state<UpdateInfo | null>(null);
+  let showConnectionManager = $state(false);
+
+  const hasConnection = $derived(
+    connectionRegistry.connections.some((c) => c.status === 'connected')
+  );
 
   onMount(() => {
     // Initialize all stores and connection
@@ -64,8 +69,8 @@
         const validQueryIds = new Set(getQueries().map((q) => q.id));
         runCheckpointCleanup(validQueryIds);
 
-        // Try to restore connection from storage
-        await initializeConnection();
+        // Initialize connection registry (with migration from single-connection format)
+        await initializeConnections();
 
         // Check for app updates (non-blocking)
         checkForUpdate().then((update) => {
@@ -92,13 +97,13 @@
 
 {#if isInitializing}
   <AppLoader />
-{:else if connectionState.isConnected}
+{:else if hasConnection && !showConnectionManager}
   <div class="animate-fade-in">
-    <MainLayout />
+    <MainLayout onManageConnections={() => (showConnectionManager = true)} />
   </div>
 {:else}
   <div class="animate-fade-in">
-    <ConnectionScreen />
+    <ConnectionScreen onBack={hasConnection ? () => (showConnectionManager = false) : undefined} />
   </div>
 {/if}
 
