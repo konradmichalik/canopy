@@ -83,6 +83,25 @@ export function getQueries(): SavedQuery[] {
 }
 
 /**
+ * Get queries belonging to a specific connection
+ */
+export function getQueriesByConnection(connectionId: string): SavedQuery[] {
+  return getQueries().filter((q) => q.connectionId === connectionId);
+}
+
+/**
+ * Delete all queries and separators belonging to a connection
+ */
+export function deleteItemsByConnection(connectionId: string): number {
+  const before = jqlState.items.length;
+  jqlState.items = jqlState.items.filter(
+    (item) => (item as { connectionId?: string }).connectionId !== connectionId
+  );
+  persistItems();
+  return before - jqlState.items.length;
+}
+
+/**
  * Get a query by ID
  */
 export function getQueryById(id: string): SavedQuery | undefined {
@@ -119,7 +138,12 @@ export function isTitleUnique(title: string, excludeId?: string): boolean {
 /**
  * Add a new query
  */
-export function addQuery(title: string, jql: string, color?: QueryColor): SavedQuery {
+export function addQuery(
+  title: string,
+  jql: string,
+  color?: QueryColor,
+  connectionId?: string
+): SavedQuery {
   const now = new Date().toISOString();
   const newQuery: SavedQuery = {
     type: 'query',
@@ -127,6 +151,7 @@ export function addQuery(title: string, jql: string, color?: QueryColor): SavedQ
     title: title.trim(),
     jql: jql.trim(),
     color,
+    connectionId,
     createdAt: now,
     updatedAt: now
   };
@@ -267,6 +292,7 @@ export function duplicateQuery(id: string): SavedQuery | null {
     ...original,
     id: generateQueryId(),
     title: copyTitle,
+    connectionId: original.connectionId,
     isDefault: false,
     createdAt: now,
     updatedAt: now,
