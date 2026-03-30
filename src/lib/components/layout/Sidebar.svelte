@@ -414,8 +414,14 @@
       {#each connectionGroups as group (group.connectionId)}
         <div class="mb-2">
           <!-- Connection Group Header -->
-          <div class="flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-muted-foreground">
-            <div class="w-2 h-2 rounded-full shrink-0 {getConnectionColorClasses(group.connection?.config.color)}"></div>
+          <div
+            class="flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-muted-foreground"
+          >
+            <div
+              class="w-2 h-2 rounded-full shrink-0 {getConnectionColorClasses(
+                group.connection?.config.color
+              )}"
+            ></div>
             <span class="truncate flex-1">{group.connection?.config.label ?? 'Unknown'}</span>
             {#if group.connection?.status === 'error'}
               <Tooltip text="Connection error — click to reconnect">

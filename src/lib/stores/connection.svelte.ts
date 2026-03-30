@@ -13,6 +13,7 @@ import {
 } from '../utils/storage';
 import { logger } from '../utils/logger';
 import { clearAvatarCache } from '../utils/avatar-cache';
+import { deleteItemsByConnection } from './jql.svelte';
 
 // ============================================
 // Registry State
@@ -170,6 +171,10 @@ export async function connectSingle(connectionId: string): Promise<boolean> {
       client = createJiraClient(config, epicLinkFieldId ?? undefined, sprintFieldId ?? undefined);
     }
 
+    if (!result.user) {
+      throw new Error('Connection succeeded but user info was not returned');
+    }
+
     // Store client in non-reactive map
     clients.set(connectionId, client);
 
@@ -182,7 +187,7 @@ export async function connectSingle(connectionId: string): Promise<boolean> {
             config: { ...c.config, baseUrl: config.baseUrl, lastConnected },
             status: 'connected' as const,
             error: null,
-            currentUser: result.user!,
+            currentUser: result.user,
             epicLinkFieldId,
             sprintFieldId
           }
@@ -192,7 +197,9 @@ export async function connectSingle(connectionId: string): Promise<boolean> {
     // Persist updated lastConnected
     await persistConnections();
 
-    logger.connectionSuccess(`[${config.label || connectionId}] Connected as ${result.user!.displayName}`);
+    logger.connectionSuccess(
+      `[${config.label || connectionId}] Connected as ${result.user.displayName}`
+    );
     return true;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Connection failed';
@@ -246,6 +253,7 @@ export async function addConnection(config: StoredConnection): Promise<string> {
  * Cleans up client and persists.
  */
 export async function removeConnection(connectionId: string): Promise<void> {
+  deleteItemsByConnection(connectionId);
   clients.delete(connectionId);
   connectionRegistry.connections = connectionRegistry.connections.filter(
     (c) => c.id !== connectionId
@@ -295,6 +303,10 @@ export async function reconnectConnection(connectionId: string): Promise<boolean
  * Disconnect all connections and clear storage.
  */
 export async function disconnectAll(): Promise<void> {
+  // Clean up queries for all connections before clearing
+  for (const conn of connectionRegistry.connections) {
+    deleteItemsByConnection(conn.id);
+  }
   clients.clear();
   connectionRegistry.connections = [];
   await setStorageItemAsync(STORAGE_KEYS.CONNECTIONS, []);
@@ -316,7 +328,7 @@ export function getClient(connectionId?: string): JiraClient | null {
   }
   // Backward compat: return first connected client
   const first = getFirstConnected();
-  return first ? clients.get(first.id) ?? null : null;
+  return first ? (clients.get(first.id) ?? null) : null;
 }
 
 /**
@@ -324,7 +336,9 @@ export function getClient(connectionId?: string): JiraClient | null {
  */
 export function getEpicLinkFieldId(connectionId?: string): string | null {
   if (connectionId) {
-    return connectionRegistry.connections.find((c) => c.id === connectionId)?.epicLinkFieldId ?? null;
+    return (
+      connectionRegistry.connections.find((c) => c.id === connectionId)?.epicLinkFieldId ?? null
+    );
   }
   return getFirstConnected()?.epicLinkFieldId ?? null;
 }

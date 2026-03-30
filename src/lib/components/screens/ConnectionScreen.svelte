@@ -13,7 +13,7 @@
     removeConnection,
     reconnectConnection
   } from '../../stores/connection.svelte';
-  import { getQueriesByConnection, deleteItemsByConnection } from '../../stores/jql.svelte';
+  import { jqlState } from '../../stores/jql.svelte';
   import type { StoredConnection } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
 
@@ -53,7 +53,6 @@
   }
 
   async function handleDelete(connectionId: string) {
-    deleteItemsByConnection(connectionId);
     await removeConnection(connectionId);
     confirmingDelete = null;
   }
@@ -101,7 +100,9 @@
             <div class="bg-background border border-border rounded-xl p-4 shadow-sm">
               <div class="flex items-center gap-3">
                 <!-- Color dot -->
-                <div class="w-3 h-3 rounded-full shrink-0 {getColorClasses(conn.config.color)}"></div>
+                <div
+                  class="w-3 h-3 rounded-full shrink-0 {getColorClasses(conn.config.color)}"
+                ></div>
 
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
@@ -134,7 +135,9 @@
                   {#if conn.currentUser}
                     <div class="flex items-center gap-1.5 mt-1.5">
                       <Avatar user={conn.currentUser} size="xs" />
-                      <span class="text-xs text-muted-foreground">{conn.currentUser.displayName}</span>
+                      <span class="text-xs text-muted-foreground"
+                        >{conn.currentUser.displayName}</span
+                      >
                     </div>
                   {/if}
                   {#if conn.error}
@@ -181,20 +184,18 @@
 
               <!-- Delete Confirmation -->
               {#if confirmingDelete === conn.id}
-                {@const queryCount = getQueriesByConnection(conn.id).length}
+                {@const itemCount = jqlState.items.filter((i) => (i as { connectionId?: string }).connectionId === conn.id).length}
                 <div class="mt-3 p-3 bg-danger-subtlest border border-border-danger rounded-lg">
                   <p class="text-sm text-text-danger font-medium">Remove this connection?</p>
-                  {#if queryCount > 0}
+                  {#if itemCount > 0}
                     <p class="text-xs text-text-danger mt-1">
-                      This will also delete {queryCount} saved {queryCount === 1 ? 'query' : 'queries'}.
+                      This will also delete {itemCount} saved {itemCount === 1
+                        ? 'query'
+                        : 'queries and separators'}.
                     </p>
                   {/if}
                   <div class="flex gap-2 mt-2">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onclick={() => handleDelete(conn.id)}
-                    >
+                    <Button size="sm" variant="destructive" onclick={() => handleDelete(conn.id)}>
                       Remove
                     </Button>
                     <Button size="sm" variant="ghost" onclick={() => (confirmingDelete = null)}>
@@ -219,10 +220,7 @@
               <AtlaskitIcon name="cross" size={14} />
             </Button>
           </div>
-          <ConnectionForm
-            editingConnection={editingConnection}
-            onConnected={handleFormDone}
-          />
+          <ConnectionForm {editingConnection} onConnected={handleFormDone} />
         </div>
       {:else}
         <Button variant="outline" class="w-full" onclick={startAdd}>

@@ -269,9 +269,7 @@ export async function loadIssues(
         const changes = detectChanges(loadingQueryId, fetchedIssues);
 
         // Beta: Filter out own changes if enabled
-        const connInstance = resolvedConnectionId
-          ? getConnection(resolvedConnectionId)
-          : undefined;
+        const connInstance = resolvedConnectionId ? getConnection(resolvedConnectionId) : undefined;
         if (
           changeTrackingState.excludeOwnChanges &&
           changes.hasChanges &&
@@ -431,8 +429,7 @@ export async function rebuildTree(): Promise<void> {
   const expandedKeys = savedExpandedKeys ? new Set(savedExpandedKeys) : new Set<string>();
 
   issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
-    epicLinkFieldId:
-      getEpicLinkFieldId(issuesState.currentConnectionId ?? undefined) || undefined,
+    epicLinkFieldId: getEpicLinkFieldId(issuesState.currentConnectionId ?? undefined) || undefined,
     expandedKeys,
     sortConfig: getSortConfig()
   });

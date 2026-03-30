@@ -9,7 +9,7 @@
   import { validateJql, validateJqlExtended } from '../../utils/jql-helpers';
   import { isTitleUnique } from '../../stores/jql.svelte';
   import { generateSlug } from '../../utils/slug';
-  import { getClient, isConnected } from '../../stores/connection.svelte';
+  import { getClient } from '../../stores/connection.svelte';
   import { issuesState } from '../../stores/issues.svelte';
 
   interface Props {
@@ -78,10 +78,13 @@
     color = color === c ? undefined : c;
   }
 
+  // Resolve client for the query's connection (for JQL validation)
+  const jqlClient = $derived(
+    getClient(query?.connectionId ?? issuesState.currentConnectionId ?? undefined)
+  );
+
   async function checkJql(): Promise<void> {
-    // Use the editing query's connection, or the current active connection
-    const connId = query?.connectionId ?? issuesState.currentConnectionId ?? undefined;
-    const client = getClient(connId);
+    const client = jqlClient;
     if (!client) return;
 
     isCheckingJql = true;
@@ -172,7 +175,7 @@
               : 'border-input'}"
             oninput={() => (jqlCheckResult = null)}
           ></textarea>
-          {#if isConnected()}
+          {#if jqlClient}
             <button
               type="button"
               onclick={checkJql}

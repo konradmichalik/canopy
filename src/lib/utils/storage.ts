@@ -673,7 +673,7 @@ export function importConfig(
     if (config.connections && config.connections.length > 0) {
       // Multi-connection format
       const storedConnections: StoredConnection[] = config.connections.map((conn) => ({
-        id: conn.id || crypto.randomUUID(),
+        id: conn.id,
         label: conn.label || deriveLabelFromUrl(conn.baseUrl),
         instanceType: conn.instanceType,
         baseUrl: conn.baseUrl,

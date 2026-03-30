@@ -774,7 +774,10 @@
                 <Button
                   variant="outline"
                   class="w-full justify-start gap-2"
-                  onclick={() => { open = false; onManageConnections?.(); }}
+                  onclick={() => {
+                    open = false;
+                    onManageConnections?.();
+                  }}
                 >
                   <AtlaskitIcon name="settings" size={16} />
                   Manage Connections

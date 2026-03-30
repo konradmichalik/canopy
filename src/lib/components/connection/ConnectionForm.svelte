@@ -37,8 +37,10 @@
         color: editingConnection.color,
         email: creds.type === 'cloud' ? creds.email : '',
         apiToken: creds.type === 'cloud' ? creds.apiToken : '',
-        username: creds.type === 'server' && creds.authMethod === 'basic' ? (creds.username ?? '') : '',
-        password: creds.type === 'server' && creds.authMethod === 'basic' ? (creds.password ?? '') : '',
+        username:
+          creds.type === 'server' && creds.authMethod === 'basic' ? (creds.username ?? '') : '',
+        password:
+          creds.type === 'server' && creds.authMethod === 'basic' ? (creds.password ?? '') : '',
         personalAccessToken:
           creds.type === 'server' && creds.authMethod === 'pat'
             ? (creds.personalAccessToken ?? '')
@@ -89,10 +91,9 @@
         await updateConnection(editingConnection.id, config);
         onConnected?.();
       } else {
-        // Add new connection
-        await addConnection(config);
-        // Check if the newly added connection succeeded
-        const newConn = connectionRegistry.connections.find((c) => c.config.baseUrl === config.baseUrl);
+        // Add new connection (returns ID after connect attempt)
+        const newId = await addConnection(config);
+        const newConn = connectionRegistry.connections.find((c) => c.id === newId);
         if (newConn?.status === 'error') {
           formError = newConn.error || 'Connection failed';
         } else {
@@ -144,7 +145,6 @@
     };
   }
 
-
   const isCloud = $derived(formData.instanceType === 'cloud');
   const isBasicAuth = $derived(formData.authMethod === 'basic');
 
@@ -175,9 +175,13 @@
       {#each QUERY_COLORS as colorOption (colorOption.id)}
         <button
           type="button"
-          class="w-6 h-6 rounded-full border-2 transition-all {colorOption.bg} {formData.color === colorOption.id ? 'border-foreground scale-110' : 'border-transparent opacity-70 hover:opacity-100'}"
+          class="w-6 h-6 rounded-full border-2 transition-all {colorOption.bg} {formData.color ===
+          colorOption.id
+            ? 'border-foreground scale-110'
+            : 'border-transparent opacity-70 hover:opacity-100'}"
           title={colorOption.label}
-          onclick={() => (formData.color = formData.color === colorOption.id ? undefined : colorOption.id)}
+          onclick={() =>
+            (formData.color = formData.color === colorOption.id ? undefined : colorOption.id)}
         ></button>
       {/each}
     </div>

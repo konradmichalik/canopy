@@ -471,7 +471,7 @@ export interface ExportedConfig {
 }
 
 export interface ExportedConnection {
-  id?: string;
+  id: string;
   label?: string;
   instanceType: 'cloud' | 'server';
   baseUrl: string;
