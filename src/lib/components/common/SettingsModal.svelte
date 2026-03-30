@@ -729,17 +729,18 @@
       <!-- Account Tab -->
       {#if !minimal}
         <Tabs.Content value="account" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
-          {#if getConnectionState().isConnected && getConnectionState().currentUser}
+          {@const connState = getConnectionState()}
+          {#if connState.isConnected && connState.currentUser}
+            {@const user = connState.currentUser}
+            {@const cfg = connState.config}
             <!-- User Info -->
             <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-              <Avatar user={getConnectionState().currentUser} size="md" />
+              <Avatar {user} size="md" />
               <div class="flex-1 min-w-0">
-                <p class="font-medium truncate">{getConnectionState().currentUser.displayName}</p>
+                <p class="font-medium truncate">{user.displayName}</p>
                 <p class="text-sm text-muted-foreground truncate">
-                  {getConnectionState().currentUser.emailAddress ||
-                    (getConnectionState().config?.credentials.type === 'cloud'
-                      ? getConnectionState().config.credentials.email
-                      : '')}
+                  {user.emailAddress ||
+                    (cfg?.credentials.type === 'cloud' ? cfg.credentials.email : '')}
                 </p>
               </div>
             </div>
@@ -748,22 +749,22 @@
             <div class="space-y-3">
               <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">Jira URL</p>
-                <p class="text-sm truncate">{getConnectionState().config?.baseUrl}</p>
+                <p class="text-sm truncate">{cfg?.baseUrl}</p>
               </div>
               <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">Instance Type</p>
                 <p class="text-sm">
-                  {getConnectionState().config?.instanceType === 'cloud' ? 'Cloud' : 'Server / DC'}
+                  {cfg?.instanceType === 'cloud' ? 'Cloud' : 'Server / DC'}
                 </p>
               </div>
             </div>
 
-            {#if getConnectionState().lastConnected}
-              <Tooltip text={`Connected: ${formatDateTime(getConnectionState().lastConnected)}`}>
+            {#if connState.lastConnected}
+              <Tooltip text={`Connected: ${formatDateTime(connState.lastConnected)}`}>
                 <span
                   class="inline-flex px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs"
                 >
-                  Connected {formatDateTimeWithSetting(getConnectionState().lastConnected)}
+                  Connected {formatDateTimeWithSetting(connState.lastConnected)}
                 </span>
               </Tooltip>
             {/if}

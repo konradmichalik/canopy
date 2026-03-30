@@ -180,18 +180,17 @@ export async function connectSingle(connectionId: string): Promise<boolean> {
 
     // Update instance state
     const lastConnected = new Date().toISOString();
+    const updatedInstance: ConnectionInstance = {
+      ...instance,
+      config: { ...instance.config, baseUrl: config.baseUrl, lastConnected },
+      status: 'connected',
+      error: null,
+      currentUser: result.user,
+      epicLinkFieldId,
+      sprintFieldId
+    };
     connectionRegistry.connections = connectionRegistry.connections.map((c) =>
-      c.id === connectionId
-        ? {
-            ...c,
-            config: { ...c.config, baseUrl: config.baseUrl, lastConnected },
-            status: 'connected' as const,
-            error: null,
-            currentUser: result.user,
-            epicLinkFieldId,
-            sprintFieldId
-          }
-        : c
+      c.id === connectionId ? updatedInstance : c
     );
 
     // Persist updated lastConnected

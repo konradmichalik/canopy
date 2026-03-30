@@ -134,7 +134,7 @@
                   </div>
                   {#if conn.currentUser}
                     <div class="flex items-center gap-1.5 mt-1.5">
-                      <Avatar user={conn.currentUser} size="xs" />
+                      <Avatar user={conn.currentUser} size="sm" />
                       <span class="text-xs text-muted-foreground"
                         >{conn.currentUser.displayName}</span
                       >
@@ -176,7 +176,7 @@
                       class="h-7 w-7 text-text-danger hover:bg-danger-subtlest"
                       onclick={() => (confirmingDelete = conn.id)}
                     >
-                      <AtlaskitIcon name="trash" size={14} />
+                      <AtlaskitIcon name="delete" size={14} />
                     </Button>
                   </Tooltip>
                 </div>
@@ -184,7 +184,9 @@
 
               <!-- Delete Confirmation -->
               {#if confirmingDelete === conn.id}
-                {@const itemCount = jqlState.items.filter((i) => (i as { connectionId?: string }).connectionId === conn.id).length}
+                {@const itemCount = jqlState.items.filter(
+                  (i) => (i as { connectionId?: string }).connectionId === conn.id
+                ).length}
                 <div class="mt-3 p-3 bg-danger-subtlest border border-border-danger rounded-lg">
                   <p class="text-sm text-text-danger font-medium">Remove this connection?</p>
                   {#if itemCount > 0}
@@ -233,7 +235,7 @@
       {#if hasConnectedInstance && !showAddForm && !editingConnection && onBack}
         <div class="mt-6">
           <Button class="w-full" onclick={onBack}>
-            <AtlaskitIcon name="arrow-left" size={16} />
+            <AtlaskitIcon name="chevron-left" size={16} />
             Back to Dashboard
           </Button>
         </div>
