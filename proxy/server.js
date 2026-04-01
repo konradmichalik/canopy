@@ -13,12 +13,15 @@ import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
+const JIRA_BASE_URL = process.env.JIRA_BASE_URL || null;
 
-if (!JIRA_BASE_URL) {
-  console.error('Error: JIRA_BASE_URL environment variable is required');
-  console.error('Example: export JIRA_BASE_URL=https://your-domain.atlassian.net');
-  process.exit(1);
+/**
+ * Resolve the target Jira base URL from:
+ * 1. X-Jira-Base-Url header (per-request, multi-instance)
+ * 2. JIRA_BASE_URL env var (fallback, single-instance)
+ */
+function resolveBaseUrl(req) {
+  return req.headers['x-jira-base-url'] || JIRA_BASE_URL;
 }
 
 // Parse JSON body
@@ -34,7 +37,11 @@ app.use(cors({
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', target: JIRA_BASE_URL });
+  res.json({
+    status: 'ok',
+    mode: JIRA_BASE_URL ? 'fixed' : 'dynamic',
+    target: JIRA_BASE_URL || '(from X-Jira-Base-Url header)'
+  });
 });
 
 // Info page for browser access
@@ -49,7 +56,7 @@ app.get('/jira', (req, res, next) => {
     <body style="font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
       <h1 style="color: #0052CC;">JIRA CORS Proxy</h1>
       <p style="color: #00875A;">✓ Proxy is running</p>
-      <p><strong>Target:</strong> <code>${JIRA_BASE_URL}</code></p>
+      <p><strong>Mode:</strong> ${JIRA_BASE_URL ? `Fixed target: <code>${JIRA_BASE_URL}</code>` : 'Dynamic (from <code>X-Jira-Base-Url</code> header)'}</p>
       <hr>
       <p>Configure JIRA Tree to use: <code>http://localhost:${PORT}/jira</code></p>
     </body>
@@ -107,10 +114,18 @@ app.get('/jira-image', async (req, res) => {
 
 // Proxy all /jira/* requests
 app.all('/jira/*', async (req, res) => {
+  const baseUrl = resolveBaseUrl(req);
+  if (!baseUrl) {
+    return res.status(400).json({
+      error: 'No target URL',
+      message: 'Set JIRA_BASE_URL env var or send X-Jira-Base-Url header'
+    });
+  }
+
   const path = req.path.replace('/jira', '');
   // Include query parameters in the target URL
   const queryString = req.originalUrl.includes('?') ? req.originalUrl.substring(req.originalUrl.indexOf('?')) : '';
-  const targetUrl = `${JIRA_BASE_URL}${path}${queryString}`;
+  const targetUrl = `${baseUrl.replace(/\/$/, '')}${path}${queryString}`;
 
   console.log(`\n[Proxy] ${req.method} ${path}`);
   console.log(`[Proxy] → ${targetUrl}`);
@@ -168,12 +183,13 @@ app.all('/jira/*', async (req, res) => {
 });
 
 app.listen(PORT, () => {
+  const target = JIRA_BASE_URL || '(dynamic via X-Jira-Base-Url header)';
   console.log(`
 ╔══════════════════════════════════════════════════════════════╗
 ║  JIRA CORS Proxy Server                                      ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  Listening on: http://localhost:${PORT}                         ║
-║  Target:       ${JIRA_BASE_URL.padEnd(43)}║
+║  Target:       ${target.padEnd(43)}║
 ║                                                              ║
 ║  Configure your app to use:                                  ║
 ║    Proxy URL: http://localhost:${PORT}/jira                     ║
