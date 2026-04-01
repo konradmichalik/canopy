@@ -5,6 +5,7 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import type { SavedQuery, QueryColor, QuerySeparator } from '../../types';
   import { isSeparator } from '../../types/tree';
+  import { connectionRegistry } from '../../stores/connection.svelte';
   import QueryListItem from '../jql/QueryListItem.svelte';
   import SeparatorListItem from '../jql/SeparatorListItem.svelte';
   import QueryForm from '../jql/QueryForm.svelte';
@@ -93,15 +94,17 @@
   ): Promise<void> {
     setupQueryConfig(query, updateUrl);
 
+    const connId = query.connectionId;
+
     // If loadAll is explicitly set, skip pre-check
     if (options.loadAll !== undefined) {
-      await loadIssues(query.jql, { loadAll: options.loadAll });
+      await loadIssues(query.jql, connId, { loadAll: options.loadAll });
       return;
     }
 
     // Pre-check count for large result warning
     try {
-      const { total, needsWarning } = await preCheckIssueCount(query.jql);
+      const { total, needsWarning } = await preCheckIssueCount(query.jql, connId);
 
       if (needsWarning) {
         // Show warning modal
@@ -110,24 +113,28 @@
       }
 
       // Load all if under threshold
-      await loadIssues(query.jql, { loadAll: true });
+      await loadIssues(query.jql, connId, { loadAll: true });
     } catch {
       // On error, fall back to loading first batch
-      await loadIssues(query.jql, { loadAll: false });
+      await loadIssues(query.jql, connId, { loadAll: false });
     }
   }
 
   // Handle warning modal callbacks
   function handleLoadFirstBatch(): void {
     if (pendingLargeQuery) {
-      loadIssues(pendingLargeQuery.query.jql, { loadAll: false });
+      loadIssues(pendingLargeQuery.query.jql, pendingLargeQuery.query.connectionId, {
+        loadAll: false
+      });
       pendingLargeQuery = null;
     }
   }
 
   function handleLoadAll(): void {
     if (pendingLargeQuery) {
-      loadIssues(pendingLargeQuery.query.jql, { loadAll: true });
+      loadIssues(pendingLargeQuery.query.jql, pendingLargeQuery.query.connectionId, {
+        loadAll: true
+      });
       pendingLargeQuery = null;
     }
   }
@@ -227,6 +234,8 @@
   // Get keyboard-focused query for visual highlight
   const keyboardFocusedQuery = $derived(getFocusedQuery());
 
+  const hasMultipleConnections = $derived(connectionRegistry.connections.length > 1);
+
   function handleNewQuery(): void {
     editingQuery = null;
     showQueryForm = true;
@@ -241,7 +250,8 @@
     title: string,
     jql: string,
     color?: QueryColor,
-    showEntryNode?: boolean
+    showEntryNode?: boolean,
+    connectionId?: string
   ): Promise<void> {
     if (editingQuery) {
       const isActiveQuery = routerState.activeQueryId === editingQuery.id;
@@ -249,11 +259,12 @@
 
       // Reload issues if the edited query is currently active
       if (isActiveQuery) {
-        await loadIssues(jql, { loadAll: true });
+        await loadIssues(jql, editingQuery.connectionId, { loadAll: true });
       }
       showFlashMessage('success', `Query "${title}" updated`);
     } else {
-      const query = addQuery(title, jql, color);
+      const resolvedConnectionId = connectionId ?? connectionRegistry.connections[0]?.id;
+      const query = addQuery(title, jql, color, resolvedConnectionId);
       if (query && showEntryNode) {
         updateQuery(query.id, { showEntryNode });
       }
@@ -355,7 +366,7 @@
         </div>
         <p class="text-sm font-medium text-foreground mb-1">No saved queries</p>
         <p class="text-xs text-muted-foreground mb-4">Create your first query to get started</p>
-        <Button variant="outline" size="sm" onclick={handleNewQuery}>
+        <Button variant="outline" size="sm" onclick={() => handleNewQuery()}>
           <AtlaskitIcon name="add" size={14} />
           Create query
         </Button>
@@ -384,6 +395,7 @@
               isKeyboardFocused={keyboardFocusedQuery?.id === item.id}
               isDragging={queryDrag.isDragging(index)}
               isDragOver={queryDrag.isDragOver(index)}
+              showConnectionBadge={hasMultipleConnections}
               onSelect={handleSelectQuery}
               onEdit={handleEditQuery}
               onDelete={handleDeleteQuery}
@@ -422,7 +434,7 @@
           <AtlaskitIcon name="chevron-down" size={12} />
         </DropdownMenu.Trigger>
         <DropdownMenu.Content align="end" class="w-36">
-          <DropdownMenu.Item onclick={handleNewQuery}>
+          <DropdownMenu.Item onclick={() => handleNewQuery()}>
             <AtlaskitIcon name="search" size={14} class="mr-2" />
             Query
           </DropdownMenu.Item>

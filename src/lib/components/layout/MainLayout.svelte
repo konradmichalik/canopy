@@ -11,7 +11,7 @@
   import HelpModal from '../help/HelpModal.svelte';
   import { Button } from '$lib/components/ui/button';
   import { routerState, toggleSidebar, setSidebarWidth } from '../../stores/router.svelte';
-  import { connectionState } from '../../stores/connection.svelte';
+  import { getConnection, getConnectionState } from '../../stores/connection.svelte';
   import { issuesState } from '../../stores/issues.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
 
@@ -19,7 +19,24 @@
     routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : null
   );
   const queryTitle = $derived(activeQuery?.title || null);
-  const isLoading = $derived(connectionState.isConnecting || issuesState.isLoading);
+
+  // Derive header user from active query's connection, fallback to first connected
+  const activeConnectionUser = $derived.by(() => {
+    const connId = issuesState.currentConnectionId;
+    if (connId) {
+      const conn = getConnection(connId);
+      if (conn?.currentUser) return conn.currentUser;
+    }
+    return getConnectionState().currentUser;
+  });
+  const isLoading = $derived.by(() => {
+    const connId = issuesState.currentConnectionId;
+    if (connId) {
+      const conn = getConnection(connId);
+      if (conn?.status === 'connecting') return true;
+    }
+    return getConnectionState().isConnecting || issuesState.isLoading;
+  });
 
   let showAboutModal = $state(false);
 </script>
@@ -67,11 +84,11 @@
 
       <!-- Right: User + Settings -->
       <div class="flex items-center gap-2 flex-shrink-0">
-        {#if connectionState.currentUser}
+        {#if activeConnectionUser}
           <div class="flex items-center gap-2 px-2">
-            <Avatar user={connectionState.currentUser} size="sm" />
+            <Avatar user={activeConnectionUser} size="sm" />
             <span class="text-sm text-muted-foreground hidden sm:block">
-              {connectionState.currentUser.displayName}
+              {activeConnectionUser.displayName}
             </span>
           </div>
           <div class="h-4 w-px bg-border"></div>

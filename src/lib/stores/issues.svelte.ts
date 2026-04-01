@@ -4,7 +4,7 @@
  */
 
 import type { JiraIssue, TreeNode } from '../types';
-import { getClient, getEpicLinkFieldId, connectionState } from './connection.svelte';
+import { getClient, getEpicLinkFieldId, getConnection } from './connection.svelte';
 import {
   buildHierarchy,
   toggleNode as toggleNodeInTree,
@@ -50,6 +50,7 @@ export const issuesState = $state({
   isLoading: false,
   error: null as string | null,
   currentJql: '',
+  currentConnectionId: null as string | null,
   isInitialLoad: true,
   lastUpdated: null as Date | null,
 
@@ -70,7 +71,7 @@ let loadingQueryId: string | null = null;
 
 // Set up filter change callback
 setFiltersChangeCallback(() => {
-  if (issuesState.currentJql) {
+  if (issuesState.currentJql && issuesState.currentConnectionId) {
     if (issuesState.isLoading) {
       // Schedule reload after current load completes
       pendingReload = true;
@@ -78,20 +79,20 @@ setFiltersChangeCallback(() => {
       issuesState.isInitialLoad = false;
       // Clear change tracking summary - filter changes are internal, not external changes
       changeTrackingState.currentChanges = null;
-      loadIssues(issuesState.currentJql);
+      loadIssues(issuesState.currentJql, issuesState.currentConnectionId);
     }
   }
 });
 
 // Set up sort config change callback (reloads issues with new ORDER BY)
 setSortConfigChangeCallback(() => {
-  if (issuesState.currentJql && !issuesState.isLoading) {
+  if (issuesState.currentJql && issuesState.currentConnectionId && !issuesState.isLoading) {
     // Only reload if the base JQL doesn't have its own ORDER BY
     if (!hasOrderByClause(issuesState.currentJql)) {
       issuesState.isInitialLoad = false;
       // Clear change tracking summary - sort changes are internal, not external changes
       changeTrackingState.currentChanges = null;
-      loadIssues(issuesState.currentJql);
+      loadIssues(issuesState.currentJql, issuesState.currentConnectionId);
     }
   }
 });
@@ -125,7 +126,7 @@ async function applyLocalFiltersAndBuildTree(issues: JiraIssue[]): Promise<void>
   const expandedKeys = hasSavedExpansion ? new Set(savedExpandedKeys) : new Set<string>();
 
   issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
-    epicLinkFieldId: getEpicLinkFieldId() || undefined,
+    epicLinkFieldId: getEpicLinkFieldId(issuesState.currentConnectionId ?? undefined) || undefined,
     expandedKeys,
     sortConfig: getSortConfig()
   });
@@ -147,9 +148,10 @@ async function applyLocalFiltersAndBuildTree(issues: JiraIssue[]): Promise<void>
  * Returns { total, needsWarning } to determine if warning modal should be shown
  */
 export async function preCheckIssueCount(
-  jql: string
+  jql: string,
+  connectionId?: string
 ): Promise<{ total: number; needsWarning: boolean }> {
-  const client = getClient();
+  const client = getClient(connectionId ?? issuesState.currentConnectionId ?? undefined);
   if (!client) {
     throw new Error('Not connected to Jira');
   }
@@ -174,14 +176,22 @@ export interface LoadIssuesOptions {
 /**
  * Load issues for a JQL query
  */
-export async function loadIssues(jql: string, options: LoadIssuesOptions = {}): Promise<boolean> {
+export async function loadIssues(
+  jql: string,
+  connectionId?: string,
+  options: LoadIssuesOptions = {}
+): Promise<boolean> {
   const { loadAll = false, maxResults = BATCH_SIZE } = options;
-  const client = getClient();
+  const resolvedConnectionId = connectionId ?? issuesState.currentConnectionId ?? undefined;
+  const client = getClient(resolvedConnectionId);
 
   if (!client) {
     issuesState.error = 'Not connected to Jira';
     return false;
   }
+
+  // Track which connection this load belongs to
+  issuesState.currentConnectionId = resolvedConnectionId ?? null;
 
   // If the JQL changed, this is a new initial load - reset pagination state
   if (issuesState.currentJql !== jql) {
@@ -259,18 +269,19 @@ export async function loadIssues(jql: string, options: LoadIssuesOptions = {}): 
         const changes = detectChanges(loadingQueryId, fetchedIssues);
 
         // Beta: Filter out own changes if enabled
+        const connInstance = resolvedConnectionId ? getConnection(resolvedConnectionId) : undefined;
         if (
           changeTrackingState.excludeOwnChanges &&
           changes.hasChanges &&
-          connectionState.currentUser
+          connInstance?.currentUser
         ) {
-          const currentUserId = getUserIdentifier(connectionState.currentUser);
+          const currentUserId = getUserIdentifier(connInstance.currentUser);
           if (currentUserId) {
-            const client = getClient();
-            if (client) {
+            const connClient = getClient(resolvedConnectionId);
+            if (connClient) {
               // filterOwnChanges is async but we don't need to await it
               // The UI will update reactively when state changes
-              void filterOwnChanges(changes, currentUserId, fetchedIssues, client);
+              void filterOwnChanges(changes, currentUserId, fetchedIssues, connClient);
             }
           }
         }
@@ -289,7 +300,10 @@ export async function loadIssues(jql: string, options: LoadIssuesOptions = {}): 
       // Clear change tracking summary - pending reload is from internal changes (filters)
       changeTrackingState.currentChanges = null;
       // Use setTimeout to avoid potential recursion issues
-      setTimeout(() => loadIssues(issuesState.currentJql), 0);
+      setTimeout(
+        () => loadIssues(issuesState.currentJql, issuesState.currentConnectionId ?? undefined),
+        0
+      );
     }
 
     return true;
@@ -310,7 +324,7 @@ export async function refreshIssues(): Promise<boolean> {
   if (!issuesState.currentJql) {
     return false;
   }
-  return loadIssues(issuesState.currentJql);
+  return loadIssues(issuesState.currentJql, issuesState.currentConnectionId ?? undefined);
 }
 
 /**
@@ -318,7 +332,7 @@ export async function refreshIssues(): Promise<boolean> {
  * Called when user clicks "Load more" button
  */
 export async function loadMoreIssues(batchSize: number = BATCH_SIZE): Promise<boolean> {
-  const client = getClient();
+  const client = getClient(issuesState.currentConnectionId ?? undefined);
 
   if (!client || !issuesState.isPartialLoad) {
     return false;
@@ -401,7 +415,7 @@ export function collapseAll(): void {
  */
 export function reloadWithFilters(): void {
   if (issuesState.currentJql && !issuesState.isLoading) {
-    loadIssues(issuesState.currentJql);
+    loadIssues(issuesState.currentJql, issuesState.currentConnectionId ?? undefined);
   }
 }
 
@@ -415,7 +429,7 @@ export async function rebuildTree(): Promise<void> {
   const expandedKeys = savedExpandedKeys ? new Set(savedExpandedKeys) : new Set<string>();
 
   issuesState.treeNodes = buildHierarchy(issuesState.rawIssues, {
-    epicLinkFieldId: getEpicLinkFieldId() || undefined,
+    epicLinkFieldId: getEpicLinkFieldId(issuesState.currentConnectionId ?? undefined) || undefined,
     expandedKeys,
     sortConfig: getSortConfig()
   });
@@ -438,6 +452,7 @@ export function clearIssues(): void {
   issuesState.rawIssues = [];
   issuesState.treeNodes = [];
   issuesState.currentJql = '';
+  issuesState.currentConnectionId = null;
   issuesState.error = null;
   issuesState.lastUpdated = null;
   invalidateFlatTreeCache(); // Invalidate keyboard navigation cache
@@ -447,7 +462,7 @@ export function clearIssues(): void {
  * Get issue URL
  */
 export function getIssueUrl(issueKey: string): string | null {
-  const client = getClient();
+  const client = getClient(issuesState.currentConnectionId ?? undefined);
   return client?.getIssueUrl(issueKey) || null;
 }
 

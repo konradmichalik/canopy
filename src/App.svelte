@@ -1,10 +1,10 @@
 <script lang="ts">
   import './app.css';
-  import ConnectionScreen from './lib/components/screens/ConnectionScreen.svelte';
   import MainLayout from './lib/components/layout/MainLayout.svelte';
   import AppLoader from './lib/components/common/AppLoader.svelte';
   import UpdateNotification from './lib/components/common/UpdateNotification.svelte';
-  import { connectionState, initializeConnection } from './lib/stores/connection.svelte';
+  import ConnectionModal from './lib/components/connection/ConnectionModal.svelte';
+  import { connectionRegistry, initializeConnections } from './lib/stores/connection.svelte';
   import { initializeRouter, cleanupRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
   import { initializeColorIntensity } from './lib/stores/colorIntensity.svelte';
@@ -32,6 +32,18 @@
 
   let isInitializing = $state(true);
   let availableUpdate = $state<UpdateInfo | null>(null);
+  let showConnectionModal = $state(false);
+
+  const hasConnection = $derived(
+    connectionRegistry.connections.some((c) => c.status === 'connected')
+  );
+
+  // Auto-open connection modal when no connections exist (first-time setup)
+  const needsConnection = $derived(!isInitializing && !hasConnection);
+  $effect(() => {
+    if (needsConnection) showConnectionModal = true;
+    else showConnectionModal = false;
+  });
 
   onMount(() => {
     // Initialize all stores and connection
@@ -64,8 +76,8 @@
         const validQueryIds = new Set(getQueries().map((q) => q.id));
         runCheckpointCleanup(validQueryIds);
 
-        // Try to restore connection from storage
-        await initializeConnection();
+        // Initialize connection registry (with migration from single-connection format)
+        await initializeConnections();
 
         // Check for app updates (non-blocking)
         checkForUpdate().then((update) => {
@@ -92,14 +104,11 @@
 
 {#if isInitializing}
   <AppLoader />
-{:else if connectionState.isConnected}
+{:else}
   <div class="animate-fade-in">
     <MainLayout />
   </div>
-{:else}
-  <div class="animate-fade-in">
-    <ConnectionScreen />
-  </div>
 {/if}
 
+<ConnectionModal bind:open={showConnectionModal} required={needsConnection} />
 <UpdateNotification update={availableUpdate} />

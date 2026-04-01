@@ -3,34 +3,70 @@
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
-  import type { ConnectionFormData } from '../../types';
-  import { connect, connectionState } from '../../stores/connection.svelte';
+  import type { ConnectionFormData, StoredConnection } from '../../types';
+  import { QUERY_COLORS } from '../../types/tree';
+  import {
+    addConnection,
+    updateConnection,
+    connectionRegistry
+  } from '../../stores/connection.svelte';
   import { detectInstanceType } from '../../api';
-  import { isTauri } from '../../utils/storage';
+  import { isTauri, deriveLabelFromUrl } from '../../utils/storage';
 
   interface Props {
     onConnected?: () => void;
+    /** If provided, the form is in edit mode */
+    editingConnection?: StoredConnection;
   }
 
-  let { onConnected }: Props = $props();
+  let { onConnected, editingConnection }: Props = $props();
+
+  const isEditMode = $derived(!!editingConnection);
 
   // Pre-fill proxy URL based on environment (empty for Tauri desktop)
   const defaultProxyUrl = isTauri() ? '' : __DEFAULT_PROXY_URL__;
 
-  // Form state
-  let formData = $state<ConnectionFormData>({
-    instanceType: 'cloud',
-    baseUrl: '',
-    email: '',
-    apiToken: '',
-    username: '',
-    password: '',
-    personalAccessToken: '',
-    authMethod: 'pat',
-    proxyUrl: defaultProxyUrl
-  });
+  // Derive initial form values from editing connection
+  function getInitialFormData(): ConnectionFormData {
+    if (editingConnection) {
+      const creds = editingConnection.credentials;
+      return {
+        instanceType: editingConnection.instanceType,
+        baseUrl: editingConnection.baseUrl,
+        label: editingConnection.label,
+        color: editingConnection.color,
+        email: creds.type === 'cloud' ? creds.email : '',
+        apiToken: creds.type === 'cloud' ? creds.apiToken : '',
+        username:
+          creds.type === 'server' && creds.authMethod === 'basic' ? (creds.username ?? '') : '',
+        password:
+          creds.type === 'server' && creds.authMethod === 'basic' ? (creds.password ?? '') : '',
+        personalAccessToken:
+          creds.type === 'server' && creds.authMethod === 'pat'
+            ? (creds.personalAccessToken ?? '')
+            : '',
+        authMethod: creds.type === 'server' ? creds.authMethod : 'pat',
+        proxyUrl: editingConnection.proxyUrl ?? defaultProxyUrl
+      };
+    }
+    return {
+      instanceType: 'cloud',
+      baseUrl: '',
+      label: '',
+      email: '',
+      apiToken: '',
+      username: '',
+      password: '',
+      personalAccessToken: '',
+      authMethod: 'pat',
+      proxyUrl: defaultProxyUrl
+    };
+  }
 
-  let showProxyInput = $state(!!defaultProxyUrl);
+  // Form state
+  let formData = $state<ConnectionFormData>(getInitialFormData());
+
+  let showProxyInput = $state(!!formData.proxyUrl);
   let isSubmitting = $state(false);
   let formError = $state<string | null>(null);
 
@@ -48,13 +84,26 @@
     isSubmitting = true;
 
     try {
-      const config = buildConfig();
-      const success = await connect(config);
+      const config = buildStoredConfig();
 
-      if (success) {
+      if (isEditMode && editingConnection) {
+        // Update existing connection
+        await updateConnection(editingConnection.id, config);
+        const updated = connectionRegistry.connections.find((c) => c.id === editingConnection.id);
+        if (updated?.status === 'error') {
+          formError = updated.error || 'Connection failed';
+          return;
+        }
         onConnected?.();
       } else {
-        formError = connectionState.error || 'Connection failed';
+        // Add new connection (returns ID after connect attempt)
+        const newId = await addConnection(config);
+        const newConn = connectionRegistry.connections.find((c) => c.id === newId);
+        if (newConn?.status === 'error') {
+          formError = newConn.error || 'Connection failed';
+        } else {
+          onConnected?.();
+        }
       }
     } catch (err) {
       formError = err instanceof Error ? err.message : 'Connection failed';
@@ -63,25 +112,33 @@
     }
   }
 
-  function buildConfig() {
-    const baseUrl = formData.baseUrl.trim().replace(/\/$/, ''); // Trim whitespace and remove trailing slash
+  function buildStoredConfig(): StoredConnection {
+    const baseUrl = formData.baseUrl.trim().replace(/\/$/, '');
+    const label = formData.label.trim() || deriveLabelFromUrl(baseUrl);
+
+    const base = {
+      id: editingConnection?.id ?? crypto.randomUUID(),
+      label,
+      baseUrl,
+      proxyUrl: formData.proxyUrl || undefined,
+      color: formData.color
+    };
 
     if (formData.instanceType === 'cloud') {
       return {
+        ...base,
         instanceType: 'cloud' as const,
-        baseUrl,
         credentials: {
           type: 'cloud' as const,
           email: formData.email,
           apiToken: formData.apiToken
-        },
-        proxyUrl: formData.proxyUrl || undefined
+        }
       };
     }
 
     return {
+      ...base,
       instanceType: 'server' as const,
-      baseUrl,
       credentials: {
         type: 'server' as const,
         authMethod: formData.authMethod,
@@ -89,8 +146,7 @@
         password: formData.authMethod === 'basic' ? formData.password : undefined,
         personalAccessToken:
           formData.authMethod === 'pat' ? formData.personalAccessToken : undefined
-      },
-      proxyUrl: formData.proxyUrl || undefined
+      }
     };
   }
 
@@ -104,6 +160,38 @@
 </script>
 
 <form onsubmit={handleSubmit} class="space-y-6">
+  <!-- Connection Label -->
+  <div class="space-y-2">
+    <Label for="label">Connection Name</Label>
+    <Input
+      id="label"
+      type="text"
+      bind:value={formData.label}
+      placeholder="e.g. Cloud Production, Server Legacy"
+      autocomplete="off"
+    />
+    <p class="text-xs text-muted-foreground">Optional. Auto-derived from URL if empty.</p>
+  </div>
+
+  <!-- Connection Color -->
+  <div class="space-y-2">
+    <Label>Color</Label>
+    <div class="flex gap-2 flex-wrap">
+      {#each QUERY_COLORS as colorOption (colorOption.id)}
+        <button
+          type="button"
+          class="w-6 h-6 rounded-full border-2 transition-all {colorOption.bg} {formData.color ===
+          colorOption.id
+            ? 'border-foreground scale-110'
+            : 'border-transparent opacity-70 hover:opacity-100'}"
+          title={colorOption.label}
+          onclick={() =>
+            (formData.color = formData.color === colorOption.id ? undefined : colorOption.id)}
+        ></button>
+      {/each}
+    </div>
+  </div>
+
   <!-- Instance Type -->
   <fieldset>
     <legend class="block text-sm font-medium text-text mb-2"> Jira Instance Type </legend>
@@ -301,10 +389,10 @@
   <Button type="submit" disabled={isSubmitting} class="w-full">
     {#if isSubmitting}
       <AtlaskitIcon name="refresh" size={16} class="animate-spin" />
-      Connecting...
+      {isEditMode ? 'Saving...' : 'Connecting...'}
     {:else}
       <AtlaskitIcon name="flask" size={16} />
-      Connect
+      {isEditMode ? 'Save & Reconnect' : 'Connect'}
     {/if}
   </Button>
 

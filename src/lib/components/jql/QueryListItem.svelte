@@ -8,11 +8,13 @@
   import { downloadSingleQuery } from '../../utils/storage';
   import { changeTrackingState } from '../../stores/changeTracking.svelte';
   import { toggleQueryChangeTrackingExclusion } from '../../stores/jql.svelte';
+  import { getConnection } from '../../stores/connection.svelte';
 
   interface Props {
     query: SavedQuery;
     isActive: boolean;
     isKeyboardFocused?: boolean;
+    showConnectionBadge?: boolean;
     index: number;
     isDragging: boolean;
     isDragOver: boolean;
@@ -30,6 +32,7 @@
     query,
     isActive,
     isKeyboardFocused = false,
+    showConnectionBadge = false,
     index,
     isDragging,
     isDragOver,
@@ -115,6 +118,18 @@
   );
   const changeTypes = $derived(changeTrackingState.queriesWithPendingChanges[query.id] ?? null);
 
+  // Connection badge
+  const connectionInfo = $derived.by(() => {
+    if (!showConnectionBadge || !query.connectionId) return null;
+    const conn = getConnection(query.connectionId);
+    if (!conn) return null;
+    return {
+      label: conn.config.label,
+      color: conn.config.color ?? null,
+      isError: conn.status === 'error'
+    };
+  });
+
   // Dropdown state
   let dropdownOpen = $state(false);
 
@@ -190,6 +205,23 @@
         class="inline-flex items-center justify-center min-w-[1.25rem] h-[18px] px-2 py-0.5 text-[10px] font-bold font-data rounded-full bg-muted text-text-subtlest flex-shrink-0"
       >
         {query.cachedIssueCount}
+      </span>
+    {/if}
+    {#if connectionInfo}
+      <span
+        class="inline-flex items-center h-[16px] px-1.5 text-[9px] font-semibold rounded flex-shrink-0 max-w-[5rem] truncate {connectionInfo.color
+          ? ''
+          : 'bg-muted text-text-subtlest'}"
+        class:opacity-40={connectionInfo.isError}
+        style:color={connectionInfo.color
+          ? `var(--color-query-${connectionInfo.color})`
+          : undefined}
+        style:background-color={connectionInfo.color
+          ? `var(--query-${connectionInfo.color}-bg)`
+          : undefined}
+        title="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}"
+      >
+        {connectionInfo.label}
       </span>
     {/if}
   </div>

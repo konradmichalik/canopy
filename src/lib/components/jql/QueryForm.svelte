@@ -9,11 +9,18 @@
   import { validateJql, validateJqlExtended } from '../../utils/jql-helpers';
   import { isTitleUnique } from '../../stores/jql.svelte';
   import { generateSlug } from '../../utils/slug';
-  import { getClient, connectionState } from '../../stores/connection.svelte';
+  import { getClient, connectionRegistry } from '../../stores/connection.svelte';
+  import { issuesState } from '../../stores/issues.svelte';
 
   interface Props {
     query?: SavedQuery | null;
-    onSave: (title: string, jql: string, color?: QueryColor, showEntryNode?: boolean) => void;
+    onSave: (
+      title: string,
+      jql: string,
+      color?: QueryColor,
+      showEntryNode?: boolean,
+      connectionId?: string
+    ) => void;
     onCancel: () => void;
   }
 
@@ -29,6 +36,19 @@
   // svelte-ignore state_referenced_locally
   let showEntryNode = $state(query?.showEntryNode ?? true);
   let error = $state<string | null>(null);
+
+  // Connection selection (only for new queries when multiple connections exist)
+  const connections = $derived(connectionRegistry.connections);
+  const showConnectionSelector = $derived(!query && connections.length > 1);
+  // svelte-ignore state_referenced_locally
+  // Default to active connection, then first healthy, then first overall
+  let selectedConnectionId = $state<string>(
+    query?.connectionId ??
+      (issuesState.currentConnectionId &&
+      connections.some((c) => c.id === issuesState.currentConnectionId && c.status !== 'error')
+        ? issuesState.currentConnectionId
+        : (connections.find((c) => c.status !== 'error')?.id ?? connections[0]?.id ?? ''))
+  );
 
   // JQL validation state
   let isCheckingJql = $state(false);
@@ -70,15 +90,22 @@
       return;
     }
 
-    onSave(trimmedTitle, trimmedJql, color, showEntryNode);
+    onSave(trimmedTitle, trimmedJql, color, showEntryNode, selectedConnectionId || undefined);
   }
 
   function selectColor(c: QueryColor): void {
     color = color === c ? undefined : c;
   }
 
+  // Resolve client for the query's connection (for JQL validation)
+  const jqlClient = $derived(
+    getClient(
+      selectedConnectionId || query?.connectionId || issuesState.currentConnectionId || undefined
+    )
+  );
+
   async function checkJql(): Promise<void> {
-    const client = getClient();
+    const client = jqlClient;
     if (!client) return;
 
     isCheckingJql = true;
@@ -127,6 +154,29 @@
 
     <!-- Form -->
     <form onsubmit={handleSubmit} class="p-4 space-y-4">
+      {#if showConnectionSelector}
+        <div class="space-y-1.5">
+          <label
+            for="queryConnection"
+            class="text-[11px] font-bold text-text-subtlest uppercase tracking-wider"
+            >Connection</label
+          >
+          <select
+            id="queryConnection"
+            bind:value={selectedConnectionId}
+            onchange={() => (jqlCheckResult = null)}
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            {#each connections as conn (conn.id)}
+              <option value={conn.id} disabled={conn.status === 'error'}>
+                {conn.config.label}
+                {conn.status === 'error' ? ' (disconnected)' : ''}
+              </option>
+            {/each}
+          </select>
+        </div>
+      {/if}
+
       <div class="space-y-1.5">
         <label
           for="queryTitle"
@@ -169,7 +219,7 @@
               : 'border-input'}"
             oninput={() => (jqlCheckResult = null)}
           ></textarea>
-          {#if connectionState.isConnected}
+          {#if jqlClient}
             <button
               type="button"
               onclick={checkJql}

@@ -40,6 +40,7 @@ async function getTauriStore(): Promise<import('@tauri-apps/plugin-store').Store
 
 export const STORAGE_KEYS = {
   CONNECTION: 'connection',
+  CONNECTIONS: 'connections',
   QUERIES: 'queries',
   THEME: 'theme',
   EXPANDED_NODES: 'expanded-nodes',
@@ -419,6 +420,85 @@ export function getStorageInfo(): { used: number; keys: string[] } {
 }
 
 // ============================================
+// Connection Helpers
+// ============================================
+
+/**
+ * Derive a human-readable label from a Jira base URL.
+ */
+export function deriveLabelFromUrl(baseUrl: string): string {
+  try {
+    const hostname = new URL(baseUrl).hostname;
+    const name = hostname.replace('.atlassian.net', '').replace(/\./g, ' ');
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  } catch {
+    return 'Jira';
+  }
+}
+
+// ============================================
+// Connection Registry Migration
+// ============================================
+
+/**
+ * Old single-connection format (pre-registry)
+ */
+interface LegacyStoredConnection {
+  instanceType: 'cloud' | 'server';
+  baseUrl: string;
+  credentials: StoredConnection['credentials'];
+  proxyUrl?: string;
+  lastConnected?: string;
+}
+
+/**
+ * Migrate from single CONNECTION key to CONNECTIONS array.
+ * Idempotent: skips if CONNECTIONS already exists.
+ * Must run before connection registry initialization.
+ */
+export async function migrateConnectionToRegistry(): Promise<void> {
+  const connections = await getStorageItemAsync<StoredConnection[]>(STORAGE_KEYS.CONNECTIONS);
+
+  // Already migrated or fresh install
+  if (connections !== null) {
+    return;
+  }
+
+  const legacy = await getStorageItemAsync<LegacyStoredConnection>(STORAGE_KEYS.CONNECTION);
+  if (!legacy) {
+    return; // Fresh install, nothing to migrate
+  }
+
+  const label = deriveLabelFromUrl(legacy.baseUrl);
+
+  const connectionId = crypto.randomUUID();
+  const migratedConnection: StoredConnection = {
+    id: connectionId,
+    label,
+    instanceType: legacy.instanceType,
+    baseUrl: legacy.baseUrl,
+    credentials: legacy.credentials,
+    proxyUrl: legacy.proxyUrl,
+    lastConnected: legacy.lastConnected
+  };
+
+  // Stamp all queries and separators with the connectionId
+  const items = await getStorageItemAsync<QueryListItem[]>(STORAGE_KEYS.QUERIES);
+  if (items && Array.isArray(items)) {
+    const stamped = items.map((item) => ({ ...item, connectionId }));
+    await setStorageItemAsync(STORAGE_KEYS.QUERIES, stamped);
+  }
+
+  // Write new connections array
+  await setStorageItemAsync(STORAGE_KEYS.CONNECTIONS, [migratedConnection]);
+
+  // Remove old key (crash-safe: if this fails, next load sees CONNECTIONS and skips)
+  await removeStorageItemAsync(STORAGE_KEYS.CONNECTION);
+
+  logger.info('Migrated single connection to registry', { connectionId, label });
+}
+
+// ============================================
 // Export / Import Configuration
 // ============================================
 
@@ -434,26 +514,31 @@ export interface ExportOptions {
  */
 export function exportConfig(options: ExportOptions = {}): ExportedConfig {
   const { includeCredentials = true } = options;
-  const connection = getStorageItem<StoredConnection>(STORAGE_KEYS.CONNECTION);
+  const connections = getStorageItem<StoredConnection[]>(STORAGE_KEYS.CONNECTIONS) || [];
   const queries = getStorageItem<SavedQuery[]>(STORAGE_KEYS.QUERIES) || [];
+
+  const exportedConnections = includeCredentials
+    ? connections.map((conn) => ({
+        id: conn.id,
+        label: conn.label,
+        instanceType: conn.instanceType,
+        baseUrl: conn.baseUrl,
+        credentials: conn.credentials,
+        proxyUrl: conn.proxyUrl,
+        color: conn.color
+      }))
+    : undefined;
 
   const config: ExportedConfig = {
     version: EXPORT_VERSION,
     exportedAt: new Date().toISOString(),
-    connection:
-      connection && includeCredentials
-        ? {
-            instanceType: connection.instanceType,
-            baseUrl: connection.baseUrl,
-            credentials: connection.credentials,
-            proxyUrl: connection.proxyUrl
-          }
-        : null,
+    connections: exportedConnections,
     queries
   };
 
-  logger.info('📦 Config exported', {
-    hasConnection: !!connection && includeCredentials,
+  logger.info('Config exported', {
+    connectionCount: connections.length,
+    includeCredentials,
     queryCount: queries.length
   });
 
@@ -531,21 +616,32 @@ export function validateImportedConfig(data: unknown): { valid: boolean; errors:
     });
   }
 
-  // Check connection (optional)
-  if (config.connection !== null && config.connection !== undefined) {
+  // Check connections (array format) or legacy connection (single object)
+  const validateSingleConnection = (conn: Record<string, unknown>, label: string) => {
+    if (!conn.baseUrl || typeof conn.baseUrl !== 'string') {
+      errors.push(`${label} is missing baseUrl`);
+    }
+    if (!conn.instanceType || !['cloud', 'server'].includes(conn.instanceType as string)) {
+      errors.push(`${label} has invalid instanceType`);
+    }
+    if (!conn.credentials || typeof conn.credentials !== 'object') {
+      errors.push(`${label} is missing credentials`);
+    }
+  };
+
+  if (Array.isArray(config.connections)) {
+    config.connections.forEach((conn, i) => {
+      if (!conn || typeof conn !== 'object') {
+        errors.push(`Connection at index ${i} is invalid`);
+      } else {
+        validateSingleConnection(conn as Record<string, unknown>, `Connection ${i}`);
+      }
+    });
+  } else if (config.connection !== null && config.connection !== undefined) {
     if (typeof config.connection !== 'object') {
       errors.push('Connection must be an object');
     } else {
-      const conn = config.connection as Record<string, unknown>;
-      if (!conn.baseUrl || typeof conn.baseUrl !== 'string') {
-        errors.push('Connection is missing baseUrl');
-      }
-      if (!conn.instanceType || !['cloud', 'server'].includes(conn.instanceType as string)) {
-        errors.push('Connection has invalid instanceType');
-      }
-      if (!conn.credentials || typeof conn.credentials !== 'object') {
-        errors.push('Connection is missing credentials');
-      }
+      validateSingleConnection(config.connection as Record<string, unknown>, 'Connection');
     }
   }
 
@@ -572,17 +668,38 @@ export function importConfig(
   let connectionImported = false;
   let queriesImported = 0;
 
-  // Import connection
-  if (config.connection && overwriteConnection) {
-    const storedConnection: StoredConnection = {
-      instanceType: config.connection.instanceType,
-      baseUrl: config.connection.baseUrl,
-      credentials: config.connection.credentials as StoredConnection['credentials'],
-      proxyUrl: config.connection.proxyUrl
-    };
-    setStorageItem(STORAGE_KEYS.CONNECTION, storedConnection);
-    connectionImported = true;
-    logger.info('🔗 Connection imported', { baseUrl: config.connection.baseUrl });
+  // Import connections (new multi-connection format or legacy single connection)
+  if (overwriteConnection) {
+    if (config.connections && config.connections.length > 0) {
+      // Multi-connection format
+      const storedConnections: StoredConnection[] = config.connections.map((conn) => ({
+        id: conn.id,
+        label: conn.label || deriveLabelFromUrl(conn.baseUrl),
+        instanceType: conn.instanceType,
+        baseUrl: conn.baseUrl,
+        credentials: conn.credentials as StoredConnection['credentials'],
+        proxyUrl: conn.proxyUrl,
+        color: conn.color
+      }));
+      setStorageItem(STORAGE_KEYS.CONNECTIONS, storedConnections);
+      connectionImported = true;
+      logger.info('Connections imported', { count: storedConnections.length });
+    } else if (config.connection) {
+      // Legacy single connection format → convert to array
+      const connectionId = crypto.randomUUID();
+      const label = deriveLabelFromUrl(config.connection.baseUrl);
+      const storedConnection: StoredConnection = {
+        id: connectionId,
+        label,
+        instanceType: config.connection.instanceType,
+        baseUrl: config.connection.baseUrl,
+        credentials: config.connection.credentials as StoredConnection['credentials'],
+        proxyUrl: config.connection.proxyUrl
+      };
+      setStorageItem(STORAGE_KEYS.CONNECTIONS, [storedConnection]);
+      connectionImported = true;
+      logger.info('Legacy connection imported as registry', { baseUrl: config.connection.baseUrl });
+    }
   }
 
   // Import queries and separators (including their displayFields)

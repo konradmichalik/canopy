@@ -9,7 +9,7 @@
     removeFlag,
     type FlagColor
   } from '../../stores/flags.svelte';
-  import { getIssueUrl } from '../../stores/issues.svelte';
+  import { getIssueUrl, issuesState } from '../../stores/issues.svelte';
   import { openExternalUrl } from '../../utils/external-link';
   import {
     isSelected,
@@ -19,7 +19,7 @@
     buildBulkEditUrl,
     copySelectedKeys
   } from '../../stores/selection.svelte';
-  import { connectionState } from '../../stores/connection.svelte';
+  import { getConnection } from '../../stores/connection.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -61,7 +61,8 @@
   }
 
   function handleBulkEdit(): void {
-    const baseUrl = connectionState.config?.baseUrl;
+    const connId = issuesState.currentConnectionId;
+    const baseUrl = connId ? getConnection(connId)?.config.baseUrl : undefined;
     if (!baseUrl) return;
     const keys = getSelectedKeys();
     const { url } = buildBulkEditUrl(baseUrl, keys);

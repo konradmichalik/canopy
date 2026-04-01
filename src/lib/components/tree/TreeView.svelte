@@ -30,7 +30,7 @@
   import { keyboardNavState, clearFocus } from '../../stores/keyboardNavigation.svelte';
   import { groupingState, groupIssues, type IssueGroup } from '../../stores/grouping.svelte';
   import { sortConfigState } from '../../stores/sortConfig.svelte';
-  import { connectionState } from '../../stores/connection.svelte';
+  import { getConnection, connectionRegistry } from '../../stores/connection.svelte';
   import {
     changeTrackingState,
     saveCheckpoint,
@@ -65,6 +65,16 @@
     routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : undefined
   );
   const showEntryNode = $derived(currentQuery?.showEntryNode ?? false);
+
+  // Connection info for the header badge (only when multiple connections)
+  const connectionBadge = $derived.by(() => {
+    if (connectionRegistry.connections.length <= 1) return null;
+    const connId = issuesState.currentConnectionId;
+    if (!connId) return null;
+    const conn = getConnection(connId);
+    if (!conn) return null;
+    return { label: conn.config.label, color: conn.config.color ?? null };
+  });
 
   // Options panel (filters, grouping, sorting) - persisted per query
   const optionsExpanded = $derived(currentQuery?.optionsExpanded ?? true);
@@ -185,9 +195,11 @@
 
   // Build JIRA URL for opening in browser
   const jiraSearchUrl = $derived.by(() => {
-    if (!connectionState.config?.baseUrl || !effectiveJql) return '';
+    const connId = issuesState.currentConnectionId;
+    const baseUrl = connId ? getConnection(connId)?.config.baseUrl : undefined;
+    if (!baseUrl || !effectiveJql) return '';
     const encodedJql = encodeURIComponent(effectiveJql);
-    return `${connectionState.config.baseUrl}/issues/?jql=${encodedJql}`;
+    return `${baseUrl}/issues/?jql=${encodedJql}`;
   });
 
   function openInJira(): void {
@@ -284,6 +296,22 @@
                 class="text-xs text-[color:var(--ds-text-warning)] bg-[color:var(--ds-background-warning)] px-2 py-0.5 rounded-full"
               >
                 Partial
+              </span>
+            {/if}
+            {#if connectionBadge}
+              <span
+                class="text-[10px] font-semibold px-1.5 py-0.5 rounded max-w-[6rem] truncate {connectionBadge.color
+                  ? ''
+                  : 'bg-muted text-text-subtlest'}"
+                style:color={connectionBadge.color
+                  ? `var(--color-query-${connectionBadge.color})`
+                  : undefined}
+                style:background-color={connectionBadge.color
+                  ? `var(--query-${connectionBadge.color}-bg)`
+                  : undefined}
+                title={connectionBadge.label}
+              >
+                {connectionBadge.label}
               </span>
             {/if}
           </div>
