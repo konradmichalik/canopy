@@ -41,7 +41,14 @@
   const connections = $derived(connectionRegistry.connections);
   const showConnectionSelector = $derived(!query && connections.length > 1);
   // svelte-ignore state_referenced_locally
-  let selectedConnectionId = $state<string>(query?.connectionId ?? connections[0]?.id ?? '');
+  // Default to active connection, then first healthy, then first overall
+  let selectedConnectionId = $state<string>(
+    query?.connectionId ??
+      (issuesState.currentConnectionId &&
+      connections.some((c) => c.id === issuesState.currentConnectionId && c.status !== 'error')
+        ? issuesState.currentConnectionId
+        : (connections.find((c) => c.status !== 'error')?.id ?? connections[0]?.id ?? ''))
+  );
 
   // JQL validation state
   let isCheckingJql = $state(false);
@@ -157,6 +164,7 @@
           <select
             id="queryConnection"
             bind:value={selectedConnectionId}
+            onchange={() => (jqlCheckResult = null)}
             class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             {#each connections as conn (conn.id)}

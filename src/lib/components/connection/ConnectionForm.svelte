@@ -89,6 +89,11 @@
       if (isEditMode && editingConnection) {
         // Update existing connection
         await updateConnection(editingConnection.id, config);
+        const updated = connectionRegistry.connections.find((c) => c.id === editingConnection.id);
+        if (updated?.status === 'error') {
+          formError = updated.error || 'Connection failed';
+          return;
+        }
         onConnected?.();
       } else {
         // Add new connection (returns ID after connect attempt)
