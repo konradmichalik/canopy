@@ -413,11 +413,25 @@
 
   <!-- Sidebar Footer -->
   <div class="h-14 flex items-center justify-between px-4 border-t flex-shrink-0 bg-accent">
-    <div class="flex items-center gap-2">
-      <span class="text-sm font-medium text-foreground"
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="text-sm font-medium text-foreground shrink-0"
         >{jqlState.items.filter((i) => !isSeparator(i)).length}</span
       >
-      <span class="text-sm text-muted-foreground">Queries</span>
+      <span class="text-sm text-muted-foreground shrink-0">Queries</span>
+      {#if hasMultipleConnections}
+        <span class="text-muted-foreground/40 shrink-0">·</span>
+        <div class="flex items-center gap-1 min-w-0 overflow-hidden">
+          {#each connectionRegistry.connections as conn (conn.id)}
+            <span
+              class="inline-flex items-center h-[16px] px-1.5 text-[9px] font-semibold rounded bg-muted text-text-subtlest truncate max-w-[4.5rem]"
+              class:opacity-40={conn.status === 'error'}
+              title={conn.config.label}
+            >
+              {conn.config.label}
+            </span>
+          {/each}
+        </div>
+      {/if}
     </div>
     <div class="flex items-center gap-1">
       <Tooltip text="Import Query">

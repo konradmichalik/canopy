@@ -211,12 +211,13 @@
       </span>
     {/if}
     {#if connectionInfo}
-      <Tooltip text="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}">
-        <span
-          class="inline-block w-2 h-2 rounded-full flex-shrink-0 {connectionInfo.bgClass}"
-          class:opacity-40={connectionInfo.isError}
-        ></span>
-      </Tooltip>
+      <span
+        class="inline-flex items-center h-[16px] px-1.5 text-[9px] font-semibold rounded bg-muted text-text-subtlest flex-shrink-0 max-w-[5rem] truncate"
+        class:opacity-40={connectionInfo.isError}
+        title="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}"
+      >
+        {connectionInfo.label}
+      </span>
     {/if}
   </div>
 
