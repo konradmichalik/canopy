@@ -30,7 +30,7 @@
   import { keyboardNavState, clearFocus } from '../../stores/keyboardNavigation.svelte';
   import { groupingState, groupIssues, type IssueGroup } from '../../stores/grouping.svelte';
   import { sortConfigState } from '../../stores/sortConfig.svelte';
-  import { getConnection } from '../../stores/connection.svelte';
+  import { getConnection, connectionRegistry } from '../../stores/connection.svelte';
   import {
     changeTrackingState,
     saveCheckpoint,
@@ -65,6 +65,14 @@
     routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : undefined
   );
   const showEntryNode = $derived(currentQuery?.showEntryNode ?? false);
+
+  // Connection label for the header badge (only when multiple connections)
+  const connectionLabel = $derived.by(() => {
+    if (connectionRegistry.connections.length <= 1) return null;
+    const connId = issuesState.currentConnectionId;
+    if (!connId) return null;
+    return getConnection(connId)?.config.label ?? null;
+  });
 
   // Options panel (filters, grouping, sorting) - persisted per query
   const optionsExpanded = $derived(currentQuery?.optionsExpanded ?? true);
@@ -286,6 +294,14 @@
                 class="text-xs text-[color:var(--ds-text-warning)] bg-[color:var(--ds-background-warning)] px-2 py-0.5 rounded-full"
               >
                 Partial
+              </span>
+            {/if}
+            {#if connectionLabel}
+              <span
+                class="text-[10px] font-semibold text-text-subtlest bg-muted px-1.5 py-0.5 rounded max-w-[6rem] truncate"
+                title={connectionLabel}
+              >
+                {connectionLabel}
               </span>
             {/if}
           </div>
