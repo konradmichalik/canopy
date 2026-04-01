@@ -865,7 +865,7 @@
                   <AtlaskitIcon name="cross" size={12} />
                 </Button>
               </div>
-              <ConnectionForm {editingConnection} onConnected={handleConnectionFormDone} />
+              <ConnectionForm {editingConnection} onConnected={handleConnectionFormDone} compact />
             </div>
           {:else}
             <Button
