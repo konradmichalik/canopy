@@ -15,12 +15,6 @@
   import { issuesState } from '../../stores/issues.svelte';
   import { getQueryById } from '../../stores/jql.svelte';
 
-  interface Props {
-    onManageConnections?: () => void;
-  }
-
-  let { onManageConnections }: Props = $props();
-
   const activeQuery = $derived(
     routerState.activeQueryId ? getQueryById(routerState.activeQueryId) : null
   );
@@ -107,7 +101,7 @@
             <AtlaskitIcon name="question-circle" size={20} />
           </button>
         </Tooltip>
-        <SettingsModal {onManageConnections} />
+        <SettingsModal />
       </div>
     </div>
   </header>

@@ -38,10 +38,11 @@
     connectionRegistry.connections.some((c) => c.status === 'connected')
   );
 
-  // Auto-open connection modal when no connections exist
+  // Auto-open connection modal when no connections exist (first-time setup)
   const needsConnection = $derived(!isInitializing && !hasConnection);
   $effect(() => {
     if (needsConnection) showConnectionModal = true;
+    else showConnectionModal = false;
   });
 
   onMount(() => {
@@ -105,7 +106,7 @@
   <AppLoader />
 {:else}
   <div class="animate-fade-in">
-    <MainLayout onManageConnections={() => (showConnectionModal = true)} />
+    <MainLayout />
   </div>
 {/if}
 
