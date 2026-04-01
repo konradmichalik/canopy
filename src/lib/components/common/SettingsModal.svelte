@@ -757,10 +757,13 @@
                         </p>
                         <span
                           class="text-[10px] font-semibold px-1.5 py-0.5 rounded truncate max-w-[5rem] {colorEntry
-                            ? 'connection-badge'
+                            ? ''
                             : 'bg-muted text-text-subtlest'}"
-                          style={colorEntry
-                            ? `--badge-color: var(--color-query-${conn.config.color});`
+                          style:color={colorEntry
+                            ? `var(--color-query-${conn.config.color})`
+                            : undefined}
+                          style:background-color={colorEntry
+                            ? `color-mix(in srgb, var(--color-query-${conn.config.color}) 15%, transparent)`
                             : undefined}
                         >
                           {conn.config.label}

@@ -301,10 +301,13 @@
             {#if connectionBadge}
               <span
                 class="text-[10px] font-semibold px-1.5 py-0.5 rounded max-w-[6rem] truncate {connectionBadge.color
-                  ? 'connection-badge'
+                  ? ''
                   : 'bg-muted text-text-subtlest'}"
-                style={connectionBadge.color
-                  ? `--badge-color: var(--color-query-${connectionBadge.color});`
+                style:color={connectionBadge.color
+                  ? `var(--color-query-${connectionBadge.color})`
+                  : undefined}
+                style:background-color={connectionBadge.color
+                  ? `color-mix(in srgb, var(--color-query-${connectionBadge.color}) 15%, transparent)`
                   : undefined}
                 title={connectionBadge.label}
               >

@@ -208,24 +208,21 @@
       </span>
     {/if}
     {#if connectionInfo}
-      {#if connectionInfo.color}
-        <span
-          class="connection-badge inline-flex items-center h-[16px] px-1.5 text-[9px] font-semibold rounded flex-shrink-0 max-w-[5rem] truncate"
-          class:opacity-40={connectionInfo.isError}
-          style="--badge-color: var(--color-query-{connectionInfo.color});"
-          title="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}"
-        >
-          {connectionInfo.label}
-        </span>
-      {:else}
-        <span
-          class="inline-flex items-center h-[16px] px-1.5 text-[9px] font-semibold rounded flex-shrink-0 max-w-[5rem] truncate bg-muted text-text-subtlest"
-          class:opacity-40={connectionInfo.isError}
-          title="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}"
-        >
-          {connectionInfo.label}
-        </span>
-      {/if}
+      <span
+        class="inline-flex items-center h-[16px] px-1.5 text-[9px] font-semibold rounded flex-shrink-0 max-w-[5rem] truncate {connectionInfo.color
+          ? ''
+          : 'bg-muted text-text-subtlest'}"
+        class:opacity-40={connectionInfo.isError}
+        style:color={connectionInfo.color
+          ? `var(--color-query-${connectionInfo.color})`
+          : undefined}
+        style:background-color={connectionInfo.color
+          ? `color-mix(in srgb, var(--color-query-${connectionInfo.color}) 15%, transparent)`
+          : undefined}
+        title="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}"
+      >
+        {connectionInfo.label}
+      </span>
     {/if}
   </div>
 
