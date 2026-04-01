@@ -307,7 +307,7 @@
                   ? `var(--color-query-${connectionBadge.color})`
                   : undefined}
                 style:background-color={connectionBadge.color
-                  ? `var(--color-query-${connectionBadge.color}-bg)`
+                  ? `var(--query-${connectionBadge.color}-bg)`
                   : undefined}
                 title={connectionBadge.label}
               >

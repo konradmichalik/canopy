@@ -433,16 +433,6 @@ html.color-intensity-vivid[data-color-mode='dark'] {
   --color-query-purple: var(--query-purple);
   --color-query-teal: var(--query-teal);
 
-  /* Query Badge Backgrounds (15% opacity) */
-  --color-query-gray-bg: var(--query-gray-bg);
-  --color-query-blue-bg: var(--query-blue-bg);
-  --color-query-green-bg: var(--query-green-bg);
-  --color-query-yellow-bg: var(--query-yellow-bg);
-  --color-query-orange-bg: var(--query-orange-bg);
-  --color-query-red-bg: var(--query-red-bg);
-  --color-query-purple-bg: var(--query-purple-bg);
-  --color-query-teal-bg: var(--query-teal-bg);
-
   /* Skeleton */
   --color-skeleton: var(--skeleton);
 

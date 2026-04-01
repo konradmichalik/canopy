@@ -763,7 +763,7 @@
                             ? `var(--color-query-${conn.config.color})`
                             : undefined}
                           style:background-color={colorEntry
-                            ? `var(--color-query-${conn.config.color}-bg)`
+                            ? `var(--query-${conn.config.color}-bg)`
                             : undefined}
                         >
                           {conn.config.label}
