@@ -8,11 +8,13 @@
   import { downloadSingleQuery } from '../../utils/storage';
   import { changeTrackingState } from '../../stores/changeTracking.svelte';
   import { toggleQueryChangeTrackingExclusion } from '../../stores/jql.svelte';
+  import { getConnection } from '../../stores/connection.svelte';
 
   interface Props {
     query: SavedQuery;
     isActive: boolean;
     isKeyboardFocused?: boolean;
+    showConnectionBadge?: boolean;
     index: number;
     isDragging: boolean;
     isDragOver: boolean;
@@ -30,6 +32,7 @@
     query,
     isActive,
     isKeyboardFocused = false,
+    showConnectionBadge = false,
     index,
     isDragging,
     isDragOver,
@@ -115,6 +118,21 @@
   );
   const changeTypes = $derived(changeTrackingState.queriesWithPendingChanges[query.id] ?? null);
 
+  // Connection badge
+  const connectionInfo = $derived.by(() => {
+    if (!showConnectionBadge || !query.connectionId) return null;
+    const conn = getConnection(query.connectionId);
+    if (!conn) return null;
+    const colorEntry = conn.config.color
+      ? QUERY_COLORS.find((c) => c.id === conn.config.color)
+      : null;
+    return {
+      label: conn.config.label,
+      bgClass: colorEntry?.bg ?? 'bg-muted-foreground/30',
+      isError: conn.status === 'error'
+    };
+  });
+
   // Dropdown state
   let dropdownOpen = $state(false);
 
@@ -191,6 +209,14 @@
       >
         {query.cachedIssueCount}
       </span>
+    {/if}
+    {#if connectionInfo}
+      <Tooltip text="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}">
+        <span
+          class="inline-block w-2 h-2 rounded-full flex-shrink-0 {connectionInfo.bgClass}"
+          class:opacity-40={connectionInfo.isError}
+        ></span>
+      </Tooltip>
     {/if}
   </div>
 

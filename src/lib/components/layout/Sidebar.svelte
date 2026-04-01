@@ -3,9 +3,9 @@
   import Tooltip from '../common/Tooltip.svelte';
   import { Button } from '$lib/components/ui/button';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import type { SavedQuery, QueryColor, QuerySeparator, ConnectionInstance } from '../../types';
-  import { isSeparator, QUERY_COLORS } from '../../types/tree';
-  import { connectionRegistry, reconnectConnection } from '../../stores/connection.svelte';
+  import type { SavedQuery, QueryColor, QuerySeparator } from '../../types';
+  import { isSeparator } from '../../types/tree';
+  import { connectionRegistry } from '../../stores/connection.svelte';
   import QueryListItem from '../jql/QueryListItem.svelte';
   import SeparatorListItem from '../jql/SeparatorListItem.svelte';
   import QueryForm from '../jql/QueryForm.svelte';
@@ -234,50 +234,10 @@
   // Get keyboard-focused query for visual highlight
   const keyboardFocusedQuery = $derived(getFocusedQuery());
 
-  // Group items by connectionId for rendering
-  interface ConnectionGroup {
-    connectionId: string;
-    connection: ConnectionInstance | undefined;
-    items: Array<{ item: (typeof jqlState.items)[number]; globalIndex: number }>;
-  }
+  const hasMultipleConnections = $derived(connectionRegistry.connections.length > 1);
 
-  const connectionGroups = $derived.by((): ConnectionGroup[] | null => {
-    const connections = connectionRegistry.connections;
-    if (connections.length <= 1) return null;
-
-    // Build groups in connection order
-    const groups: ConnectionGroup[] = connections.map((conn) => ({
-      connectionId: conn.id,
-      connection: conn,
-      items: []
-    }));
-
-    const groupIndex: Record<string, number> = {};
-    connections.forEach((conn, i) => {
-      groupIndex[conn.id] = i;
-    });
-
-    // Distribute items into groups
-    jqlState.items.forEach((item, index) => {
-      const connId = 'connectionId' in item ? (item.connectionId ?? '') : '';
-      const idx = groupIndex[connId] ?? 0; // Orphaned items go to first group
-      groups[idx]?.items.push({ item, globalIndex: index });
-    });
-
-    return groups;
-  });
-
-  function getConnectionColorClasses(color?: string): string {
-    const found = QUERY_COLORS.find((c) => c.id === color);
-    return found ? found.bg : 'bg-muted-foreground/30';
-  }
-
-  // Track which connection new queries should be created in
-  let newQueryConnectionId = $state<string | undefined>(undefined);
-
-  function handleNewQuery(connectionId?: string): void {
+  function handleNewQuery(): void {
     editingQuery = null;
-    newQueryConnectionId = connectionId ?? connectionRegistry.connections[0]?.id;
     showQueryForm = true;
   }
 
@@ -290,7 +250,8 @@
     title: string,
     jql: string,
     color?: QueryColor,
-    showEntryNode?: boolean
+    showEntryNode?: boolean,
+    connectionId?: string
   ): Promise<void> {
     if (editingQuery) {
       const isActiveQuery = routerState.activeQueryId === editingQuery.id;
@@ -302,7 +263,8 @@
       }
       showFlashMessage('success', `Query "${title}" updated`);
     } else {
-      const query = addQuery(title, jql, color, newQueryConnectionId);
+      const resolvedConnectionId = connectionId ?? connectionRegistry.connections[0]?.id;
+      const query = addQuery(title, jql, color, resolvedConnectionId);
       if (query && showEntryNode) {
         updateQuery(query.id, { showEntryNode });
       }
@@ -409,79 +371,7 @@
           Create query
         </Button>
       </div>
-    {:else if connectionGroups}
-      <!-- Multi-connection grouped view -->
-      {#each connectionGroups as group (group.connectionId)}
-        <div class="mb-2">
-          <!-- Connection Group Header -->
-          <div
-            class="flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-muted-foreground"
-          >
-            <div
-              class="w-2 h-2 rounded-full shrink-0 {getConnectionColorClasses(
-                group.connection?.config.color
-              )}"
-            ></div>
-            <span class="truncate flex-1">{group.connection?.config.label ?? 'Unknown'}</span>
-            {#if group.connection?.status === 'error'}
-              <Tooltip text="Connection error — click to reconnect">
-                <button
-                  class="text-text-warning hover:text-text-danger"
-                  onclick={() => group.connection && reconnectConnection(group.connection.id)}
-                >
-                  <AtlaskitIcon name="warning" size={12} />
-                </button>
-              </Tooltip>
-            {/if}
-            <Tooltip text="New query">
-              <button
-                class="text-muted-foreground hover:text-foreground"
-                onclick={() => handleNewQuery(group.connectionId)}
-              >
-                <AtlaskitIcon name="add" size={12} />
-              </button>
-            </Tooltip>
-          </div>
-          <!-- Items in this group -->
-          <div class="space-y-1 {group.connection?.status === 'error' ? 'opacity-50' : ''}">
-            {#each group.items as { item, globalIndex } (item.id)}
-              {#if isSeparator(item)}
-                <SeparatorListItem
-                  separator={item}
-                  index={globalIndex}
-                  isDragging={queryDrag.isDragging(globalIndex)}
-                  isDragOver={queryDrag.isDragOver(globalIndex)}
-                  onEdit={handleEditSeparator}
-                  onDelete={handleDeleteSeparator}
-                  onDragStart={queryDrag.handleDragStart}
-                  onDragOver={queryDrag.handleDragOver}
-                  onDrop={queryDrag.handleDrop}
-                  onDragEnd={queryDrag.handleDragEnd}
-                />
-              {:else}
-                <QueryListItem
-                  query={item}
-                  index={globalIndex}
-                  isActive={routerState.activeQueryId === item.id}
-                  isKeyboardFocused={keyboardFocusedQuery?.id === item.id}
-                  isDragging={queryDrag.isDragging(globalIndex)}
-                  isDragOver={queryDrag.isDragOver(globalIndex)}
-                  onSelect={handleSelectQuery}
-                  onEdit={handleEditQuery}
-                  onDelete={handleDeleteQuery}
-                  onDuplicate={handleDuplicateQuery}
-                  onDragStart={queryDrag.handleDragStart}
-                  onDragOver={queryDrag.handleDragOver}
-                  onDrop={queryDrag.handleDrop}
-                  onDragEnd={queryDrag.handleDragEnd}
-                />
-              {/if}
-            {/each}
-          </div>
-        </div>
-      {/each}
     {:else}
-      <!-- Single-connection flat view -->
       <div class="space-y-1">
         {#each jqlState.items as item, index (item.id)}
           {#if isSeparator(item)}
@@ -505,6 +395,7 @@
               isKeyboardFocused={keyboardFocusedQuery?.id === item.id}
               isDragging={queryDrag.isDragging(index)}
               isDragOver={queryDrag.isDragOver(index)}
+              showConnectionBadge={hasMultipleConnections}
               onSelect={handleSelectQuery}
               onEdit={handleEditQuery}
               onDelete={handleDeleteQuery}
