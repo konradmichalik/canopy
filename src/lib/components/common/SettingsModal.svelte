@@ -16,16 +16,9 @@
   } from '../../utils/storage';
   import { initializeQueries, getQueries } from '../../stores/jql.svelte';
   import { Checkbox } from '$lib/components/ui/checkbox';
-  import {
-    initializeConnections,
-    connectionRegistry,
-    removeConnection,
-    reconnectConnection
-  } from '../../stores/connection.svelte';
-  import { jqlState } from '../../stores/jql.svelte';
+  import { initializeConnections, connectionRegistry } from '../../stores/connection.svelte';
   import { QUERY_COLORS } from '../../types/tree';
-  import type { StoredConnection } from '../../types';
-  import ConnectionForm from '../connection/ConnectionForm.svelte';
+  import ConnectionModal from '../connection/ConnectionModal.svelte';
   import Avatar from './Avatar.svelte';
   import { themeState, setTheme, type Theme } from '../../stores/theme.svelte';
   import {
@@ -91,20 +84,7 @@
   let includeCredentials = $state(true);
   let cacheSize = $state<string>('...');
 
-  // Connection management (inline in account tab)
-  let showAddConnectionForm = $state(false);
-  let editingConnection = $state<StoredConnection | undefined>(undefined);
-  let confirmingDeleteId = $state<string | null>(null);
-
-  function handleConnectionFormDone() {
-    showAddConnectionForm = false;
-    editingConnection = undefined;
-  }
-
-  async function handleDeleteConnection(connectionId: string) {
-    await removeConnection(connectionId);
-    confirmingDeleteId = null;
-  }
+  let showConnectionModal = $state(false);
 
   const queryCount = $derived(getQueries().length);
 
@@ -737,13 +717,13 @@
       <!-- Account Tab -->
       {#if !minimal}
         <Tabs.Content value="account" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
-          <!-- Connection List -->
-          {#each connectionRegistry.connections as conn (conn.id)}
-            {@const colorEntry = conn.config.color
-              ? QUERY_COLORS.find((c) => c.id === conn.config.color)
-              : null}
-            <div class="p-3 rounded-lg bg-muted/50 space-y-2">
-              <div class="flex items-center gap-3">
+          {#if connectionRegistry.connections.length > 0}
+            <!-- Connection List (read-only) -->
+            {#each connectionRegistry.connections as conn (conn.id)}
+              {@const colorEntry = conn.config.color
+                ? QUERY_COLORS.find((c) => c.id === conn.config.color)
+                : null}
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                 {#if conn.currentUser}
                   <Avatar user={conn.currentUser} size="md" />
                 {:else}
@@ -777,117 +757,41 @@
                     </span>
                   </p>
                 </div>
-                <div class="flex items-center gap-1 shrink-0">
-                  {#if conn.status === 'error'}
-                    <Tooltip text="Reconnect">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        class="h-7 w-7"
-                        onclick={() => reconnectConnection(conn.id)}
-                      >
-                        <AtlaskitIcon name="refresh" size={14} />
-                      </Button>
-                    </Tooltip>
-                  {/if}
-                  <Tooltip text="Edit">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      class="h-7 w-7"
-                      onclick={() => {
-                        editingConnection = conn.config;
-                        showAddConnectionForm = false;
-                      }}
-                    >
-                      <AtlaskitIcon name="edit" size={14} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip text="Remove">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      class="h-7 w-7 text-text-danger hover:bg-danger-subtlest"
-                      onclick={() => (confirmingDeleteId = conn.id)}
-                    >
-                      <AtlaskitIcon name="delete" size={14} />
-                    </Button>
-                  </Tooltip>
-                </div>
-              </div>
-              {#if conn.error}
-                <p class="text-xs text-text-danger">{conn.error}</p>
-              {/if}
-              {#if confirmingDeleteId === conn.id}
-                {@const itemCount = jqlState.items.filter(
-                  (i) => (i as { connectionId?: string }).connectionId === conn.id
-                ).length}
-                <div class="p-2 bg-danger-subtlest border border-border-danger rounded-lg">
-                  <p class="text-xs text-text-danger font-medium">Remove this connection?</p>
-                  {#if itemCount > 0}
-                    <p class="text-xs text-text-danger mt-1">
-                      This will also delete {itemCount} saved {itemCount === 1
-                        ? 'query'
-                        : 'queries'}.
-                    </p>
-                  {/if}
-                  <div class="flex gap-2 mt-2">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onclick={() => handleDeleteConnection(conn.id)}>Remove</Button
-                    >
-                    <Button size="sm" variant="ghost" onclick={() => (confirmingDeleteId = null)}
-                      >Cancel</Button
-                    >
-                  </div>
-                </div>
-              {/if}
-            </div>
-          {/each}
-
-          <!-- Inline Add/Edit Form -->
-          {#if showAddConnectionForm || editingConnection}
-            <div class="border border-border rounded-lg p-4">
-              <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-medium">
-                  {editingConnection ? 'Edit Connection' : 'Add Connection'}
-                </p>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="h-6 w-6"
-                  onclick={() => {
-                    showAddConnectionForm = false;
-                    editingConnection = undefined;
-                  }}
+                <span
+                  class="text-[10px] px-1.5 py-0.5 rounded-full shrink-0 {conn.status ===
+                  'connected'
+                    ? 'bg-success-subtlest text-text-success'
+                    : conn.status === 'error'
+                      ? 'bg-danger-subtlest text-text-danger'
+                      : 'bg-muted text-muted-foreground'}"
                 >
-                  <AtlaskitIcon name="cross" size={12} />
-                </Button>
+                  {conn.status === 'connected'
+                    ? 'Connected'
+                    : conn.status === 'error'
+                      ? 'Error'
+                      : 'Offline'}
+                </span>
               </div>
-              <ConnectionForm {editingConnection} onConnected={handleConnectionFormDone} compact />
-            </div>
+            {/each}
           {:else}
-            <Button
-              variant="outline"
-              size="sm"
-              class="w-full"
-              onclick={() => {
-                showAddConnectionForm = true;
-                editingConnection = undefined;
-              }}
-            >
-              <AtlaskitIcon name="add" size={14} />
-              Add Connection
-            </Button>
-          {/if}
-
-          {#if connectionRegistry.connections.length === 0 && !showAddConnectionForm}
             <div class="text-center py-4 text-muted-foreground">
               <AtlaskitIcon name="person-offboard" size={32} class="mx-auto mb-2 opacity-50" />
               <p>No connections configured</p>
             </div>
           {/if}
+
+          <Button
+            variant="outline"
+            size="sm"
+            class="w-full"
+            onclick={() => {
+              open = false;
+              showConnectionModal = true;
+            }}
+          >
+            <AtlaskitIcon name="settings" size={14} />
+            Manage Connections
+          </Button>
         </Tabs.Content>
       {/if}
     </Tabs.Root>
@@ -931,3 +835,5 @@
     </div>
   {/snippet}
 </ConfirmModal>
+
+<ConnectionModal bind:open={showConnectionModal} />
