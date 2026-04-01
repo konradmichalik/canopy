@@ -66,12 +66,14 @@
   );
   const showEntryNode = $derived(currentQuery?.showEntryNode ?? false);
 
-  // Connection label for the header badge (only when multiple connections)
-  const connectionLabel = $derived.by(() => {
+  // Connection info for the header badge (only when multiple connections)
+  const connectionBadge = $derived.by(() => {
     if (connectionRegistry.connections.length <= 1) return null;
     const connId = issuesState.currentConnectionId;
     if (!connId) return null;
-    return getConnection(connId)?.config.label ?? null;
+    const conn = getConnection(connId);
+    if (!conn) return null;
+    return { label: conn.config.label, color: conn.config.color ?? null };
   });
 
   // Options panel (filters, grouping, sorting) - persisted per query
@@ -296,12 +298,17 @@
                 Partial
               </span>
             {/if}
-            {#if connectionLabel}
+            {#if connectionBadge}
               <span
-                class="text-[10px] font-semibold text-text-subtlest bg-muted px-1.5 py-0.5 rounded max-w-[6rem] truncate"
-                title={connectionLabel}
+                class="text-[10px] font-semibold px-1.5 py-0.5 rounded max-w-[6rem] truncate {connectionBadge.color
+                  ? 'connection-badge'
+                  : 'bg-muted text-text-subtlest'}"
+                style={connectionBadge.color
+                  ? `--badge-color: var(--color-query-${connectionBadge.color});`
+                  : undefined}
+                title={connectionBadge.label}
               >
-                {connectionLabel}
+                {connectionBadge.label}
               </span>
             {/if}
           </div>

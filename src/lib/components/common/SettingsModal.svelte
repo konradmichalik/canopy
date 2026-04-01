@@ -19,8 +19,9 @@
   import {
     initializeConnections,
     disconnectAll,
-    getConnectionState
+    connectionRegistry
   } from '../../stores/connection.svelte';
+  import { QUERY_COLORS } from '../../types/tree';
   import Avatar from './Avatar.svelte';
   import { themeState, setTheme, type Theme } from '../../stores/theme.svelte';
   import {
@@ -729,45 +730,72 @@
       <!-- Account Tab -->
       {#if !minimal}
         <Tabs.Content value="account" class="mt-0 px-6 py-4 min-h-[280px] space-y-4">
-          {@const connState = getConnectionState()}
-          {#if connState.isConnected && connState.currentUser}
-            {@const user = connState.currentUser}
-            {@const cfg = connState.config}
-            <!-- User Info -->
-            <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-              <Avatar {user} size="md" />
-              <div class="flex-1 min-w-0">
-                <p class="font-medium truncate">{user.displayName}</p>
-                <p class="text-sm text-muted-foreground truncate">
-                  {user.emailAddress ||
-                    (cfg?.credentials.type === 'cloud' ? cfg.credentials.email : '')}
-                </p>
-              </div>
-            </div>
-
-            <!-- Connection Details -->
+          {#if connectionRegistry.connections.length > 0}
+            <!-- Connection List -->
             <div class="space-y-3">
-              <div class="space-y-1">
-                <p class="text-xs text-muted-foreground">Jira URL</p>
-                <p class="text-sm truncate">{cfg?.baseUrl}</p>
-              </div>
-              <div class="space-y-1">
-                <p class="text-xs text-muted-foreground">Instance Type</p>
-                <p class="text-sm">
-                  {cfg?.instanceType === 'cloud' ? 'Cloud' : 'Server / DC'}
-                </p>
-              </div>
+              {#each connectionRegistry.connections as conn (conn.id)}
+                {@const colorEntry = conn.config.color
+                  ? QUERY_COLORS.find((c) => c.id === conn.config.color)
+                  : null}
+                <div class="p-3 rounded-lg bg-muted/50 space-y-2">
+                  <div class="flex items-center gap-3">
+                    {#if conn.currentUser}
+                      <Avatar user={conn.currentUser} size="md" />
+                    {:else}
+                      <div class="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                        <AtlaskitIcon
+                          name="person-offboard"
+                          size={20}
+                          class="text-muted-foreground"
+                        />
+                      </div>
+                    {/if}
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2">
+                        <p class="font-medium truncate">
+                          {conn.currentUser?.displayName ?? conn.config.label}
+                        </p>
+                        <span
+                          class="text-[10px] font-semibold px-1.5 py-0.5 rounded truncate max-w-[5rem] {colorEntry
+                            ? 'connection-badge'
+                            : 'bg-muted text-text-subtlest'}"
+                          style={colorEntry
+                            ? `--badge-color: var(--color-query-${conn.config.color});`
+                            : undefined}
+                        >
+                          {conn.config.label}
+                        </span>
+                      </div>
+                      <p class="text-sm text-muted-foreground truncate">
+                        {conn.config.baseUrl}
+                        <span class="text-text-subtle">
+                          ({conn.config.instanceType === 'cloud' ? 'Cloud' : 'Server'})
+                        </span>
+                      </p>
+                    </div>
+                    <span
+                      class="text-xs px-1.5 py-0.5 rounded-full shrink-0 {conn.status ===
+                      'connected'
+                        ? 'bg-success-subtlest text-text-success'
+                        : conn.status === 'error'
+                          ? 'bg-danger-subtlest text-text-danger'
+                          : 'bg-muted text-muted-foreground'}"
+                    >
+                      {conn.status === 'connected'
+                        ? 'Connected'
+                        : conn.status === 'error'
+                          ? 'Error'
+                          : 'Disconnected'}
+                    </span>
+                  </div>
+                  {#if conn.config.lastConnected}
+                    <p class="text-xs text-muted-foreground">
+                      Connected {formatDateTimeWithSetting(conn.config.lastConnected)}
+                    </p>
+                  {/if}
+                </div>
+              {/each}
             </div>
-
-            {#if connState.lastConnected}
-              <Tooltip text={`Connected: ${formatDateTime(connState.lastConnected)}`}>
-                <span
-                  class="inline-flex px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs"
-                >
-                  Connected {formatDateTimeWithSetting(connState.lastConnected)}
-                </span>
-              </Tooltip>
-            {/if}
 
             <!-- Connection Management -->
             <div class="pt-3 border-t space-y-2">

@@ -123,12 +123,9 @@
     if (!showConnectionBadge || !query.connectionId) return null;
     const conn = getConnection(query.connectionId);
     if (!conn) return null;
-    const colorEntry = conn.config.color
-      ? QUERY_COLORS.find((c) => c.id === conn.config.color)
-      : null;
     return {
       label: conn.config.label,
-      bgClass: colorEntry?.bg ?? 'bg-muted-foreground/30',
+      color: conn.config.color ?? null,
       isError: conn.status === 'error'
     };
   });
@@ -211,13 +208,24 @@
       </span>
     {/if}
     {#if connectionInfo}
-      <span
-        class="inline-flex items-center h-[16px] px-1.5 text-[9px] font-semibold rounded bg-muted text-text-subtlest flex-shrink-0 max-w-[5rem] truncate"
-        class:opacity-40={connectionInfo.isError}
-        title="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}"
-      >
-        {connectionInfo.label}
-      </span>
+      {#if connectionInfo.color}
+        <span
+          class="connection-badge inline-flex items-center h-[16px] px-1.5 text-[9px] font-semibold rounded flex-shrink-0 max-w-[5rem] truncate"
+          class:opacity-40={connectionInfo.isError}
+          style="--badge-color: var(--color-query-{connectionInfo.color});"
+          title="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}"
+        >
+          {connectionInfo.label}
+        </span>
+      {:else}
+        <span
+          class="inline-flex items-center h-[16px] px-1.5 text-[9px] font-semibold rounded flex-shrink-0 max-w-[5rem] truncate bg-muted text-text-subtlest"
+          class:opacity-40={connectionInfo.isError}
+          title="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}"
+        >
+          {connectionInfo.label}
+        </span>
+      {/if}
     {/if}
   </div>
 
