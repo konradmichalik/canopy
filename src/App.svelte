@@ -1,9 +1,9 @@
 <script lang="ts">
   import './app.css';
-  import ConnectionScreen from './lib/components/screens/ConnectionScreen.svelte';
   import MainLayout from './lib/components/layout/MainLayout.svelte';
   import AppLoader from './lib/components/common/AppLoader.svelte';
   import UpdateNotification from './lib/components/common/UpdateNotification.svelte';
+  import ConnectionModal from './lib/components/connection/ConnectionModal.svelte';
   import { connectionRegistry, initializeConnections } from './lib/stores/connection.svelte';
   import { initializeRouter, cleanupRouter } from './lib/stores/router.svelte';
   import { initializeTheme, cleanupTheme } from './lib/stores/theme.svelte';
@@ -32,11 +32,17 @@
 
   let isInitializing = $state(true);
   let availableUpdate = $state<UpdateInfo | null>(null);
-  let showConnectionManager = $state(false);
+  let showConnectionModal = $state(false);
 
   const hasConnection = $derived(
     connectionRegistry.connections.some((c) => c.status === 'connected')
   );
+
+  // Auto-open connection modal when no connections exist
+  const needsConnection = $derived(!isInitializing && !hasConnection);
+  $effect(() => {
+    if (needsConnection) showConnectionModal = true;
+  });
 
   onMount(() => {
     // Initialize all stores and connection
@@ -97,14 +103,11 @@
 
 {#if isInitializing}
   <AppLoader />
-{:else if hasConnection && !showConnectionManager}
-  <div class="animate-fade-in">
-    <MainLayout onManageConnections={() => (showConnectionManager = true)} />
-  </div>
 {:else}
   <div class="animate-fade-in">
-    <ConnectionScreen onBack={hasConnection ? () => (showConnectionManager = false) : undefined} />
+    <MainLayout onManageConnections={() => (showConnectionModal = true)} />
   </div>
 {/if}
 
+<ConnectionModal bind:open={showConnectionModal} required={needsConnection} />
 <UpdateNotification update={availableUpdate} />
