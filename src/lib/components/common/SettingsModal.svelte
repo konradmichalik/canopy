@@ -16,11 +16,7 @@
   } from '../../utils/storage';
   import { initializeQueries, getQueries } from '../../stores/jql.svelte';
   import { Checkbox } from '$lib/components/ui/checkbox';
-  import {
-    initializeConnections,
-    disconnectAll,
-    connectionRegistry
-  } from '../../stores/connection.svelte';
+  import { initializeConnections, connectionRegistry } from '../../stores/connection.svelte';
   import { QUERY_COLORS } from '../../types/tree';
   import Avatar from './Avatar.svelte';
   import { themeState, setTheme, type Theme } from '../../stores/theme.svelte';
@@ -82,7 +78,6 @@
 
   let open = $state(false);
   let activeTab = $state('appearance');
-  let showDisconnectModal = $state(false);
   let showClearCacheModal = $state(false);
   let keepFlagsOnClear = $state(true);
   let fileInput: HTMLInputElement;
@@ -155,15 +150,6 @@
 
   function handleImportClick(): void {
     fileInput?.click();
-  }
-
-  function handleDisconnectClick(): void {
-    open = false;
-    showDisconnectModal = true;
-  }
-
-  async function handleDisconnectConfirm(): Promise<void> {
-    await disconnectAll();
   }
 
   async function handleFileSelect(event: Event): Promise<void> {
@@ -800,7 +786,7 @@
               {/each}
             </div>
 
-            <!-- Connection Management -->
+            <!-- Connection Actions -->
             <div class="pt-3 border-t space-y-2">
               {#if onManageConnections}
                 <Button
@@ -811,18 +797,10 @@
                     onManageConnections?.();
                   }}
                 >
-                  <AtlaskitIcon name="settings" size={16} />
-                  Manage Connections
+                  <AtlaskitIcon name="add" size={16} />
+                  Add / Edit Connections
                 </Button>
               {/if}
-              <Button
-                variant="destructive"
-                class="w-full justify-start gap-2"
-                onclick={handleDisconnectClick}
-              >
-                <AtlaskitIcon name="log-out" size={16} />
-                Disconnect All
-              </Button>
             </div>
           {:else}
             <div class="text-center py-4 text-muted-foreground">
@@ -846,17 +824,6 @@
 />
 
 <FlashMessage message={importMessage} />
-
-<!-- Disconnect Confirmation Modal -->
-<ConfirmModal
-  bind:open={showDisconnectModal}
-  title="Disconnect from Jira?"
-  description="You will need to enter your credentials again to reconnect."
-  confirmLabel="Disconnect"
-  variant="destructive"
-  icon="log-out"
-  onConfirm={handleDisconnectConfirm}
-/>
 
 <!-- Clear Cache Confirmation Modal -->
 <ConfirmModal
