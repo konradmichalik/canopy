@@ -99,6 +99,16 @@ html[data-color-mode='light'] {
   --query-red: #bf616a;
   --query-purple: #b48ead;
   --query-teal: #8fbcbb;
+
+  /* Query Colors - Badge Backgrounds (15% opacity equivalent on white) */
+  --query-gray-bg: #4c566a26;
+  --query-blue-bg: #5e81ac26;
+  --query-green-bg: #a3be8c26;
+  --query-yellow-bg: #ebcb8b26;
+  --query-orange-bg: #d0877026;
+  --query-red-bg: #bf616a26;
+  --query-purple-bg: #b48ead26;
+  --query-teal-bg: #8fbcbb26;
 }
 
 /* Nord Design Tokens - Dark Theme (Deep blacks, bright accents, high contrast) */
@@ -203,6 +213,14 @@ html[data-color-mode='dark'] {
   --query-red: #bf616a;
   --query-purple: #b48ead;
   --query-teal: #8fbcbb;
+  --query-gray-bg: #5c657526;
+  --query-blue-bg: #88c0d026;
+  --query-green-bg: #a3be8c26;
+  --query-yellow-bg: #ebcb8b26;
+  --query-orange-bg: #d0877026;
+  --query-red-bg: #bf616a26;
+  --query-purple-bg: #b48ead26;
+  --query-teal-bg: #8fbcbb26;
 }
 
 /* Color Intensity: Vivid - Light Theme */
@@ -229,6 +247,14 @@ html.color-intensity-vivid[data-color-mode='light'] {
   --query-red: #ef4444;
   --query-purple: #a855f7;
   --query-teal: #14b8a6;
+  --query-gray-bg: #6b728026;
+  --query-blue-bg: #3b82f626;
+  --query-green-bg: #22c55e26;
+  --query-yellow-bg: #eab30826;
+  --query-orange-bg: #f9731626;
+  --query-red-bg: #ef444426;
+  --query-purple-bg: #a855f726;
+  --query-teal-bg: #14b8a626;
 }
 
 /* Color Intensity: Vivid - Dark Theme */
@@ -255,6 +281,14 @@ html.color-intensity-vivid[data-color-mode='dark'] {
   --query-red: #f87171;
   --query-purple: #c084fc;
   --query-teal: #2dd4bf;
+  --query-gray-bg: #9ca3af26;
+  --query-blue-bg: #60a5fa26;
+  --query-green-bg: #4ade8026;
+  --query-yellow-bg: #facc1526;
+  --query-orange-bg: #fb923c26;
+  --query-red-bg: #f8717126;
+  --query-purple-bg: #c084fc26;
+  --query-teal-bg: #2dd4bf26;
 }
 
 /* shadcn-svelte variables mapped to Atlassian tokens */
@@ -398,6 +432,16 @@ html.color-intensity-vivid[data-color-mode='dark'] {
   --color-query-red: var(--query-red);
   --color-query-purple: var(--query-purple);
   --color-query-teal: var(--query-teal);
+
+  /* Query Badge Backgrounds (15% opacity) */
+  --color-query-gray-bg: var(--query-gray-bg);
+  --color-query-blue-bg: var(--query-blue-bg);
+  --color-query-green-bg: var(--query-green-bg);
+  --color-query-yellow-bg: var(--query-yellow-bg);
+  --color-query-orange-bg: var(--query-orange-bg);
+  --color-query-red-bg: var(--query-red-bg);
+  --color-query-purple-bg: var(--query-purple-bg);
+  --color-query-teal-bg: var(--query-teal-bg);
 
   /* Skeleton */
   --color-skeleton: var(--skeleton);

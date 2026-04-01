@@ -763,7 +763,7 @@
                             ? `var(--color-query-${conn.config.color})`
                             : undefined}
                           style:background-color={colorEntry
-                            ? `color-mix(in srgb, var(--color-query-${conn.config.color}) 15%, transparent)`
+                            ? `var(--color-query-${conn.config.color}-bg)`
                             : undefined}
                         >
                           {conn.config.label}

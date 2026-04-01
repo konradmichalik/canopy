@@ -217,7 +217,7 @@
           ? `var(--color-query-${connectionInfo.color})`
           : undefined}
         style:background-color={connectionInfo.color
-          ? `color-mix(in srgb, var(--color-query-${connectionInfo.color}) 15%, transparent)`
+          ? `var(--color-query-${connectionInfo.color}-bg)`
           : undefined}
         title="{connectionInfo.label}{connectionInfo.isError ? ' (disconnected)' : ''}"
       >

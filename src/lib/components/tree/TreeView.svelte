@@ -307,7 +307,7 @@
                   ? `var(--color-query-${connectionBadge.color})`
                   : undefined}
                 style:background-color={connectionBadge.color
-                  ? `color-mix(in srgb, var(--color-query-${connectionBadge.color}) 15%, transparent)`
+                  ? `var(--color-query-${connectionBadge.color}-bg)`
                   : undefined}
                 title={connectionBadge.label}
               >
