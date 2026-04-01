@@ -17,11 +17,9 @@
     onConnected?: () => void;
     /** If provided, the form is in edit mode */
     editingConnection?: StoredConnection;
-    /** Compact layout for inline use (e.g. Settings tab) */
-    compact?: boolean;
   }
 
-  let { onConnected, editingConnection, compact = false }: Props = $props();
+  let { onConnected, editingConnection }: Props = $props();
 
   const isEditMode = $derived(!!editingConnection);
 
@@ -161,7 +159,7 @@
   );
 </script>
 
-<form onsubmit={handleSubmit} class={compact ? 'space-y-3' : 'space-y-6'}>
+<form onsubmit={handleSubmit} class="space-y-6">
   <!-- Connection Label -->
   <div class="space-y-2">
     <Label for="label">Connection Name</Label>
@@ -398,23 +396,21 @@
     {/if}
   </Button>
 
-  {#if !compact}
-    <!-- Privacy Info -->
-    <div class="p-3 bg-information-subtlest border border-border-information rounded-lg">
-      <div class="flex gap-2">
-        <AtlaskitIcon
-          name="status-information"
-          size={16}
-          class="text-icon-information shrink-0 mt-0.5"
-        />
-        <div class="text-xs text-text-subtle">
-          <p class="font-medium text-text-subtle">Your data stays local</p>
-          <p class="mt-1">
-            All credentials and settings are stored only in your browser's local storage. No data is
-            sent to any server except your Jira instance.
-          </p>
-        </div>
+  <!-- Privacy Info -->
+  <div class="p-3 bg-information-subtlest border border-border-information rounded-lg">
+    <div class="flex gap-2">
+      <AtlaskitIcon
+        name="status-information"
+        size={16}
+        class="text-icon-information shrink-0 mt-0.5"
+      />
+      <div class="text-xs text-text-subtle">
+        <p class="font-medium text-text-subtle">Your data stays local</p>
+        <p class="mt-1">
+          All credentials and settings are stored only in your browser's local storage. No data is
+          sent to any server except your Jira instance.
+        </p>
       </div>
     </div>
-  {/if}
+  </div>
 </form>
