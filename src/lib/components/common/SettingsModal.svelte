@@ -763,13 +763,17 @@
                     ? 'bg-success-subtlest text-text-success'
                     : conn.status === 'error'
                       ? 'bg-danger-subtlest text-text-danger'
-                      : 'bg-muted text-muted-foreground'}"
+                      : conn.status === 'connecting'
+                        ? 'bg-warning-subtlest text-text-warning'
+                        : 'bg-muted text-muted-foreground'}"
                 >
                   {conn.status === 'connected'
                     ? 'Connected'
                     : conn.status === 'error'
                       ? 'Error'
-                      : 'Offline'}
+                      : conn.status === 'connecting'
+                        ? 'Connecting...'
+                        : 'Offline'}
                 </span>
               </div>
             {/each}
