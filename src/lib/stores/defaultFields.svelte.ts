@@ -4,13 +4,21 @@
  */
 
 import type { DisplayFieldId } from './fieldConfig.svelte';
-import { DEFAULT_FIELD_IDS } from './fieldConfig.svelte';
 import { getStorageItemAsync, saveStorage, STORAGE_KEYS } from '../utils/storage';
 import { logger } from '../utils/logger';
 
+// Inline fallback to avoid circular import (fieldConfig ↔ defaultFields)
+const INITIAL_FIELD_IDS: DisplayFieldId[] = [
+  'blockingIndicator',
+  'aggregatedTimeProgress',
+  'status',
+  'assignee',
+  'updated'
+];
+
 // State container
 export const defaultFieldsState = $state({
-  fieldIds: [...DEFAULT_FIELD_IDS] as DisplayFieldId[]
+  fieldIds: [...INITIAL_FIELD_IDS] as DisplayFieldId[]
 });
 
 /**
