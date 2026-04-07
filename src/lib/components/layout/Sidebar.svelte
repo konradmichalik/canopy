@@ -234,7 +234,31 @@
   // Get keyboard-focused query for visual highlight
   const keyboardFocusedQuery = $derived(getFocusedQuery());
 
-  const hasMultipleConnections = $derived(connectionRegistry.connections.length > 1);
+  // Smart badge visibility: only show badges for minority connection labels.
+  // If all connections share the same label, no badges are shown.
+  // If mixed, only non-majority connections get a badge.
+  const badgeConnectionIds = $derived.by(() => {
+    const conns = connectionRegistry.connections;
+    if (conns.length <= 1) return {} as Record<string, true>;
+
+    // Find the most common label
+    const counts: Record<string, number> = {};
+    let majorityLabel = conns[0].config.label;
+    for (const conn of conns) {
+      const count = (counts[conn.config.label] = (counts[conn.config.label] ?? 0) + 1);
+      if (count > (counts[majorityLabel] ?? 0)) majorityLabel = conn.config.label;
+    }
+
+    // All same label → no badges needed
+    if (Object.keys(counts).length <= 1) return {} as Record<string, true>;
+
+    // Badge only non-majority connections
+    const minority: Record<string, true> = {};
+    for (const conn of conns) {
+      if (conn.config.label !== majorityLabel) minority[conn.id] = true;
+    }
+    return minority;
+  });
 
   function handleNewQuery(): void {
     editingQuery = null;
@@ -395,7 +419,7 @@
               isKeyboardFocused={keyboardFocusedQuery?.id === item.id}
               isDragging={queryDrag.isDragging(index)}
               isDragOver={queryDrag.isDragOver(index)}
-              showConnectionBadge={hasMultipleConnections}
+              showConnectionBadge={(item.connectionId ?? '') in badgeConnectionIds}
               onSelect={handleSelectQuery}
               onEdit={handleEditQuery}
               onDelete={handleDeleteQuery}

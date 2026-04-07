@@ -27,7 +27,18 @@ Save and organize multiple JQL queries for quick access.
 | **Issue Count** | Cached count displayed next to query name |
 | **URL Slugs** | Shareable URLs based on query title |
 | **Active Query** | Currently selected query is highlighted |
+| **Connection Badge** | Shows which Jira instance a query belongs to (smart visibility) |
 | **Dynamic Page Title** | Browser tab shows current query name |
+
+## Connection Badges
+
+When using multiple Jira connections, queries display a badge indicating which instance they belong to. To reduce visual noise, badges use **smart visibility**:
+
+- **Single connection** — no badges shown
+- **Multiple connections, same type** (e.g., all "Server") — no badges shown
+- **Mixed connections** — only the minority gets a badge (e.g., 7 Server + 1 Cloud → only the Cloud query shows a "Cloud" badge)
+
+This keeps the sidebar clean while still highlighting queries that belong to a different instance than the majority.
 
 ## Query Actions
 
