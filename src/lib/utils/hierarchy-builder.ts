@@ -63,7 +63,6 @@ export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}):
       const parentNode = nodeMap.get(parentKey);
       if (!parentNode) return;
       node.parentKey = parentKey;
-      node.depth = parentNode.depth + 1;
       parentNode.children.push(node);
       logger.debug(`${issue.key} -> parent ${parentKey} (children: ${parentNode.children.length})`);
     } else if (parentKey) {
@@ -76,6 +75,9 @@ export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}):
       rootNodes.push(node);
     }
   });
+
+  // Recalculate depths top-down (fixes incorrect depths when children are processed before parents)
+  recalculateDepths(rootNodes, 0);
 
   // Sort children recursively
   sortChildrenRecursively(rootNodes, sortConfig);
@@ -160,6 +162,19 @@ function findParentKey(
   }
 
   return null;
+}
+
+/**
+ * Recalculate depths top-down from root nodes
+ * Needed because children may be processed before parents during tree building
+ */
+function recalculateDepths(nodes: TreeNode[], depth: number): void {
+  for (const node of nodes) {
+    node.depth = depth;
+    if (node.children.length > 0) {
+      recalculateDepths(node.children, depth + 1);
+    }
+  }
 }
 
 /**
