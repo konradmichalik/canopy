@@ -275,7 +275,7 @@
             style="width: {aggregatedTimeProgress.percent}%"
           ></div>
         </div>
-        <span class="text-xs font-data text-text-subtlest w-10 text-right">
+        <span class="text-xs font-data text-text-subtlest tabular-nums">
           {aggregatedTimeProgress.percent}%
         </span>
       </div>
