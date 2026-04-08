@@ -107,7 +107,10 @@ function getEffectiveJql(baseJql: string): { jql: string; filterConditions: stri
   let jql = applyQuickFilters(baseJql, filterConditions);
   if (!hasOrderByClause(baseJql)) {
     const sortConfig = getSortConfig();
-    jql = setOrderBy(jql, sortConfig.field, sortConfig.direction);
+    // 'dependency' is a client-side sort — don't send it as JQL ORDER BY
+    if (sortConfig.field !== 'dependency') {
+      jql = setOrderBy(jql, sortConfig.field, sortConfig.direction);
+    }
   }
   return { jql, filterConditions };
 }

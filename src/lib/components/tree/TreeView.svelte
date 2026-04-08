@@ -185,10 +185,12 @@
   const effectiveJql = $derived.by(() => {
     if (!issuesState.currentJql) return '';
     let jql = applyQuickFilters(issuesState.currentJql, filterConditions);
-    // Add ORDER BY if base JQL doesn't have one
+    // Add ORDER BY if base JQL doesn't have one (skip client-only sort fields)
     if (!hasOrderByClause(issuesState.currentJql)) {
       const { field, direction } = sortConfigState.config;
-      jql = setOrderBy(jql, field, direction);
+      if (field !== 'dependency') {
+        jql = setOrderBy(jql, field, direction);
+      }
     }
     return jql;
   });
