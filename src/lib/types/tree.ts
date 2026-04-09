@@ -18,6 +18,8 @@ export interface TreeNode {
   // Cached aggregated progress (calculated during tree build for performance)
   cachedTimeProgress?: { logged: number; total: number; percent: number };
   cachedResolutionProgress?: { done: number; total: number; percent: number };
+  // Cached dependency rank (0 = blocks others, higher = blocked by others)
+  dependencyRank?: number;
 }
 
 // ============================================
@@ -196,7 +198,14 @@ export function generateSeparatorId(): string {
 // Sort Configuration
 // ============================================
 
-export type SortField = 'key' | 'priority' | 'created' | 'updated' | 'duedate' | 'status';
+export type SortField =
+  | 'key'
+  | 'priority'
+  | 'created'
+  | 'updated'
+  | 'duedate'
+  | 'status'
+  | 'dependency';
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortConfig {
@@ -215,7 +224,8 @@ export const SORT_FIELDS: SortFieldDefinition[] = [
   { id: 'created', label: 'Created' },
   { id: 'updated', label: 'Updated' },
   { id: 'duedate', label: 'Due Date' },
-  { id: 'status', label: 'Status' }
+  { id: 'status', label: 'Status' },
+  { id: 'dependency', label: 'Dependency' }
 ];
 
 export const DEFAULT_SORT_CONFIG: SortConfig = {
@@ -438,6 +448,17 @@ export function compareNodes(a: TreeNode, b: TreeNode, sortConfig?: SortConfig):
       const statusB = b.issue.fields.status.name;
       comparison = statusA.localeCompare(statusB);
       // Fallback to key if statuses are equal
+      if (comparison === 0) {
+        comparison = a.issue.key.localeCompare(b.issue.key, undefined, { numeric: true });
+      }
+      break;
+    }
+
+    case 'dependency': {
+      const rankA = a.dependencyRank ?? 0;
+      const rankB = b.dependencyRank ?? 0;
+      comparison = rankA - rankB;
+      // Fallback to key if ranks are equal
       if (comparison === 0) {
         comparison = a.issue.key.localeCompare(b.issue.key, undefined, { numeric: true });
       }

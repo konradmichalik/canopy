@@ -22,6 +22,15 @@
   const tooltipText = $derived(getIndicatorTooltip(blockingState));
   const hasLinks = $derived(blockingState.isBlocked || blockingState.isBlocking);
 
+  // Distinct icon per state: warning triangle for blocked, check for resolved, link for blocking
+  const iconName = $derived(
+    blockingState.isActivelyBlocked
+      ? 'status-warning'
+      : blockingState.isBlocked
+        ? 'check-circle'
+        : 'link'
+  );
+
   // Red for actively blocked, gray for resolved blockers only, yellow for blocking others
   const iconColor = $derived(
     blockingState.isActivelyBlocked
@@ -67,7 +76,7 @@
           onclick={(e) => e.stopPropagation()}
           aria-label={tooltipText}
         >
-          <AtlaskitIcon name="link" size={14} color={iconColor} />
+          <AtlaskitIcon name={iconName} size={14} color={iconColor} />
         </button>
       </Tooltip>
     </DropdownMenu.Trigger>
@@ -75,7 +84,7 @@
     <DropdownMenu.Content align="start" class="min-w-[280px] max-w-[400px]">
       {#if blockingState.activeBlockedByIssues.length > 0}
         <DropdownMenu.Label class="flex items-center gap-1.5 text-[var(--ds-text-danger)]">
-          <AtlaskitIcon name="link" size={12} color="var(--ds-text-danger)" />
+          <AtlaskitIcon name="status-warning" size={12} color="var(--ds-text-danger)" />
           Blocked by ({blockingState.activeBlockedByIssues.length})
         </DropdownMenu.Label>
         {@render issueList(blockingState.activeBlockedByIssues)}

@@ -6,6 +6,7 @@
 import type { JiraIssue, TreeNode } from '../types';
 import type { SortConfig } from '../types/tree';
 import { compareNodes } from '../types/tree';
+import { BLOCKED_BY_PATTERNS, BLOCKS_PATTERNS, matchesAny } from './issue-links';
 import { logger } from './logger';
 
 interface BuildOptions {
@@ -79,6 +80,12 @@ export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}):
   // Recalculate depths top-down (fixes incorrect depths when children are processed before parents)
   recalculateDepths(rootNodes, 0);
 
+  // Compute dependency ranks when sorting by dependency
+  if (sortConfig?.field === 'dependency') {
+    const ranks = computeDependencyRanks(issues);
+    applyDependencyRanks(nodeMap, ranks);
+  }
+
   // Sort children recursively
   sortChildrenRecursively(rootNodes, sortConfig);
 
@@ -102,6 +109,10 @@ export function buildHierarchy(issues: JiraIssue[], options: BuildOptions = {}):
 export function buildFlatList(issues: JiraIssue[], options: FlatListOptions = {}): TreeNode[] {
   const { sortConfig } = options;
 
+  // Compute dependency ranks when sorting by dependency
+  const dependencyRanks =
+    sortConfig?.field === 'dependency' ? computeDependencyRanks(issues) : null;
+
   // Create flat tree nodes (no children, no expansion)
   const nodes: TreeNode[] = issues.map((issue) => ({
     issue,
@@ -109,7 +120,8 @@ export function buildFlatList(issues: JiraIssue[], options: FlatListOptions = {}
     depth: 0,
     isExpanded: false,
     isVisible: true,
-    parentKey: null
+    parentKey: null,
+    dependencyRank: dependencyRanks?.get(issue.key) ?? 0
   }));
 
   // Sort by hierarchy level first, then by configured field
@@ -162,6 +174,116 @@ function findParentKey(
   }
 
   return null;
+}
+
+/**
+ * Compute dependency ranks based on "blocks" / "is blocked by" issue links.
+ * Blockers get negative ranks, neutral issues get 0, blocked issues get positive ranks.
+ */
+function computeDependencyRanks(issues: JiraIssue[]): Map<string, number> {
+  const issueKeys = new Set(issues.map((i) => i.key));
+
+  // blockedBy[X] = set of issue keys that block X
+  const blockedBy = new Map<string, Set<string>>();
+  // Track all issues involved in any blocker relationship
+  const involvedInDependency = new Set<string>();
+
+  for (const issue of issues) {
+    if (!issue.fields.issuelinks) continue;
+    for (const link of issue.fields.issuelinks) {
+      const inwardDesc = link.type.inward;
+      const outwardDesc = link.type.outward;
+
+      // outwardIssue: this issue "blocks" the outward issue
+      if (
+        link.outwardIssue &&
+        issueKeys.has(link.outwardIssue.key) &&
+        matchesAny(outwardDesc, BLOCKS_PATTERNS)
+      ) {
+        const blocked = link.outwardIssue.key;
+        const existing = blockedBy.get(blocked) ?? new Set<string>();
+        existing.add(issue.key);
+        blockedBy.set(blocked, existing);
+        involvedInDependency.add(issue.key);
+        involvedInDependency.add(blocked);
+      }
+
+      // inwardIssue: the inward issue "blocks" this issue (this issue "is blocked by")
+      if (
+        link.inwardIssue &&
+        issueKeys.has(link.inwardIssue.key) &&
+        matchesAny(inwardDesc, BLOCKED_BY_PATTERNS)
+      ) {
+        const existing = blockedBy.get(issue.key) ?? new Set<string>();
+        existing.add(link.inwardIssue.key);
+        blockedBy.set(issue.key, existing);
+        involvedInDependency.add(issue.key);
+        involvedInDependency.add(link.inwardIssue.key);
+      }
+    }
+  }
+
+  // Compute depth via recursive walk with cycle protection
+  const depthRanks = new Map<string, number>();
+
+  function getDepth(key: string, visited: Set<string>): number {
+    const cached = depthRanks.get(key);
+    if (cached !== undefined) return cached;
+    if (visited.has(key)) return 0; // cycle — break it
+    visited.add(key);
+
+    const blockers = blockedBy.get(key);
+    if (!blockers || blockers.size === 0) {
+      depthRanks.set(key, 0);
+      return 0;
+    }
+
+    let maxBlockerDepth = -1;
+    for (const blocker of blockers) {
+      maxBlockerDepth = Math.max(maxBlockerDepth, getDepth(blocker, visited));
+    }
+
+    const depth = maxBlockerDepth + 1;
+    depthRanks.set(key, depth);
+    return depth;
+  }
+
+  for (const key of involvedInDependency) {
+    if (!depthRanks.has(key)) {
+      getDepth(key, new Set());
+    }
+  }
+
+  // Find max depth to place neutral issues in the middle
+  let maxDepth = 0;
+  for (const depth of depthRanks.values()) {
+    maxDepth = Math.max(maxDepth, depth);
+  }
+
+  // Assign final ranks:
+  // Blockers (low depth) → negative, neutral → 0, blocked (high depth) → positive
+  const midpoint = maxDepth / 2;
+  const ranks = new Map<string, number>();
+
+  for (const issue of issues) {
+    if (involvedInDependency.has(issue.key)) {
+      const depth = depthRanks.get(issue.key) ?? 0;
+      ranks.set(issue.key, depth - midpoint);
+    } else {
+      ranks.set(issue.key, 0);
+    }
+  }
+
+  return ranks;
+}
+
+/**
+ * Apply precomputed dependency ranks to tree nodes
+ */
+function applyDependencyRanks(nodeMap: Map<string, TreeNode>, ranks: Map<string, number>): void {
+  for (const [, node] of nodeMap) {
+    node.dependencyRank = ranks.get(node.issue.key) ?? 0;
+  }
 }
 
 /**

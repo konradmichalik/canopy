@@ -34,7 +34,7 @@ export interface BlockingState {
 
 // Patterns that indicate "this issue is blocked/depends on another"
 // Includes English and German variations
-const BLOCKED_BY_PATTERNS = [
+export const BLOCKED_BY_PATTERNS = [
   /is blocked by/i,
   /wird blockiert von/i,
   /depends on/i,
@@ -43,12 +43,11 @@ const BLOCKED_BY_PATTERNS = [
   /benötigt/i,
   /is prevented by/i,
   /wird verhindert von/i,
-  /is cloned by/i, // Sometimes used for blocking
-  /is duplicated by/i
+  /is cloned by/i // Sometimes used for blocking
 ];
 
 // Patterns that indicate "this issue blocks/is required by another"
-const BLOCKS_PATTERNS = [
+export const BLOCKS_PATTERNS = [
   /blocks/i,
   /blockiert/i,
   /is required by/i,
@@ -56,11 +55,10 @@ const BLOCKS_PATTERNS = [
   /is depended on by/i,
   /prevents/i,
   /verhindert/i,
-  /clones/i,
-  /duplicates/i
+  /clones/i
 ];
 
-function matchesAny(text: string | undefined, patterns: RegExp[]): boolean {
+export function matchesAny(text: string | undefined, patterns: RegExp[]): boolean {
   if (!text) return false;
   return patterns.some((p) => p.test(text));
 }
