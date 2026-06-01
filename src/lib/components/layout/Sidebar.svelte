@@ -279,11 +279,18 @@
   ): Promise<void> {
     if (editingQuery) {
       const isActiveQuery = routerState.activeQueryId === editingQuery.id;
-      updateQuery(editingQuery.id, { title, jql, color, showEntryNode });
+      const resolvedConnectionId = connectionId ?? editingQuery.connectionId;
+      updateQuery(editingQuery.id, {
+        title,
+        jql,
+        color,
+        showEntryNode,
+        connectionId: resolvedConnectionId
+      });
 
       // Reload issues if the edited query is currently active
       if (isActiveQuery) {
-        await loadIssues(jql, editingQuery.connectionId, { loadAll: true });
+        await loadIssues(jql, resolvedConnectionId, { loadAll: true });
       }
       showFlashMessage('success', `Query "${title}" updated`);
     } else {
