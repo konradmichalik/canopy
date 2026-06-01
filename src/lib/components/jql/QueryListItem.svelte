@@ -3,7 +3,7 @@
   import Tooltip from '../common/Tooltip.svelte';
   import ConfirmDeleteModal from '../common/ConfirmDeleteModal.svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import type { SavedQuery } from '../../types';
+  import type { SavedQuery, QueryColor } from '../../types';
   import { QUERY_COLORS } from '../../types/tree';
   import { downloadSingleQuery } from '../../utils/storage';
   import { changeTrackingState } from '../../stores/changeTracking.svelte';
@@ -15,6 +15,7 @@
     isActive: boolean;
     isKeyboardFocused?: boolean;
     showConnectionBadge?: boolean;
+    badgeColor?: QueryColor;
     index: number;
     isDragging: boolean;
     isDragOver: boolean;
@@ -33,6 +34,7 @@
     isActive,
     isKeyboardFocused = false,
     showConnectionBadge = false,
+    badgeColor = undefined,
     index,
     isDragging,
     isDragOver,
@@ -124,8 +126,8 @@
     const conn = getConnection(query.connectionId);
     if (!conn) return null;
     return {
-      label: conn.config.label,
-      color: conn.config.color ?? null,
+      label: conn.config.instanceType === 'cloud' ? 'Cloud' : 'Server',
+      color: badgeColor ?? null,
       isError: conn.status === 'error'
     };
   });

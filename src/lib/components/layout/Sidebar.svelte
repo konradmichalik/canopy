@@ -4,7 +4,7 @@
   import { Button } from '$lib/components/ui/button';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import type { SavedQuery, QueryColor, QuerySeparator } from '../../types';
-  import { isSeparator } from '../../types/tree';
+  import { isSeparator, QUERY_COLORS } from '../../types/tree';
   import { connectionRegistry } from '../../stores/connection.svelte';
   import QueryListItem from '../jql/QueryListItem.svelte';
   import SeparatorListItem from '../jql/SeparatorListItem.svelte';
@@ -234,30 +234,24 @@
   // Get keyboard-focused query for visual highlight
   const keyboardFocusedQuery = $derived(getFocusedQuery());
 
-  // Smart badge visibility: only show badges for minority connection labels.
-  // If all connections share the same label, no badges are shown.
-  // If mixed, only non-majority connections get a badge.
-  const badgeConnectionIds = $derived.by(() => {
+  // Smart badge visibility: only show badges for minority connection types.
+  // Multiple minority connections get distinct colors cycled from QUERY_COLORS.
+  const badgeConnectionColors = $derived.by(() => {
     const conns = connectionRegistry.connections;
-    if (conns.length <= 1) return {} as Record<string, true>;
+    if (conns.length <= 1) return {} as Record<string, QueryColor>;
 
-    // Find the most common label
-    const counts: Record<string, number> = {};
-    let majorityLabel = conns[0].config.label;
-    for (const conn of conns) {
-      const count = (counts[conn.config.label] = (counts[conn.config.label] ?? 0) + 1);
-      if (count > (counts[majorityLabel] ?? 0)) majorityLabel = conn.config.label;
+    const cloudConns = conns.filter((c) => c.config.instanceType === 'cloud');
+    const serverConns = conns.filter((c) => c.config.instanceType === 'server');
+    if (cloudConns.length === 0 || serverConns.length === 0) {
+      return {} as Record<string, QueryColor>;
     }
 
-    // All same label → no badges needed
-    if (Object.keys(counts).length <= 1) return {} as Record<string, true>;
-
-    // Badge only non-majority connections
-    const minority: Record<string, true> = {};
-    for (const conn of conns) {
-      if (conn.config.label !== majorityLabel) minority[conn.id] = true;
-    }
-    return minority;
+    const minorityConns = cloudConns.length <= serverConns.length ? cloudConns : serverConns;
+    const result: Record<string, QueryColor> = {};
+    minorityConns.forEach((conn, i) => {
+      result[conn.id] = QUERY_COLORS[i % QUERY_COLORS.length].id;
+    });
+    return result;
   });
 
   function handleNewQuery(): void {
@@ -426,7 +420,8 @@
               isKeyboardFocused={keyboardFocusedQuery?.id === item.id}
               isDragging={queryDrag.isDragging(index)}
               isDragOver={queryDrag.isDragOver(index)}
-              showConnectionBadge={(item.connectionId ?? '') in badgeConnectionIds}
+              showConnectionBadge={(item.connectionId ?? '') in badgeConnectionColors}
+              badgeColor={badgeConnectionColors[item.connectionId ?? '']}
               onSelect={handleSelectQuery}
               onEdit={handleEditQuery}
               onDelete={handleDeleteQuery}
