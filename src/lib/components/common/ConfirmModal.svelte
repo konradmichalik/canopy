@@ -43,10 +43,10 @@
     isConfirming = true;
     try {
       await onConfirm();
-      handleClose();
     } finally {
       isConfirming = false;
     }
+    handleClose();
   }
 
   const iconColorClass = $derived(
