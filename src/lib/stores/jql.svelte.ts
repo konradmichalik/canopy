@@ -174,6 +174,7 @@ export function updateQuery(
       | 'title'
       | 'jql'
       | 'color'
+      | 'connectionId'
       | 'displayFields'
       | 'activeFilterIds'
       | 'searchText'

@@ -37,9 +37,9 @@
   let showEntryNode = $state(query?.showEntryNode ?? true);
   let error = $state<string | null>(null);
 
-  // Connection selection (only for new queries when multiple connections exist)
+  // Connection selection (shown when multiple connections exist, for both new and edit)
   const connections = $derived(connectionRegistry.connections);
-  const showConnectionSelector = $derived(!query && connections.length > 1);
+  const showConnectionSelector = $derived(connections.length > 1);
   // svelte-ignore state_referenced_locally
   // Default to active connection, then first healthy, then first overall
   let selectedConnectionId = $state<string>(
