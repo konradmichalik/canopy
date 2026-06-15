@@ -284,9 +284,20 @@ export abstract class JiraClient {
 
   /**
    * Get total issue count for a JQL query (without fetching issues)
-   * Uses maxResults: 0 to minimize API response size
    */
   async getIssueCount(jql: string): Promise<number> {
+    if (this.config.instanceType === 'cloud') {
+      // Cloud's /search/jql endpoint rejects maxResults: 0 and no longer
+      // returns a reliable total — use the dedicated count endpoint instead
+      const response = await this.request<{ count: number }>(
+        'POST',
+        '/search/approximate-count',
+        { jql }
+      );
+      return response.count;
+    }
+
+    // Server/DC: maxResults: 0 returns total without fetching issues
     const response = await this.searchIssues({
       jql,
       maxResults: 0,
