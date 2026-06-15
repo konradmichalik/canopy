@@ -11,7 +11,6 @@ import type {
   JiraUser,
   JiraIssue,
   JiraIssueWithChangelog,
-  JiraChangelog,
   JiraFieldsResponse
 } from '../types';
 import { logger } from '../utils/logger';
