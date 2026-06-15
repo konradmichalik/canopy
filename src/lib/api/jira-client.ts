@@ -288,11 +288,9 @@ export abstract class JiraClient {
     if (this.config.instanceType === 'cloud') {
       // Cloud's /search/jql endpoint rejects maxResults: 0 and no longer
       // returns a reliable total — use the dedicated count endpoint instead
-      const response = await this.request<{ count: number }>(
-        'POST',
-        '/search/approximate-count',
-        { jql }
-      );
+      const response = await this.request<{ count: number }>('POST', '/search/approximate-count', {
+        jql
+      });
       return response.count;
     }
 
